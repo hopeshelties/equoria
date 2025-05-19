@@ -429,10 +429,8 @@ async function determinePhenotype(
     }
   }
 
-  let currentDisplayColor = baseColor; // Start with the base, this will be modified by dilutions
-// After existing line 203 (currentDisplayColor = baseColor)
 console.log('[Debug Scope] currentDisplayColor after base color setup (line 203+):', currentDisplayColor, 'phenotypeKeyForShade:', phenotypeKeyForShade);
-  
+
 // --- 2. Apply Dilutions ---
 
   // Mushroom (MFSD12_Mushroom) - only on Chestnut (e/e)
@@ -486,6 +484,8 @@ console.log('[Debug Scope] currentDisplayColor after base color setup (line 203+
       }
     }
   }
+
+  console.log('[Debug Scope] currentDisplayColor after Cream dilution:', currentDisplayColor, 'phenotypeKeyForShade:', phenotypeKeyForShade);
 
   // Dun Dilution (D_Dun)
   // This block handles Dun *before* Champagne. Champagne logic will then check Dun status.
@@ -684,6 +684,8 @@ console.log('[Debug Scope] currentDisplayColor after base color setup (line 203+
   currentDisplayColor = pearlResult.currentDisplayColor;
   phenotypeKeyForShade = pearlResult.phenotypeKeyForShade;
 
+  console.log('[Debug Scope] currentDisplayColor after Pearl dilution:', currentDisplayColor, 'phenotypeKeyForShade:', phenotypeKeyForShade);
+
   // Adjust phenotypeKeyForShade for Sooty *before* shade determination if Sooty is present
   if (
     fullGenotype.sooty === true &&
@@ -739,11 +741,11 @@ if (
     currentDisplayColor = `${capitalizeFirstLetter(determined_shade)} ${currentDisplayColor}`;
 }
 
-console.log('[Debug Scope] currentDisplayColor before displayColorParts (line 444-):', currentDisplayColor, 'phenotypeKeyForShade:', phenotypeKeyForShade);
+console.log('[Debug Scope] currentDisplayColor after shade application:', currentDisplayColor, 'phenotypeKeyForShade:', phenotypeKeyForShade);
 
   // --- Initialize displayColorParts with (potentially shaded) currentDisplayColor ---
-  let displayColorParts = [currentDisplayColor];
-
+let displayColorParts = [currentDisplayColor];
+  
   console.log(
     '[Debug] displayColorParts JUST BEFORE FINAL JOIN:',
     JSON.stringify(displayColorParts)
