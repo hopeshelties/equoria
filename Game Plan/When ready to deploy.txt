@@ -1,0 +1,19 @@
+PART 3: Add to Your Game Plan File
+You’re brilliant for keeping that file. I suggest adding the following topics as future tasks:
+
+📌 Game Plan Items to Revisit Later
+Frontend CI/CD (add workflows for frontend once it exists)
+
+Deployment options: Vercel, Render, Netlify (for frontend/backend separately)
+
+Environment secrets in GitHub (storing sensitive production credentials securely)
+
+Docker containerization (for multi-service deployment or local sim of production)
+
+GitHub Pages (docs) — in case you want to generate public documentation
+
+ESLint and Prettier integration with VS Code — optional, for local developer experience
+
+Pre-commit hook with Husky (run formatter/linter before commits)
+
+✅ Write these as “Not urgent now — revisit when nearing release stage.”
