@@ -430,8 +430,10 @@ async function determinePhenotype(
   }
 
   let currentDisplayColor = baseColor; // Start with the base, this will be modified by dilutions
-
-  // --- 2. Apply Dilutions ---
+// After existing line 203 (currentDisplayColor = baseColor)
+console.log('[Debug Scope] currentDisplayColor after base color setup (line 203+):', currentDisplayColor, 'phenotypeKeyForShade:', phenotypeKeyForShade);
+  
+// --- 2. Apply Dilutions ---
 
   // Mushroom (MFSD12_Mushroom) - only on Chestnut (e/e)
   if (isChestnutBase && hasAllele('MFSD12_Mushroom', 'Mu')) {
@@ -728,15 +730,16 @@ async function determinePhenotype(
 
   // Apply shade to currentDisplayColor
   const shadeLower = determined_shade.toLowerCase();
-  if (
+if (
     shadeLower !== 'standard' &&
     shadeLower !== 'medium' &&
-    !currentDisplayColor.toLowerCase().includes(shadeLower) && // Avoid double-shading
+    !currentDisplayColor.toLowerCase().includes(shadeLower) &&
     !currentDisplayColor.toLowerCase().includes('gray')
-  ) {
-    // Don't prepend shade to gray stages
+) {
     currentDisplayColor = `${capitalizeFirstLetter(determined_shade)} ${currentDisplayColor}`;
-  }
+}
+
+console.log('[Debug Scope] currentDisplayColor before displayColorParts (line 444-):', currentDisplayColor, 'phenotypeKeyForShade:', phenotypeKeyForShade);
 
   // --- Initialize displayColorParts with (potentially shaded) currentDisplayColor ---
   let displayColorParts = [currentDisplayColor];
