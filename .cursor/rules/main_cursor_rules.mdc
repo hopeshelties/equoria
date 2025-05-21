@@ -46,6 +46,11 @@ This project uses modular rules by topic and concern. Each file has a dedicated 
 - Use `008_frontendcoding.mdc` for React Native component structure, syntax, and Tailwind usage
 - Reference `equoria_auth.mdc` when creating/modifying protected routes or role logic
 - Add new rule files in this format when expanding domains (e.g., `deployment.mdc`, `notifications.mdc`)
+# Update .cursorrules to auto-update nodemon.json when dev folders are added
+- when: a new folder is created at the project root AND it is used for backend code
+  do: update nodemon.json to include the folder name in the "watch" list
+
+
 
 ---
 

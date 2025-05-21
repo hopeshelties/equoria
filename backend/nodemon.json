@@ -1,0 +1,9 @@
+{
+  "watch": ["app.js", "server.js", "routes/", "controllers/", "services/", "models/", "middleware/", "utils/", "config/"],
+  "ext": "js,json",
+  "ignore": ["node_modules/", "tests/", ".git/", ".env"],
+  "exec": "node server.js",
+  "env": {
+    "NODE_ENV": "development"
+  }
+} 
