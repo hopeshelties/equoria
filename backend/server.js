@@ -1,5 +1,8 @@
+// Update server.js to trigger the database connection by importing db/index.js
+require('./db'); // This will initialize the pool and attempt connection
+
 const app = require('./app');
-const { port } = require('./config/config'); // Ensure correct path to config
+const { port } = require('./config/config'); // Corrected path to config
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
