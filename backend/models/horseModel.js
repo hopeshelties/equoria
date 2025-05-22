@@ -46,4 +46,4 @@ async function getHorseById(id) {
 module.exports = {
   createHorse,
   getHorseById
-}; 
+};

@@ -7,8 +7,10 @@ const router = express.Router();
 
 // POST /api/breeds - Create a new breed
 router.post('/', [
-  body('name').trim().notEmpty().withMessage('Breed name is required.')
+  body('name')
     .isString().withMessage('Breed name must be a string.')
+    .trim()
+    .notEmpty().withMessage('Breed name cannot be empty after trimming.')
     .isLength({ min: 2, max: 255 }).withMessage('Breed name must be between 2 and 255 characters.')
 ], handleValidationErrors, breedController.createBreed);
 

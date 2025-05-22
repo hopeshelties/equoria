@@ -17,4 +17,4 @@ pool.connect((err, client, release) => {
   }
 });
 
-module.exports = pool; // Export the pool for use in other modules 
+module.exports = pool; // Export the pool for use in other modules
