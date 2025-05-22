@@ -1,0 +1,16 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+### [2024-05-22] — Initial Backend Server Setup and Core Tooling Configured
+
+### [Date TBD] — Breeds API and Horse Model Implementation
+- Implemented API endpoints for `breeds` (POST, GET all, GET by ID) following TDD.
+- Created `backend/routes/breedRoutes.js` and `backend/controllers/breedController.js`.
+- Added input validation using `express-validator` and a shared `validationErrorHandler.js` middleware.
+- Developed integration tests for the breeds API in `tests/integration/breeds.test.js`.
+- Created `backend/models/horseModel.js` with `createHorse` and `getHorseById` functions for database interaction with the `public.horses` table based on the finalized schema.
+- Updated `schema.sql` to include `DROP TABLE IF EXISTS ... CASCADE` statements for easier table recreation.
+- Decision: Continued with a modular, test-driven approach for API development.
+

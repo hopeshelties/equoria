@@ -49,7 +49,7 @@ This project uses modular rules by topic and concern. Each file has a dedicated 
 # Update .cursorrules to auto-update nodemon.json when dev folders are added
 - when: a new folder is created at the project root AND it is used for backend code
   do: update nodemon.json to include the folder name in the "watch" list
-
+Ensure you are updating documentation.mdc and project_milestones at regular intervals.
 
 
 ---

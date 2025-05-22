@@ -3,10 +3,9 @@ description: Living technical documentation file for Equoria. Updated automatica
 globs: ["**/*"]
 alwaysApply: true
 ---
-
 ## 📚 Technical Documentation
 
-This file is maintained as a centralized location for Equoria’s evolving technical references. Cursor should:
+This file is maintained as a centralized location for Equoria's evolving technical references. Cursor should:
 
 - Append new content here when:
   - A new function, utility, or hook is created
@@ -30,3 +29,29 @@ Each section should include:
 ```
 
 > Use this file to ensure the entire development team has access to up-to-date internal documentation.
+
+### `backend/routes/ping.js`
+- Defines the router for the `/ping` endpoint.
+- Purpose: Provides a simple health check or test endpoint.
+- Usage: Mounted in `backend/app.js` at the `/ping` path.
+- Related components: `backend/controllers/pingController.js`, `backend/middleware/validatePing.js`
+- Tests: `tests/integration/ping.test.js`
+
+### `backend/controllers/pingController.js` - `handlePing(req, res)`
+- Handles requests to the `/ping` endpoint.
+- Purpose: Responds with a JSON message, optionally including a validated `name` query parameter.
+- Parameters: `req` (Express request object), `res` (Express response object).
+- Returns: JSON response `{ message: "pong" }` or `{ message: "pong, [name]!" }`.
+- Used in: `backend/routes/ping.js`
+
+### `backend/middleware/validatePing.js` - `validatePing`
+- Express middleware array for validating the `/ping` route's query parameters.
+- Purpose: Validates the optional `name` query parameter to ensure it is a string between 2 and 30 characters.
+- Usage: Applied to the `/ping` route in `backend/routes/ping.js`.
+- Returns: Calls `next()` if validation passes, otherwise responds with a 400 error and validation messages.
+
+### `backend/middleware/errorHandler.js` - `(err, req, res, next)`
+- Global error handling middleware for the Express application.
+- Purpose: Catches errors passed via `next(err)` from other routes/middleware, logs them, and sends a generic 500 Internal Server Error JSON response.
+- Parameters: `err` (Error object), `req` (Express request object), `res` (Express response object), `next` (Express next function).
+- Usage: Applied as the last middleware in `backend/app.js`.
