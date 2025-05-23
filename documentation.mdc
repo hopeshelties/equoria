@@ -53,3 +53,15 @@ alwaysApply: false
 - Returns: Promise resolving to the horse record (object) if found, otherwise `undefined`.
 - Used in: (To be used by horse controller/service)
 
+### `backend/config/logger.js` - `logger`
+- Configures and exports a `winston` logger instance.
+- Purpose: Provides a centralized logging solution for the application. Logs to console with different formats/levels for development and production.
+- Usage: Imported in `backend/app.js` for HTTP request logging and can be imported elsewhere for custom logging.
+- Environment-dependent: Log level and formatting change based on `NODE_ENV`.
+
+### `backend/config/config.js`
+- Loads and validates environment variables from `.env` file.
+- Purpose: Centralizes configuration management and ensures required variables are present.
+- Exports: `port`, `dbUrl`, `env` (NODE_ENV).
+- Usage: Imported throughout the backend for accessing configuration values (e.g., `server.js`, `db/index.js`, `config/logger.js`).
+

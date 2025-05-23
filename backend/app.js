@@ -1,6 +1,7 @@
 const express = require('express');
-const morgan = require('morgan'); // Import morgan
+const morgan = require('morgan'); // Re-import morgan
 const config = require('./config/config');
+const logger = require('./utils/logger'); // Updated logger import path
 const pingRoute = require('./routes/ping'); // Require the new ping route
 const breedRoutes = require('./routes/breedRoutes'); // <--- Add this line
 const { handleValidationErrors } = require('./middleware/validationErrorHandler'); // Example, if you create it
@@ -9,7 +10,18 @@ const errorHandler = require('./middleware/errorHandler'); // Import error handl
 const app = express();
 
 // Middleware
-app.use(morgan('dev')); // Use morgan for request logging
+// Integrate morgan with winston for HTTP request logging
+if (config.env !== 'test') {
+  // Morgan stream piped to Winston
+  const morganStream = {
+    write: (message) => {
+      // Remove newline characters from morgan's output to avoid double newlines in winston logs
+      logger.info(message.trim());
+    },
+  };
+  app.use(morgan('dev', { stream: morganStream }));
+}
+
 app.use(express.json()); // Middleware to parse JSON bodies
 
 // Mount the ping route

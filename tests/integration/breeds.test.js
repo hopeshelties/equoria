@@ -1,6 +1,7 @@
 const request = require('supertest');
 const app = require('../../backend/app'); // Path to your Express app
 const pool = require('../../backend/db'); // Path to your db connection pool
+const logger = require('../../backend/utils/logger'); // Import logger
 
 // Helper function to reset the database using schema.sql
 // This might need to be more sophisticated depending on your setup,
@@ -12,7 +13,7 @@ const resetDatabase = async () => {
     await pool.query('DELETE FROM public.horses;'); // Clear horses first due to FK
     await pool.query('DELETE FROM public.breeds;');
   } catch (error) {
-    console.error('Error resetting database for tests:', error);
+    logger.error('Error resetting database for tests: %o', error); // Use logger
     // It's crucial that tests can reset state. If this fails, tests are unreliable.
     // Depending on test runner setup, might want to throw to halt tests.
   }
@@ -34,6 +35,8 @@ describe('Breeds API - /api/breeds', () => {
   afterAll(async () => {
     // Close database connection
     await pool.end();
+    // TODO: Investigate Jest open handle warning using --detectOpenHandles. 
+    // It might be related to pool.end() not completing cleanly or other async ops.
   });
 
   describe('POST /api/breeds', () => {

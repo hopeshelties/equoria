@@ -54,7 +54,7 @@ create table public.horses (
   agility integer default 0 check (agility >= 0 and agility <= 100),
   endurance integer default 0 check (endurance >= 0 and endurance <= 100),
   intelligence integer default 0 check (intelligence >= 0 and intelligence <= 100),
-  personality integer default 0 check (personality >= 0 and personality <= 100),
+  personality varchar(50) check (personality in ('Spirited', 'Nervous', 'Calm', 'Bold', 'Steady', 'Independent', 'Reactive', 'Stubborn', 'Playful', 'Lazy', 'Aggressive')),
   total_earnings integer default 0 check (total_earnings >= 0),
 
   sire_id bigint references public.horses(id) on delete set null, -- Added ON DELETE SET NULL for sires
