@@ -1,6 +1,6 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
-import { getFoalDevelopment, completeActivity, advanceDay } from '../models/foalModel.js';
+import { getFoalDevelopment, completeActivity, advanceDay, completeEnrichmentActivity } from '../models/foalModel.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -147,6 +147,77 @@ router.post('/:foalId/advance-day', [
     }
 
     if (error.message.includes('already completed')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+/**
+ * POST /api/foals/:foalId/enrichment
+ * Complete a foal enrichment activity (Task 5 API)
+ */
+router.post('/:foalId/enrichment', [
+  param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer'),
+  body('day').isInt({ min: 0, max: 6 }).withMessage('Day must be an integer between 0 and 6'),
+  body('activity').notEmpty().withMessage('Activity is required')
+    .isString().withMessage('Activity must be a string')
+    .isLength({ min: 1, max: 100 }).withMessage('Activity must be between 1 and 100 characters')
+], async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { foalId } = req.params;
+    const { day, activity } = req.body;
+    
+    logger.info(`[foalRoutes] POST /api/foals/${foalId}/enrichment - Day ${day}, Activity: ${activity}`);
+
+    const result = await completeEnrichmentActivity(foalId, day, activity);
+
+    res.json({
+      success: true,
+      message: `Enrichment activity "${result.activity.name}" completed successfully`,
+      data: {
+        foal: result.foal,
+        activity: result.activity,
+        updated_levels: {
+          bond_score: result.levels.bond_score,
+          stress_level: result.levels.stress_level
+        },
+        changes: {
+          bond_change: result.levels.bond_change,
+          stress_change: result.levels.stress_change
+        },
+        training_record_id: result.training_record_id
+      }
+    });
+
+  } catch (error) {
+    logger.error(`[foalRoutes] POST /api/foals/:foalId/enrichment error: ${error.message}`);
+    
+    if (error.message.includes('not found') || error.message.includes('not a foal')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    if (error.message.includes('not appropriate') || error.message.includes('must be between')) {
       return res.status(400).json({
         success: false,
         message: error.message

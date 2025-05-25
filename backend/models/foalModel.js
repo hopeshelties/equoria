@@ -99,6 +99,127 @@ async function getFoalDevelopment(foalId) {
 }
 
 /**
+ * Complete a foal enrichment activity (new API for Task 5)
+ * @param {number} foalId - ID of the foal
+ * @param {number} day - Development day (0-6)
+ * @param {string} activity - Activity name/type
+ * @returns {Object} - Updated bonding and stress levels
+ * @throws {Error} - If validation fails or activity not appropriate
+ */
+async function completeEnrichmentActivity(foalId, day, activity) {
+  try {
+    // Validate inputs
+    const parsedFoalId = parseInt(foalId, 10);
+    if (isNaN(parsedFoalId) || parsedFoalId <= 0) {
+      throw new Error('Foal ID must be a positive integer');
+    }
+
+    const parsedDay = parseInt(day, 10);
+    if (isNaN(parsedDay) || parsedDay < 0 || parsedDay > 6) {
+      throw new Error('Day must be between 0 and 6');
+    }
+
+    if (!activity || typeof activity !== 'string') {
+      throw new Error('Activity is required and must be a string');
+    }
+
+    logger.info(`[foalModel.completeEnrichmentActivity] Processing enrichment activity "${activity}" for foal ${parsedFoalId} on day ${parsedDay}`);
+
+    // Get foal and verify it exists
+    const foal = await prisma.horse.findUnique({
+      where: { id: parsedFoalId },
+      select: {
+        id: true,
+        name: true,
+        age: true,
+        bond_score: true,
+        stress_level: true
+      }
+    });
+
+    if (!foal) {
+      throw new Error('Foal not found');
+    }
+
+    // Verify this is actually a foal (age 0 or 1)
+    if (foal.age > 1) {
+      throw new Error('Horse is not a foal (must be 1 year old or younger)');
+    }
+
+    // Validate activity is appropriate for the given day
+    const availableActivities = getAvailableActivities(parsedDay, {});
+    const activityDefinition = availableActivities.find(a => 
+      a.type === activity || a.name === activity || 
+      a.type.toLowerCase().replace('_', ' ') === activity.toLowerCase() ||
+      a.name.toLowerCase() === activity.toLowerCase()
+    );
+
+    if (!activityDefinition) {
+      throw new Error(`Activity "${activity}" is not appropriate for day ${parsedDay}. Available activities: ${availableActivities.map(a => a.name).join(', ')}`);
+    }
+
+    // Calculate activity outcome
+    const outcome = calculateActivityOutcome(activityDefinition);
+
+    // Get current bonding and stress levels (use defaults if null)
+    const currentBondScore = foal.bond_score ?? 50;
+    const currentStressLevel = foal.stress_level ?? 0;
+
+    // Calculate new levels with bounds checking
+    const newBondScore = Math.max(0, Math.min(100, currentBondScore + outcome.bondingChange));
+    const newStressLevel = Math.max(0, Math.min(100, currentStressLevel + outcome.stressChange));
+
+    // Update horse's bonding and stress levels
+    const updatedHorse = await prisma.horse.update({
+      where: { id: parsedFoalId },
+      data: {
+        bond_score: newBondScore,
+        stress_level: newStressLevel
+      }
+    });
+
+    // Record activity in foal_training_history
+    const trainingRecord = await prisma.foalTrainingHistory.create({
+      data: {
+        horse_id: parsedFoalId,
+        day: parsedDay,
+        activity: activityDefinition.name,
+        outcome: outcome.result,
+        bond_change: outcome.bondingChange,
+        stress_change: outcome.stressChange
+      }
+    });
+
+    logger.info(`[foalModel.completeEnrichmentActivity] Activity completed successfully. Bond: ${currentBondScore} -> ${newBondScore}, Stress: ${currentStressLevel} -> ${newStressLevel}`);
+
+    return {
+      success: true,
+      foal: {
+        id: foal.id,
+        name: foal.name
+      },
+      activity: {
+        name: activityDefinition.name,
+        day: parsedDay,
+        outcome: outcome.result,
+        description: outcome.description
+      },
+      levels: {
+        bond_score: newBondScore,
+        stress_level: newStressLevel,
+        bond_change: outcome.bondingChange,
+        stress_change: outcome.stressChange
+      },
+      training_record_id: trainingRecord.id
+    };
+
+  } catch (error) {
+    logger.error(`[foalModel.completeEnrichmentActivity] Error: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
  * Complete a foal enrichment activity
  * @param {number} foalId - ID of the foal
  * @param {string} activityType - Type of activity to complete
@@ -251,7 +372,8 @@ function getAvailableActivities(currentDay, completedActivities = {}) {
     3: [ // Day 3 - Learning and training basics
       { type: 'halter_introduction', name: 'Halter Introduction', description: 'Introduce wearing a halter', bondingRange: [3, 7], stressRange: [2, 6] },
       { type: 'leading_practice', name: 'Leading Practice', description: 'Practice being led', bondingRange: [5, 9], stressRange: [1, 4] },
-      { type: 'handling_exercises', name: 'Handling Exercises', description: 'Practice being handled', bondingRange: [4, 8], stressRange: [0, 3] }
+      { type: 'handling_exercises', name: 'Handling Exercises', description: 'Practice being handled', bondingRange: [4, 8], stressRange: [0, 3] },
+      { type: 'trailer_exposure', name: 'Trailer Exposure', description: 'Introduce the foal to a horse trailer', bondingRange: [2, 6], stressRange: [3, 7] }
     ],
     4: [ // Day 4 - Advanced interaction
       { type: 'obstacle_introduction', name: 'Obstacle Introduction', description: 'Navigate simple obstacles', bondingRange: [4, 8], stressRange: [2, 5] },
@@ -310,5 +432,6 @@ export {
   getFoalDevelopment,
   completeActivity,
   advanceDay,
-  getAvailableActivities
+  getAvailableActivities,
+  completeEnrichmentActivity
 }; 
