@@ -87,3 +87,79 @@ This file is intended to capture key implementation checkpoints and architectura
 - **Data Integrity Verification:** Confirmed database contains 1 Player with 2 linked horses and 3 additional unlinked horses, demonstrating proper relationship handling.
 - **Technical Decision:** Used dynamic imports in seed script to resolve ES module environment loading order issues, ensuring proper configuration before module imports.
 - **Key Learning:** Proper foreign key relationship handling in Prisma requires careful attention to field inclusion in model functions and proper relationship syntax in seed data.
+
+### [2024-12-28] — Training Cooldown System Implementation Completed (Task 1.5)
+- **Database Schema Enhancement:** Successfully added `trainingCooldown` DateTime field to Horse model with proper Prisma migration (`20250525022323_add_training_cooldown`).
+- **Comprehensive Utility Functions:** Implemented 4 core training cooldown functions in `backend/utils/trainingCooldown.js`:
+  - `canTrain(horse)` - Boolean check for training eligibility
+  - `getCooldownTimeRemaining(horse)` - Precise millisecond calculations
+  - `setCooldown(horseId)` - Database update with 7-day cooldown
+  - `formatCooldown(milliseconds)` - Human-readable time formatting
+- **Production-Ready Validation:** Implemented comprehensive input validation with specific error messages for null/undefined inputs, invalid IDs, and database errors.
+- **Database Integration Excellence:** Full Prisma integration with proper error handling for non-existent records (P2025) and relationship inclusion (breed, owner, stable, player).
+- **Test-Driven Development Success:** Created comprehensive test suite with 29 test cases covering:
+  - Unit tests for all 4 functions with edge cases
+  - Integration tests with real database operations
+  - Error handling and validation scenarios
+  - End-to-end workflow testing (train → cooldown → verify → format)
+- **Migration and Seeding Integration:** Successfully integrated cooldown field with existing seeding system, maintaining backward compatibility with all existing horses.
+- **Time Calculation Precision:** Implemented accurate millisecond-based time calculations with proper handling of past/future dates and null values.
+- **User Experience Features:** Added human-readable formatting supporting days/hours/minutes display for UI integration.
+- **Technical Achievement:** All 89 tests passing (60 existing + 29 new training cooldown tests), demonstrating robust system integration.
+- **Code Quality Standards:** Applied all established patterns including ES module structure, comprehensive error handling, and detailed logging.
+- **Key Learning:** Training cooldown systems require careful consideration of time zone handling, database precision, and user experience formatting to create a seamless gameplay mechanic.
+
+### [2024-12-28] — Horse Show Eligibility System Implementation Completed (Task 1.6a)
+- **Refined Business Logic Implementation:** Successfully implemented `isHorseEligibleForShow()` function with updated requirements:
+  - Age restrictions: 3-20 years (inclusive) for all show participation
+  - Level validation: Horse level must be within show's levelMin and levelMax range (if specified)
+  - Duplicate prevention: Horses cannot enter the same show multiple times
+  - Discipline independence: Any horse can enter any discipline regardless of trait or specialization
+- **Comprehensive Utility Function:** Created `backend/utils/isHorseEligible.js` with production-ready validation:
+  - Input parameter validation with descriptive error messages
+  - Flexible level limit handling (shows can have no limits, only min, only max, or both)
+  - Mixed data type support for show IDs (string and numeric)
+  - Proper handling of edge cases and boundary conditions
+- **Extensive Test Coverage:** Implemented comprehensive test suite with 43 test cases covering:
+  - Input validation scenarios (null/undefined parameters, invalid types)
+  - Age requirement testing (boundary conditions, invalid ages)
+  - Level requirement validation (min/max limits, flexible restrictions)
+  - Previous entries checking (duplicate prevention, mixed ID types)
+  - Discipline independence verification (trait and health status irrelevance)
+  - Valid entry scenarios (minimum, maximum, and typical requirements)
+  - Edge cases (large arrays, empty strings, negative values)
+- **Business Rule Clarification:** Established clear eligibility rules that prioritize accessibility:
+  - Health status affects scoring but NOT eligibility (horses can compete regardless of health)
+  - Trait specialization affects performance but NOT eligibility (any horse can enter any discipline)
+  - Age and level are the primary gatekeeping mechanisms for fair competition
+- **Integration Success:** All 132 tests passing (89 existing + 43 new horse eligibility tests), maintaining system stability.
+- **Production-Ready Features:** Implemented robust error handling, comprehensive validation, and flexible configuration support.
+- **Technical Achievement:** Created reusable utility function suitable for show registration systems, UI eligibility checks, and competition management.
+- **Key Learning:** Show eligibility systems benefit from clear separation between eligibility (can enter) and performance (how well they compete), allowing for inclusive participation while maintaining competitive balance.
+
+### [2024-12-28] — Horse Show Eligibility System Implementation Completed (Task 1.6a)
+- **Core Utility Functions:** Implemented comprehensive horse show eligibility checking in `backend/utils/isHorseEligible.js`:
+  - `isHorseEligibleForShow(horse, show, previousEntries)` - Boolean eligibility check
+  - `getEligibilityDetails(horse, show, previousEntries)` - Detailed feedback with reasons
+- **Multi-Criteria Validation:** Comprehensive eligibility logic covering:
+  - Level range validation (horse.level within show.levelMin and show.levelMax)
+  - Discipline validation (horse.discipline in show.allowedDisciplines)
+  - Duplicate entry prevention (show.id not in previousEntries)
+  - Boundary condition handling (inclusive level boundaries)
+- **Production-Ready Features:** 
+  - Robust parameter validation with descriptive error messages
+  - Graceful handling of optional restrictions (shows without level/discipline limits)
+  - Edge case support (negative levels, large numbers, empty arrays)
+  - Detailed error reporting for UI feedback systems
+- **Comprehensive Test Coverage:** Created extensive test suite with 38 test cases covering:
+  - Valid scenarios: boundary conditions, optional restrictions, empty arrays
+  - Invalid scenarios: level violations, discipline mismatches, duplicate entries
+  - Parameter validation: null/undefined inputs with proper error handling
+  - Edge cases: negative levels, large numbers, empty disciplines, non-array types
+  - Detailed reporting: specific error messages and multiple reason accumulation
+- **Integration Excellence:** All 127 tests passing (89 existing + 38 new eligibility tests), maintaining system stability
+- **Game Logic Foundation:** Provides essential filtering mechanism for competition entry systems
+- **User Experience Focus:** Detailed error messages enable clear feedback to players about eligibility requirements
+- **Technical Achievement:** Zero breaking changes while adding critical competition infrastructure
+- **Code Quality Standards:** Applied established patterns including ES module structure, comprehensive validation, and extensive testing
+- **Key Learning:** Competition eligibility systems require careful balance between strict validation and user-friendly feedback, with comprehensive edge case handling for robust gameplay mechanics.

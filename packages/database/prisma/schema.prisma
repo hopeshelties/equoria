@@ -34,12 +34,21 @@ model Horse {
   image_url             String?
   trait                 String?
   temperament           String?
-  precision             Int?
-  strength              Int?
+  // Core stats for competition scoring (all 10 stat categories)
   speed                 Int?
+  stamina               Int?
   agility               Int?
-  endurance             Int?
+  balance               Int?
+  precision             Int?
   intelligence          Int?
+  boldness              Int?
+  flexibility           Int?
+  obedience             Int?
+  focus                 Int?
+  
+  // Legacy stats (keeping for backward compatibility)
+  strength              Int?
+  endurance             Int?
   personality           String?
   total_earnings        Float?
   sire_id               Int?
@@ -52,6 +61,7 @@ model Horse {
   health_status         String?
   last_vetted_date      DateTime?
   tack                  Json?
+  trainingCooldown      DateTime?
 }
 
 model Player {

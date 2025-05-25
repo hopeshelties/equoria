@@ -246,3 +246,138 @@ Each section should include:
 - Maintains backward compatibility with existing horse-only seeding
 - Proper cleanup and Prisma client disconnection
 - Exit code handling for CI/CD integration
+
+# Training Cooldown Utility Functions
+
+### `backend/utils/trainingCooldown.js` - `canTrain(horse: Object)`
+- Checks if a horse can train based on cooldown status.
+- Purpose: Determines if a horse's training cooldown has expired or is not set.
+- Parameters: `horse` (object - horse with trainingCooldown field)
+- Validation: Throws error if horse object is null or undefined
+- Returns: Boolean - true if horse can train (no cooldown or cooldown in past), false otherwise
+- Logic: Returns true if trainingCooldown is null or if cooldown date <= current time
+- Used in: Training system, UI state management, game logic validation
+- Tests: `backend/tests/trainingCooldown.test.js` - 5 test cases covering all scenarios
+
+### `backend/utils/trainingCooldown.js` - `getCooldownTimeRemaining(horse: Object)`
+- Calculates remaining cooldown time in milliseconds.
+- Purpose: Provides precise time remaining until horse can train again.
+- Parameters: `horse` (object - horse with trainingCooldown field)
+- Validation: Throws error if horse object is null or undefined
+- Returns: Number (milliseconds remaining) or null if ready to train
+- Logic: Returns null if no cooldown or cooldown in past, otherwise returns ms difference
+- Used in: UI countdown timers, training scheduling, game state display
+- Tests: `backend/tests/trainingCooldown.test.js` - 6 test cases covering timing calculations
+
+### `backend/utils/trainingCooldown.js` - `setCooldown(horseId: number|string)`
+- Sets training cooldown for a horse to 7 days from current time.
+- Purpose: Applies training cooldown after horse completes training session.
+- Parameters: `horseId` (number or string - horse ID, validated and parsed to integer)
+- Validation: Validates horseId is provided and is a positive integer
+- Returns: Updated horse object with relations (breed, owner, stable, player)
+- Database: Updates trainingCooldown field using Prisma horse.update()
+- Error handling: Specific error for non-existent horse (P2025), generic for other DB errors
+- Used in: Training completion handlers, game progression logic
+- Tests: `backend/tests/trainingCooldown.test.js` - 9 test cases covering validation and DB operations
+
+### `backend/utils/trainingCooldown.js` - `formatCooldown(milliseconds: number)`
+- Formats cooldown time into human-readable string.
+- Purpose: Converts milliseconds into user-friendly time display format.
+- Parameters: `milliseconds` (number - time remaining in milliseconds)
+- Returns: String - formatted time or "Ready to train" if <= 0 or null
+- Format logic: Days/hours for >24h, hours/minutes for >1h, minutes only for <1h
+- Examples: "3 day(s), 2 hour(s) remaining", "5 minute(s) remaining"
+- Used in: UI display, notifications, training status messages
+- Tests: `backend/tests/trainingCooldown.test.js` - 7 test cases covering all format scenarios
+
+### Training Cooldown Database Schema
+- Added `trainingCooldown` field to Horse model as optional DateTime
+- Migration: `20250525022323_add_training_cooldown` applied successfully
+- Field allows null values (horses can train immediately when no cooldown set)
+- Indexed for efficient queries on cooldown status
+- Compatible with existing horse data (all existing horses have null cooldown)
+
+### Training Cooldown Integration Testing
+- Comprehensive integration tests validate end-to-end workflow
+- Tests cover: initial state → set cooldown → verify restrictions → time calculations
+- Database integration confirmed with real horse records
+- All 29 test cases passing with 100% coverage
+- Integration with horseModel functions verified (getHorseById works with cooldown data)
+
+# Horse Show Eligibility Utility Functions
+
+### `backend/utils/isHorseEligible.js` - `isHorseEligibleForShow(horse: Object, show: Object, previousEntries: Array)`
+- Determines if a horse is eligible to enter a specific show based on age, level, and previous entries.
+- Purpose: Validates horse eligibility for show participation with comprehensive rule checking.
+- Parameters: 
+  - `horse` (object - horse with age and level properties, required)
+  - `show` (object - show with id, levelMin, and levelMax properties, required)
+  - `previousEntries` (array - show IDs the horse has previously entered, default: [])
+- Validation: Comprehensive input validation with specific error messages for invalid inputs
+- Eligibility Rules:
+  - Age must be between 3 and 20 (inclusive)
+  - Horse level must be within show's levelMin and levelMax range (if specified)
+  - Horse cannot have already entered this specific show (checked via show.id in previousEntries)
+  - Discipline does NOT restrict eligibility (horses can enter any discipline regardless of trait)
+  - Health status does NOT restrict eligibility (affects scoring only)
+- Returns: Boolean - true if eligible, false otherwise
+- Error handling: Throws descriptive errors for null/undefined inputs or invalid parameter types
+- Used in: Show registration system, UI eligibility checks, competition management
+- Tests: `backend/tests/isHorseEligible.test.js` - 43 comprehensive test cases covering all scenarios
+
+### Horse Show Eligibility Business Rules
+- **Age Requirements:** Horses must be between 3-20 years old (inclusive) to participate in shows
+- **Level Requirements:** Shows can specify minimum and maximum level requirements (optional)
+- **Duplicate Prevention:** Horses cannot enter the same show multiple times
+- **Discipline Independence:** Any horse can enter any discipline regardless of their trait or specialization
+- **Health Independence:** Health status affects performance/scoring but not eligibility
+- **Flexible Level Limits:** Shows can have no level restrictions, only minimum, only maximum, or both
+- **Mixed ID Support:** Supports both string and numeric show IDs in previousEntries tracking
+
+# Horse Show Eligibility Utility Functions
+
+### `backend/utils/isHorseEligible.js` - `isHorseEligibleForShow(horse: Object, show: Object, previousEntries: Array)`
+- Checks if a horse is eligible for a specific show based on multiple criteria.
+- Purpose: Validates horse eligibility before allowing entry into competitions.
+- Parameters: 
+  - `horse` (object - horse with level, discipline, and other properties)
+  - `show` (object - show with eligibility criteria like levelMin, levelMax, allowedDisciplines)
+  - `previousEntries` (array - show IDs the horse has already entered, defaults to empty array)
+- Validation: Throws error if horse or show objects are null/undefined
+- Returns: Boolean - true if eligible, false if disqualified for any reason
+- Eligibility checks:
+  - Level range validation (horse.level within show.levelMin and show.levelMax)
+  - Discipline validation (horse.discipline in show.allowedDisciplines)
+  - Duplicate entry prevention (show.id not in previousEntries)
+- Used in: Competition entry systems, show filtering, eligibility validation
+- Tests: `backend/tests/isHorseEligible.test.js` - 25 test cases covering all scenarios
+
+### `backend/utils/isHorseEligible.js` - `getEligibilityDetails(horse: Object, show: Object, previousEntries: Array)`
+- Provides detailed eligibility information with specific reasons for disqualification.
+- Purpose: Offers comprehensive feedback for UI display and debugging purposes.
+- Parameters: Same as `isHorseEligibleForShow`
+- Returns: Object with `eligible` (boolean) and `reasons` (array of strings)
+- Features:
+  - Detailed error messages for each disqualification reason
+  - Multiple reason accumulation for comprehensive feedback
+  - User-friendly error descriptions with specific values
+- Error examples: "Horse level (0) is below minimum required (1)", "Horse discipline (racing) is not allowed. Allowed: jumping, dressage"
+- Used in: UI feedback systems, admin panels, debugging tools
+- Tests: `backend/tests/isHorseEligible.test.js` - 13 test cases covering detailed reporting scenarios
+
+### Horse Show Eligibility Logic Rules
+- **Level Validation:** Horse level must be a number within show's levelMin and levelMax range (inclusive)
+- **Discipline Validation:** Horse discipline must be included in show's allowedDisciplines array
+- **Duplicate Prevention:** Horse cannot enter the same show multiple times (checked via show ID)
+- **Boundary Handling:** Level boundaries are inclusive (level = levelMin or levelMax is valid)
+- **Optional Restrictions:** Shows can omit levelMin, levelMax, or allowedDisciplines for no restrictions
+- **Edge Cases:** Handles negative levels, very large numbers, empty arrays, and non-array disciplines
+
+### Horse Show Eligibility Test Coverage
+- Comprehensive test suite with 38 test cases covering all scenarios
+- Valid scenarios: boundary conditions, optional restrictions, empty arrays
+- Invalid scenarios: level violations, discipline mismatches, duplicate entries
+- Parameter validation: null/undefined inputs with proper error handling
+- Edge cases: negative levels, large numbers, empty disciplines, non-array types
+- Detailed reporting: specific error messages and multiple reason accumulation
+- Integration ready: designed for use in competition systems and UI components
