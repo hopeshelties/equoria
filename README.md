@@ -119,6 +119,22 @@ equoria/
 ### Competitions
 - `POST /api/competition/enter` - Enter horses in competition
 
+### Traits
+- `POST /api/traits/discover/:horseId` - Trigger trait discovery for a horse
+- `GET /api/traits/horse/:horseId` - Get all traits for a horse
+- `GET /api/traits/definitions` - Get all trait definitions
+- `GET /api/traits/discovery-status/:horseId` - Get discovery status for a horse
+- `POST /api/traits/batch-discover` - Trigger discovery for multiple horses
+
+### Grooms
+- `POST /api/grooms/assign` - Assign a groom to a foal
+- `POST /api/grooms/ensure-default/:foalId` - Ensure foal has default groom assignment
+- `GET /api/grooms/assignments/:foalId` - Get all assignments for a foal
+- `POST /api/grooms/interact` - Record a groom interaction with a foal
+- `GET /api/grooms/player/:playerId` - Get all grooms for a player
+- `POST /api/grooms/hire` - Hire a new groom for a player
+- `GET /api/grooms/definitions` - Get groom system definitions
+
 ### Documentation
 - `GET /api-docs` - Interactive API documentation (Swagger UI)
 - `GET /api-docs.json` - OpenAPI specification JSON

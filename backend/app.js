@@ -1,3 +1,4 @@
+
 import express from 'express';
 import morgan from 'morgan';
 import config from './config/config.js';
@@ -9,6 +10,8 @@ import authRoutes from './routes/authRoutes.js';
 import horseRoutes from './routes/horseRoutes.js';
 import trainingRoutes from './routes/trainingRoutes.js';
 import foalRoutes from './routes/foalRoutes.js';
+import traitRoutes from './routes/traitRoutes.js';
+import groomRoutes from './routes/groomRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import { createSecurityMiddleware } from './middleware/security.js';
@@ -63,6 +66,8 @@ app.use('/api/competition', competitionRoutes);
 app.use('/api/horses', horseRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/foals', foalRoutes);
+app.use('/api/traits', traitRoutes);
+app.use('/api/grooms', groomRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Initialize cron job service
@@ -77,5 +82,12 @@ if (config.env !== 'test') {
 // Error handling middleware - must be last
 app.use(errorRequestLogger); // Log errors before handling them
 app.use(errorHandler);
+
+const _input = {
+  damTraits: ['resilient', 'nervous'], // Mixed traits
+  sireTraits: ['bold', 'stubborn'], // Mixed traits
+  damBondScore: 70,
+  damStressLevel: 30
+};
 
 export default app;

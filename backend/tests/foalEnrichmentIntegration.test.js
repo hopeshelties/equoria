@@ -30,12 +30,16 @@ describe('Foal Enrichment API Integration Tests', () => {
 
   afterAll(async () => {
     // Clean up test data
-    await prisma.foalTrainingHistory.deleteMany({
-      where: { horse_id: testFoal.id }
-    });
-    await prisma.horse.delete({ where: { id: testFoal.id } });
-    await prisma.breed.delete({ where: { id: testBreed.id } });
-    await prisma.$disconnect();
+    if (testFoal?.id) {
+      await prisma.foalTrainingHistory.deleteMany({
+        where: { horse_id: testFoal.id }
+      });
+      await prisma.horse.delete({ where: { id: testFoal.id } });
+    }
+    if (testBreed?.id) {
+      await prisma.breed.delete({ where: { id: testBreed.id } });
+    }
+    // Note: Prisma cleanup is handled by jest.setup.js
   });
 
   describe('POST /api/foals/:foalId/enrichment', () => {

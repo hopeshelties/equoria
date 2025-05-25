@@ -5,9 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
-    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs --watch",
-    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs --coverage",
+    "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
+    "test:watch": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs --watch",
+    "test:coverage": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs --coverage",
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node seed/horseSeed.js",

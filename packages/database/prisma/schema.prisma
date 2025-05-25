@@ -78,6 +78,8 @@ model Horse {
   foalDevelopment       FoalDevelopment?
   foalActivities        FoalActivity[]
   foalTrainingHistory   FoalTrainingHistory[]
+  groomAssignments      GroomAssignment[]
+  groomInteractions     GroomInteraction[]
 }
 
 model Player {
@@ -89,6 +91,8 @@ model Player {
   xp       Int
   settings Json
   horses   Horse[]  // 1:N relation to Horse
+  grooms   Groom[]  // 1:N relation to Groom
+  groomAssignments GroomAssignment[]  // 1:N relation to GroomAssignment
 
   @@map("players")
 }
@@ -225,4 +229,76 @@ model FoalTrainingHistory {
   @@index([day])
   @@index([timestamp])
   @@index([horse_id, day])
+}
+
+model Groom {
+  id          Int      @id @default(autoincrement())
+  name        String
+  speciality  String   // "foal_care", "general", "training", "medical"
+  experience  Int      @default(1) // Years of experience (1-20)
+  skill_level String   @default("novice") // "novice", "intermediate", "expert", "master"
+  personality String   // "gentle", "energetic", "patient", "strict"
+  hourly_rate Float    @default(15.0) // Cost per hour
+  availability Json    @default("{}") // Available days/hours
+  bio         String?  // Optional biography
+  image_url   String?  // Optional profile image
+  is_active   Boolean  @default(true)
+  hired_date  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  assignments   GroomAssignment[]
+  interactions  GroomInteraction[]
+  player        Player? @relation(fields: [playerId], references: [id])
+  playerId      String?
+
+  @@map("grooms")
+}
+
+model GroomAssignment {
+  id          Int      @id @default(autoincrement())
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false) // System-assigned default groom
+  priority    Int      @default(1) // 1 = primary, 2 = backup, etc.
+  notes       String?  // Assignment notes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  foal        Horse @relation(fields: [foalId], references: [id], onDelete: Cascade)
+  foalId      Int
+  groom       Groom @relation(fields: [groomId], references: [id], onDelete: Cascade)
+  groomId     Int
+  player      Player? @relation(fields: [playerId], references: [id])
+  playerId    String?
+  interactions GroomInteraction[]
+
+  @@unique([foalId, groomId, isActive])
+  @@map("groom_assignments")
+}
+
+model GroomInteraction {
+  id              Int      @id @default(autoincrement())
+  interactionType String   // "daily_care", "feeding", "grooming", "exercise", "medical_check"
+  duration        Int      // Duration in minutes
+  bondingChange   Int      @default(0) // Change in bonding score (-10 to +10)
+  stressChange    Int      @default(0) // Change in stress level (-10 to +10)
+  quality         String   @default("good") // "poor", "fair", "good", "excellent"
+  notes           String?  // Optional interaction notes
+  cost            Float    @default(0.0) // Cost of this interaction
+  timestamp       DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  // Relations
+  foal            Horse @relation(fields: [foalId], references: [id], onDelete: Cascade)
+  foalId          Int
+  groom           Groom @relation(fields: [groomId], references: [id], onDelete: Cascade)
+  groomId         Int
+  assignment      GroomAssignment? @relation(fields: [assignmentId], references: [id])
+  assignmentId    Int?
+
+  @@map("groom_interactions")
 }

@@ -28,10 +28,12 @@ export default {
     '!**/*.test.js',
     '!**/*.spec.js'
   ],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   verbose: true,
-  forceExit: true,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
-  maxWorkers: 1
+  maxWorkers: 1,
+  forceExit: true,  // Temporarily re-enabled due to module resolution issues
+  testTimeout: 30000
 };

@@ -1,6 +1,8 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { getFoalDevelopment, completeActivity, advanceDay, completeEnrichmentActivity } from '../models/foalModel.js';
+import { enrichmentDiscoveryMiddleware, bondingDiscoveryMiddleware } from '../middleware/traitDiscoveryMiddleware.js';
+import { ensureDefaultGroomAssignment } from '../utils/groomSystem.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -11,7 +13,7 @@ const router = express.Router();
  */
 router.get('/:foalId/development', [
   param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')
-], async (req, res) => {
+], async(req, res) => {
   try {
     // Check for validation errors
     const errors = validationResult(req);
@@ -28,6 +30,14 @@ router.get('/:foalId/development', [
 
     const developmentData = await getFoalDevelopment(foalId);
 
+    // Ensure foal has a groom assignment
+    try {
+      const playerId = req.user?.id || 'default-player'; // TODO: Get from auth
+      await ensureDefaultGroomAssignment(parseInt(foalId, 10), playerId);
+    } catch (groomError) {
+      logger.warn(`[foalRoutes] Failed to ensure groom assignment for foal ${foalId}: ${groomError.message}`);
+    }
+
     res.json({
       success: true,
       data: developmentData
@@ -35,7 +45,7 @@ router.get('/:foalId/development', [
 
   } catch (error) {
     logger.error(`[foalRoutes] GET /api/foals/:foalId/development error: ${error.message}`);
-    
+
     if (error.message.includes('not found') || error.message.includes('not a foal')) {
       return res.status(404).json({
         success: false,
@@ -58,7 +68,7 @@ router.post('/:foalId/activity', [
   param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer'),
   body('activityType').notEmpty().withMessage('Activity type is required')
     .isString().withMessage('Activity type must be a string')
-], async (req, res) => {
+], async(req, res) => {
   try {
     // Check for validation errors
     const errors = validationResult(req);
@@ -72,7 +82,7 @@ router.post('/:foalId/activity', [
 
     const { foalId } = req.params;
     const { activityType } = req.body;
-    
+
     logger.info(`[foalRoutes] POST /api/foals/${foalId}/activity - ${activityType}`);
 
     const updatedData = await completeActivity(foalId, activityType);
@@ -85,7 +95,7 @@ router.post('/:foalId/activity', [
 
   } catch (error) {
     logger.error(`[foalRoutes] POST /api/foals/:foalId/activity error: ${error.message}`);
-    
+
     if (error.message.includes('not found') || error.message.includes('not available')) {
       return res.status(404).json({
         success: false,
@@ -113,7 +123,7 @@ router.post('/:foalId/activity', [
  */
 router.post('/:foalId/advance-day', [
   param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')
-], async (req, res) => {
+], async(req, res) => {
   try {
     // Check for validation errors
     const errors = validationResult(req);
@@ -138,7 +148,7 @@ router.post('/:foalId/advance-day', [
 
   } catch (error) {
     logger.error(`[foalRoutes] POST /api/foals/:foalId/advance-day error: ${error.message}`);
-    
+
     if (error.message.includes('not found')) {
       return res.status(404).json({
         success: false,
@@ -170,7 +180,7 @@ router.post('/:foalId/enrichment', [
   body('activity').notEmpty().withMessage('Activity is required')
     .isString().withMessage('Activity must be a string')
     .isLength({ min: 1, max: 100 }).withMessage('Activity must be between 1 and 100 characters')
-], async (req, res) => {
+], enrichmentDiscoveryMiddleware(), async(req, res) => {
   try {
     // Check for validation errors
     const errors = validationResult(req);
@@ -184,7 +194,7 @@ router.post('/:foalId/enrichment', [
 
     const { foalId } = req.params;
     const { day, activity } = req.body;
-    
+
     logger.info(`[foalRoutes] POST /api/foals/${foalId}/enrichment - Day ${day}, Activity: ${activity}`);
 
     const result = await completeEnrichmentActivity(foalId, day, activity);
@@ -209,7 +219,7 @@ router.post('/:foalId/enrichment', [
 
   } catch (error) {
     logger.error(`[foalRoutes] POST /api/foals/:foalId/enrichment error: ${error.message}`);
-    
+
     if (error.message.includes('not found') || error.message.includes('not a foal')) {
       return res.status(404).json({
         success: false,
@@ -231,4 +241,4 @@ router.post('/:foalId/enrichment', [
   }
 });
 
-export default router; 
+export default router;
