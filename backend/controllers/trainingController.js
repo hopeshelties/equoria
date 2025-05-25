@@ -280,9 +280,54 @@ async function getTrainableHorses(playerId) {
   }
 }
 
+/**
+ * Route handler for POST /train endpoint
+ * @param {Object} req - Express request object with horseId and discipline in body
+ * @param {Object} res - Express response object
+ */
+async function trainRouteHandler(req, res) {
+  try {
+    const { horseId, discipline } = req.body;
+    
+    logger.info(`[trainingController.trainRouteHandler] Training request for horse ${horseId} in ${discipline}`);
+    
+    // Call the existing trainHorse function
+    const result = await trainHorse(horseId, discipline);
+    
+    if (result.success) {
+      // Extract the updated score for the specific discipline
+      const disciplineScores = result.updatedHorse?.disciplineScores || {};
+      const updatedScore = disciplineScores[discipline] || 0;
+      
+      // Format response according to Task 2.6 specifications
+      res.json({
+        success: true,
+        message: `${result.updatedHorse.name} trained in ${discipline}. +5 added.`,
+        updatedScore: updatedScore,
+        nextEligibleDate: result.nextEligible
+      });
+    } else {
+      // Return failure response for ineligible training
+      res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+    
+  } catch (error) {
+    logger.error(`[trainingController.trainRouteHandler] Error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to train horse',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+}
+
 export {
   canTrain,
   trainHorse,
   getTrainingStatus,
-  getTrainableHorses
+  getTrainableHorses,
+  trainRouteHandler
 }; 

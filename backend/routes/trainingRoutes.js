@@ -1,6 +1,6 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
-import { canTrain, trainHorse, getTrainingStatus } from '../controllers/trainingController.js';
+import { canTrain, trainHorse, getTrainingStatus, trainRouteHandler } from '../controllers/trainingController.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -72,46 +72,7 @@ router.post('/train', [
     .isLength({ min: 1, max: 50 })
     .withMessage('Discipline must be between 1 and 50 characters'),
   handleValidationErrors
-], async (req, res) => {
-  try {
-    const { horseId, discipline } = req.body;
-    
-    logger.info(`[trainingRoutes.train] Training horse ${horseId} in ${discipline}`);
-    
-    const result = await trainHorse(horseId, discipline);
-    
-    if (result.success) {
-      res.json({
-        success: true,
-        message: result.message,
-        data: {
-          updatedHorse: result.updatedHorse,
-          nextEligible: result.nextEligible,
-          horseId: horseId,
-          discipline: discipline
-        }
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        message: result.message,
-        data: {
-          reason: result.reason,
-          horseId: horseId,
-          discipline: discipline
-        }
-      });
-    }
-    
-  } catch (error) {
-    logger.error(`[trainingRoutes.train] Error: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to train horse',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
-    });
-  }
-});
+], trainRouteHandler);
 
 /**
  * GET /api/training/status/:horseId/:discipline

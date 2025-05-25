@@ -25,5 +25,10 @@ export default {
       '/node_modules/',
       '/build/',
       '/dist/'
-    ]
+    ],
+    // Run tests in sequence to avoid mock interference
+    maxWorkers: 1,
+    // Clear mocks between test files
+    clearMocks: true,
+    restoreMocks: true
   };

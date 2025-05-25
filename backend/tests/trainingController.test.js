@@ -503,4 +503,123 @@ describe('trainingController', () => {
         .rejects.toThrow('Failed to get trainable horses: Player database error');
     });
   });
+
+  describe('trainRouteHandler', () => {
+    let mockReq, mockRes;
+
+    beforeEach(() => {
+      mockReq = {
+        body: {
+          horseId: 1,
+          discipline: 'Dressage'
+        }
+      };
+      mockRes = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis()
+      };
+    });
+
+    it('should return success response with correct format for successful training', async () => {
+      // Mock successful training
+      mockGetHorseAge.mockResolvedValue(4);
+      mockGetLastTrainingDate.mockResolvedValue(null);
+      const mockTrainingLog = {
+        id: 1,
+        horse_id: 1,
+        discipline: 'Dressage',
+        trained_at: new Date()
+      };
+      const mockUpdatedHorse = {
+        id: 1,
+        name: 'Nova',
+        disciplineScores: { 'Dressage': 25 },
+        breed: { id: 1, name: 'Thoroughbred' }
+      };
+      mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
+      mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
+
+      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      await trainRouteHandler(mockReq, mockRes);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Nova trained in Dressage. +5 added.',
+        updatedScore: 25,
+        nextEligibleDate: expect.any(String)
+      });
+      expect(mockRes.status).not.toHaveBeenCalled(); // Should not set error status
+    });
+
+    it('should return failure response for ineligible horse (under age)', async () => {
+      mockGetHorseAge.mockResolvedValue(2);
+
+      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      await trainRouteHandler(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Training not allowed: Horse is under age'
+      });
+    });
+
+    it('should return failure response for horse in cooldown', async () => {
+      mockGetHorseAge.mockResolvedValue(4);
+      const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
+      mockGetLastTrainingDate.mockResolvedValue(twoDaysAgo);
+
+      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      await trainRouteHandler(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Training not allowed: Training cooldown active'
+      });
+    });
+
+    it('should handle missing discipline score gracefully', async () => {
+      mockGetHorseAge.mockResolvedValue(4);
+      mockGetLastTrainingDate.mockResolvedValue(null);
+      const mockTrainingLog = {
+        id: 1,
+        horse_id: 1,
+        discipline: 'Dressage',
+        trained_at: new Date()
+      };
+      const mockUpdatedHorse = {
+        id: 1,
+        name: 'Nova',
+        disciplineScores: null, // No discipline scores
+        breed: { id: 1, name: 'Thoroughbred' }
+      };
+      mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
+      mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
+
+      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      await trainRouteHandler(mockReq, mockRes);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Nova trained in Dressage. +5 added.',
+        updatedScore: 0, // Should default to 0 when no scores exist
+        nextEligibleDate: expect.any(String)
+      });
+    });
+
+    it('should handle server errors gracefully', async () => {
+      mockGetHorseAge.mockRejectedValue(new Error('Database connection failed'));
+
+      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      await trainRouteHandler(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Failed to train horse',
+        error: expect.any(String)
+      });
+    });
+  });
 }); 

@@ -22,6 +22,17 @@ const { saveResult, getResultsByHorse, getResultsByShow, getResultById } = await
 describe('resultModel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset all mock implementations to default resolved values
+    mockPrisma.competitionResult.create.mockResolvedValue({});
+    mockPrisma.competitionResult.findMany.mockResolvedValue([]);
+    mockPrisma.competitionResult.findUnique.mockResolvedValue(null);
+    mockPrisma.competitionResult.update.mockResolvedValue({});
+    mockPrisma.competitionResult.delete.mockResolvedValue({});
+  });
+
+  afterEach(() => {
+    // Additional cleanup to ensure no mock state leaks
+    jest.clearAllMocks();
   });
 
   describe('saveResult', () => {
