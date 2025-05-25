@@ -8,7 +8,8 @@ import competitionRoutes from './routes/competitionRoutes.js'; // Competition ro
 import horseRoutes from './routes/horseRoutes.js'; // Horse routes
 import trainingRoutes from './routes/trainingRoutes.js'; // Training routes
 import foalRoutes from './routes/foalRoutes.js'; // Foal routes
-import adminRoutes from './routes/adminRoutes.js'; // Admin routes
+import adminRoutes from './routes/adminRoutes.js';
+import traitDiscoveryRoutes from './routes/traitDiscoveryRoutes.js'; // Admin routes
 // import { handleValidationErrors } from './middleware/validationErrorHandler.js'; // Example, if you create it
 import errorHandler from './middleware/errorHandler.js'; // Import error handler
 import cronJobService from './services/cronJobs.js'; // Cron job service
@@ -38,6 +39,7 @@ app.use('/api/horses', horseRoutes); // Mount horse routes
 app.use('/api/training', trainingRoutes); // Mount training routes
 app.use('/api/foals', foalRoutes); // Mount foal routes
 app.use('/api/admin', adminRoutes); // Mount admin routes
+app.use('/api/traits', traitDiscoveryRoutes); // Mount trait discovery routes
 
 // Initialize cron job service
 if (config.env !== 'test') {
