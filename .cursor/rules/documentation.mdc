@@ -580,3 +580,177 @@ Each section should include:
 - **Placement Logic:** Automatically assigns "1st", "2nd", "3rd" to top 3 finishers
 - **Error Resilience:** Comprehensive error handling with detailed logging and graceful failures
 - **Test Coverage:** 33 total tests (23 resultModel + 10 competitionController) with 100% coverage
+
+# Training System (Tasks 2.1, 2.2, 2.3, 2.4, 2.6 & 2.7) - COMPLETED
+
+## Core Training Functions
+
+### `backend/models/trainingModel.js` - `logTrainingSession({ horseId, discipline })`
+- **Database Logging:** Records training sessions in training_logs table with timestamp
+- **Purpose:** Creates permanent record of when horses train in specific disciplines for cooldown tracking
+- **Parameters:** 
+  - `horseId` (number) - ID of horse being trained
+  - `discipline` (string) - Discipline being trained (Racing, Show Jumping, Dressage, Cross Country, Western)
+- **Returns:** Created training log record with ID, horseId, discipline, and trainedAt timestamp
+- **Validation:** Ensures horseId is positive integer and discipline is provided
+- **Error Handling:** Wraps database errors with descriptive messages
+
+### `backend/models/trainingModel.js` - `getLastTrainingDate(horseId, discipline)`
+- **Discipline-Specific Query:** Retrieves most recent training date for specific horse-discipline combination
+- **Purpose:** Used for UI display and discipline-specific status information
+- **Parameters:**
+  - `horseId` (number) - ID of horse to check
+  - `discipline` (string) - Specific discipline to check
+- **Returns:** Date object of last training or null if never trained in that discipline
+- **Database Query:** Uses Prisma findFirst with orderBy trainedAt DESC and LIMIT 1
+- **Error Handling:** Validates inputs and handles database connection issues
+
+### `backend/models/trainingModel.js` - `getAnyRecentTraining(horseId)` (NEW - One-Discipline-Per-Week Fix)
+- **Global Cooldown Query:** Retrieves most recent training date across ALL disciplines for a horse
+- **Purpose:** Enforces one-discipline-per-week limit by checking for any recent training activity
+- **Parameters:**
+  - `horseId` (number) - ID of horse to check
+- **Returns:** Date object of most recent training across all disciplines or null if never trained
+- **Database Query:** Uses Prisma findFirst without discipline filter, ordered by trainedAt DESC
+- **Game Balance:** Prevents discipline hopping and stat stacking by enforcing global 7-day cooldown
+- **Logging:** Includes discipline information in log messages for debugging
+
+### `backend/models/trainingModel.js` - `getHorseAge(horseId)`
+- **Age Validation:** Retrieves horse age from database for training eligibility
+- **Purpose:** Enforces minimum age requirement (3+ years) for training participation
+- **Parameters:** `horseId` (number) - ID of horse to check
+- **Returns:** Number representing horse age or null if horse not found
+- **Business Rule:** Horses under 3 years old cannot train in any discipline
+- **Error Handling:** Validates horseId format and handles non-existent horses
+
+## Training Logic & Eligibility
+
+### `backend/controllers/trainingController.js` - `canTrain(horseId, discipline)` (UPDATED - One-Discipline-Per-Week)
+- **Enhanced Eligibility Check:** Comprehensive validation for training permission with global cooldown
+- **Purpose:** Determines if horse can train in any discipline based on age and global cooldown status
+- **Parameters:**
+  - `horseId` (number) - Horse to check eligibility for
+  - `discipline` (string) - Discipline being requested (for logging purposes)
+- **Validation Process:**
+  1. **Age Check:** Horse must be 3+ years old
+  2. **Global Cooldown Check:** Uses `getAnyRecentTraining()` to check for ANY training within 7 days
+  3. **Cooldown Calculation:** Calculates remaining days if cooldown active
+- **Returns:** Object with `eligible` (boolean) and `reason` (string or null)
+- **Game Balance Change:** Now blocks training in ALL disciplines if horse trained in any discipline within 7 days
+- **Error Messages:** 
+  - "Horse not found" - Horse doesn't exist
+  - "Horse is under age" - Horse younger than 3 years
+  - "Training cooldown active for this horse" - Global 7-day cooldown active
+
+### `backend/controllers/trainingController.js` - `trainHorse(horseId, discipline)`
+- **Complete Training Workflow:** Handles full training process from eligibility to database updates
+- **Purpose:** Executes training if eligible, updates discipline scores, and logs session
+- **Parameters:**
+  - `horseId` (number) - Horse to train
+  - `discipline` (string) - Discipline to train in
+- **Process Flow:**
+  1. Calls `canTrain()` for eligibility validation
+  2. If eligible: logs session, increments discipline score by +5, calculates next eligible date
+  3. If ineligible: returns failure with reason
+- **Returns:** Success object with updated horse data and next eligible date, or failure object with reason
+- **Database Updates:** Creates training log entry and updates horse's disciplineScores JSONB field
+- **Cooldown Setting:** Sets next eligible date 7 days from training completion
+
+### `backend/controllers/trainingController.js` - `getTrainingStatus(horseId, discipline)` (UPDATED)
+- **Enhanced Status Information:** Provides comprehensive training status with global cooldown awareness
+- **Purpose:** Returns detailed training status for UI display and decision making
+- **Parameters:**
+  - `horseId` (number) - Horse to check status for
+  - `discipline` (string) - Specific discipline to check
+- **Status Information:**
+  - `eligible` (boolean) - Whether horse can currently train
+  - `reason` (string|null) - Reason if not eligible
+  - `horseAge` (number) - Current horse age
+  - `lastTrainingDate` (Date|null) - Last training in this specific discipline
+  - `cooldown` (object|null) - Global cooldown information with remaining time
+- **Cooldown Details:** Uses `getAnyRecentTraining()` for accurate global cooldown calculation
+- **UI Support:** Provides all data needed for training status displays and countdown timers
+
+### `backend/controllers/trainingController.js` - `getTrainableHorses(playerId)` (UPDATED - Global Cooldown)
+- **Enhanced Horse Filtering:** Returns horses eligible for training with global cooldown consideration
+- **Purpose:** Provides list of horses that can currently train for UI selection
+- **Parameters:** `playerId` (string) - UUID of player to get horses for
+- **Filtering Logic:**
+  1. **Age Filter:** Excludes horses under 3 years old
+  2. **Global Cooldown Filter:** Uses `getAnyRecentTraining()` to exclude horses with recent training
+  3. **Availability Logic:** If horse is trainable, all disciplines are available (since cooldown is global)
+- **Returns:** Array of trainable horses with full discipline lists
+- **Performance:** Single database query per horse instead of per-discipline queries
+- **Game Balance:** Enforces one-discipline-per-week limit at the horse selection level
+
+### `backend/controllers/trainingController.js` - `trainRouteHandler(req, res)` (Task 2.6)
+- **Complete REST API Route Handler:** Provides formatted response for POST /train endpoint according to Task 2.6 specifications
+- **Purpose:** Handles training requests with specific response format including updated discipline score and next eligible date
+- **Parameters:** 
+  - `req` (Express request object with horseId and discipline in body)
+  - `res` (Express response object for sending formatted JSON responses)
+- **Process Flow:**
+  1. Extracts horseId and discipline from request body
+  2. Calls existing `trainHorse(horseId, discipline)` function for business logic
+  3. Formats response according to Task 2.6 specifications
+- **Success Response Format:**
+  ```json
+  {
+    "success": true,
+    "message": "Nova trained in Barrel Racing. +5 added.",
+    "updatedScore": 25,
+    "nextEligibleDate": "2025-06-08T13:45:00.000Z"
+  }
+  ```
+- **Error Response Format:**
+  ```json
+  {
+    "success": false,
+    "message": "Training not allowed: Training cooldown active for this horse"
+  }
+  ```
+- **Integration:** Works seamlessly with updated global cooldown system
+
+### `backend/tests/training.test.js` - **Comprehensive Training Integration Test Suite** (Task 2.7)
+- **Complete End-to-End Testing:** Comprehensive integration tests covering the entire training system workflow
+- **Purpose:** Validates all training system components working together including age checks, cooldown enforcement, stat updates, history logging, and success/failure handling
+- **Test Coverage:**
+  - **Age Requirements:** Tests blocking training for horses under 3 years old and allowing training for eligible horses
+  - **First-Time Training:** Validates discipline score initialization and +5 point progression
+  - **Cooldown Enforcement:** Tests 7-day cooldown period enforcement and discipline availability during cooldown
+  - **Training Status:** Verifies correct status reporting for horses with active/expired cooldowns
+  - **Trainable Horses:** Tests filtering of eligible horses based on age and cooldown status
+  - **Error Handling:** Validates proper error responses for invalid requests and non-existent horses
+  - **Training Logs:** Confirms training sessions are properly logged in database
+  - **Discipline Progression:** Tests discipline score tracking across multiple training sessions
+- **Integration Approach:** Uses real API endpoints and database operations for authentic testing
+- **Adaptive Testing:** Gracefully handles cases where no trainable horses are available due to recent training activity
+- **Global Cooldown Validation:** Confirms one-discipline-per-week limit is properly enforced
+
+## Game Balance & Design
+
+### One-Discipline-Per-Week Training Limit (IMPLEMENTED)
+- **Game Balance Fix:** Prevents players from training multiple disciplines in the same week to avoid stat stacking
+- **Implementation:** Global 7-day cooldown applies to ALL disciplines after any training session
+- **Player Impact:** Forces strategic decisions about which discipline to focus on each week
+- **Database Efficiency:** Single query per horse instead of multiple discipline-specific queries
+- **UI Consistency:** Clear messaging about global cooldown status across all interfaces
+
+### Training Progression System
+- **Discipline Scores:** Each discipline tracked separately in horse's disciplineScores JSONB field
+- **Point System:** +5 points awarded per training session in chosen discipline
+- **Score Initialization:** Disciplines start at 0 and are created on first training
+- **Cumulative Progress:** Scores accumulate over time, allowing long-term character development
+- **Flexible Storage:** JSONB field allows easy addition of new disciplines without schema changes
+
+### Age-Based Training Restrictions
+- **Minimum Age:** Horses must be 3+ years old to participate in training
+- **Realistic Simulation:** Reflects real-world horse training practices
+- **Game Progression:** Creates natural progression from young horses to trained competitors
+- **Clear Messaging:** Age-based restrictions clearly communicated to players
+
+### Training History & Logging
+- **Complete Audit Trail:** All training sessions logged with timestamps and discipline information
+- **Cooldown Calculation:** Training logs used to calculate and enforce cooldown periods
+- **Player Statistics:** Historical data available for player progress tracking
+- **Database Integrity:** Permanent records ensure consistent cooldown enforcement

@@ -1,4 +1,3 @@
-
 import express from 'express';
 import morgan from 'morgan';
 import config from './config/config.js';
@@ -7,10 +6,15 @@ import pingRoute from './routes/ping.js';
 import breedRoutes from './routes/breedRoutes.js';
 import competitionRoutes from './routes/competitionRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import horseRoutes from './routes/horseRoutes.js';
+import trainingRoutes from './routes/trainingRoutes.js';
+import foalRoutes from './routes/foalRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import { createSecurityMiddleware } from './middleware/security.js';
 import { requestLogger, errorRequestLogger } from './middleware/requestLogger.js';
 import { specs, swaggerUi } from './docs/swagger.js';
+import cronJobService from './services/cronJobs.js';
 
 const app = express();
 
@@ -56,6 +60,16 @@ app.use('/ping', pingRoute);
 app.use('/api/auth', authRoutes);
 app.use('/api/breeds', breedRoutes);
 app.use('/api/competition', competitionRoutes);
+app.use('/api/horses', horseRoutes);
+app.use('/api/training', trainingRoutes);
+app.use('/api/foals', foalRoutes);
+app.use('/api/admin', adminRoutes);
+
+// Initialize cron job service
+if (config.env !== 'test') {
+  cronJobService.start();
+  logger.info('[app] Cron job service initialized');
+}
 
 // Old direct routes removed as per refactoring for /ping.
 // The default '/' route can be re-added or managed elsewhere if needed.

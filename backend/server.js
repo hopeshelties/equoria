@@ -1,4 +1,3 @@
-
 // Initialize database connection
 import './db/index.js';
 

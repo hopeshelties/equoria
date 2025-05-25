@@ -64,8 +64,20 @@ model Horse {
   trainingCooldown      DateTime?
   earnings              Float?   @default(0)
   rider                 Json?    // Required for competition entry
+  disciplineScores      Json?    // Stores discipline scores as {"Dressage": 10, "Show Jumping": 20, ...}
 
-  competitionResults CompetitionResult[]
+  // New bonding and stress tracking fields
+  bond_score            Int?     @default(50)  // Bonding score between horse and handler (0-100)
+  stress_level          Int?     @default(0)   // Current stress level of the horse (0-100)
+
+  // Epigenetic traits system
+  epigenetic_modifiers  Json?    @default("{\"positive\": [], \"negative\": [], \"hidden\": []}")  // Traits revealed through foal development
+
+  competitionResults    CompetitionResult[]
+  trainingLogs          TrainingLog[]
+  foalDevelopment       FoalDevelopment?
+  foalActivities        FoalActivity[]
+  foalTrainingHistory   FoalTrainingHistory[]
 }
 
 model Player {
@@ -150,4 +162,67 @@ model CompetitionResult {
   showId Int
 
   @@map("competition_results")
+}
+
+model TrainingLog {
+  id         Int      @id @default(autoincrement())
+  discipline String
+  trainedAt  DateTime @default(now())
+
+  horse   Horse @relation(fields: [horseId], references: [id])
+  horseId Int
+
+  @@map("training_logs")
+}
+
+model FoalDevelopment {
+  id                  Int      @id @default(autoincrement())
+  currentDay          Int      @default(0)
+  bondingLevel        Int      @default(50)
+  stressLevel         Int      @default(20)
+  completedActivities Json     @default("{}")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  foal   Horse @relation(fields: [foalId], references: [id])
+  foalId Int   @unique
+
+  @@map("foal_development")
+}
+
+model FoalActivity {
+  id            Int      @id @default(autoincrement())
+  day           Int
+  activityType  String
+  outcome       String
+  bondingChange Int
+  stressChange  Int
+  description   String
+  createdAt     DateTime @default(now())
+
+  foal   Horse @relation(fields: [foalId], references: [id])
+  foalId Int
+
+  @@map("foal_activities")
+}
+
+model FoalTrainingHistory {
+  id           String   @id @default(uuid())
+  day          Int      // Development day (0-6) when activity occurred
+  activity     String   // Type of training activity performed
+  outcome      String   // Result/outcome of the training activity
+  bond_change  Int      @default(0)  // Change in bonding score (-50 to +50)
+  stress_change Int     @default(0)  // Change in stress level (-50 to +50)
+  timestamp    DateTime @default(now())  // When the activity was performed
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  horse   Horse @relation(fields: [horse_id], references: [id], onDelete: Cascade)
+  horse_id Int
+
+  @@map("foal_training_history")
+  @@index([horse_id])
+  @@index([day])
+  @@index([timestamp])
+  @@index([horse_id, day])
 }

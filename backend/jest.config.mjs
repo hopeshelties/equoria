@@ -11,7 +11,14 @@ export default {
   },
   testMatch: [
     '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).js'
+    '**/?(*.)+(spec|test).js',
+    '**/tests/**/*.test.js',
+    '**/models/**/*.test.js'
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/build/',
+    '/dist/'
   ],
   collectCoverageFrom: [
     '**/*.js',
@@ -25,5 +32,6 @@ export default {
   forceExit: true,
   clearMocks: true,
   resetMocks: true,
-  restoreMocks: true
+  restoreMocks: true,
+  maxWorkers: 1
 };

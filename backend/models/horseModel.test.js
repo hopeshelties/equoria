@@ -6,6 +6,7 @@ jest.unstable_mockModule('../db/index.js', () => ({
     horse: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
   }
 }));
@@ -18,7 +19,7 @@ jest.unstable_mockModule('../utils/logger.js', () => ({
 }));
 
 // Now import the module under test and the mocks
-const { createHorse, getHorseById } = await import('./horseModel.js');
+const { createHorse, getHorseById, updateDisciplineScore, getDisciplineScores, incrementDisciplineScore } = await import('./horseModel.js');
 const mockPrisma = (await import('../db/index.js')).default;
 const mockLogger = (await import('../utils/logger.js')).default;
 
@@ -27,6 +28,7 @@ describe('horseModel', () => {
     // Clear all mock implementations and calls before each test
     mockPrisma.horse.create.mockClear();
     mockPrisma.horse.findUnique.mockClear();
+    mockPrisma.horse.update.mockClear();
     mockLogger.error.mockClear();
     mockLogger.info.mockClear();
   });
@@ -321,6 +323,328 @@ describe('horseModel', () => {
       await expect(getHorseById(horseId)).rejects.toThrow('Database error in getHorseById: DB findUnique error');
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       expect(mockLogger.error).toHaveBeenCalledWith('[horseModel.getHorseById] Database error: %o', dbError);
+    });
+  });
+
+  describe('updateDisciplineScore', () => {
+    it('should update discipline score for existing horse', async () => {
+      const horseId = 1;
+      const discipline = 'Dressage';
+      const pointsToAdd = 5;
+      
+      const currentHorse = { disciplineScores: null };
+      const updatedHorse = { 
+        id: horseId, 
+        name: 'Test Horse',
+        disciplineScores: { 'Dressage': 5 },
+        breed: { id: 1, name: 'Arabian' },
+        owner: null,
+        stable: null,
+        player: null
+      };
+      
+      mockPrisma.horse.findUnique.mockResolvedValue(currentHorse);
+      mockPrisma.horse.update.mockResolvedValue(updatedHorse);
+
+      const result = await updateDisciplineScore(horseId, discipline, pointsToAdd);
+
+      expect(mockPrisma.horse.findUnique).toHaveBeenCalledWith({
+        where: { id: horseId },
+        select: { disciplineScores: true }
+      });
+      expect(mockPrisma.horse.update).toHaveBeenCalledWith({
+        where: { id: horseId },
+        data: {
+          disciplineScores: { 'Dressage': 5 }
+        },
+        include: {
+          breed: true,
+          owner: true,
+          stable: true,
+          player: true
+        }
+      });
+      expect(result).toEqual(updatedHorse);
+    });
+
+    it('should add to existing discipline score', async () => {
+      const horseId = 1;
+      const discipline = 'Dressage';
+      const pointsToAdd = 5;
+      
+      const currentHorse = { disciplineScores: { 'Dressage': 5 } };
+      const updatedHorse = { 
+        id: horseId, 
+        disciplineScores: { 'Dressage': 10 },
+        breed: { id: 1, name: 'Arabian' }
+      };
+      
+      mockPrisma.horse.findUnique.mockResolvedValue(currentHorse);
+      mockPrisma.horse.update.mockResolvedValue(updatedHorse);
+
+      const result = await updateDisciplineScore(horseId, discipline, pointsToAdd);
+
+      expect(mockPrisma.horse.update).toHaveBeenCalledWith({
+        where: { id: horseId },
+        data: {
+          disciplineScores: { 'Dressage': 10 }
+        },
+        include: {
+          breed: true,
+          owner: true,
+          stable: true,
+          player: true
+        }
+      });
+      expect(result.disciplineScores['Dressage']).toBe(10);
+    });
+
+    it('should handle multiple disciplines independently', async () => {
+      const horseId = 1;
+      const discipline = 'Show Jumping';
+      const pointsToAdd = 3;
+      
+      const currentHorse = { disciplineScores: { 'Dressage': 5 } };
+      const updatedHorse = { 
+        id: horseId, 
+        disciplineScores: { 'Dressage': 5, 'Show Jumping': 3 }
+      };
+      
+      mockPrisma.horse.findUnique.mockResolvedValue(currentHorse);
+      mockPrisma.horse.update.mockResolvedValue(updatedHorse);
+
+      const result = await updateDisciplineScore(horseId, discipline, pointsToAdd);
+
+      expect(mockPrisma.horse.update).toHaveBeenCalledWith({
+        where: { id: horseId },
+        data: {
+          disciplineScores: { 'Dressage': 5, 'Show Jumping': 3 }
+        },
+        include: {
+          breed: true,
+          owner: true,
+          stable: true,
+          player: true
+        }
+      });
+      expect(result.disciplineScores).toEqual({ 'Dressage': 5, 'Show Jumping': 3 });
+    });
+
+    it('should throw error for invalid horse ID', async () => {
+      await expect(updateDisciplineScore(-1, 'Dressage', 5))
+        .rejects.toThrow('Invalid horse ID provided');
+      
+      await expect(updateDisciplineScore('invalid', 'Dressage', 5))
+        .rejects.toThrow('Invalid horse ID provided');
+      
+      expect(mockPrisma.horse.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should throw error for non-existent horse', async () => {
+      mockPrisma.horse.findUnique.mockResolvedValue(null);
+
+      await expect(updateDisciplineScore(99999, 'Dressage', 5))
+        .rejects.toThrow('Horse with ID 99999 not found');
+    });
+
+    it('should throw error for invalid discipline', async () => {
+      await expect(updateDisciplineScore(1, '', 5))
+        .rejects.toThrow('Discipline must be a non-empty string');
+      
+      await expect(updateDisciplineScore(1, null, 5))
+        .rejects.toThrow('Discipline must be a non-empty string');
+    });
+
+    it('should throw error for invalid points', async () => {
+      await expect(updateDisciplineScore(1, 'Dressage', 0))
+        .rejects.toThrow('Points to add must be a positive number');
+      
+      await expect(updateDisciplineScore(1, 'Dressage', -5))
+        .rejects.toThrow('Points to add must be a positive number');
+      
+      await expect(updateDisciplineScore(1, 'Dressage', 'invalid'))
+        .rejects.toThrow('Points to add must be a positive number');
+    });
+  });
+
+  describe('getDisciplineScores', () => {
+    it('should return empty object for horse with no scores', async () => {
+      const horseId = 1;
+      const horse = { disciplineScores: null };
+      
+      mockPrisma.horse.findUnique.mockResolvedValue(horse);
+
+      const result = await getDisciplineScores(horseId);
+
+      expect(mockPrisma.horse.findUnique).toHaveBeenCalledWith({
+        where: { id: horseId },
+        select: { disciplineScores: true }
+      });
+      expect(result).toEqual({});
+    });
+
+    it('should return discipline scores for horse with scores', async () => {
+      const horseId = 1;
+      const horse = { 
+        disciplineScores: {
+          'Dressage': 5,
+          'Show Jumping': 3
+        }
+      };
+      
+      mockPrisma.horse.findUnique.mockResolvedValue(horse);
+
+      const result = await getDisciplineScores(horseId);
+
+      expect(result).toEqual({
+        'Dressage': 5,
+        'Show Jumping': 3
+      });
+    });
+
+    it('should throw error for invalid horse ID', async () => {
+      await expect(getDisciplineScores(-1))
+        .rejects.toThrow('Invalid horse ID provided');
+      
+      await expect(getDisciplineScores('invalid'))
+        .rejects.toThrow('Invalid horse ID provided');
+      
+      expect(mockPrisma.horse.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should throw error for non-existent horse', async () => {
+      mockPrisma.horse.findUnique.mockResolvedValue(null);
+
+      await expect(getDisciplineScores(99999))
+        .rejects.toThrow('Horse with ID 99999 not found');
+    });
+  });
+
+  describe('incrementDisciplineScore', () => {
+    it('should increment discipline score by +5 for existing horse with no scores', async () => {
+      const horseId = 1;
+      const discipline = 'Dressage';
+      
+      const currentHorse = { disciplineScores: null };
+      const updatedHorse = { 
+        id: horseId, 
+        name: 'Test Horse',
+        disciplineScores: { 'Dressage': 5 },
+        breed: { id: 1, name: 'Arabian' },
+        owner: null,
+        stable: null,
+        player: null
+      };
+      
+      mockPrisma.horse.findUnique.mockResolvedValue(currentHorse);
+      mockPrisma.horse.update.mockResolvedValue(updatedHorse);
+
+      const result = await incrementDisciplineScore(horseId, discipline);
+
+      expect(mockPrisma.horse.findUnique).toHaveBeenCalledWith({
+        where: { id: horseId },
+        select: { disciplineScores: true }
+      });
+      expect(mockPrisma.horse.update).toHaveBeenCalledWith({
+        where: { id: horseId },
+        data: {
+          disciplineScores: { 'Dressage': 5 }
+        },
+        include: {
+          breed: true,
+          owner: true,
+          stable: true,
+          player: true
+        }
+      });
+      expect(result).toEqual(updatedHorse);
+      expect(result.disciplineScores['Dressage']).toBe(5);
+    });
+
+    it('should increment existing discipline score by +5', async () => {
+      const horseId = 1;
+      const discipline = 'Dressage';
+      
+      const currentHorse = { disciplineScores: { 'Dressage': 10 } };
+      const updatedHorse = { 
+        id: horseId, 
+        disciplineScores: { 'Dressage': 15 },
+        breed: { id: 1, name: 'Arabian' }
+      };
+      
+      mockPrisma.horse.findUnique.mockResolvedValue(currentHorse);
+      mockPrisma.horse.update.mockResolvedValue(updatedHorse);
+
+      const result = await incrementDisciplineScore(horseId, discipline);
+
+      expect(mockPrisma.horse.update).toHaveBeenCalledWith({
+        where: { id: horseId },
+        data: {
+          disciplineScores: { 'Dressage': 15 }
+        },
+        include: {
+          breed: true,
+          owner: true,
+          stable: true,
+          player: true
+        }
+      });
+      expect(result.disciplineScores['Dressage']).toBe(15);
+    });
+
+    it('should handle multiple disciplines when incrementing', async () => {
+      const horseId = 1;
+      const discipline = 'Show Jumping';
+      
+      const currentHorse = { disciplineScores: { 'Dressage': 10, 'Racing': 8 } };
+      const updatedHorse = { 
+        id: horseId, 
+        disciplineScores: { 'Dressage': 10, 'Racing': 8, 'Show Jumping': 5 }
+      };
+      
+      mockPrisma.horse.findUnique.mockResolvedValue(currentHorse);
+      mockPrisma.horse.update.mockResolvedValue(updatedHorse);
+
+      const result = await incrementDisciplineScore(horseId, discipline);
+
+      expect(mockPrisma.horse.update).toHaveBeenCalledWith({
+        where: { id: horseId },
+        data: {
+          disciplineScores: { 'Dressage': 10, 'Racing': 8, 'Show Jumping': 5 }
+        },
+        include: {
+          breed: true,
+          owner: true,
+          stable: true,
+          player: true
+        }
+      });
+      expect(result.disciplineScores).toEqual({ 'Dressage': 10, 'Racing': 8, 'Show Jumping': 5 });
+    });
+
+    it('should throw error for invalid horse ID', async () => {
+      await expect(incrementDisciplineScore(-1, 'Dressage'))
+        .rejects.toThrow('Invalid horse ID provided');
+      
+      await expect(incrementDisciplineScore('invalid', 'Dressage'))
+        .rejects.toThrow('Invalid horse ID provided');
+      
+      expect(mockPrisma.horse.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should throw error for non-existent horse', async () => {
+      mockPrisma.horse.findUnique.mockResolvedValue(null);
+
+      await expect(incrementDisciplineScore(99999, 'Dressage'))
+        .rejects.toThrow('Horse with ID 99999 not found');
+    });
+
+    it('should throw error for invalid discipline', async () => {
+      await expect(incrementDisciplineScore(1, ''))
+        .rejects.toThrow('Discipline must be a non-empty string');
+      
+      await expect(incrementDisciplineScore(1, null))
+        .rejects.toThrow('Discipline must be a non-empty string');
     });
   });
 }); 
