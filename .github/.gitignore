@@ -1,7 +1,2 @@
-node_modules/
-
-frontend/build/
-*.log
-.DS_Store
-.cursor/             # Exclude .cursor/rules from git
-Legacy/
+# GitHub-specific ignores
+# (Most ignores are now handled by root .gitignore)

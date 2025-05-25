@@ -580,3 +580,256 @@ Each section should include:
 - **Placement Logic:** Automatically assigns "1st", "2nd", "3rd" to top 3 finishers
 - **Error Resilience:** Comprehensive error handling with detailed logging and graceful failures
 - **Test Coverage:** 33 total tests (23 resultModel + 10 competitionController) with 100% coverage
+
+# Training System (Tasks 2.1, 2.2, 2.3 & 2.4) - COMPLETED
+
+### Database Schema - `TrainingLog` Model
+- **Table:** `training_logs`
+- **Purpose:** Tracks training sessions for horses in specific disciplines
+- **Fields:**
+  - `id` (SERIAL PK) - Unique training log identifier
+  - `horseId` (INTEGER FK) - References horse table
+  - `discipline` (STRING) - Discipline being trained
+  - `trainedAt` (DATETIME) - When the training session occurred (defaults to NOW())
+- **Relations:** Belongs to Horse model
+- **Migration:** `20250525070153_add_training_logs`
+
+### Training System Business Rules
+- **Age Requirement:** Horses must be 3+ years old to train
+- **Training Effect:** Training adds +5 to selected discipline score
+- **Cooldown Period:** 7-day cooldown period per discipline (discipline-specific)
+- **Discipline Independence:** Each discipline has its own cooldown timer
+
+### `backend/models/trainingModel.js` - `logTrainingSession({ horseId, discipline })`
+- Records a new training session for a horse in a specific discipline.
+- Purpose: Logs training activity for cooldown tracking and progression history.
+- Parameters: 
+  - `horseId` (number - horse ID, required, must be positive integer)
+  - `discipline` (string - discipline being trained, required)
+- Validation: 
+  - Horse ID must be provided and be a positive integer
+  - Discipline must be provided and non-empty
+- Returns: Created training log record with all fields
+- Throws: Error with descriptive message for validation failures or database errors
+- Used in: Training systems, progression tracking, cooldown management
+- Tests: 5 test cases covering success, validation, and error scenarios
+
+### `backend/models/trainingModel.js` - `getLastTrainingDate(horseId, discipline)`
+- Retrieves the most recent training date for a horse in a specific discipline.
+- Purpose: Enables cooldown period enforcement and training eligibility checks.
+- Parameters:
+  - `horseId` (number - horse ID, must be positive integer)
+  - `discipline` (string - discipline to check, required)
+- Validation: Horse ID must be positive integer, discipline must be provided
+- Returns: Date object of most recent training or null if never trained
+- Throws: Error for invalid parameters or database errors
+- Used in: Cooldown validation, training eligibility checks, UI status display
+- Tests: 5 test cases covering found/not found scenarios and validation
+
+### `backend/models/trainingModel.js` - `getHorseAge(horseId)`
+- Retrieves the age of a horse from the database for training eligibility.
+- Purpose: Validates that horses meet the minimum age requirement (3 years) for training.
+- Parameters: `horseId` (number - horse ID, must be positive integer)
+- Validation: Horse ID must be a positive integer
+- Returns: Number representing horse age or null if horse not found
+- Throws: Error for invalid horse ID or database errors
+- Used in: Training eligibility validation, age verification systems
+- Tests: 4 test cases covering success, not found, and validation scenarios
+
+### `backend/controllers/trainingController.js` - Training Business Logic
+- **Purpose:** Orchestrates training eligibility checks, training execution, and status reporting
+- **Core Functions:**
+  - `canTrain(horseId, discipline)` - Returns eligibility status with reason
+  - `trainHorse(horseId, discipline)` - Executes training with validation
+  - `getTrainingStatus(horseId, discipline)` - Provides detailed status information
+
+### `backend/controllers/trainingController.js` - `canTrain(horseId, discipline)`
+- Comprehensive eligibility validation for horse training in specific disciplines.
+- Purpose: Validates age requirements and cooldown periods before allowing training.
+- Parameters: `horseId` (number), `discipline` (string - both required)
+- Validation: Horse ID must be positive integer, discipline must be non-empty
+- Returns: Object with `eligible` (boolean) and `reason` (string or null)
+- Business Logic:
+  - Age check: Horse must be 3+ years old
+  - Cooldown check: 7-day period since last training in same discipline
+  - Horse existence: Returns specific error for non-existent horses
+- Used in: Training systems, UI eligibility checks, training workflow validation
+- Tests: 10 test cases covering all eligibility scenarios and validation
+
+### `backend/controllers/trainingController.js` - `trainHorse(horseId, discipline)`
+- Executes horse training with full eligibility validation and session logging.
+- Purpose: Complete training workflow from validation to session recording.
+- Parameters: `horseId` (number), `discipline` (string - both required)
+- Process: Eligibility check → training session logging → success response
+- Returns: Object with `success` (boolean), `reason` (string), `trainingLog` (object), `message` (string)
+- Features: Automatic rejection for ineligible horses with specific reasons
+- Integration: Uses `canTrain()` for validation, `logTrainingSession()` for persistence
+- Used in: Training execution, API endpoints, automated training systems
+- Tests: 4 test cases covering success, rejection, and error scenarios
+
+### `backend/controllers/trainingController.js` - `getTrainingStatus(horseId, discipline)`
+- Provides comprehensive training status information for horses in specific disciplines.
+- Purpose: Detailed status reporting for UI display and training management.
+- Parameters: `horseId` (number), `discipline` (string - both required)
+- Returns: Object with eligibility, age, last training date, and cooldown information
+- Cooldown Details: Active status, remaining days/hours, last training timestamp
+- Features: Human-readable cooldown calculations for UI integration
+- Used in: Training dashboards, status displays, cooldown timers
+- Tests: 5 test cases covering all status scenarios and error handling
+
+### `backend/routes/trainingRoutes.js` - Training REST API
+- **Base Path:** `/api/training`
+- **Purpose:** Provides REST endpoints for training operations with comprehensive validation
+- **Middleware:** Express-validator for request validation, comprehensive error handling
+
+#### `POST /api/training/check-eligibility`
+- Checks horse eligibility for training in a specific discipline.
+- **Request Body:** `{ horseId: number, discipline: string }`
+- **Validation:** Horse ID must be positive integer, discipline 1-50 characters
+- **Response:** Eligibility status with eligible boolean and reason
+- **Used in:** Training UI validation, pre-training checks
+
+#### `POST /api/training/train`
+- Executes horse training with full validation and session logging.
+- **Request Body:** `{ horseId: number, discipline: string }`
+- **Validation:** Horse ID must be positive integer, discipline 1-50 characters
+- **Response:** Training result with success status and training log details
+- **Status Codes:** 200 for success, 400 for training rejection, 500 for server errors
+- **Used in:** Training execution, mobile app training features
+
+#### `GET /api/training/status/:horseId/:discipline`
+- Retrieves detailed training status for a horse in a specific discipline.
+- **Parameters:** `horseId` (positive integer), `discipline` (1-50 characters)
+- **Response:** Complete status including eligibility, age, cooldown information
+- **Used in:** Training status displays, cooldown timers, training dashboards
+
+#### `GET /api/training/horse/:horseId/all-status`
+- Retrieves training status across all disciplines for a specific horse.
+- **Parameters:** `horseId` (positive integer)
+- **Response:** Array of status objects for all supported disciplines
+- **Disciplines:** Racing, Show Jumping, Dressage, Cross Country, Western
+- **Error Handling:** Graceful handling of individual discipline failures
+- **Used in:** Horse profile pages, comprehensive training overviews
+
+### Database Schema - `disciplineScores` Field Enhancement
+- **Table:** `horses` table enhanced with `disciplineScores` JSONB field
+- **Purpose:** Stores discipline-specific scores as JSON object (e.g., {"Dressage": 10, "Show Jumping": 20})
+- **Migration:** `20250525070153_add_discipline_scores` applied successfully
+- **Default Value:** NULL for new horses, allowing flexible initialization
+- **Structure:** Key-value pairs where keys are discipline names and values are numeric scores
+
+### `backend/models/horseModel.js` - `updateDisciplineScore(horseId, discipline, pointsToAdd)`
+- Updates a horse's discipline score by adding points to existing or new discipline.
+- Purpose: Handles discipline score progression from training sessions and competition rewards.
+- Parameters: 
+  - `horseId` (number - horse ID, validated as positive integer)
+  - `discipline` (string - discipline name, required and non-empty)
+  - `pointsToAdd` (number - points to add, must be positive)
+- Validation: Comprehensive input validation with specific error messages
+- Logic: Retrieves current scores, adds points to specified discipline, updates database
+- Returns: Updated horse object with all relations (breed, owner, stable, player)
+- Database: Uses Prisma horse.update() with JSONB field manipulation
+- Error handling: Specific errors for non-existent horses and validation failures
+- Used in: Training completion, competition rewards, skill progression systems
+- Tests: 15 test cases covering all scenarios including edge cases and error handling
+
+### `backend/models/horseModel.js` - `getDisciplineScores(horseId)`
+- Retrieves current discipline scores for a specific horse.
+- Purpose: Provides read-only access to horse's discipline progression data.
+- Parameters: `horseId` (number - horse ID, validated as positive integer)
+- Validation: Horse ID must be a positive integer
+- Returns: Object containing discipline scores or empty object if no scores set
+- Error handling: Specific error for non-existent horses, graceful handling of null scores
+- Used in: UI display, training eligibility checks, competition entry validation
+- Tests: 6 test cases covering success, not found, and validation scenarios
+
+### `backend/models/horseModel.js` - `incrementDisciplineScore(horseId, discipline)` (Task 2.4)
+- Convenience function that increments a horse's discipline score by exactly +5 points.
+- Purpose: Provides a simplified interface for training operations that always add +5 points.
+- Parameters: 
+  - `horseId` (number - horse ID, validated as positive integer)
+  - `discipline` (string - discipline to increment, required and non-empty)
+- Implementation: Uses `updateDisciplineScore(horseId, discipline, 5)` internally for consistency
+- Returns: Updated horse object with relations (breed, owner, stable, player)
+- Validation: Inherits all validation from `updateDisciplineScore` function
+- Error Handling: Re-throws errors from underlying function with proper error messages
+- Used in: Training controller for consistent +5 point increments during training sessions
+- Tests: 6 test cases covering new horse scores, existing scores, multiple disciplines, and validation scenarios
+
+### `backend/controllers/trainingController.js` - Enhanced `trainHorse(horseId, discipline)` (Task 2.3)
+- **Complete Training Workflow:** Executes full training process including discipline score updates
+- **Enhanced Return Format:** Returns comprehensive training result with updated horse data
+- **Process Flow:**
+  1. Validates eligibility using `canTrain(horseId, discipline)`
+  2. Updates discipline score by +5 using `updateDisciplineScore()`
+  3. Logs training session using `logTrainingSession()`
+  4. Calculates next eligible training date (7 days from now)
+  5. Returns complete result with updated horse object
+- **Return Object:**
+  ```javascript
+  {
+    success: true,
+    updatedHorse: {...}, // Complete horse object with updated disciplineScores
+    message: "Horse trained successfully in Dressage. +5 added.",
+    nextEligible: "2025-06-01T10:30:00.000Z", // ISO timestamp 7 days from now
+    reason: null // Only present if success is false
+  }
+  ```
+- **Error Handling:** Graceful rejection for ineligible horses with specific reasons
+- **Integration:** Seamlessly integrates with existing training model and horse model functions
+- **Used in:** Training execution API, mobile app training features, automated training systems
+- **Tests:** Enhanced test coverage including discipline score validation and return format verification
+
+### `backend/controllers/trainingController.js` - `getTrainableHorses(playerId)`
+- Retrieves all horses owned by a player that are eligible for training in at least one discipline.
+- Purpose: Provides filtered list of horses that can be trained, checking age requirements and cooldown periods across all disciplines.
+- Parameters: `playerId` (string - player UUID, required and validated)
+- Validation: Player ID must be provided and non-empty
+- Business Logic:
+  - Fetches player with horses using `getPlayerWithHorses()`
+  - Filters out horses under 3 years old (age requirement)
+  - Checks each discipline (Racing, Show Jumping, Dressage, Cross Country, Western) for cooldown eligibility
+  - Uses `getLastTrainingDate()` to determine if 7-day cooldown has expired
+  - Only includes horses with at least one trainable discipline
+- Returns: Array of horse objects with `horseId`, `name`, `age`, and `trainableDisciplines` array
+- Error Handling: Graceful handling of individual discipline check failures, continues processing other disciplines
+- Used in: Horse training UI, training management systems, player dashboard
+- Tests: 8 comprehensive test cases covering all scenarios including edge cases and error handling
+
+### `backend/routes/horseRoutes.js` - Horse REST API Enhancement
+- **Base Path:** `/api/horses`
+- **Purpose:** Provides REST endpoints for horse-related operations including training eligibility
+
+#### `GET /api/horses/trainable/:playerId`
+- Retrieves all horses owned by a player that are eligible for training.
+- **Parameters:** `playerId` (URL parameter, validated as 1-50 characters)
+- **Validation:** Player ID length validation using express-validator
+- **Response:** JSON object with success status, message, and data array
+- **Response Format:**
+  ```json
+  {
+    "success": true,
+    "message": "Found X trainable horses",
+    "data": [
+      {
+        "horseId": 7,
+        "name": "Nova",
+        "age": 5,
+        "trainableDisciplines": ["Dressage", "Western"]
+      }
+    ]
+  }
+  ```
+- **Error Handling:** 400 for validation errors, 500 for server errors
+- **Used in:** Training management UI, horse selection interfaces, mobile app training features
+
+### Training System Integration (Task 2.5 - COMPLETED)
+- **Complete Training Workflow:** Full end-to-end training system from eligibility checking to execution
+- **Multi-Discipline Support:** Handles all 5 disciplines (Racing, Show Jumping, Dressage, Cross Country, Western) independently
+- **Age-Based Filtering:** Automatically filters horses under 3 years old from training eligibility
+- **Cooldown Management:** 7-day discipline-specific cooldown periods with precise tracking
+- **Player Integration:** Seamless integration with player-horse relationships via `getPlayerWithHorses()`
+- **Error Resilience:** Graceful handling of database errors and individual discipline check failures
+- **API Integration:** Complete REST API with proper validation, error handling, and response formatting
+- **Test Coverage:** 38 total tests (30 trainingController + 8 getTrainableHorses) with comprehensive scenario coverage
+- **Production Ready:** Full validation, logging, error handling, and documentation for deployment
