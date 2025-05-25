@@ -13,7 +13,7 @@ describe('Groom Routes Integration Tests', () => {
   let testBreed;
   let testPlayer;
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     // Create test player
     testPlayer = await prisma.player.create({
       data: {
@@ -61,7 +61,7 @@ describe('Groom Routes Integration Tests', () => {
     });
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     // Clean up test data
     if (testFoal?.id) {
       await prisma.groomInteraction.deleteMany({ where: { foalId: testFoal.id } });
@@ -80,7 +80,7 @@ describe('Groom Routes Integration Tests', () => {
   });
 
   describe('POST /api/grooms/assign', () => {
-    it('should assign groom to foal successfully', async () => {
+    it('should assign groom to foal successfully', async() => {
       const response = await request(app)
         .post('/api/grooms/assign')
         .send({
@@ -99,7 +99,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.data).toHaveProperty('isActive', true);
     });
 
-    it('should return validation error for missing required fields', async () => {
+    it('should return validation error for missing required fields', async() => {
       const response = await request(app)
         .post('/api/grooms/assign')
         .send({
@@ -113,7 +113,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.errors).toBeDefined();
     });
 
-    it('should return validation error for invalid foal ID', async () => {
+    it('should return validation error for invalid foal ID', async() => {
       const response = await request(app)
         .post('/api/grooms/assign')
         .send({
@@ -126,7 +126,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should handle assignment to non-existent foal', async () => {
+    it('should handle assignment to non-existent foal', async() => {
       const response = await request(app)
         .post('/api/grooms/assign')
         .send({
@@ -141,7 +141,7 @@ describe('Groom Routes Integration Tests', () => {
   });
 
   describe('POST /api/grooms/ensure-default/:foalId', () => {
-    it('should ensure default assignment for foal', async () => {
+    it('should ensure default assignment for foal', async() => {
       // First, remove any existing assignments
       await prisma.groomAssignment.deleteMany({ where: { foalId: testFoal.id } });
 
@@ -155,7 +155,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.data.assignment).toHaveProperty('isDefault', true);
     });
 
-    it('should return existing assignment if one exists', async () => {
+    it('should return existing assignment if one exists', async() => {
       // Ensure there's an assignment
       await request(app)
         .post('/api/grooms/assign')
@@ -172,7 +172,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.data).toHaveProperty('isExisting', true);
     });
 
-    it('should return validation error for invalid foal ID', async () => {
+    it('should return validation error for invalid foal ID', async() => {
       const response = await request(app)
         .post('/api/grooms/ensure-default/invalid')
         .expect(400);
@@ -183,7 +183,7 @@ describe('Groom Routes Integration Tests', () => {
   });
 
   describe('GET /api/grooms/assignments/:foalId', () => {
-    it('should get assignments for foal', async () => {
+    it('should get assignments for foal', async() => {
       const response = await request(app)
         .get(`/api/grooms/assignments/${testFoal.id}`)
         .expect(200);
@@ -196,7 +196,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(Array.isArray(response.body.data.assignments)).toBe(true);
     });
 
-    it('should return validation error for invalid foal ID', async () => {
+    it('should return validation error for invalid foal ID', async() => {
       const response = await request(app)
         .get('/api/grooms/assignments/invalid')
         .expect(400);
@@ -207,7 +207,7 @@ describe('Groom Routes Integration Tests', () => {
   });
 
   describe('POST /api/grooms/interact', () => {
-    it('should record groom interaction successfully', async () => {
+    it('should record groom interaction successfully', async() => {
       const response = await request(app)
         .post('/api/grooms/interact')
         .send({
@@ -224,20 +224,20 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.data).toHaveProperty('effects');
       expect(response.body.data).toHaveProperty('foalUpdates');
 
-      const interaction = response.body.data.interaction;
+      const { interaction } = response.body.data;
       expect(interaction).toHaveProperty('foalId', testFoal.id);
       expect(interaction).toHaveProperty('groomId', testGroom.id);
       expect(interaction).toHaveProperty('interactionType', 'daily_care');
       expect(interaction).toHaveProperty('duration', 60);
 
-      const effects = response.body.data.effects;
+      const { effects } = response.body.data;
       expect(effects).toHaveProperty('bondingChange');
       expect(effects).toHaveProperty('stressChange');
       expect(effects).toHaveProperty('cost');
       expect(effects).toHaveProperty('quality');
     });
 
-    it('should return validation error for missing required fields', async () => {
+    it('should return validation error for missing required fields', async() => {
       const response = await request(app)
         .post('/api/grooms/interact')
         .send({
@@ -251,7 +251,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should return validation error for invalid interaction type', async () => {
+    it('should return validation error for invalid interaction type', async() => {
       const response = await request(app)
         .post('/api/grooms/interact')
         .send({
@@ -266,7 +266,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should return validation error for invalid duration', async () => {
+    it('should return validation error for invalid duration', async() => {
       const response = await request(app)
         .post('/api/grooms/interact')
         .send({
@@ -281,7 +281,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should return 404 for non-existent foal', async () => {
+    it('should return 404 for non-existent foal', async() => {
       const response = await request(app)
         .post('/api/grooms/interact')
         .send({
@@ -296,7 +296,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.message).toBe('Foal not found');
     });
 
-    it('should return 404 for non-existent groom', async () => {
+    it('should return 404 for non-existent groom', async() => {
       const response = await request(app)
         .post('/api/grooms/interact')
         .send({
@@ -313,7 +313,7 @@ describe('Groom Routes Integration Tests', () => {
   });
 
   describe('GET /api/grooms/player/:playerId', () => {
-    it('should get grooms for player', async () => {
+    it('should get grooms for player', async() => {
       const response = await request(app)
         .get(`/api/grooms/player/${testPlayer.id}`)
         .expect(200);
@@ -327,7 +327,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.data.grooms.length).toBeGreaterThan(0);
     });
 
-    it('should return empty array for player with no grooms', async () => {
+    it('should return empty array for player with no grooms', async() => {
       const emptyPlayer = await prisma.player.create({
         data: {
           name: `Empty Player ${Date.now()}`,
@@ -352,7 +352,7 @@ describe('Groom Routes Integration Tests', () => {
   });
 
   describe('POST /api/grooms/hire', () => {
-    it('should hire new groom successfully', async () => {
+    it('should hire new groom successfully', async() => {
       const response = await request(app)
         .post('/api/grooms/hire')
         .send({
@@ -377,7 +377,7 @@ describe('Groom Routes Integration Tests', () => {
       await prisma.groom.delete({ where: { id: response.body.data.id } });
     });
 
-    it('should return validation error for missing required fields', async () => {
+    it('should return validation error for missing required fields', async() => {
       const response = await request(app)
         .post('/api/grooms/hire')
         .send({
@@ -390,7 +390,7 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should return validation error for invalid speciality', async () => {
+    it('should return validation error for invalid speciality', async() => {
       const response = await request(app)
         .post('/api/grooms/hire')
         .send({
@@ -407,7 +407,7 @@ describe('Groom Routes Integration Tests', () => {
   });
 
   describe('GET /api/grooms/definitions', () => {
-    it('should get groom system definitions', async () => {
+    it('should get groom system definitions', async() => {
       const response = await request(app)
         .get('/api/grooms/definitions')
         .expect(200);
@@ -419,19 +419,19 @@ describe('Groom Routes Integration Tests', () => {
       expect(response.body.data).toHaveProperty('defaultGrooms');
 
       // Check structure of definitions
-      const specialties = response.body.data.specialties;
+      const { specialties } = response.body.data;
       expect(specialties).toHaveProperty('foal_care');
       expect(specialties).toHaveProperty('general');
       expect(specialties).toHaveProperty('training');
       expect(specialties).toHaveProperty('medical');
 
-      const skillLevels = response.body.data.skillLevels;
+      const { skillLevels } = response.body.data;
       expect(skillLevels).toHaveProperty('novice');
       expect(skillLevels).toHaveProperty('intermediate');
       expect(skillLevels).toHaveProperty('expert');
       expect(skillLevels).toHaveProperty('master');
 
-      const personalities = response.body.data.personalities;
+      const { personalities } = response.body.data;
       expect(personalities).toHaveProperty('gentle');
       expect(personalities).toHaveProperty('energetic');
       expect(personalities).toHaveProperty('patient');

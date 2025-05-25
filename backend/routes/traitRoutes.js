@@ -12,6 +12,11 @@ import {
   getDiscoveryStatus,
   batchDiscoverTraits
 } from '../controllers/traitController.js';
+import {
+  analyzeHorseTraitImpact,
+  compareTraitImpactAcrossDisciplines,
+  getTraitCompetitionEffects
+} from '../controllers/traitCompetitionController.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -356,5 +361,184 @@ router.post('/batch-discover', [
     .withMessage('checkEnrichment must be a boolean'),
   handleValidationErrors
 ], batchDiscoverTraits);
+
+/**
+ * @swagger
+ * /api/traits/competition-impact/{horseId}:
+ *   get:
+ *     summary: Analyze trait impact for a specific horse and discipline
+ *     tags: [Traits, Competition]
+ *     parameters:
+ *       - in: path
+ *         name: horseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID of the horse
+ *       - in: query
+ *         name: discipline
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [Dressage, Show Jumping, Cross Country, Racing, Endurance, Reining, Driving, Trail, Eventing]
+ *         description: Competition discipline
+ *     responses:
+ *       200:
+ *         description: Trait impact analysis completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     horseId:
+ *                       type: integer
+ *                     horseName:
+ *                       type: string
+ *                     discipline:
+ *                       type: string
+ *                     analysis:
+ *                       type: object
+ *                     traits:
+ *                       type: object
+ *                     summary:
+ *                       type: object
+ *       400:
+ *         description: Invalid horse ID or missing discipline
+ *       404:
+ *         description: Horse not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/competition-impact/:horseId', [
+  param('horseId')
+    .isInt({ min: 1 })
+    .withMessage('Horse ID must be a positive integer'),
+  query('discipline')
+    .notEmpty()
+    .withMessage('Discipline is required')
+    .isIn(['Dressage', 'Show Jumping', 'Cross Country', 'Racing', 'Endurance', 'Reining', 'Driving', 'Trail', 'Eventing'])
+    .withMessage('Invalid discipline'),
+  handleValidationErrors
+], analyzeHorseTraitImpact);
+
+/**
+ * @swagger
+ * /api/traits/competition-comparison/{horseId}:
+ *   get:
+ *     summary: Compare trait impact across multiple disciplines for a horse
+ *     tags: [Traits, Competition]
+ *     parameters:
+ *       - in: path
+ *         name: horseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: ID of the horse
+ *     responses:
+ *       200:
+ *         description: Trait impact comparison completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     horseId:
+ *                       type: integer
+ *                     horseName:
+ *                       type: string
+ *                     comparison:
+ *                       type: array
+ *                     summary:
+ *                       type: object
+ *       400:
+ *         description: Invalid horse ID
+ *       404:
+ *         description: Horse not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/competition-comparison/:horseId', [
+  param('horseId')
+    .isInt({ min: 1 })
+    .withMessage('Horse ID must be a positive integer'),
+  handleValidationErrors
+], compareTraitImpactAcrossDisciplines);
+
+/**
+ * @swagger
+ * /api/traits/competition-effects:
+ *   get:
+ *     summary: Get all trait competition effects and definitions
+ *     tags: [Traits, Competition]
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [positive, negative, all]
+ *         description: Filter by trait type
+ *       - in: query
+ *         name: discipline
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [Dressage, Show Jumping, Cross Country, Racing, Endurance, Reining, Driving, Trail, Eventing]
+ *         description: Highlight effects for specific discipline
+ *     responses:
+ *       200:
+ *         description: Trait competition effects retrieved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalTraits:
+ *                       type: integer
+ *                     positiveTraits:
+ *                       type: integer
+ *                     negativeTraits:
+ *                       type: integer
+ *                     filter:
+ *                       type: object
+ *                     effects:
+ *                       type: array
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/competition-effects', [
+  query('type')
+    .optional()
+    .isIn(['positive', 'negative', 'all'])
+    .withMessage('Type must be positive, negative, or all'),
+  query('discipline')
+    .optional()
+    .isIn(['Dressage', 'Show Jumping', 'Cross Country', 'Racing', 'Endurance', 'Reining', 'Driving', 'Trail', 'Eventing'])
+    .withMessage('Invalid discipline'),
+  handleValidationErrors
+], getTraitCompetitionEffects);
 
 export default router;

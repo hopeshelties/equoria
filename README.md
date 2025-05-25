@@ -125,6 +125,9 @@ equoria/
 - `GET /api/traits/definitions` - Get all trait definitions
 - `GET /api/traits/discovery-status/:horseId` - Get discovery status for a horse
 - `POST /api/traits/batch-discover` - Trigger discovery for multiple horses
+- `GET /api/traits/competition-impact/:horseId` - Analyze trait impact for specific discipline
+- `GET /api/traits/competition-comparison/:horseId` - Compare trait impact across all disciplines
+- `GET /api/traits/competition-effects` - Get all trait competition effects and definitions
 
 ### Grooms
 - `POST /api/grooms/assign` - Assign a groom to a foal

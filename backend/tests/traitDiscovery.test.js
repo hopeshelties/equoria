@@ -69,7 +69,7 @@ describe('Trait Discovery System', () => {
       foalActivities: []
     };
 
-    it('should reveal traits when conditions are met', async () => {
+    it('should reveal traits when conditions are met', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockHorse);
       mockPrisma.horse.update.mockResolvedValue({
         ...mockHorse,
@@ -96,7 +96,7 @@ describe('Trait Discovery System', () => {
       });
     });
 
-    it('should return no revelations when no conditions are met', async () => {
+    it('should return no revelations when no conditions are met', async() => {
       const lowBondHorse = {
         ...mockHorse,
         bond_score: 30,
@@ -112,7 +112,7 @@ describe('Trait Discovery System', () => {
       expect(result.message).toContain('No discovery conditions currently met');
     });
 
-    it('should return message when no hidden traits exist', async () => {
+    it('should return message when no hidden traits exist', async() => {
       const noHiddenTraitsHorse = {
         ...mockHorse,
         epigenetic_modifiers: {
@@ -131,13 +131,13 @@ describe('Trait Discovery System', () => {
       expect(result.message).toContain('No hidden traits available for discovery');
     });
 
-    it('should handle horse not found', async () => {
+    it('should handle horse not found', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       await expect(revealTraits(999)).rejects.toThrow('Horse with ID 999 not found');
     });
 
-    it('should limit revelations per check', async () => {
+    it('should limit revelations per check', async() => {
       const manyHiddenTraitsHorse = {
         ...mockHorse,
         bond_score: 95, // Excellent bond
@@ -160,53 +160,53 @@ describe('Trait Discovery System', () => {
   });
 
   describe('checkDiscoveryConditions', () => {
-    it('should detect high bond condition', async () => {
+    it('should detect high bond condition', async() => {
       const horse = { bond_score: 85, stress_level: 30, age: 1 };
-      
+
       const conditions = await checkDiscoveryConditions(horse);
-      
+
       const highBondCondition = conditions.find(c => c.name === 'HIGH_BOND');
       expect(highBondCondition).toBeDefined();
       expect(highBondCondition.priority).toBe('high');
     });
 
-    it('should detect low stress condition', async () => {
+    it('should detect low stress condition', async() => {
       const horse = { bond_score: 60, stress_level: 15, age: 1 };
-      
+
       const conditions = await checkDiscoveryConditions(horse);
-      
+
       const lowStressCondition = conditions.find(c => c.name === 'LOW_STRESS');
       expect(lowStressCondition).toBeDefined();
       expect(lowStressCondition.priority).toBe('medium');
     });
 
-    it('should detect perfect care condition', async () => {
+    it('should detect perfect care condition', async() => {
       const horse = { bond_score: 85, stress_level: 15, age: 1 };
-      
+
       const conditions = await checkDiscoveryConditions(horse);
-      
+
       const perfectCareCondition = conditions.find(c => c.name === 'PERFECT_CARE');
       expect(perfectCareCondition).toBeDefined();
       expect(perfectCareCondition.priority).toBe('legendary');
     });
 
-    it('should detect consistent training condition', async () => {
+    it('should detect consistent training condition', async() => {
       const horse = { id: 1, bond_score: 60, stress_level: 30, age: 1 };
       mockPrisma.trainingLog.count.mockResolvedValue(6); // 6 training sessions in last 7 days
-      
+
       const conditions = await checkDiscoveryConditions(horse);
-      
+
       const trainingCondition = conditions.find(c => c.name === 'CONSISTENT_TRAINING');
       expect(trainingCondition).toBeDefined();
       expect(trainingCondition.priority).toBe('medium');
     });
 
-    it('should return empty array when no conditions are met', async () => {
+    it('should return empty array when no conditions are met', async() => {
       const horse = { bond_score: 30, stress_level: 80, age: 0 };
       mockPrisma.trainingLog.count.mockResolvedValue(0);
-      
+
       const conditions = await checkDiscoveryConditions(horse);
-      
+
       expect(conditions).toHaveLength(0);
     });
   });
@@ -219,9 +219,9 @@ describe('Trait Discovery System', () => {
         { activityType: 'group_play' },
         { activityType: 'group_play' }
       ];
-      
+
       const conditions = checkEnrichmentDiscoveries(activities);
-      
+
       const socializationCondition = conditions.find(c => c.name === 'SOCIALIZATION_COMPLETE');
       expect(socializationCondition).toBeDefined();
       expect(socializationCondition.completedCount).toBe(4);
@@ -234,9 +234,9 @@ describe('Trait Discovery System', () => {
         { activityType: 'obstacle_course' },
         { activityType: 'puzzle_feeding' }
       ];
-      
+
       const conditions = checkEnrichmentDiscoveries(activities);
-      
+
       const mentalCondition = conditions.find(c => c.name === 'MENTAL_STIMULATION_COMPLETE');
       expect(mentalCondition).toBeDefined();
       expect(mentalCondition.priority).toBe('high');
@@ -252,9 +252,9 @@ describe('Trait Discovery System', () => {
         { activityType: 'controlled_movement' },
         { activityType: 'social_interaction' } // Extra to meet count
       ];
-      
+
       const conditions = checkEnrichmentDiscoveries(activities);
-      
+
       const allEnrichmentCondition = conditions.find(c => c.name === 'ALL_ENRICHMENT_COMPLETE');
       expect(allEnrichmentCondition).toBeDefined();
       expect(allEnrichmentCondition.priority).toBe('legendary');
@@ -265,32 +265,32 @@ describe('Trait Discovery System', () => {
         { activityType: 'social_interaction' },
         { activityType: 'puzzle_feeding' }
       ];
-      
+
       const conditions = checkEnrichmentDiscoveries(activities);
-      
+
       expect(conditions).toHaveLength(0);
     });
 
     it('should handle empty activities array', () => {
       const conditions = checkEnrichmentDiscoveries([]);
-      
+
       expect(conditions).toHaveLength(0);
     });
   });
 
   describe('Error Handling', () => {
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockPrisma.horse.findUnique.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(revealTraits(1)).rejects.toThrow('Database connection failed');
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
-    it('should handle invalid horse ID', async () => {
+    it('should handle invalid horse ID', async() => {
       await expect(revealTraits('invalid')).rejects.toThrow();
     });
 
-    it('should handle missing epigenetic_modifiers field', async () => {
+    it('should handle missing epigenetic_modifiers field', async() => {
       const horseWithoutTraits = {
         id: 1,
         name: 'Test Horse',
