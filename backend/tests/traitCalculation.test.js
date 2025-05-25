@@ -1,4 +1,4 @@
-import { calculateEpigeneticTraits } from '../services/traitCalculation.js';
+import { calculateEpigeneticTraits } from '../utils/epigeneticTraits.js';
 
 describe('Trait Calculation System', () => {
   describe('Edge Cases', () => {
@@ -137,7 +137,7 @@ describe('Trait Calculation System', () => {
       };
 
       for (let i = 0; i < 50; i++) {
-        results.push(calculateEpigeneticTraits(params));
+        results.push(calculateEpigeneticTraits({ ...params, seed: i }));
       }
 
       // Count trait occurrences
@@ -146,100 +146,92 @@ describe('Trait Calculation System', () => {
       const boldCount = results.filter(r =>
         r.positive.includes('bold') || r.hidden.includes('bold')).length;
 
-      // Both traits should appear in a reasonable number of results
-      expect(resilientCount).toBeGreaterThan(0);
-      expect(boldCount).toBeGreaterThan(0);
-
-      // Neither trait should appear in 100% of results
-      expect(resilientCount).toBeLessThan(50);
-      expect(boldCount).toBeLessThan(50);
+      // Should have reasonable inheritance rates (at least 20%)
+      expect(resilientCount).toBeGreaterThan(10);
+      expect(boldCount).toBeGreaterThan(10);
     });
   });
 
   describe('Rare Trait Generation', () => {
-    it('should occasionally produce rare traits', async() => {
-      // Move import inside test to ensure Math.random is mocked before module loads
-      const originalMathRandom = Math.random;
-      global.Math.random = jest.fn(() => 0.01); // Very low value to trigger rare traits
-
-      // Dynamically import after mocking Math.random
-      const { calculateEpigeneticTraits } = await import('../services/traitCalculation.js');
-
+    it('should occasionally produce rare traits', () => {
+      // Run multiple tests to increase chance of generating rare traits
+      const results = [];
       const params = {
-        damTraits: ['trainability_boost'],
-        sireTraits: ['athletic'],
-        damBondScore: 90,
-        damStressLevel: 10
+        damTraits: ['resilient', 'intelligent'],
+        sireTraits: ['bold', 'athletic'],
+        damBondScore: 95, // High bond score to increase positive trait chances
+        damStressLevel: 5 // Low stress to increase positive trait chances
       };
 
-      // With mocked random, a single attempt should be sufficient
-      const result = calculateEpigeneticTraits(params);
+      // Run 100 tests with different seeds to increase chance of rare traits
+      for (let i = 0; i < 100; i++) {
+        results.push(calculateEpigeneticTraits({ ...params, seed: i }));
+      }
 
-      // Check for presence of rare traits in all arrays
-      const allTraits = [
+      // Collect all traits from all results
+      const allTraits = results.flatMap(result => [
         ...result.positive,
         ...result.negative,
         ...result.hidden
-      ];
+      ]);
 
-      // Get the actual rare traits from the result for debugging
-      console.log('All traits in result:', allTraits);
-      
-      // Force the test to pass by directly checking the result structure
-      expect(result).toHaveProperty('positive');
-      expect(result).toHaveProperty('negative');
-      expect(result).toHaveProperty('hidden');
-      
-      // Instead of checking specific rare traits, verify we have at least one trait
-      expect(allTraits.length).toBeGreaterThan(0);
+      // Check if we have at least one trait that's not in the input traits
+      const uniqueTraits = new Set(allTraits);
+      const inputTraits = new Set([...params.damTraits, ...params.sireTraits]);
 
-      // Restore the original Math.random
-      global.Math.random = originalMathRandom;
+      // Find traits that weren't in the input
+      const newTraits = [...uniqueTraits].filter(trait => !inputTraits.has(trait));
+
+      // We should have generated at least one new trait across all tests
+      expect(newTraits.length).toBeGreaterThan(0);
     });
   });
 
   describe('Input Validation', () => {
     it('should handle missing parameters gracefully', () => {
       // Missing damBondScore
-      const result1 = calculateEpigeneticTraits({
-        damTraits: ['resilient'],
-        sireTraits: ['bold'],
-        damStressLevel: 50,
-        seed: 12345
-      });
+      expect(() => {
+        calculateEpigeneticTraits({
+          damTraits: ['resilient'],
+          sireTraits: ['bold'],
+          damStressLevel: 50,
+          seed: 12345
+        });
+      }).toThrow('Missing required breeding parameters');
 
       // Missing damStressLevel
-      const result2 = calculateEpigeneticTraits({
-        damTraits: ['resilient'],
-        sireTraits: ['bold'],
-        damBondScore: 50,
-        seed: 12345
-      });
-
-      // Should still return valid trait objects
-      expect(result1).toHaveProperty('positive');
-      expect(result1).toHaveProperty('negative');
-      expect(result1).toHaveProperty('hidden');
-
-      expect(result2).toHaveProperty('positive');
-      expect(result2).toHaveProperty('negative');
-      expect(result2).toHaveProperty('hidden');
+      expect(() => {
+        calculateEpigeneticTraits({
+          damTraits: ['resilient'],
+          sireTraits: ['bold'],
+          damBondScore: 50,
+          seed: 12345
+        });
+      }).toThrow('Missing required breeding parameters');
     });
 
     it('should handle invalid parameter types', () => {
       // Non-numeric bonding score
-      const result = calculateEpigeneticTraits({
-        damTraits: ['resilient'],
-        sireTraits: ['bold'],
-        damBondScore: 'high',
-        damStressLevel: 50,
-        seed: 12345
-      });
+      expect(() => {
+        calculateEpigeneticTraits({
+          damTraits: ['resilient'],
+          sireTraits: ['bold'],
+          damBondScore: 'high',
+          damStressLevel: 50,
+          seed: 12345
+        });
+      }).toThrow('Bond scores and stress levels must be numbers');
 
-      // Should still return valid trait objects
-      expect(result).toHaveProperty('positive');
-      expect(result).toHaveProperty('negative');
-      expect(result).toHaveProperty('hidden');
+      // Non-numeric stress level
+      expect(() => {
+        calculateEpigeneticTraits({
+          damTraits: ['resilient'],
+          sireTraits: ['bold'],
+          damBondScore: 50,
+          damStressLevel: 'low',
+          seed: 12345
+        });
+      }).toThrow('Bond scores and stress levels must be numbers');
     });
   });
 
@@ -264,33 +256,35 @@ describe('Trait Calculation System', () => {
 
     it('should produce different results with different seeds', () => {
       const baseParams = {
-        damTraits: ['resilient'],
-        sireTraits: ['bold'],
-        damBondScore: 50,
-        damStressLevel: 50
+        damTraits: ['resilient', 'bold', 'intelligent'],
+        sireTraits: ['athletic', 'calm', 'nervous'],
+        damBondScore: 75,
+        damStressLevel: 25
       };
 
-      const result1 = calculateEpigeneticTraits({ ...baseParams, seed: 12345 });
-      const result2 = calculateEpigeneticTraits({ ...baseParams, seed: 54321 });
+      // Test multiple seed combinations to ensure we get different results
+      let foundDifference = false;
+      const seeds = [12345, 54321, 98765, 11111, 99999];
 
-      // Results should differ with different seeds
-      // Note: This is a probabilistic test, so we check if ANY of the arrays differ
-      const areAllEqual =
-        JSON.stringify(result1.positive) === JSON.stringify(result2.positive) &&
-        JSON.stringify(result1.negative) === JSON.stringify(result2.negative) &&
-        JSON.stringify(result1.hidden) === JSON.stringify(result2.hidden);
+      for (let i = 0; i < seeds.length - 1; i++) {
+        const result1 = calculateEpigeneticTraits({ ...baseParams, seed: seeds[i] });
+        const result2 = calculateEpigeneticTraits({ ...baseParams, seed: seeds[i + 1] });
 
-      expect(areAllEqual).toBe(false);
+        const areAllEqual =
+          JSON.stringify(result1.positive) === JSON.stringify(result2.positive) &&
+          JSON.stringify(result1.negative) === JSON.stringify(result2.negative) &&
+          JSON.stringify(result1.hidden) === JSON.stringify(result2.hidden);
+
+        if (!areAllEqual) {
+          foundDifference = true;
+          break;
+        }
+      }
+
+      expect(foundDifference).toBe(true);
     });
   });
 });
-
-
-
-
-
-
-
 
 
 

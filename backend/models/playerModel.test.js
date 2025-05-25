@@ -1,7 +1,12 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock modules
-jest.unstable_mockModule('../db/index.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: {
     player: {
       create: jest.fn(),
@@ -13,7 +18,7 @@ jest.unstable_mockModule('../db/index.js', () => ({
   }
 }));
 
-jest.unstable_mockModule('../utils/logger.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
   default: {
     error: jest.fn(),
     info: jest.fn(),
@@ -22,9 +27,9 @@ jest.unstable_mockModule('../utils/logger.js', () => ({
 }));
 
 // Import modules after mocking
-const { createPlayer, getPlayerById, getPlayerByEmail, getPlayerWithHorses, updatePlayer, deletePlayer } = await import('./playerModel.js');
-const mockPrisma = (await import('../db/index.js')).default;
-const mockLogger = (await import('../utils/logger.js')).default;
+const { createPlayer, getPlayerById, getPlayerByEmail, getPlayerWithHorses, updatePlayer, deletePlayer } = await import(join(__dirname, './playerModel.js'));
+const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
+const mockLogger = (await import(join(__dirname, '../utils/logger.js'))).default;
 
 describe('playerModel', () => {
   beforeEach(() => {
@@ -49,7 +54,7 @@ describe('playerModel', () => {
         xp: 0,
         settings: { theme: 'light', notifications: true }
       };
-      
+
       const expectedPlayer = {
         id: 'player-uuid-123',
         name: 'Test Player',
@@ -215,7 +220,7 @@ describe('playerModel', () => {
         xp: 0,
         settings: {}
       };
-      
+
       const dbError = new Error('DB create error');
       mockPrisma.player.create.mockRejectedValue(dbError);
 
@@ -429,7 +434,7 @@ describe('playerModel', () => {
       const playerId = '123e4567-e89b-12d3-a456-426614174000';
       const updateData = { money: 5000 };
       const dbError = new Error('DB update error');
-      
+
       mockPrisma.player.update.mockRejectedValue(dbError);
 
       await expect(updatePlayer(playerId, updateData)).rejects.toThrow('Database error in updatePlayer: DB update error');
@@ -473,7 +478,7 @@ describe('playerModel', () => {
     it('should throw an error if Prisma client fails to delete', async () => {
       const playerId = '123e4567-e89b-12d3-a456-426614174000';
       const dbError = new Error('DB delete error');
-      
+
       mockPrisma.player.delete.mockRejectedValue(dbError);
 
       await expect(deletePlayer(playerId)).rejects.toThrow('Database error in deletePlayer: DB delete error');
@@ -481,4 +486,4 @@ describe('playerModel', () => {
       expect(mockLogger.error).toHaveBeenCalledWith('[playerModel.deletePlayer] Database error: %o', dbError);
     });
   });
-}); 
+});
