@@ -65,11 +65,16 @@ model Horse {
   earnings              Float?   @default(0)
   rider                 Json?    // Required for competition entry
   disciplineScores      Json?    // Stores discipline scores as {"Dressage": 10, "Show Jumping": 20, ...}
+  
+  // New bonding and stress tracking fields
+  bond_score            Int?     @default(50)  // Bonding score between horse and handler (0-100)
+  stress_level          Int?     @default(0)   // Current stress level of the horse (0-100)
 
-  competitionResults CompetitionResult[]
-  trainingLogs       TrainingLog[]
-  foalDevelopment    FoalDevelopment?
-  foalActivities     FoalActivity[]
+  competitionResults    CompetitionResult[]
+  trainingLogs          TrainingLog[]
+  foalDevelopment       FoalDevelopment?
+  foalActivities        FoalActivity[]
+  foalTrainingHistory   FoalTrainingHistory[]
 }
 
 model Player {
@@ -188,4 +193,25 @@ model FoalActivity {
   foalId Int
 
   @@map("foal_activities")
+}
+
+model FoalTrainingHistory {
+  id           String   @id @default(uuid())
+  day          Int      // Development day (0-6) when activity occurred
+  activity     String   // Type of training activity performed
+  outcome      String   // Result/outcome of the training activity
+  bond_change  Int      @default(0)  // Change in bonding score (-50 to +50)
+  stress_change Int     @default(0)  // Change in stress level (-50 to +50)
+  timestamp    DateTime @default(now())  // When the activity was performed
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  horse   Horse @relation(fields: [horse_id], references: [id], onDelete: Cascade)
+  horse_id Int
+
+  @@map("foal_training_history")
+  @@index([horse_id])
+  @@index([day])
+  @@index([timestamp])
+  @@index([horse_id, day])
 } 
