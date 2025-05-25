@@ -9,6 +9,7 @@ async function createHorse(horseData) {
       breedId,
       breed,
       ownerId,
+      playerId,
       stableId,
       sex,
       date_of_birth,
@@ -71,6 +72,12 @@ async function createHorse(horseData) {
       ownerRelation = { ownerId };
     }
 
+    // Prepare player relationship if provided
+    let playerRelation = {};
+    if (playerId) {
+      playerRelation = { playerId };
+    }
+
     // Prepare stable relationship if provided
     let stableRelation = {};
     if (stableId) {
@@ -84,6 +91,7 @@ async function createHorse(horseData) {
         age,
         ...breedRelation,
         ...ownerRelation,
+        ...playerRelation,
         ...stableRelation,
         ...(sex && { sex }),
         ...(date_of_birth && { date_of_birth: new Date(date_of_birth) }),
@@ -116,7 +124,8 @@ async function createHorse(horseData) {
       include: {
         breed: true,
         owner: true,
-        stable: true
+        stable: true,
+        player: true
       }
     });
 

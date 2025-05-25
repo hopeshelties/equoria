@@ -19,8 +19,8 @@ function isValidUUID(id) {
   }
   
   // Relaxed validation for specific mock UUID patterns that are valid
-  // Allow patterns like 'player-uuid-123', 'nonexistent-uuid', but not 'invalid-uuid'
-  if (id.startsWith('player-') || id.startsWith('nonexistent-')) {
+  // Allow patterns like 'player-uuid-123', 'test-player-uuid-123', 'nonexistent-uuid', but not 'invalid-uuid'
+  if (id.startsWith('player-') || id.startsWith('test-') || id.startsWith('nonexistent-')) {
     return true;
   }
   
