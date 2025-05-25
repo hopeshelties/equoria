@@ -5,3 +5,48 @@ frontend/build/
 .DS_Store
 .cursor/             # Exclude .cursor/rules from git
 Legacy/
+
+# Environment files
+.env
+backend/.env
+backend/env.test
+
+# Dependency folders
+backend/node_modules/
+packages/*/node_modules/
+
+# Build and output folders
+build/
+backend/build/
+frontend/build/
+dist/
+packages/*/dist/
+
+# Test output and coverage
+coverage/
+backend/coverage/
+*.lcov
+
+# Logs
+logs/
+backend/*.log
+
+# System files
+Thumbs.db
+
+# IDE/editor folders
+.vscode/
+.idea/
+
+# Miscellaneous
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Ignore package lock files if not using them
+package-lock.json
+yarn.lock
+
+# Ignore cursor docs if not needed
+.cursor/docs/
