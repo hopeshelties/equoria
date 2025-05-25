@@ -56,7 +56,10 @@ describe('resultModel', () => {
           score: 85.5,
           placement: '1st',
           discipline: 'Racing',
-          runDate: new Date('2024-05-25')
+          runDate: new Date('2024-05-25'),
+          showName: 'Spring Classic',
+          prizeWon: 500,
+          statGains: '{"stat":"speed","gain":1}'
         },
         include: {
           horse: {
@@ -77,7 +80,8 @@ describe('resultModel', () => {
         score: 65.2,
         placement: null,
         discipline: 'Racing',
-        runDate: new Date('2024-05-25')
+        runDate: new Date('2024-05-25'),
+        showName: 'Spring Classic'
       };
 
       const expectedResult = { id: 2, ...resultData, createdAt: new Date() };
@@ -86,7 +90,17 @@ describe('resultModel', () => {
       const result = await saveResult(resultData);
 
       expect(mockPrisma.competitionResult.create).toHaveBeenCalledWith({
-        data: resultData,
+        data: {
+          horseId: 3,
+          showId: 2,
+          score: 65.2,
+          placement: null,
+          discipline: 'Racing',
+          runDate: new Date('2024-05-25'),
+          showName: 'Spring Classic',
+          prizeWon: 0,
+          statGains: null
+        },
         include: {
           horse: {
             include: {
@@ -105,7 +119,8 @@ describe('resultModel', () => {
         score: 85.5,
         placement: '1st',
         discipline: 'Racing',
-        runDate: new Date('2024-05-25')
+        runDate: new Date('2024-05-25'),
+        showName: 'Spring Classic'
       };
 
       await expect(saveResult(resultData)).rejects.toThrow('Horse ID is required');
@@ -118,7 +133,8 @@ describe('resultModel', () => {
         score: 85.5,
         placement: '1st',
         discipline: 'Racing',
-        runDate: new Date('2024-05-25')
+        runDate: new Date('2024-05-25'),
+        showName: 'Spring Classic'
       };
 
       await expect(saveResult(resultData)).rejects.toThrow('Show ID is required');
@@ -171,7 +187,8 @@ describe('resultModel', () => {
         score: 'invalid',
         placement: '1st',
         discipline: 'Racing',
-        runDate: new Date('2024-05-25')
+        runDate: new Date('2024-05-25'),
+        showName: 'Spring Classic'
       };
 
       await expect(saveResult(resultData)).rejects.toThrow('Score must be a number');
@@ -185,7 +202,8 @@ describe('resultModel', () => {
         score: 85.5,
         placement: '1st',
         discipline: 'Racing',
-        runDate: new Date('2024-05-25')
+        runDate: new Date('2024-05-25'),
+        showName: 'Spring Classic'
       };
 
       await expect(saveResult(resultData)).rejects.toThrow('Horse ID must be a positive integer');
@@ -199,7 +217,8 @@ describe('resultModel', () => {
         score: 85.5,
         placement: '1st',
         discipline: 'Racing',
-        runDate: new Date('2024-05-25')
+        runDate: new Date('2024-05-25'),
+        showName: 'Spring Classic'
       };
 
       await expect(saveResult(resultData)).rejects.toThrow('Show ID must be a positive integer');
@@ -213,7 +232,8 @@ describe('resultModel', () => {
         score: 85.5,
         placement: '1st',
         discipline: 'Racing',
-        runDate: new Date('2024-05-25')
+        runDate: new Date('2024-05-25'),
+        showName: 'Spring Classic'
       };
 
       mockPrisma.competitionResult.create.mockRejectedValue(new Error('Database connection failed'));

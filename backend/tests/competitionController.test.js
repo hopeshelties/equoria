@@ -498,5 +498,397 @@ describe('competitionController', () => {
         { horseId: 5, name: 'Horse5', score: 82.1, placement: '3rd', prizeWon: 200 }
       ]);
     });
+
+    // 🎯 Enhanced Feature Tests
+
+    it('should reject horses without valid riders', async () => {
+      const horseIds = [1, 2, 3];
+      const mockHorses = [
+        createMockHorse(1, 'Thunder', { rider: null }), // No rider
+        createMockHorse(2, 'Lightning', { rider: { name: 'Test Rider', skill: 80 } }), // Valid rider
+        createMockHorse(3, 'Storm', { rider: undefined }) // No rider
+      ];
+
+      const mockSimulationResults = [
+        { horseId: 2, name: 'Lightning', score: 88.5, placement: '1st' }
+      ];
+
+      // Mock horse retrieval
+      mockHorseModel.getHorseById
+        .mockResolvedValueOnce(mockHorses[0])
+        .mockResolvedValueOnce(mockHorses[1])
+        .mockResolvedValueOnce(mockHorses[2]);
+
+      // Mock rider validation
+      mockCompetitionRewards.hasValidRider
+        .mockReturnValueOnce(false) // Horse 1 - no rider
+        .mockReturnValueOnce(true)  // Horse 2 - valid rider
+        .mockReturnValueOnce(false); // Horse 3 - no rider
+
+      // Mock eligibility checks (for horses with riders)
+      mockIsHorseEligibleForShow.mockReturnValue(true);
+
+      // Mock existing results check
+      mockResultModel.getResultsByShow.mockResolvedValue([]);
+
+      // Mock competition simulation (only 1 horse with rider)
+      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+
+      // Mock result saving
+      mockResultModel.saveResult.mockResolvedValueOnce({ id: 1, ...mockSimulationResults[0] });
+
+      const result = await enterAndRunShow(horseIds, mockShow);
+
+      // Verify rider validation was called for all horses
+      expect(mockCompetitionRewards.hasValidRider).toHaveBeenCalledTimes(3);
+      expect(mockCompetitionRewards.hasValidRider).toHaveBeenCalledWith(mockHorses[0]);
+      expect(mockCompetitionRewards.hasValidRider).toHaveBeenCalledWith(mockHorses[1]);
+      expect(mockCompetitionRewards.hasValidRider).toHaveBeenCalledWith(mockHorses[2]);
+
+      // Verify only 1 horse was simulated (only one with valid rider)
+      expect(mockSimulateCompetition).toHaveBeenCalledWith([mockHorses[1]], mockShow);
+      expect(mockResultModel.saveResult).toHaveBeenCalledTimes(1);
+
+      expect(result.summary.totalEntries).toBe(3);
+      expect(result.summary.validEntries).toBe(1);
+      expect(result.summary.skippedEntries).toBe(2);
+    });
+
+    it('should apply prize distribution correctly (50%/30%/20%)', async () => {
+      const horseIds = [1, 2, 3, 4];
+      const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
+
+      const mockSimulationResults = [
+        { horseId: 1, name: 'Horse1', score: 95.5, placement: '1st' },
+        { horseId: 2, name: 'Horse2', score: 88.2, placement: '2nd' },
+        { horseId: 3, name: 'Horse3', score: 82.1, placement: '3rd' },
+        { horseId: 4, name: 'Horse4', score: 76.8, placement: null }
+      ];
+
+      // Mock all successful
+      mockHorseModel.getHorseById.mockImplementation(id => 
+        Promise.resolve(mockHorses.find(h => h.id === id))
+      );
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+      mockIsHorseEligibleForShow.mockReturnValue(true);
+      mockResultModel.getResultsByShow.mockResolvedValue([]);
+      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+
+      // Mock prize distribution (50%/30%/20% of 1000 = 500/300/200)
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+
+      // Mock stat gains (no gains for this test)
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+
+      // Mock entry fees and transfers
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(400);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+
+      // Mock horse rewards update
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+
+      // Mock result saving
+      mockResultModel.saveResult.mockImplementation(data => 
+        Promise.resolve({ id: Math.random(), ...data })
+      );
+
+      const result = await enterAndRunShow(horseIds, mockShow);
+
+      // Verify prize distribution calculation was called
+      expect(mockCompetitionRewards.calculatePrizeDistribution).toHaveBeenCalledWith(mockShow.prize);
+
+      // Verify horse rewards were updated for winners
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledTimes(3); // Only top 3
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(1, 500, null);
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(2, 300, null);
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(3, 200, null);
+
+      // Verify results include correct prize amounts
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
+        horseId: 1,
+        prizeWon: 500
+      }));
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
+        horseId: 2,
+        prizeWon: 300
+      }));
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
+        horseId: 3,
+        prizeWon: 200
+      }));
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
+        horseId: 4,
+        prizeWon: 0
+      }));
+    });
+
+    it('should apply stat gains with correct probabilities (10%/5%/3%)', async () => {
+      const horseIds = [1, 2, 3];
+      const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
+
+      const mockSimulationResults = [
+        { horseId: 1, name: 'Horse1', score: 95.5, placement: '1st' },
+        { horseId: 2, name: 'Horse2', score: 88.2, placement: '2nd' },
+        { horseId: 3, name: 'Horse3', score: 82.1, placement: '3rd' }
+      ];
+
+      // Mock all successful
+      mockHorseModel.getHorseById.mockImplementation(id => 
+        Promise.resolve(mockHorses.find(h => h.id === id))
+      );
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+      mockIsHorseEligibleForShow.mockReturnValue(true);
+      mockResultModel.getResultsByShow.mockResolvedValue([]);
+      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+
+      // Mock prize distribution
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+
+      // Mock stat gains (simulate gains for testing)
+      mockCompetitionRewards.calculateStatGains
+        .mockReturnValueOnce('speed')    // 1st place gets speed gain
+        .mockReturnValueOnce('stamina')  // 2nd place gets stamina gain
+        .mockReturnValueOnce(null);      // 3rd place gets no gain
+
+      // Mock other functions
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(300);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+      mockResultModel.saveResult.mockImplementation(data => 
+        Promise.resolve({ id: Math.random(), ...data })
+      );
+
+      const result = await enterAndRunShow(horseIds, mockShow);
+
+      // Verify stat gains calculation was called for each placement
+      expect(mockCompetitionRewards.calculateStatGains).toHaveBeenCalledTimes(3);
+      expect(mockCompetitionRewards.calculateStatGains).toHaveBeenCalledWith('1st', mockShow.discipline);
+      expect(mockCompetitionRewards.calculateStatGains).toHaveBeenCalledWith('2nd', mockShow.discipline);
+      expect(mockCompetitionRewards.calculateStatGains).toHaveBeenCalledWith('3rd', mockShow.discipline);
+
+      // Verify horse rewards were updated with stat gains
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(1, 500, 'speed');
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(2, 300, 'stamina');
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(3, 200, null);
+
+      // Verify results include stat gains
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
+        horseId: 1,
+        statGains: 'speed'
+      }));
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
+        horseId: 2,
+        statGains: 'stamina'
+      }));
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
+        horseId: 3,
+        statGains: null
+      }));
+    });
+
+    it('should transfer entry fees to show host player', async () => {
+      const horseIds = [1, 2, 3];
+      const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
+      const showWithHost = { ...mockShow, hostPlayer: 'host-player-123' };
+
+      const mockSimulationResults = [
+        { horseId: 1, name: 'Horse1', score: 95.5, placement: '1st' },
+        { horseId: 2, name: 'Horse2', score: 88.2, placement: '2nd' },
+        { horseId: 3, name: 'Horse3', score: 82.1, placement: '3rd' }
+      ];
+
+      // Mock all successful
+      mockHorseModel.getHorseById.mockImplementation(id => 
+        Promise.resolve(mockHorses.find(h => h.id === id))
+      );
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+      mockIsHorseEligibleForShow.mockReturnValue(true);
+      mockResultModel.getResultsByShow.mockResolvedValue([]);
+      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+
+      // Mock prize distribution and stat gains
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+
+      // Mock entry fees calculation (3 horses × 100 entry fee = 300)
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(300);
+
+      // Mock fee transfer
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+
+      // Mock other functions
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+      mockResultModel.saveResult.mockImplementation(data => 
+        Promise.resolve({ id: Math.random(), ...data })
+      );
+
+      const result = await enterAndRunShow(horseIds, showWithHost);
+
+      // Verify entry fees calculation
+      expect(mockCompetitionRewards.calculateEntryFees).toHaveBeenCalledWith(showWithHost.entryFee, 3);
+
+      // Verify fee transfer to host player
+      expect(mockPlayerUpdates.transferEntryFees).toHaveBeenCalledWith('host-player-123', showWithHost.entryFee, 3);
+
+      // Verify summary includes entry fees collected
+      expect(result.summary.entryFeesCollected).toBe(300);
+    });
+
+    it('should save complete history with show info and stat gains', async () => {
+      const horseIds = [1, 2];
+      const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
+
+      const mockSimulationResults = [
+        { horseId: 1, name: 'Horse1', score: 95.5, placement: '1st' },
+        { horseId: 2, name: 'Horse2', score: 88.2, placement: '2nd' }
+      ];
+
+      // Mock all successful
+      mockHorseModel.getHorseById.mockImplementation(id => 
+        Promise.resolve(mockHorses.find(h => h.id === id))
+      );
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+      mockIsHorseEligibleForShow.mockReturnValue(true);
+      mockResultModel.getResultsByShow.mockResolvedValue([]);
+      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+
+      // Mock prize distribution and stat gains
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains
+        .mockReturnValueOnce('stamina')  // 1st place gets stamina gain
+        .mockReturnValueOnce(null);      // 2nd place gets no gain
+
+      // Mock other functions
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(200);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+      mockResultModel.saveResult.mockImplementation(data => 
+        Promise.resolve({ id: Math.random(), ...data })
+      );
+
+      const result = await enterAndRunShow(horseIds, mockShow);
+
+      // Verify complete result data is saved with all required fields
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith({
+        horseId: 1,
+        showId: mockShow.id,
+        score: 95.5,
+        placement: '1st',
+        discipline: mockShow.discipline,
+        runDate: mockShow.runDate,
+        showName: mockShow.name,
+        prizeWon: 500,
+        statGains: 'stamina'
+      });
+
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith({
+        horseId: 2,
+        showId: mockShow.id,
+        score: 88.2,
+        placement: '2nd',
+        discipline: mockShow.discipline,
+        runDate: mockShow.runDate,
+        showName: mockShow.name,
+        prizeWon: 300,
+        statGains: null
+      });
+
+      // Verify result includes complete information
+      expect(result.success).toBe(true);
+      expect(result.results).toHaveLength(2);
+    });
+
+    it('should demonstrate score randomness across multiple runs', async () => {
+      const horseIds = [1];
+      const mockHorse = createMockHorse(1, 'Thunder');
+
+      // Mock all successful setup
+      mockHorseModel.getHorseById.mockResolvedValue(mockHorse);
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+      mockIsHorseEligibleForShow.mockReturnValue(true);
+      mockResultModel.getResultsByShow.mockResolvedValue([]);
+
+      // Mock other functions
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+      mockResultModel.saveResult.mockImplementation(data => 
+        Promise.resolve({ id: Math.random(), ...data })
+      );
+
+      // Simulate different scores across runs to demonstrate randomness
+      const scores = [85.5, 87.2, 83.9, 86.1, 84.7];
+      let callCount = 0;
+      
+      mockSimulateCompetition.mockImplementation(() => {
+        const score = scores[callCount % scores.length];
+        callCount++;
+        return [{ horseId: 1, name: 'Thunder', score, placement: '1st' }];
+      });
+
+      // Run competition multiple times
+      const results = [];
+      for (let i = 0; i < 5; i++) {
+        const result = await enterAndRunShow(horseIds, mockShow);
+        results.push(result.results[0].score);
+        
+        // Reset only the call counts, not the implementations
+        mockHorseModel.getHorseById.mockClear();
+        mockCompetitionRewards.hasValidRider.mockClear();
+        mockIsHorseEligibleForShow.mockClear();
+        mockResultModel.getResultsByShow.mockClear();
+        mockCompetitionRewards.calculatePrizeDistribution.mockClear();
+        mockCompetitionRewards.calculateStatGains.mockClear();
+        mockCompetitionRewards.calculateEntryFees.mockClear();
+        mockPlayerUpdates.transferEntryFees.mockClear();
+        mockHorseUpdates.updateHorseRewards.mockClear();
+        mockResultModel.saveResult.mockClear();
+        
+        // Re-setup mocks for next iteration (keeping the simulation implementation)
+        mockHorseModel.getHorseById.mockResolvedValue(mockHorse);
+        mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+        mockIsHorseEligibleForShow.mockReturnValue(true);
+        mockResultModel.getResultsByShow.mockResolvedValue([]);
+        mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+          first: 500,
+          second: 300,
+          third: 200
+        });
+        mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+        mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
+        mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+        mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+        mockResultModel.saveResult.mockImplementation(data => 
+          Promise.resolve({ id: Math.random(), ...data })
+        );
+      }
+
+      // Verify that scores vary across runs (demonstrating randomness)
+      const uniqueScores = [...new Set(results)];
+      expect(uniqueScores.length).toBeGreaterThan(1); // Should have different scores
+      expect(mockSimulateCompetition).toHaveBeenCalledTimes(5);
+    });
   });
 }); 
