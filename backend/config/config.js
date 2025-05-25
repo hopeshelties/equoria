@@ -15,7 +15,7 @@ if (result.error) {
   process.exit(1);
 }
 
-const requiredVars = ['DATABASE_URL', 'PORT'];
+const requiredVars = ['DATABASE_URL', 'PORT', 'JWT_SECRET'];
 const missingVars = requiredVars.filter(key => !process.env[key]);
 
 if (missingVars.length > 0) {
@@ -32,6 +32,8 @@ if (process.env.NODE_ENV === undefined) {
 const {
   PORT,
   DATABASE_URL,
+  JWT_SECRET,
+  ALLOWED_ORIGINS,
 } = process.env;
 
 if (!PORT) {
@@ -43,6 +45,8 @@ const config = {
   port: PORT,
   dbUrl: DATABASE_URL,
   env: NODE_ENV,
+  jwtSecret: JWT_SECRET,
+  allowedOrigins: ALLOWED_ORIGINS,
 };
 
 // Log successful configuration

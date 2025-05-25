@@ -243,6 +243,9 @@ describe('competitionController', () => {
         .mockResolvedValueOnce(mockHorses[1])
         .mockResolvedValueOnce(mockHorses[2]);
 
+      // Mock rider validation (all horses have valid riders)
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+
       // Mock eligibility checks (all eligible)
       mockIsHorseEligibleForShow.mockReturnValue(true);
 
@@ -251,6 +254,17 @@ describe('competitionController', () => {
 
       // Mock competition simulation (only 2 horses)
       mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+
+      // Mock prize distribution and other required functions
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(200);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
       // Mock result saving
       mockResultModel.saveResult
@@ -286,6 +300,9 @@ describe('competitionController', () => {
         .mockResolvedValueOnce(mockHorses[1])
         .mockResolvedValueOnce(mockHorses[2]);
 
+      // Mock rider validation (all horses have valid riders)
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+
       // Mock eligibility checks
       mockIsHorseEligibleForShow
         .mockReturnValueOnce(false) // Horse 1 ineligible
@@ -297,6 +314,17 @@ describe('competitionController', () => {
 
       // Mock competition simulation (only 1 horse)
       mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+
+      // Mock prize distribution and other required functions
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
       // Mock result saving
       mockResultModel.saveResult.mockResolvedValueOnce({ id: 1, ...mockSimulationResults[0] });
@@ -330,6 +358,9 @@ describe('competitionController', () => {
       // Mock existing results check
       mockResultModel.getResultsByShow.mockResolvedValue([]);
 
+      // Mock rider validation (all horses have no riders)
+      mockCompetitionRewards.hasValidRider.mockReturnValue(false);
+
       const result = await enterAndRunShow(horseIds, mockShow);
 
       // Verify no simulation or saving occurred
@@ -340,7 +371,10 @@ describe('competitionController', () => {
         success: false,
         message: 'No valid horses available for competition',
         results: [],
-        failedFetches: [],
+        failedFetches: [
+          { horseId: 1, reason: 'Horse must have a rider to compete' },
+          { horseId: 2, reason: 'Horse must have a rider to compete' }
+        ],
         summary: {
           totalEntries: 2,
           validEntries: 0,
@@ -377,8 +411,22 @@ describe('competitionController', () => {
       // Mock existing results check
       mockResultModel.getResultsByShow.mockResolvedValue([]);
 
+      // Mock rider validation (for existing horses)
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+
       // Mock competition simulation
       mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+
+      // Mock prize distribution and other required functions
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(200);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
       // Mock result saving
       mockResultModel.saveResult
@@ -417,7 +465,7 @@ describe('competitionController', () => {
 
       // Mock horse retrieval error
       mockHorseModel.getHorseById.mockRejectedValue(new Error('Database connection failed'));
-      
+
       // Mock other required functions
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
@@ -437,6 +485,7 @@ describe('competitionController', () => {
 
       // Mock successful horse retrieval
       mockHorseModel.getHorseById.mockResolvedValue(mockHorse);
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
 
@@ -455,9 +504,21 @@ describe('competitionController', () => {
 
       // Mock successful setup
       mockHorseModel.getHorseById.mockResolvedValue(mockHorse);
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
       mockSimulateCompetition.mockReturnValue([mockSimulationResult]);
+
+      // Mock prize distribution and other required functions
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
       // Mock result saving error
       mockResultModel.saveResult.mockRejectedValue(new Error('Failed to save result'));
@@ -480,13 +541,26 @@ describe('competitionController', () => {
       ];
 
       // Mock all successful
-      mockHorseModel.getHorseById.mockImplementation(id => 
+      mockHorseModel.getHorseById.mockImplementation(id =>
         Promise.resolve(mockHorses.find(h => h.id === id))
       );
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
       mockSimulateCompetition.mockReturnValue(mockSimulationResults);
-      mockResultModel.saveResult.mockImplementation(data => 
+
+      // Mock prize distribution and other required functions
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(700);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+
+      mockResultModel.saveResult.mockImplementation(data =>
         Promise.resolve({ id: Math.random(), ...data })
       );
 
@@ -534,6 +608,17 @@ describe('competitionController', () => {
       // Mock competition simulation (only 1 horse with rider)
       mockSimulateCompetition.mockReturnValue(mockSimulationResults);
 
+      // Mock prize distribution and other required functions
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+
       // Mock result saving
       mockResultModel.saveResult.mockResolvedValueOnce({ id: 1, ...mockSimulationResults[0] });
 
@@ -566,7 +651,7 @@ describe('competitionController', () => {
       ];
 
       // Mock all successful
-      mockHorseModel.getHorseById.mockImplementation(id => 
+      mockHorseModel.getHorseById.mockImplementation(id =>
         Promise.resolve(mockHorses.find(h => h.id === id))
       );
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
@@ -592,7 +677,7 @@ describe('competitionController', () => {
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
       // Mock result saving
-      mockResultModel.saveResult.mockImplementation(data => 
+      mockResultModel.saveResult.mockImplementation(data =>
         Promise.resolve({ id: Math.random(), ...data })
       );
 
@@ -637,7 +722,7 @@ describe('competitionController', () => {
       ];
 
       // Mock all successful
-      mockHorseModel.getHorseById.mockImplementation(id => 
+      mockHorseModel.getHorseById.mockImplementation(id =>
         Promise.resolve(mockHorses.find(h => h.id === id))
       );
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
@@ -662,7 +747,7 @@ describe('competitionController', () => {
       mockCompetitionRewards.calculateEntryFees.mockReturnValue(300);
       mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
-      mockResultModel.saveResult.mockImplementation(data => 
+      mockResultModel.saveResult.mockImplementation(data =>
         Promise.resolve({ id: Math.random(), ...data })
       );
 
@@ -706,7 +791,7 @@ describe('competitionController', () => {
       ];
 
       // Mock all successful
-      mockHorseModel.getHorseById.mockImplementation(id => 
+      mockHorseModel.getHorseById.mockImplementation(id =>
         Promise.resolve(mockHorses.find(h => h.id === id))
       );
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
@@ -730,7 +815,7 @@ describe('competitionController', () => {
 
       // Mock other functions
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
-      mockResultModel.saveResult.mockImplementation(data => 
+      mockResultModel.saveResult.mockImplementation(data =>
         Promise.resolve({ id: Math.random(), ...data })
       );
 
@@ -756,7 +841,7 @@ describe('competitionController', () => {
       ];
 
       // Mock all successful
-      mockHorseModel.getHorseById.mockImplementation(id => 
+      mockHorseModel.getHorseById.mockImplementation(id =>
         Promise.resolve(mockHorses.find(h => h.id === id))
       );
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
@@ -778,7 +863,7 @@ describe('competitionController', () => {
       mockCompetitionRewards.calculateEntryFees.mockReturnValue(200);
       mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
-      mockResultModel.saveResult.mockImplementation(data => 
+      mockResultModel.saveResult.mockImplementation(data =>
         Promise.resolve({ id: Math.random(), ...data })
       );
 
@@ -834,14 +919,14 @@ describe('competitionController', () => {
       mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
       mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
-      mockResultModel.saveResult.mockImplementation(data => 
+      mockResultModel.saveResult.mockImplementation(data =>
         Promise.resolve({ id: Math.random(), ...data })
       );
 
       // Simulate different scores across runs to demonstrate randomness
       const scores = [85.5, 87.2, 83.9, 86.1, 84.7];
       let callCount = 0;
-      
+
       mockSimulateCompetition.mockImplementation(() => {
         const score = scores[callCount % scores.length];
         callCount++;
@@ -853,7 +938,7 @@ describe('competitionController', () => {
       for (let i = 0; i < 5; i++) {
         const result = await enterAndRunShow(horseIds, mockShow);
         results.push(result.results[0].score);
-        
+
         // Reset only the call counts, not the implementations
         mockHorseModel.getHorseById.mockClear();
         mockCompetitionRewards.hasValidRider.mockClear();
@@ -865,7 +950,7 @@ describe('competitionController', () => {
         mockPlayerUpdates.transferEntryFees.mockClear();
         mockHorseUpdates.updateHorseRewards.mockClear();
         mockResultModel.saveResult.mockClear();
-        
+
         // Re-setup mocks for next iteration (keeping the simulation implementation)
         mockHorseModel.getHorseById.mockResolvedValue(mockHorse);
         mockCompetitionRewards.hasValidRider.mockReturnValue(true);
@@ -880,7 +965,7 @@ describe('competitionController', () => {
         mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
         mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
         mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
-        mockResultModel.saveResult.mockImplementation(data => 
+        mockResultModel.saveResult.mockImplementation(data =>
           Promise.resolve({ id: Math.random(), ...data })
         );
       }
@@ -891,4 +976,4 @@ describe('competitionController', () => {
       expect(mockSimulateCompetition).toHaveBeenCalledTimes(5);
     });
   });
-}); 
+});

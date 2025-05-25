@@ -1,8 +1,7 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
-// Will import dynamically in route handler
-const { getHorseById } = require('../models/horseModel.js');
-const logger = require('../utils/logger.js');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import { getHorseById } from '../models/horseModel.js';
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -22,13 +21,13 @@ const validateEnterShow = [
 /**
  * POST /enter-show
  * Enter horses into a show and run the competition
- * 
+ *
  * Request body:
  * {
  *   "showId": 1,
  *   "horseIds": [1, 2, 3, 4, 5]
  * }
- * 
+ *
  * Response:
  * {
  *   "success": true,
@@ -75,7 +74,7 @@ router.post('/enter-show', validateEnterShow, async (req, res) => {
 
     // Dynamic import for ES module
     const { enterAndRunShow } = await import('../controllers/competitionController.js');
-    
+
     // Call the controller function
     const result = await enterAndRunShow(horseIds, mockShow);
 
@@ -107,7 +106,7 @@ router.post('/enter-show', validateEnterShow, async (req, res) => {
 router.get('/show/:showId/results', async (req, res) => {
   try {
     const showId = parseInt(req.params.showId, 10);
-    
+
     if (isNaN(showId) || showId <= 0) {
       return res.status(400).json({
         success: false,
@@ -116,7 +115,7 @@ router.get('/show/:showId/results', async (req, res) => {
     }
 
     // Import here to avoid circular dependency issues
-    const { getResultsByShow } = require('../models/resultModel.js');
+    const { getResultsByShow } = await import('../models/resultModel.js');
     const results = await getResultsByShow(showId);
 
     logger.info(`[competitionRoutes.GET /show/${showId}/results] Retrieved ${results.length} results`);
@@ -145,7 +144,7 @@ router.get('/show/:showId/results', async (req, res) => {
 router.get('/horse/:horseId/results', async (req, res) => {
   try {
     const horseId = parseInt(req.params.horseId, 10);
-    
+
     if (isNaN(horseId) || horseId <= 0) {
       return res.status(400).json({
         success: false,
@@ -154,7 +153,7 @@ router.get('/horse/:horseId/results', async (req, res) => {
     }
 
     // Import here to avoid circular dependency issues
-    const { getResultsByHorse } = require('../models/resultModel.js');
+    const { getResultsByHorse } = await import('../models/resultModel.js');
     const results = await getResultsByHorse(horseId);
 
     logger.info(`[competitionRoutes.GET /horse/${horseId}/results] Retrieved ${results.length} results`);
@@ -176,4 +175,4 @@ router.get('/horse/:horseId/results', async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router;

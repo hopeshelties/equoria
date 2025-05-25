@@ -1,39 +1,67 @@
-const express = require('express');
-const morgan = require('morgan'); // Re-import morgan
-const config = require('./config/config');
-const logger = require('./utils/logger'); // Updated logger import path
-const pingRoute = require('./routes/ping'); // Require the new ping route
-const breedRoutes = require('./routes/breedRoutes'); // <--- Add this line
-const competitionRoutes = require('./routes/competitionRoutes'); // Competition routes
-const { handleValidationErrors } = require('./middleware/validationErrorHandler'); // Example, if you create it
-const errorHandler = require('./middleware/errorHandler'); // Import error handler
+
+import express from 'express';
+import morgan from 'morgan';
+import config from './config/config.js';
+import logger from './utils/logger.js';
+import pingRoute from './routes/ping.js';
+import breedRoutes from './routes/breedRoutes.js';
+import competitionRoutes from './routes/competitionRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import errorHandler from './middleware/errorHandler.js';
+import { createSecurityMiddleware } from './middleware/security.js';
+import { requestLogger, errorRequestLogger } from './middleware/requestLogger.js';
+import { specs, swaggerUi } from './docs/swagger.js';
 
 const app = express();
 
-// Middleware
-// Integrate morgan with winston for HTTP request logging
+// Security middleware (applied first)
+app.use(createSecurityMiddleware());
+
+// Request logging middleware
+if (config.env !== 'test') {
+  app.use(requestLogger);
+}
+
+// Morgan logging middleware
 if (config.env !== 'test') {
   // Morgan stream piped to Winston
   const morganStream = {
     write: (message) => {
       // Remove newline characters from morgan's output to avoid double newlines in winston logs
       logger.info(message.trim());
-    },
+    }
   };
   app.use(morgan('dev', { stream: morganStream }));
 }
 
-app.use(express.json()); // Middleware to parse JSON bodies
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' })); // Middleware to parse JSON bodies with size limit
+app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
 
-// Mount the ping route
+// API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Equoria API Documentation'
+}));
+
+// API Documentation JSON
+app.get('/api-docs.json', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(specs);
+});
+
+// Routes
 app.use('/ping', pingRoute);
-app.use('/api/breeds', breedRoutes); // <--- Add this line to mount the breed routes
-app.use('/api/competition', competitionRoutes); // Mount competition routes
+app.use('/api/auth', authRoutes);
+app.use('/api/breeds', breedRoutes);
+app.use('/api/competition', competitionRoutes);
 
 // Old direct routes removed as per refactoring for /ping.
 // The default '/' route can be re-added or managed elsewhere if needed.
 
 // Error handling middleware - must be last
+app.use(errorRequestLogger); // Log errors before handling them
 app.use(errorHandler);
 
-module.exports = app; 
+export default app;

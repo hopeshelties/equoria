@@ -1,17 +1,29 @@
 // backend/jest.config.mjs
 export default {
-    testEnvironment: 'node',
-    transform: {}, // No transformation needed for ESM with --experimental-vm-modules
-    transformIgnorePatterns: [
-      '/node_modules/(?!@prisma/client)', // Allow @prisma/client to be processed as ESM
-    ],
-    moduleNameMapper: {
-      '^(\\.{1,2}/.*)\\.js$': '$1', // Keep your existing mapper for .js imports
-      '\\.(css|less|scss|sass)$': 'identity-obj-proxy', // Mock non-JS assets (optional)
-    },
-    globals: {
-      'jest': true
-    },
-    setupFilesAfterEnv: [], // Can add setup files if needed
-    verbose: true
-  };
+  testEnvironment: 'node',
+  preset: null,
+  transform: {},
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$|@prisma/client))'
+  ],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
+  testMatch: [
+    '**/__tests__/**/*.js',
+    '**/?(*.)+(spec|test).js'
+  ],
+  collectCoverageFrom: [
+    '**/*.js',
+    '!**/node_modules/**',
+    '!**/coverage/**',
+    '!jest.config.mjs',
+    '!**/*.test.js',
+    '!**/*.spec.js'
+  ],
+  verbose: true,
+  forceExit: true,
+  clearMocks: true,
+  resetMocks: true,
+  restoreMocks: true
+};

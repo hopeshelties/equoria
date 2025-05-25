@@ -2,11 +2,11 @@ import { getHorseById } from '../models/horseModel.js';
 import { saveResult, getResultsByShow } from '../models/resultModel.js';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
-import { 
-  calculatePrizeDistribution, 
-  calculateStatGains, 
-  calculateEntryFees, 
-  hasValidRider 
+import {
+  calculatePrizeDistribution,
+  calculateStatGains,
+  calculateEntryFees,
+  hasValidRider
 } from '../utils/competitionRewards.js';
 import { updateHorseRewards } from '../utils/horseUpdates.js';
 import { transferEntryFees } from '../utils/playerUpdates.js';
@@ -19,27 +19,27 @@ import logger from '../utils/logger.js';
  * @returns {Object} - Competition results with summary
  */
 async function enterAndRunShow(horseIds, show) {
-  try {
-    // Validate inputs
-    if (!horseIds) {
-      throw new Error('Horse IDs array is required');
-    }
-    if (!Array.isArray(horseIds)) {
-      throw new Error('Horse IDs must be an array');
-    }
-    if (horseIds.length === 0) {
-      throw new Error('At least one horse ID is required');
-    }
-    if (!show) {
-      throw new Error('Show object is required');
-    }
+  // Validate inputs (outside try-catch to preserve original error messages)
+  if (!horseIds) {
+    throw new Error('Horse IDs array is required');
+  }
+  if (!Array.isArray(horseIds)) {
+    throw new Error('Horse IDs must be an array');
+  }
+  if (horseIds.length === 0) {
+    throw new Error('At least one horse ID is required');
+  }
+  if (!show) {
+    throw new Error('Show object is required');
+  }
 
+  try {
     logger.info(`[competitionController.enterAndRunShow] Starting enhanced competition for show ${show.id} with ${horseIds.length} horses`);
 
     // Step 1: Fetch horse data and validate riders
     const horses = [];
     const failedFetches = [];
-    
+
     for (const horseId of horseIds) {
       try {
         const horse = await getHorseById(horseId);
@@ -222,4 +222,4 @@ async function enterAndRunShow(horseIds, show) {
 
 export {
   enterAndRunShow
-}; 
+};
