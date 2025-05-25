@@ -5,4 +5,3 @@ frontend/build/
 .DS_Store
 .cursor/             # Exclude .cursor/rules from git
 Legacy/
-.env

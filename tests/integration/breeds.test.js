@@ -1,111 +1,108 @@
-const request = require('supertest');
-const app = require('../../backend/app'); // Path to your Express app
-const pool = require('../../backend/db'); // Path to your db connection pool
-const logger = require('../../backend/utils/logger'); // Import logger
+import request from 'supertest'; // Changed to ESM
+import app from '../../backend/app.js'; // Path to your Express app, assuming .js extension
+import prisma from '../../backend/db/index.js'; // Path to your Prisma client
+// const logger = require('../../backend/utils/logger'); // Logger might not be needed directly if Prisma handles errors
 
-// Helper function to reset the database using schema.sql
-// This might need to be more sophisticated depending on your setup,
-// e.g., running the SQL file via a script or directly with pg
+// Helper function to reset the database using Prisma
 const resetDatabase = async () => {
-  // For now, we'll assume a simple way to clear tables relevant to breeds
-  // Ideally, you'd re-run your schema.sql or use a migration tool
   try {
-    await pool.query('DELETE FROM public.horses;'); // Clear horses first due to FK
-    await pool.query('DELETE FROM public.breeds;');
+    // Order matters due to foreign key constraints if any exist pointing to Breed
+    // If Horse model has a required relation to Breed, horses must be deleted first.
+    // Assuming Horse model has a breedId that relates to Breed model's id
+    await prisma.horse.deleteMany({}); // Clear horses first
+    await prisma.breed.deleteMany({}); // Then clear breeds
   } catch (error) {
-    logger.error('Error resetting database for tests: %o', error); // Use logger
+    console.error('Error resetting database for tests:', error); // console.error for test visibility
     // It's crucial that tests can reset state. If this fails, tests are unreliable.
-    // Depending on test runner setup, might want to throw to halt tests.
+    throw error; // Rethrow to halt tests if DB reset fails
   }
 };
 
 describe('Breeds API - /api/breeds', () => {
   beforeAll(async () => {
-    // Setup database connection if not already handled by app start
-    // For example, if your app.js doesn't immediately connect.
-    // In our case, db is initialized in server.js, but tests use app.js
-    // and pool is directly imported.
+    // Any one-time setup, if needed. Prisma client is typically available globally.
   });
 
   beforeEach(async () => {
-    // Reset database before each test to ensure isolation
     await resetDatabase();
   });
 
   afterAll(async () => {
-    // Close database connection
-    await pool.end();
-    // TODO: Investigate Jest open handle warning using --detectOpenHandles. 
-    // It might be related to pool.end() not completing cleanly or other async ops.
+    await prisma.$disconnect(); // Disconnect Prisma client after all tests
   });
 
   describe('POST /api/breeds', () => {
     it('should create a new breed and return 201 status with the created breed', async () => {
-      const newBreed = { name: 'Arabian' };
+      const newBreedData = { name: 'Arabian', description: 'Elegant and spirited' };
       const response = await request(app)
         .post('/api/breeds')
-        .send(newBreed);
+        .send(newBreedData);
       expect(response.statusCode).toBe(201);
       expect(response.body).toHaveProperty('id');
-      expect(response.body.name).toBe(newBreed.name);
+      expect(response.body.name).toBe(newBreedData.name);
+      expect(response.body.description).toBe(newBreedData.description);
 
-      // Verify the breed was actually inserted into the database
-      const dbResult = await pool.query('SELECT * FROM public.breeds WHERE id = $1', [response.body.id]);
-      expect(dbResult.rows.length).toBe(1);
-      expect(dbResult.rows[0].name).toBe(newBreed.name);
+      // Verify the breed was actually inserted into the database using Prisma
+      const dbBreed = await prisma.breed.findUnique({ where: { id: response.body.id } });
+      expect(dbBreed).not.toBeNull();
+      expect(dbBreed.name).toBe(newBreedData.name);
+      expect(dbBreed.description).toBe(newBreedData.description);
     });
 
     it('should return 400 if name is missing', async () => {
       const response = await request(app)
         .post('/api/breeds')
-        .send({});
+        .send({ description: 'A breed without a name' }); // Send only description
       expect(response.statusCode).toBe(400);
-      // Optionally, check for a specific error message if your API returns one
-      // expect(response.body.message).toBe('Name is required');
     });
 
     it('should return 400 if name is not a string or empty', async () => {
-      const response = await request(app)
+      const responseEmptyName = await request(app)
         .post('/api/breeds')
         .send({ name: '' });
-      expect(response.statusCode).toBe(400);
+      expect(responseEmptyName.statusCode).toBe(400);
 
-      const response2 = await request(app)
+      const responseNonStringName = await request(app)
         .post('/api/breeds')
         .send({ name: 123 });
-      expect(response2.statusCode).toBe(400);
+      expect(responseNonStringName.statusCode).toBe(400);
     });
 
-    it('should return 409 if breed name already exists (case-insensitive)', async () => {
-      // First, create a breed
-      await request(app).post('/api/breeds').send({ name: 'Thoroughbred' });
+    it('should return 409 if breed name already exists (case-insensitive handled by controller)', async () => {
+      const breedName = 'Thoroughbred';
+      await prisma.breed.create({ data: { name: breedName, description: 'Racehorse' } });
       
-      // Attempt to create it again
-      const response = await request(app)
+      // Attempt to create it again (same case)
+      const responseSameCase = await request(app)
         .post('/api/breeds')
-        .send({ name: 'Thoroughbred' });
-      expect(response.statusCode).toBe(409);
+        .send({ name: breedName });
+      expect(responseSameCase.statusCode).toBe(409);
 
       // Attempt to create with different casing
-      const response2 = await request(app)
+      const responseDifferentCase = await request(app)
         .post('/api/breeds')
-        .send({ name: 'thoroughbred' });
-      expect(response2.statusCode).toBe(409);
+        .send({ name: breedName.toLowerCase() });
+      expect(responseDifferentCase.statusCode).toBe(409);
     });
   });
 
   describe('GET /api/breeds', () => {
     it('should return an array of breeds and 200 status', async () => {
-      // Pre-populate some data
-      await request(app).post('/api/breeds').send({ name: 'Quarter Horse' });
-      await request(app).post('/api/breeds').send({ name: 'Morgan' });
+      // Pre-populate some data using Prisma
+      await prisma.breed.createMany({
+        data: [
+          { name: 'Quarter Horse', description: 'Versatile' },
+          { name: 'Morgan', description: 'Elegant' },
+        ],
+      });
 
       const response = await request(app).get('/api/breeds');
       expect(response.statusCode).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBe(2);
-      expect(response.body.some(b => b.name === 'Quarter Horse')).toBe(true);
-      expect(response.body.some(b => b.name === 'Morgan')).toBe(true);
+      const names = response.body.map(b => b.name);
+      expect(names).toContain('Quarter Horse');
+      expect(names).toContain('Morgan');
     });
 
     it('should return an empty array and 200 status if no breeds exist', async () => {
@@ -118,8 +115,10 @@ describe('Breeds API - /api/breeds', () => {
 
   describe('GET /api/breeds/:id', () => {
     it('should return a single breed by id and 200 status', async () => {
-      const postRes = await request(app).post('/api/breeds').send({ name: 'Appaloosa' });
-      const breedId = postRes.body.id;
+      const createdBreed = await prisma.breed.create({ 
+        data: { name: 'Appaloosa', description: 'Spotted' } 
+      });
+      const breedId = createdBreed.id;
 
       const response = await request(app).get(`/api/breeds/${breedId}`);
       expect(response.statusCode).toBe(200);
@@ -133,9 +132,14 @@ describe('Breeds API - /api/breeds', () => {
       expect(response.statusCode).toBe(404);
     });
 
-    it('should return 400 if id is not a valid integer', async () => {
+    it('should return 400 if id is not a valid integer (route validation)', async () => {
       const invalidId = 'abc';
       const response = await request(app).get(`/api/breeds/${invalidId}`);
+      // This depends on your route validation for the ID parameter.
+      // If it's like the breedController, it should be a 400 due to parseInt failing before Prisma is even hit.
+      // Or if the route param validation is less strict and allows it to reach the controller, 
+      // Prisma might throw its own error or the parseInt in controller would make it NaN, leading to 404 if not found (or other error).
+      // Assuming route param validation catches non-integers for /:id and returns 400 as per typical practice.
       expect(response.statusCode).toBe(400);
     });
   });

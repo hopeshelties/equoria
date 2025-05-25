@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Horse {
+  id        Int      @id @default(autoincrement())
+  name      String
+  age       Int
+  createdAt DateTime @default(now())
+
+  breed   Breed @relation(fields: [breedId], references: [id])
+  breedId Int
+
+  player   Player? @relation(fields: [playerId], references: [id])
+  playerId String?
+
+  owner   User? @relation(fields: [ownerId], references: [id])
+  ownerId Int?
+
+  stable   Stable? @relation(fields: [stableId], references: [id])
+  stableId Int?
+
+  sex                   String?
+  date_of_birth         DateTime?
+  genotype              Json?
+  phenotypic_markings   Json?
+  final_display_color   String?
+  shade                 String?
+  image_url             String?
+  trait                 String?
+  temperament           String?
+  precision             Int?
+  strength              Int?
+  speed                 Int?
+  agility               Int?
+  endurance             Int?
+  intelligence          Int?
+  personality           String?
+  total_earnings        Float?
+  sire_id               Int?
+  dam_id                Int?
+  stud_status           String?
+  stud_fee              Float?
+  last_bred_date        DateTime?
+  for_sale              Boolean? @default(false)
+  sale_price            Float? @default(0)
+  health_status         String?
+  last_vetted_date      DateTime?
+  tack                  Json?
+}
+
+model Player {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  money    Int
+  level    Int
+  xp       Int
+  settings Json
+  horses   Horse[]  // 1:N relation to Horse
+
+  @@map("players")
+}
+
+model Breed {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  horses Horse[]
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  name  String?
+  email String? @unique
+
+  horses Horse[]
+}
+
+model Stable {
+  id   Int     @id @default(autoincrement())
+  name String?
+
+  horses Horse[]
+} 

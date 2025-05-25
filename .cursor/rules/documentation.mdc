@@ -1,0 +1,211 @@
+---
+description: Living technical documentation file for Equoria. Updated automatically with function definitions, API schemas, and database changes.
+globs: ["**/*"]
+alwaysApply: true
+---
+## 📚 Technical Documentation
+
+This file is maintained as a centralized location for Equoria's evolving technical references. Cursor should:
+
+- Append new content here when:
+  - A new function, utility, or hook is created
+  - A new Express route is defined
+  - A database schema/table is added or modified
+  - A new file or module contains reusable logic
+
+Each section should include:
+- Function name (with signature if available)
+- Purpose and usage
+- Parameters and return values
+- Related components, files, or tests
+
+**Example Entry:**
+```
+### createFoalProfile(foalData: Object)
+- Creates a new foal profile from provided genetic data and parentage.
+- Params: foalData (includes genotype, traits, and lineage ID)
+- Returns: inserted DB record
+- Used in: /routes/breeding.js
+```
+
+> Use this file to ensure the entire development team has access to up-to-date internal documentation.
+
+### `backend/routes/ping.js`
+- Defines the router for the `/ping` endpoint.
+- Purpose: Provides a simple health check or test endpoint.
+- Usage: Mounted in `backend/app.js` at the `/ping` path.
+- Related components: `backend/controllers/pingController.js`, `backend/middleware/validatePing.js`
+- Tests: `tests/integration/ping.test.js`
+
+### `backend/controllers/pingController.js` - `handlePing(req, res)`
+- Handles requests to the `/ping` endpoint.
+- Purpose: Responds with a JSON message, optionally including a validated `name` query parameter.
+- Parameters: `req` (Express request object), `res` (Express response object).
+- Returns: JSON response `{ message: "pong" }` or `{ message: "pong, [name]!" }`.
+- Used in: `backend/routes/ping.js`
+
+### `backend/middleware/validatePing.js` - `validatePing`
+- Express middleware array for validating the `/ping` route's query parameters.
+- Purpose: Validates the optional `name` query parameter to ensure it is a string between 2 and 30 characters.
+- Usage: Applied to the `/ping` route in `backend/routes/ping.js`.
+- Returns: Calls `next()` if validation passes, otherwise responds with a 400 error and validation messages.
+
+### `backend/middleware/errorHandler.js` - `(err, req, res, next)`
+- Global error handling middleware for the Express application.
+- Purpose: Catches errors passed via `next(err)` from other routes/middleware, logs them, and sends a generic 500 Internal Server Error JSON response.
+- Parameters: `err` (Error object), `req` (Express request object), `res` (Express response object), `next` (Express next function).
+- Usage: Applied as the last middleware in `backend/app.js`.
+
+### `backend/models/horseModel.js` - `createHorse(horseData: Object)`
+- Creates a new horse record in the database using Prisma Client with proper relationship handling.
+- Purpose: Handles horse creation with breed, owner, and stable relationships, supports all horse schema fields.
+- Parameters: `horseData` (object containing horse data - requires name, age, and either breedId or breed connection)
+- Validation: Validates required fields (name, age, breed), handles multiple breed input formats
+- Breed formats supported: 
+  - `breedId: number` (direct foreign key)
+  - `breed: { connect: { id: number } }` (Prisma relation syntax)
+  - `breed: number` (treated as breedId)
+- Returns: Created horse object with included breed, owner, and stable relations
+- Throws: Error with descriptive message for validation failures or database errors
+- Used in: Breeding controllers, horse management endpoints
+- Tests: `backend/models/horseModel.test.js` - 8 test cases covering all scenarios
+
+### `backend/models/horseModel.js` - `getHorseById(id: string|number)`
+- Retrieves a horse by ID with all relationship data included.
+- Purpose: Fetches a specific horse with breed, owner, and stable information.
+- Parameters: `id` (string or number - horse ID, validated and converted to integer)
+- Validation: Ensures ID is a valid positive integer
+- Returns: Horse object with relations if found, null if not found
+- Relations included: breed, owner, stable
+- Throws: Error for invalid IDs or database errors
+- Used in: Horse detail views, breeding operations, marketplace
+- Tests: `backend/models/horseModel.test.js` - 7 test cases covering success, not found, and validation scenarios
+
+### `backend/seed/horseSeed.js` - `findOrCreateBreed(breedName: string)`
+- Finds an existing breed by name or creates a new one if not found.
+- Purpose: Ensures breed records exist for horse seeding operations.
+- Parameters: `breedName` (string - name of the breed to find or create)
+- Validation: Returns null if breedName is undefined or null
+- Returns: Breed object with id and name, or null if invalid input
+- Database operations: Uses `prisma.breed.findUnique()` and `prisma.breed.create()`
+- Error handling: Throws errors with descriptive messages for database failures
+- Used in: Database seeding operations
+- Tests: `backend/seed/horseSeed.test.js` - 4 test cases covering find, create, null, and error scenarios
+
+### `backend/seed/horseSeed.js` - `ensureReferencedRecordsExist()`
+- Creates required User and Stable records for horse seeding operations.
+- Purpose: Ensures foreign key references exist before creating horse records.
+- Parameters: None
+- Creates: User records with IDs 1 and 2, Stable records with IDs 1 and 2
+- Error handling: Logs warnings but continues if creation fails
+- Database operations: Uses `prisma.user.upsert()` and `prisma.stable.upsert()`
+- Used in: Database seeding initialization
+- Tests: `backend/seed/horseSeed.test.js` - 2 test cases covering success and error scenarios
+
+### `backend/seed/horseSeed.js` - `checkHorseExists(name: string)`
+- Checks if a horse with the given name already exists in the database.
+- Purpose: Prevents duplicate horse creation during seeding operations.
+- Parameters: `name` (string - horse name to check)
+- Returns: Boolean - true if horse exists, false otherwise
+- Error handling: Returns false and logs warning on database errors
+- Database operations: Uses `prisma.horse.findFirst()`
+- Used in: Duplicate prevention during seeding
+- Tests: `backend/seed/horseSeed.test.js` - 3 test cases covering exists, not exists, and error scenarios
+
+### `backend/seed/horseSeed.js` - `seedHorses()`
+- Main seeding function that orchestrates the entire horse seeding process.
+- Purpose: Creates sample horses with proper validation and error handling.
+- Parameters: None
+- Returns: Boolean - true if successful, false if there were issues
+- Features: Duplicate prevention, comprehensive error handling, detailed logging
+- Process: Ensures references exist → checks duplicates → creates breeds → creates horses
+- Error handling: Categorizes failures, continues on non-fatal errors, provides summary statistics
+- Integration: Uses `horseModel.createHorse()` for consistent validation
+- Used in: Main seeding script execution
+- Tests: Covered through individual function tests and integration scenarios
+
+### `backend/seed/horseSeed.js` - Sample Data Structure
+- Contains 3 complete horse records with all schema fields populated
+- Includes proper age fields (4, 5, and 1 years respectively) required by horseModel validation
+- Uses ES module imports with proper `__dirname` handling for file paths
+- Integrates with `horseModel.createHorse()` for consistent validation
+- Error handling: Provides detailed logging and graceful failure handling
+- Data relationships: Properly handles breed, owner, and stable connections
+- Security: Environment validation without exposing sensitive database credentials
+- CLI integration: Includes npm scripts for easy execution (`npm run seed`, `npm run seed:dev`)
+- Documentation: Complete README.md with usage examples and troubleshooting guide
+
+# Player Model Functions
+
+### `backend/models/playerModel.js` - `createPlayer(playerData: Object)`
+- Creates a new player in the database with comprehensive validation.
+- Purpose: Handles player creation with required fields validation and business rules enforcement.
+- Parameters: `playerData` (object containing name, email, money, level, xp, settings - all required)
+- Validation: 
+  - Required fields: name, email, money, level, xp, settings
+  - Email format validation
+  - Money >= 0, level >= 1, xp >= 0
+- Returns: Created player object with generated UUID
+- Throws: Error with descriptive message for validation failures or database errors
+- Used in: Player registration, game initialization
+- Tests: `backend/models/playerModel.test.js` - 12 test cases covering all validation scenarios
+
+### `backend/models/playerModel.js` - `getPlayerById(id: string)`
+- Retrieves a player by UUID with validation.
+- Purpose: Fetches a specific player by their unique identifier.
+- Parameters: `id` (string - player UUID, validated for proper format)
+- Validation: UUID format validation (supports both production UUIDs and test mock IDs)
+- Returns: Player object if found, null if not found
+- Throws: Error for invalid UUID format or database errors
+- Used in: Player profile views, authentication verification, game state loading
+- Tests: `backend/models/playerModel.test.js` - 4 test cases covering success, not found, and validation scenarios
+
+### `backend/models/playerModel.js` - `getPlayerByEmail(email: string)`
+- Retrieves a player by email address with validation.
+- Purpose: Enables player lookup by email for authentication and account management.
+- Parameters: `email` (string - player email, validated for proper format)
+- Validation: Email format validation using regex
+- Returns: Player object if found, null if not found
+- Throws: Error for invalid email format or database errors
+- Used in: Login systems, password reset, account verification
+- Tests: `backend/models/playerModel.test.js` - 3 test cases covering success, not found, and validation scenarios
+
+### `backend/models/playerModel.js` - `getPlayerWithHorses(id: string)`
+- Retrieves a player with all related horse data included.
+- Purpose: Provides complete player profile including their horse collection for game views.
+- Parameters: `id` (string - player UUID, validated for proper format)
+- Validation: UUID format validation
+- Returns: Player object with horses array (including breed and stable relations), null if not found
+- Relations included: horses.breed, horses.stable
+- Throws: Error for invalid UUID format or database errors
+- Used in: Player dashboard, stable management, horse collection views
+- Tests: `backend/models/playerModel.test.js` - 3 test cases covering success, not found, and validation scenarios
+
+### `backend/models/playerModel.js` - `updatePlayer(id: string, updateData: Object)`
+- Updates a player's information with validation.
+- Purpose: Modifies player data such as money, level, xp, or settings for game progression.
+- Parameters: `id` (string - player UUID), `updateData` (object - fields to update)
+- Validation: UUID format validation, ensures update data is provided
+- Returns: Updated player object
+- Throws: Error for invalid UUID format, empty update data, or database errors
+- Used in: Game progression, settings changes, in-game purchases, leveling system
+- Tests: `backend/models/playerModel.test.js` - 4 test cases covering success and validation scenarios
+
+### `backend/models/playerModel.js` - `deletePlayer(id: string)`
+- Deletes a player from the database.
+- Purpose: Removes player accounts for account deletion requests or administrative actions.
+- Parameters: `id` (string - player UUID, validated for proper format)
+- Validation: UUID format validation
+- Returns: Deleted player object
+- Throws: Error for invalid UUID format or database errors
+- Used in: Account deletion, administrative moderation
+- Tests: `backend/models/playerModel.test.js` - 3 test cases covering success and validation scenarios
+
+### Player Model Schema Design
+- Uses UUID for primary keys (String @id @default(uuid()))
+- Enforces unique email constraint
+- Required fields: name, email, money, level, xp, settings
+- Settings stored as JSON for flexible configuration
+- Maps to "players" table using @@map("players")
+- Maintains 1:N relationship with Horse model via horses field
+- Backward compatible with existing User model through optional playerId on Horse

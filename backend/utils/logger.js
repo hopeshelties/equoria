@@ -1,5 +1,5 @@
-const winston = require('winston');
-const config = require('../config/config'); // Adjusted path for config
+import winston from 'winston';
+import config from '../config/config.js'; // Changed to ES module import
 
 const enumerateErrorFormat = winston.format(info => {
   if (info instanceof Error) {
@@ -24,4 +24,4 @@ const logger = winston.createLogger({
   ],
 });
 
-module.exports = logger; 
+export default logger; // Changed to ES module export 

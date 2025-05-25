@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+## Future Implementations & Reminders
+
+- When implementing the `POST /horses` route, ensure the `validateCreateHorse` middleware from `backend/middleware/validateHorse.js` is applied before the controller logic.
+
+
