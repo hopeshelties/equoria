@@ -3,7 +3,8 @@
  * Tests for trait-based competition scoring system
  */
 
-import { jest } from '@jest/globals';
+// Import jest for mocking if needed
+// import { jest } from '@jest/globals';
 
 // Import the module under test
 import {
@@ -342,7 +343,7 @@ describe('Trait Competition Impact System', () => {
     it('should ensure trait effects are balanced', () => {
       const allEffects = getAllTraitCompetitionEffects();
 
-      Object.entries(allEffects).forEach(([traitName, effect]) => {
+      Object.entries(allEffects).forEach(([_traitName, effect]) => {
         // General effects should be reasonable
         expect(Math.abs(effect.general.scoreModifier)).toBeLessThanOrEqual(0.08);
 
@@ -384,3 +385,5 @@ describe('Trait Competition Impact System', () => {
     });
   });
 });
+
+

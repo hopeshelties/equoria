@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { getFoalDevelopment, completeActivity, advanceDay, completeEnrichmentActivity } from '../models/foalModel.js';
-import { enrichmentDiscoveryMiddleware, bondingDiscoveryMiddleware } from '../middleware/traitDiscoveryMiddleware.js';
+import { enrichmentDiscoveryMiddleware } from '../middleware/traitDiscoveryMiddleware.js';
 import { ensureDefaultGroomAssignment } from '../utils/groomSystem.js';
 import logger from '../utils/logger.js';
 
