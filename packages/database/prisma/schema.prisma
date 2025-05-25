@@ -62,6 +62,8 @@ model Horse {
   last_vetted_date      DateTime?
   tack                  Json?
   trainingCooldown      DateTime?
+  earnings              Float?   @default(0)
+  rider                 Json?    // Required for competition entry
 
   competitionResults CompetitionResult[]
 }
@@ -115,6 +117,7 @@ model Show {
   runDate    DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  hostPlayer String?  // Player ID who hosts/benefits from entry fees
 
   competitionResults CompetitionResult[]
 
@@ -128,6 +131,9 @@ model CompetitionResult {
   discipline String
   runDate    DateTime
   createdAt  DateTime @default(now())
+  showName   String   // Store show name for history
+  prizeWon   Float?   @default(0)
+  statGains  Json?    // Store any stat increases from winning
 
   horse   Horse @relation(fields: [horseId], references: [id])
   horseId Int

@@ -4,6 +4,16 @@ import { applyRiderModifiers } from '../utils/riderBonus.js';
 
 /**
  * Simulate a competition with multiple horses and return ranked results
+ * 
+ * Final Score Formula:
+ * finalScore = baseStatScore                  // 50/30/20 weighted
+ *            + traitBonus                    // +5 if trait matches discipline
+ *            + trainingScore                 // 0–100
+ *            + tack bonuses                 // saddle + bridle
+ *            + rider bonus/penalty          // % boost and reduction
+ *            + healthModifier               // % adjustment based on health
+ *            + randomLuckModifier           // ±1–10% random factor
+ * 
  * @param {Array} horses - Array of horse objects with stats, tack, health, rider info
  * @param {Object} show - Show object with discipline and other properties
  * @returns {Array} - Sorted array of results with scores and placements
@@ -49,7 +59,11 @@ function simulateCompetition(horses, show) {
       
       // 7. Apply health modifier (percentage adjustment)
       const healthModifier = getHealthModifier(horse.health || 'Good');
-      const finalScore = scoreAfterRider * (1 + healthModifier);
+      const scoreAfterHealth = scoreAfterRider * (1 + healthModifier);
+      
+      // 8. Apply random luck modifier (±1–10% random factor)
+      const randomLuckPercent = (Math.random() * 0.18) - 0.09; // Random between -0.09 and +0.09 (-9% to +9%)
+      const finalScore = scoreAfterHealth * (1 + randomLuckPercent);
       
       return {
         horseId: horse.id,

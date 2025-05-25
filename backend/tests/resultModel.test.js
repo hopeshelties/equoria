@@ -32,7 +32,10 @@ describe('resultModel', () => {
         score: 85.5,
         placement: '1st',
         discipline: 'Racing',
-        runDate: new Date('2024-05-25')
+        runDate: new Date('2024-05-25'),
+        showName: 'Spring Classic',
+        prizeWon: 500,
+        statGains: { stat: 'speed', gain: 1 }
       };
 
       const expectedResult = {

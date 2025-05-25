@@ -10,6 +10,9 @@ import logger from '../utils/logger.js';
  * @param {string|null} resultData.placement - Placement ("1st", "2nd", "3rd", or null)
  * @param {string} resultData.discipline - Competition discipline
  * @param {Date} resultData.runDate - Date when the show was run
+ * @param {string} resultData.showName - Name of the show for history
+ * @param {number} resultData.prizeWon - Prize amount won (default 0)
+ * @param {Object|null} resultData.statGains - Stat gains from winning (default null)
  * @returns {Object} - Created result object with relations
  */
 async function saveResult(resultData) {
@@ -20,7 +23,10 @@ async function saveResult(resultData) {
       score,
       placement,
       discipline,
-      runDate
+      runDate,
+      showName,
+      prizeWon = 0,
+      statGains = null
     } = resultData;
 
     // Validate required fields
@@ -38,6 +44,10 @@ async function saveResult(resultData) {
     }
     if (!runDate) {
       throw new Error('Run date is required');
+    }
+
+    if (!showName || typeof showName !== 'string') {
+      throw new Error('Show name is required');
     }
 
     // Validate data types
@@ -59,7 +69,10 @@ async function saveResult(resultData) {
         score,
         placement,
         discipline,
-        runDate: new Date(runDate)
+        runDate: new Date(runDate),
+        showName,
+        prizeWon: parseFloat(prizeWon),
+        statGains: statGains ? JSON.stringify(statGains) : null
       },
       include: {
         horse: {

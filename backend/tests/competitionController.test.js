@@ -14,6 +14,21 @@ const mockSimulateCompetition = jest.fn();
 
 const mockIsHorseEligibleForShow = jest.fn();
 
+const mockCompetitionRewards = {
+  calculatePrizeDistribution: jest.fn(),
+  calculateStatGains: jest.fn(),
+  calculateEntryFees: jest.fn(),
+  hasValidRider: jest.fn()
+};
+
+const mockHorseUpdates = {
+  updateHorseRewards: jest.fn()
+};
+
+const mockPlayerUpdates = {
+  transferEntryFees: jest.fn()
+};
+
 // Mock the imports
 jest.unstable_mockModule('../models/horseModel.js', () => mockHorseModel);
 jest.unstable_mockModule('../models/resultModel.js', () => mockResultModel);
@@ -23,6 +38,9 @@ jest.unstable_mockModule('../logic/simulateCompetition.js', () => ({
 jest.unstable_mockModule('../utils/isHorseEligible.js', () => ({
   isHorseEligibleForShow: mockIsHorseEligibleForShow
 }));
+jest.unstable_mockModule('../utils/competitionRewards.js', () => mockCompetitionRewards);
+jest.unstable_mockModule('../utils/horseUpdates.js', () => mockHorseUpdates);
+jest.unstable_mockModule('../utils/playerUpdates.js', () => mockPlayerUpdates);
 
 // Import the module under test after mocking
 const { enterAndRunShow } = await import('../controllers/competitionController.js');
@@ -56,6 +74,7 @@ describe('competitionController', () => {
       breed: { name: 'Thoroughbred' },
       owner: { name: 'Test Owner' },
       stable: { name: 'Test Stable' },
+      rider: { name: 'Test Rider', skill: 80 }, // Add default rider
       ...overrides
     });
 
@@ -94,11 +113,33 @@ describe('competitionController', () => {
         .mockResolvedValueOnce(mockHorses[3])
         .mockResolvedValueOnce(mockHorses[4]);
 
+      // Mock rider validation (all have valid riders)
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+
       // Mock eligibility checks (all eligible)
       mockIsHorseEligibleForShow.mockReturnValue(true);
 
       // Mock existing results check (no previous entries)
       mockResultModel.getResultsByShow.mockResolvedValue([]);
+
+      // Mock prize distribution
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+
+      // Mock stat gains (no gains for simplicity)
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+
+      // Mock entry fees calculation
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(500);
+
+      // Mock fee transfer
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+
+      // Mock horse rewards update
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
       // Mock competition simulation
       mockSimulateCompetition.mockReturnValue(mockSimulationResults);
@@ -137,24 +178,35 @@ describe('competitionController', () => {
           score: simResult.score,
           placement: simResult.placement,
           discipline: mockShow.discipline,
-          runDate: mockShow.runDate
+          runDate: mockShow.runDate,
+          showName: mockShow.name,
+          prizeWon: simResult.placement === '1st' ? 500 : simResult.placement === '2nd' ? 300 : simResult.placement === '3rd' ? 200 : 0,
+          statGains: null
         });
       });
 
       // Verify return value
       expect(result).toEqual({
         success: true,
-        message: 'Competition completed successfully',
+        message: 'Competition completed successfully with enhanced features',
         results: mockSavedResults,
+        failedFetches: [],
         summary: {
           totalEntries: 5,
           validEntries: 5,
           skippedEntries: 0,
           topThree: [
-            { horseId: 1, name: 'Thunder', score: 95.5, placement: '1st' },
-            { horseId: 2, name: 'Lightning', score: 88.2, placement: '2nd' },
-            { horseId: 3, name: 'Storm', score: 82.1, placement: '3rd' }
-          ]
+            { horseId: 1, name: 'Thunder', score: 95.5, placement: '1st', prizeWon: 500 },
+            { horseId: 2, name: 'Lightning', score: 88.2, placement: '2nd', prizeWon: 300 },
+            { horseId: 3, name: 'Storm', score: 82.1, placement: '3rd', prizeWon: 200 }
+          ],
+          entryFeesCollected: 0,
+          prizesAwarded: 1000,
+          prizeDistribution: {
+            first: 500,
+            second: 300,
+            third: 200
+          }
         }
       });
     });
@@ -288,11 +340,14 @@ describe('competitionController', () => {
         success: false,
         message: 'No valid horses available for competition',
         results: [],
+        failedFetches: [],
         summary: {
           totalEntries: 2,
           validEntries: 0,
           skippedEntries: 2,
-          topThree: []
+          topThree: [],
+          entryFeesCollected: 0,
+          prizesAwarded: 0
         }
       });
     });
@@ -362,8 +417,18 @@ describe('competitionController', () => {
 
       // Mock horse retrieval error
       mockHorseModel.getHorseById.mockRejectedValue(new Error('Database connection failed'));
+      
+      // Mock other required functions
+      mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+      mockResultModel.getResultsByShow.mockResolvedValue([]);
 
-      await expect(enterAndRunShow(horseIds, mockShow)).rejects.toThrow('Database error in enterAndRunShow: Database connection failed');
+      const result = await enterAndRunShow(horseIds, mockShow);
+
+      // Should handle errors gracefully by collecting failed fetches
+      expect(result.success).toBe(false);
+      expect(result.failedFetches).toHaveLength(2);
+      expect(result.failedFetches[0].reason).toBe('Database connection failed');
+      expect(result.failedFetches[1].reason).toBe('Database connection failed');
     });
 
     it('should handle simulation errors gracefully', async () => {
@@ -428,9 +493,9 @@ describe('competitionController', () => {
       const result = await enterAndRunShow(horseIds, mockShow);
 
       expect(result.summary.topThree).toEqual([
-        { horseId: 3, name: 'Horse3', score: 95.5, placement: '1st' },
-        { horseId: 1, name: 'Horse1', score: 88.2, placement: '2nd' },
-        { horseId: 5, name: 'Horse5', score: 82.1, placement: '3rd' }
+        { horseId: 3, name: 'Horse3', score: 95.5, placement: '1st', prizeWon: 500 },
+        { horseId: 1, name: 'Horse1', score: 88.2, placement: '2nd', prizeWon: 300 },
+        { horseId: 5, name: 'Horse5', score: 82.1, placement: '3rd', prizeWon: 200 }
       ]);
     });
   });

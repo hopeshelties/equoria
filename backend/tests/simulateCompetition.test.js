@@ -167,16 +167,29 @@ describe('Competition Simulation System', () => {
     });
 
     it('should calculate trait bonus correctly', () => {
-      const horses = [
-        createTestHorse(1, 'TraitMatch', { trait: 'Racing' }), // Matches show discipline
-        createTestHorse(2, 'NoTraitMatch', { trait: 'Jumping' }) // Doesn't match
-      ];
-
-      const results = simulateCompetition(horses, sampleShow);
+      // Run multiple simulations to account for random luck modifier
+      let traitMatchWins = 0;
+      const totalRuns = 20; // Increase sample size for more reliable results
       
-      // Horse with matching trait should score higher (all else being equal)
-      expect(results[0].name).toBe('TraitMatch');
-      expect(results[0].score).toBeGreaterThan(results[1].score);
+      for (let i = 0; i < totalRuns; i++) {
+        const horses = [
+          createTestHorse(1, 'TraitMatch', { trait: 'Racing' }), // Matches show discipline
+          createTestHorse(2, 'NoTraitMatch', { trait: 'Jumping' }) // Doesn't match
+        ];
+
+        const results = simulateCompetition(horses, sampleShow);
+        
+        if (results[0].name === 'TraitMatch') {
+          traitMatchWins++;
+        }
+      }
+      
+      // Horse with matching trait should win most of the time (at least 60% due to +5 trait bonus)
+      // The +5 trait bonus should provide advantage over random luck modifier (±9%)
+      expect(traitMatchWins).toBeGreaterThanOrEqual(12); // At least 12 out of 20 wins (60%)
+      
+      // Also verify that trait matching provides some advantage (not 50/50)
+      expect(traitMatchWins).toBeGreaterThan(10); // Better than random chance
     });
 
     it('should handle horses with missing optional fields', () => {
@@ -227,7 +240,7 @@ describe('Competition Simulation System', () => {
       expect(results[0].name).toBe('ErrorHorse');
     });
 
-    it('should verify complete scoring formula', () => {
+    it('should verify complete scoring formula with random luck modifier', () => {
       const horse = createTestHorse(1, 'TestHorse', {
         speed: 80, // Primary stat for Racing
         stamina: 60, // Secondary stat for Racing  
@@ -241,15 +254,51 @@ describe('Competition Simulation System', () => {
 
       const results = simulateCompetition([horse], sampleShow);
       
-      // Manual calculation:
+      // Manual calculation (before random luck modifier):
       // Base: (80 * 0.5) + (60 * 0.3) + (40 * 0.2) = 40 + 18 + 8 = 66
       // Trait: +5 = 71
       // Training: +20 = 91  
       // Tack: +15 = 106
       // Rider: 106 * 1.03 = 109.18
-      // Health: 109.18 * 1.05 = 114.639 ≈ 114.6
+      // Health: 109.18 * 1.05 = 114.639
+      // Random luck: ±9% of 114.639 = ±10.32, so range is 104.32 to 124.96
       
-      expect(results[0].score).toBeCloseTo(114.6, 1);
+      const baseScore = 114.639;
+      const minExpected = baseScore * 0.91; // -9% luck
+      const maxExpected = baseScore * 1.09; // +9% luck
+      
+      expect(results[0].score).toBeGreaterThanOrEqual(minExpected);
+      expect(results[0].score).toBeLessThanOrEqual(maxExpected);
+      expect(results[0].score).toBeGreaterThan(0);
+    });
+
+    it('should apply random luck modifier causing score variation', () => {
+      // Create identical horses to test randomness
+      const identicalHorse = createTestHorse(1, 'TestHorse', {
+        speed: 80,
+        stamina: 60,
+        focus: 50,
+        trait: 'Racing',
+        trainingScore: 50,
+        health: 'Good'
+      });
+
+      // Run simulation multiple times to verify randomness
+      const scores = [];
+      for (let i = 0; i < 20; i++) {
+        const results = simulateCompetition([{ ...identicalHorse }], sampleShow);
+        scores.push(results[0].score);
+      }
+
+      // Verify that we get different scores due to random luck modifier
+      const uniqueScores = new Set(scores);
+      expect(uniqueScores.size).toBeGreaterThan(1); // Should have multiple different scores
+      
+      // Verify all scores are within reasonable range
+      const minScore = Math.min(...scores);
+      const maxScore = Math.max(...scores);
+      expect(maxScore - minScore).toBeGreaterThan(0); // Should have some variation
+      expect(minScore).toBeGreaterThan(0); // All scores should be positive
     });
   });
 }); 
