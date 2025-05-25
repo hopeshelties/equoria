@@ -134,8 +134,51 @@ async function getHorseAge(horseId) {
   }
 }
 
+/**
+ * Get the most recent training date for a horse across all disciplines
+ * @param {number} horseId - ID of the horse
+ * @returns {Date|null} - Most recent training date across all disciplines or null if never trained
+ * @throws {Error} - If validation fails or database error occurs
+ */
+async function getAnyRecentTraining(horseId) {
+  try {
+    // Validate horseId is a positive integer
+    const parsedHorseId = parseInt(horseId, 10);
+    if (isNaN(parsedHorseId) || parsedHorseId <= 0) {
+      throw new Error('Horse ID must be a positive integer');
+    }
+
+    logger.info(`[trainingModel.getAnyRecentTraining] Checking most recent training date for horse ${parsedHorseId} across all disciplines`);
+
+    // Query for most recent training date across all disciplines using Prisma
+    const trainingLog = await prisma.trainingLog.findFirst({
+      where: {
+        horseId: parsedHorseId
+      },
+      orderBy: {
+        trainedAt: 'desc'
+      }
+    });
+    
+    if (!trainingLog) {
+      logger.info(`[trainingModel.getAnyRecentTraining] No training records found for horse ${parsedHorseId}`);
+      return null;
+    }
+
+    const lastTrainingDate = trainingLog.trainedAt;
+    logger.info(`[trainingModel.getAnyRecentTraining] Most recent training date for horse ${parsedHorseId}: ${lastTrainingDate} (discipline: ${trainingLog.discipline})`);
+    
+    return lastTrainingDate;
+
+  } catch (error) {
+    logger.error(`[trainingModel.getAnyRecentTraining] Database error: ${error.message}`);
+    throw new Error(`Database error: ${error.message}`);
+  }
+}
+
 export {
   logTrainingSession,
   getLastTrainingDate,
-  getHorseAge
+  getHorseAge,
+  getAnyRecentTraining
 }; 

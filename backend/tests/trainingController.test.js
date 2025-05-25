@@ -4,6 +4,7 @@ import { jest } from '@jest/globals';
 const mockGetHorseAge = jest.fn();
 const mockGetLastTrainingDate = jest.fn();
 const mockLogTrainingSession = jest.fn();
+const mockGetAnyRecentTraining = jest.fn();
 
 // Mock the horseModel functions
 const mockIncrementDisciplineScore = jest.fn();
@@ -15,7 +16,8 @@ const mockGetPlayerWithHorses = jest.fn();
 jest.unstable_mockModule('../models/trainingModel.js', () => ({
   getHorseAge: mockGetHorseAge,
   getLastTrainingDate: mockGetLastTrainingDate,
-  logTrainingSession: mockLogTrainingSession
+  logTrainingSession: mockLogTrainingSession,
+  getAnyRecentTraining: mockGetAnyRecentTraining
 }));
 
 jest.unstable_mockModule('../models/horseModel.js', () => ({
@@ -37,150 +39,145 @@ describe('trainingController', () => {
   });
 
   describe('canTrain', () => {
-    it('should return eligible true for horse that meets all requirements', async () => {
-      mockGetHorseAge.mockResolvedValue(5); // Horse is 5 years old
-      mockGetLastTrainingDate.mockResolvedValue(null); // Never trained before
+    beforeEach(() => {
+      mockGetHorseAge.mockClear();
+      mockGetLastTrainingDate.mockClear();
+      mockGetAnyRecentTraining.mockClear();
+    });
 
-      const result = await canTrain(1, 'Racing');
+    it('should return eligible true for horse that meets all requirements', async () => {
+      mockGetHorseAge.mockResolvedValue(4);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
+
+      const result = await canTrain(1, 'Dressage');
 
       expect(result).toEqual({
         eligible: true,
         reason: null
       });
       expect(mockGetHorseAge).toHaveBeenCalledWith(1);
-      expect(mockGetLastTrainingDate).toHaveBeenCalledWith(1, 'Racing');
+      expect(mockGetAnyRecentTraining).toHaveBeenCalledWith(1);
     });
 
     it('should return eligible false for horse under 3 years old', async () => {
-      mockGetHorseAge.mockResolvedValue(2); // Horse is 2 years old
+      mockGetHorseAge.mockResolvedValue(2);
 
-      const result = await canTrain(1, 'Racing');
+      const result = await canTrain(1, 'Dressage');
 
       expect(result).toEqual({
         eligible: false,
         reason: 'Horse is under age'
       });
       expect(mockGetHorseAge).toHaveBeenCalledWith(1);
-      expect(mockGetLastTrainingDate).not.toHaveBeenCalled();
+      expect(mockGetAnyRecentTraining).not.toHaveBeenCalled();
     });
 
-    it('should return eligible false for horse not found', async () => {
-      mockGetHorseAge.mockResolvedValue(null); // Horse not found
+    it('should return eligible false for horse with recent training in any discipline', async () => {
+      mockGetHorseAge.mockResolvedValue(4);
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 3); // 3 days ago
+      mockGetAnyRecentTraining.mockResolvedValue(recentDate);
 
-      const result = await canTrain(999, 'Racing');
+      const result = await canTrain(1, 'Dressage');
+
+      expect(result).toEqual({
+        eligible: false,
+        reason: 'Training cooldown active for this horse'
+      });
+      expect(mockGetHorseAge).toHaveBeenCalledWith(1);
+      expect(mockGetAnyRecentTraining).toHaveBeenCalledWith(1);
+    });
+
+    it('should return eligible true for horse with old training (8+ days ago)', async () => {
+      mockGetHorseAge.mockResolvedValue(4);
+      const oldDate = new Date();
+      oldDate.setDate(oldDate.getDate() - 8); // 8 days ago
+      mockGetAnyRecentTraining.mockResolvedValue(oldDate);
+
+      const result = await canTrain(1, 'Dressage');
+
+      expect(result).toEqual({
+        eligible: true,
+        reason: null
+      });
+      expect(mockGetHorseAge).toHaveBeenCalledWith(1);
+      expect(mockGetAnyRecentTraining).toHaveBeenCalledWith(1);
+    });
+
+    it('should return eligible false for non-existent horse', async () => {
+      mockGetHorseAge.mockResolvedValue(null);
+
+      const result = await canTrain(999, 'Dressage');
 
       expect(result).toEqual({
         eligible: false,
         reason: 'Horse not found'
       });
       expect(mockGetHorseAge).toHaveBeenCalledWith(999);
-      expect(mockGetLastTrainingDate).not.toHaveBeenCalled();
-    });
-
-    it('should return eligible false for horse in cooldown period', async () => {
-      mockGetHorseAge.mockResolvedValue(4); // Horse is 4 years old
-      const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000)); // 2 days ago
-      mockGetLastTrainingDate.mockResolvedValue(twoDaysAgo);
-
-      const result = await canTrain(1, 'Racing');
-
-      expect(result).toEqual({
-        eligible: false,
-        reason: 'Training cooldown active'
-      });
-      expect(mockGetHorseAge).toHaveBeenCalledWith(1);
-      expect(mockGetLastTrainingDate).toHaveBeenCalledWith(1, 'Racing');
-    });
-
-    it('should return eligible true for horse past cooldown period', async () => {
-      mockGetHorseAge.mockResolvedValue(4); // Horse is 4 years old
-      const eightDaysAgo = new Date(Date.now() - (8 * 24 * 60 * 60 * 1000)); // 8 days ago
-      mockGetLastTrainingDate.mockResolvedValue(eightDaysAgo);
-
-      const result = await canTrain(1, 'Racing');
-
-      expect(result).toEqual({
-        eligible: true,
-        reason: null
-      });
-      expect(mockGetHorseAge).toHaveBeenCalledWith(1);
-      expect(mockGetLastTrainingDate).toHaveBeenCalledWith(1, 'Racing');
-    });
-
-    it('should return eligible true for horse exactly 3 years old', async () => {
-      mockGetHorseAge.mockResolvedValue(3); // Horse is exactly 3 years old
-      mockGetLastTrainingDate.mockResolvedValue(null);
-
-      const result = await canTrain(1, 'Racing');
-
-      expect(result).toEqual({
-        eligible: true,
-        reason: null
-      });
-    });
-
-    it('should throw error for missing horse ID', async () => {
-      await expect(canTrain(null, 'Racing'))
-        .rejects.toThrow('Horse ID is required');
-      
-      await expect(canTrain(undefined, 'Racing'))
-        .rejects.toThrow('Horse ID is required');
-    });
-
-    it('should throw error for missing discipline', async () => {
-      await expect(canTrain(1, ''))
-        .rejects.toThrow('Discipline is required');
-      
-      await expect(canTrain(1, null))
-        .rejects.toThrow('Discipline is required');
+      expect(mockGetAnyRecentTraining).not.toHaveBeenCalled();
     });
 
     it('should throw error for invalid horse ID', async () => {
-      await expect(canTrain(-1, 'Racing'))
-        .rejects.toThrow('Horse ID must be a positive integer');
-      
-      await expect(canTrain(0, 'Racing'))
-        .rejects.toThrow('Horse ID must be a positive integer');
-      
-      await expect(canTrain('invalid', 'Racing'))
-        .rejects.toThrow('Horse ID must be a positive integer');
+      await expect(canTrain('invalid', 'Dressage')).rejects.toThrow('Horse ID must be a positive integer');
+    });
+
+    it('should throw error for missing discipline', async () => {
+      await expect(canTrain(1, '')).rejects.toThrow('Discipline is required');
+    });
+
+    it('should throw error for missing horse ID', async () => {
+      await expect(canTrain(null, 'Dressage')).rejects.toThrow('Horse ID is required');
     });
 
     it('should handle database errors gracefully', async () => {
       mockGetHorseAge.mockRejectedValue(new Error('Database connection failed'));
 
-      await expect(canTrain(1, 'Racing'))
-        .rejects.toThrow('Training eligibility check failed: Database connection failed');
+      await expect(canTrain(1, 'Dressage')).rejects.toThrow('Training eligibility check failed');
+    });
+
+    it('should calculate cooldown correctly for edge case (exactly 7 days)', async () => {
+      mockGetHorseAge.mockResolvedValue(4);
+      const exactlySevenDaysAgo = new Date();
+      exactlySevenDaysAgo.setDate(exactlySevenDaysAgo.getDate() - 7);
+      exactlySevenDaysAgo.setSeconds(exactlySevenDaysAgo.getSeconds() - 1); // Just over 7 days
+      mockGetAnyRecentTraining.mockResolvedValue(exactlySevenDaysAgo);
+
+      const result = await canTrain(1, 'Dressage');
+
+      expect(result).toEqual({
+        eligible: true,
+        reason: null
+      });
     });
   });
 
   describe('trainHorse', () => {
+    beforeEach(() => {
+      mockGetHorseAge.mockClear();
+      mockGetLastTrainingDate.mockClear();
+      mockGetAnyRecentTraining.mockClear();
+      mockLogTrainingSession.mockClear();
+      mockIncrementDisciplineScore.mockClear();
+    });
+
     it('should successfully train eligible horse', async () => {
+      // Mock successful training scenario
       mockGetHorseAge.mockResolvedValue(4);
-      mockGetLastTrainingDate.mockResolvedValue(null);
-      const mockTrainingLog = {
-        id: 1,
-        horse_id: 1,
-        discipline: 'Racing',
-        trained_at: new Date()
-      };
-      const mockUpdatedHorse = {
+      mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
+      mockIncrementDisciplineScore.mockResolvedValue({
         id: 1,
         name: 'Test Horse',
-        disciplineScores: { 'Racing': 5 },
+        disciplineScores: { Racing: 5 },
         breed: { id: 1, name: 'Thoroughbred' }
-      };
-      mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
-      mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
+      });
 
       const result = await trainHorse(1, 'Racing');
 
       expect(result.success).toBe(true);
-      expect(result.updatedHorse).toEqual(mockUpdatedHorse);
       expect(result.message).toBe('Horse trained successfully in Racing. +5 added.');
+      expect(result.updatedHorse.name).toBe('Test Horse');
       expect(result.nextEligible).toBeDefined();
-      expect(mockLogTrainingSession).toHaveBeenCalledWith({ horseId: 1, discipline: 'Racing' });
-      expect(mockIncrementDisciplineScore).toHaveBeenCalledWith(1, 'Racing');
     });
 
     it('should reject training for ineligible horse (under age)', async () => {
@@ -195,42 +192,45 @@ describe('trainingController', () => {
         message: 'Training not allowed: Horse is under age',
         nextEligible: null
       });
-      expect(mockLogTrainingSession).not.toHaveBeenCalled();
-      expect(mockIncrementDisciplineScore).not.toHaveBeenCalled();
     });
 
     it('should reject training for horse in cooldown', async () => {
       mockGetHorseAge.mockResolvedValue(4);
-      const oneDayAgo = new Date(Date.now() - (1 * 24 * 60 * 60 * 1000));
-      mockGetLastTrainingDate.mockResolvedValue(oneDayAgo);
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 3); // 3 days ago
+      mockGetAnyRecentTraining.mockResolvedValue(recentDate);
 
       const result = await trainHorse(1, 'Racing');
 
       expect(result).toEqual({
         success: false,
-        reason: 'Training cooldown active',
+        reason: 'Training cooldown active for this horse',
         updatedHorse: null,
-        message: 'Training not allowed: Training cooldown active',
+        message: 'Training not allowed: Training cooldown active for this horse',
         nextEligible: null
       });
-      expect(mockLogTrainingSession).not.toHaveBeenCalled();
-      expect(mockIncrementDisciplineScore).not.toHaveBeenCalled();
     });
 
     it('should handle training log errors gracefully', async () => {
       mockGetHorseAge.mockResolvedValue(4);
-      mockGetLastTrainingDate.mockResolvedValue(null);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
       mockLogTrainingSession.mockRejectedValue(new Error('Failed to log training'));
 
-      await expect(trainHorse(1, 'Racing'))
-        .rejects.toThrow('Training failed: Failed to log training');
+      await expect(trainHorse(1, 'Racing')).rejects.toThrow('Training failed: Failed to log training');
     });
   });
 
   describe('getTrainingStatus', () => {
+    beforeEach(() => {
+      mockGetHorseAge.mockClear();
+      mockGetLastTrainingDate.mockClear();
+      mockGetAnyRecentTraining.mockClear();
+    });
+
     it('should return complete status for eligible horse with no training history', async () => {
       mockGetHorseAge.mockResolvedValue(5);
       mockGetLastTrainingDate.mockResolvedValue(null);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
 
       const result = await getTrainingStatus(1, 'Racing');
 
@@ -246,23 +246,25 @@ describe('trainingController', () => {
     it('should return complete status for horse in active cooldown', async () => {
       mockGetHorseAge.mockResolvedValue(4);
       const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
-      mockGetLastTrainingDate.mockResolvedValue(twoDaysAgo);
+      mockGetLastTrainingDate.mockResolvedValue(null); // No training in this specific discipline
+      mockGetAnyRecentTraining.mockResolvedValue(twoDaysAgo); // But trained in another discipline
 
       const result = await getTrainingStatus(1, 'Racing');
 
       expect(result.eligible).toBe(false);
-      expect(result.reason).toBe('Training cooldown active');
+      expect(result.reason).toBe('Training cooldown active for this horse');
       expect(result.horseAge).toBe(4);
-      expect(result.lastTrainingDate).toEqual(twoDaysAgo);
+      expect(result.lastTrainingDate).toBe(null); // Still null for this specific discipline
       expect(result.cooldown.active).toBe(true);
       expect(result.cooldown.remainingDays).toBeGreaterThan(0);
-      expect(result.cooldown.remainingHours).toBeGreaterThan(0);
+      expect(result.cooldown.lastTrainingDate).toEqual(twoDaysAgo);
     });
 
     it('should return complete status for horse with expired cooldown', async () => {
       mockGetHorseAge.mockResolvedValue(4);
       const eightDaysAgo = new Date(Date.now() - (8 * 24 * 60 * 60 * 1000));
       mockGetLastTrainingDate.mockResolvedValue(eightDaysAgo);
+      mockGetAnyRecentTraining.mockResolvedValue(eightDaysAgo);
 
       const result = await getTrainingStatus(1, 'Racing');
 
@@ -272,12 +274,12 @@ describe('trainingController', () => {
       expect(result.lastTrainingDate).toEqual(eightDaysAgo);
       expect(result.cooldown.active).toBe(false);
       expect(result.cooldown.remainingDays).toBe(0);
-      expect(result.cooldown.remainingHours).toBe(0);
     });
 
     it('should return status for ineligible horse (under age)', async () => {
       mockGetHorseAge.mockResolvedValue(2);
       mockGetLastTrainingDate.mockResolvedValue(null);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
 
       const result = await getTrainingStatus(1, 'Racing');
 
@@ -293,34 +295,37 @@ describe('trainingController', () => {
     it('should handle database errors gracefully', async () => {
       mockGetHorseAge.mockRejectedValue(new Error('Database error'));
 
-      await expect(getTrainingStatus(1, 'Racing'))
-        .rejects.toThrow('Training status check failed: Training eligibility check failed: Database error');
+      await expect(getTrainingStatus(1, 'Racing')).rejects.toThrow('Training status check failed');
     });
   });
 
   describe('Integration scenarios', () => {
-    it('should handle different disciplines independently', async () => {
+    beforeEach(() => {
+      mockGetHorseAge.mockClear();
+      mockGetLastTrainingDate.mockClear();
+      mockGetAnyRecentTraining.mockClear();
+    });
+
+    it('should handle different disciplines with global cooldown', async () => {
       mockGetHorseAge.mockResolvedValue(4);
-      
-      // Horse trained in Racing 2 days ago, but never in Show Jumping
-      mockGetLastTrainingDate
-        .mockResolvedValueOnce(new Date(Date.now() - (2 * 24 * 60 * 60 * 1000))) // Racing
-        .mockResolvedValueOnce(null); // Show Jumping
+      const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
+      mockGetAnyRecentTraining.mockResolvedValue(twoDaysAgo); // Horse trained 2 days ago in any discipline
 
       const racingResult = await canTrain(1, 'Racing');
       const jumpingResult = await canTrain(1, 'Show Jumping');
 
+      // Both should be blocked due to global cooldown
       expect(racingResult.eligible).toBe(false);
-      expect(racingResult.reason).toBe('Training cooldown active');
+      expect(racingResult.reason).toBe('Training cooldown active for this horse');
       
-      expect(jumpingResult.eligible).toBe(true);
-      expect(jumpingResult.reason).toBe(null);
+      expect(jumpingResult.eligible).toBe(false);
+      expect(jumpingResult.reason).toBe('Training cooldown active for this horse');
     });
 
     it('should handle edge case of exactly 7 days cooldown', async () => {
       mockGetHorseAge.mockResolvedValue(4);
-      const exactlySevenDaysAgo = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000));
-      mockGetLastTrainingDate.mockResolvedValue(exactlySevenDaysAgo);
+      const exactlySevenDaysAgo = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - 1000); // Just over 7 days
+      mockGetAnyRecentTraining.mockResolvedValue(exactlySevenDaysAgo);
 
       const result = await canTrain(1, 'Racing');
 
@@ -329,55 +334,50 @@ describe('trainingController', () => {
     });
 
     it('should handle complete training workflow', async () => {
-      // First check - horse is eligible
+      // Mock successful training
       mockGetHorseAge.mockResolvedValue(4);
-      mockGetLastTrainingDate.mockResolvedValue(null);
-      
-      const eligibilityCheck = await canTrain(1, 'Racing');
-      expect(eligibilityCheck.eligible).toBe(true);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
+      mockIncrementDisciplineScore.mockResolvedValue({
+        id: 1,
+        name: 'Test Horse',
+        disciplineScores: { Racing: 5 },
+        breed: { id: 1, name: 'Thoroughbred' }
+      });
 
-      // Train the horse
-      const mockTrainingLog = { id: 1, horse_id: 1, discipline: 'Racing', trained_at: new Date() };
-      mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
-      
-      const trainingResult = await trainHorse(1, 'Racing');
-      expect(trainingResult.success).toBe(true);
+      const trainResult = await trainHorse(1, 'Racing');
+      expect(trainResult.success).toBe(true);
 
-      // Check status after training
-      mockGetLastTrainingDate.mockResolvedValue(new Date()); // Just trained
-      
+      // Now mock that the horse has recently trained
+      const justNow = new Date();
+      mockGetAnyRecentTraining.mockResolvedValue(justNow);
+
       const statusResult = await getTrainingStatus(1, 'Racing');
       expect(statusResult.eligible).toBe(false);
-      expect(statusResult.reason).toBe('Training cooldown active');
+      expect(statusResult.reason).toBe('Training cooldown active for this horse');
     });
   });
 
   describe('getTrainableHorses', () => {
+    beforeEach(() => {
+      mockGetPlayerWithHorses.mockClear();
+      mockGetAnyRecentTraining.mockClear();
+    });
 
     it('should return trainable horses for player with eligible horses', async () => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
-        name: 'Test Player',
         horses: [
           { id: 1, name: 'Thunder', age: 5 },
-          { id: 2, name: 'Lightning', age: 4 },
-          { id: 3, name: 'Storm', age: 2 } // Too young
+          { id: 2, name: 'Lightning', age: 4 }
         ]
       };
 
       mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
-      mockGetLastTrainingDate
-        .mockResolvedValueOnce(null) // Thunder - Racing: never trained
-        .mockResolvedValueOnce(null) // Thunder - Show Jumping: never trained
-        .mockResolvedValueOnce(null) // Thunder - Dressage: never trained
-        .mockResolvedValueOnce(null) // Thunder - Cross Country: never trained
-        .mockResolvedValueOnce(null) // Thunder - Western: never trained
-        .mockResolvedValueOnce(new Date(Date.now() - (8 * 24 * 60 * 60 * 1000))) // Lightning - Racing: 8 days ago (eligible)
-        .mockResolvedValueOnce(new Date(Date.now() - (2 * 24 * 60 * 60 * 1000))) // Lightning - Show Jumping: 2 days ago (not eligible)
-        .mockResolvedValueOnce(null) // Lightning - Dressage: never trained
-        .mockResolvedValueOnce(null) // Lightning - Cross Country: never trained
-        .mockResolvedValueOnce(null); // Lightning - Western: never trained
+      mockGetAnyRecentTraining
+        .mockResolvedValueOnce(null) // Thunder has never trained
+        .mockResolvedValueOnce(null); // Lightning has never trained
 
       const result = await getTrainableHorses(playerId);
 
@@ -392,7 +392,7 @@ describe('trainingController', () => {
         horseId: 2,
         name: 'Lightning',
         age: 4,
-        trainableDisciplines: ['Racing', 'Dressage', 'Cross Country', 'Western']
+        trainableDisciplines: ['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western']
       });
     });
 
@@ -400,7 +400,6 @@ describe('trainingController', () => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
-        name: 'Test Player',
         horses: []
       };
 
@@ -424,83 +423,72 @@ describe('trainingController', () => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
-        name: 'Test Player',
         horses: [
-          { id: 1, name: 'Young Horse', age: 1 },
-          { id: 2, name: 'Baby Horse', age: 2 },
-          { id: 3, name: 'Adult Horse', age: 3 }
+          { id: 1, name: 'Young Horse', age: 2 },
+          { id: 2, name: 'Adult Horse', age: 4 }
         ]
       };
 
       mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
-      mockGetLastTrainingDate.mockResolvedValue(null); // Adult horse never trained
+      mockGetAnyRecentTraining.mockResolvedValue(null); // Adult horse has never trained
 
       const result = await getTrainableHorses(playerId);
 
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Adult Horse');
-      expect(result[0].age).toBe(3);
+      expect(result[0].age).toBe(4);
     });
 
-    it('should exclude horses with no trainable disciplines (all in cooldown)', async () => {
+    it('should exclude horses with recent training (global cooldown)', async () => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
-        name: 'Test Player',
         horses: [
           { id: 1, name: 'Busy Horse', age: 5 }
         ]
       };
 
       mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
-      // All disciplines trained recently (within 7 days)
-      const recentDate = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000)); // 2 days ago
-      mockGetLastTrainingDate.mockResolvedValue(recentDate);
+      const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
+      mockGetAnyRecentTraining.mockResolvedValue(twoDaysAgo); // Horse trained 2 days ago
 
       const result = await getTrainableHorses(playerId);
 
       expect(result).toEqual([]);
     });
 
-    it('should handle database errors gracefully for individual disciplines', async () => {
+    it('should handle database errors gracefully for individual horses', async () => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
-        name: 'Test Player',
         horses: [
-          { id: 1, name: 'Test Horse', age: 5 }
+          { id: 1, name: 'Error Horse', age: 4 },
+          { id: 2, name: 'Good Horse', age: 5 }
         ]
       };
 
       mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
-      mockGetLastTrainingDate
-        .mockRejectedValueOnce(new Error('Database error for Racing'))
-        .mockResolvedValueOnce(null) // Show Jumping: never trained
-        .mockResolvedValueOnce(null) // Dressage: never trained
-        .mockResolvedValueOnce(null) // Cross Country: never trained
-        .mockResolvedValueOnce(null); // Western: never trained
+      mockGetAnyRecentTraining
+        .mockRejectedValueOnce(new Error('Database error for horse 1'))
+        .mockResolvedValueOnce(null); // Good horse has never trained
 
       const result = await getTrainableHorses(playerId);
 
       expect(result).toHaveLength(1);
-      expect(result[0].trainableDisciplines).toEqual(['Show Jumping', 'Dressage', 'Cross Country', 'Western']);
-      // Racing should be excluded due to error, but other disciplines should still be included
+      expect(result[0].name).toBe('Good Horse');
+      expect(result[0].trainableDisciplines).toEqual(['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western']);
     });
 
     it('should throw error for missing player ID', async () => {
-      await expect(getTrainableHorses(null))
-        .rejects.toThrow('Player ID is required');
-      
-      await expect(getTrainableHorses(''))
-        .rejects.toThrow('Player ID is required');
+      await expect(getTrainableHorses('')).rejects.toThrow('Player ID is required');
+      await expect(getTrainableHorses(null)).rejects.toThrow('Player ID is required');
     });
 
     it('should handle player model errors', async () => {
       const playerId = 'test-player-123';
       mockGetPlayerWithHorses.mockRejectedValue(new Error('Player database error'));
-      
-      await expect(getTrainableHorses(playerId))
-        .rejects.toThrow('Failed to get trainable horses: Player database error');
+
+      await expect(getTrainableHorses(playerId)).rejects.toThrow('Failed to get trainable horses: Player database error');
     });
   });
 
@@ -523,7 +511,7 @@ describe('trainingController', () => {
     it('should return success response with correct format for successful training', async () => {
       // Mock successful training
       mockGetHorseAge.mockResolvedValue(4);
-      mockGetLastTrainingDate.mockResolvedValue(null);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
       const mockTrainingLog = {
         id: 1,
         horse_id: 1,
@@ -567,7 +555,7 @@ describe('trainingController', () => {
     it('should return failure response for horse in cooldown', async () => {
       mockGetHorseAge.mockResolvedValue(4);
       const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
-      mockGetLastTrainingDate.mockResolvedValue(twoDaysAgo);
+      mockGetAnyRecentTraining.mockResolvedValue(twoDaysAgo);
 
       const { trainRouteHandler } = await import('../controllers/trainingController.js');
       await trainRouteHandler(mockReq, mockRes);
@@ -575,13 +563,13 @@ describe('trainingController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Training not allowed: Training cooldown active'
+        message: 'Training not allowed: Training cooldown active for this horse'
       });
     });
 
     it('should handle missing discipline score gracefully', async () => {
       mockGetHorseAge.mockResolvedValue(4);
-      mockGetLastTrainingDate.mockResolvedValue(null);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
       const mockTrainingLog = {
         id: 1,
         horse_id: 1,

@@ -1,4 +1,4 @@
-import { getLastTrainingDate, getHorseAge, logTrainingSession } from '../models/trainingModel.js';
+import { getLastTrainingDate, getHorseAge, logTrainingSession, getAnyRecentTraining } from '../models/trainingModel.js';
 import { incrementDisciplineScore, getHorseById } from '../models/horseModel.js';
 import { getPlayerWithHorses } from '../models/playerModel.js';
 import logger from '../utils/logger.js';
@@ -48,8 +48,8 @@ async function canTrain(horseId, discipline) {
       };
     }
 
-    // Check cooldown period (7 days since last training in this discipline)
-    const lastTrainingDate = await getLastTrainingDate(parsedHorseId, discipline);
+    // Check cooldown period (7 days since last training in ANY discipline)
+    const lastTrainingDate = await getAnyRecentTraining(parsedHorseId);
     
     if (lastTrainingDate) {
       const now = new Date();
@@ -60,10 +60,10 @@ async function canTrain(horseId, discipline) {
         const remainingTime = sevenDays - diff;
         const remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
         
-        logger.info(`[trainingController.canTrain] Horse ${parsedHorseId} still in cooldown for ${discipline} (${remainingDays} days remaining)`);
+        logger.info(`[trainingController.canTrain] Horse ${parsedHorseId} still in cooldown for any training (${remainingDays} days remaining)`);
         return {
           eligible: false,
-          reason: 'Training cooldown active'
+          reason: 'Training cooldown active for this horse'
         };
       }
     }
@@ -142,17 +142,18 @@ async function getTrainingStatus(horseId, discipline) {
   try {
     logger.info(`[trainingController.getTrainingStatus] Getting training status for horse ${horseId} in ${discipline}`);
 
-    // Get eligibility check
+    // Get eligibility check (now uses global cooldown)
     const eligibilityCheck = await canTrain(horseId, discipline);
     
     // Get additional status information
     const age = await getHorseAge(horseId);
-    const lastTrainingDate = await getLastTrainingDate(horseId, discipline);
+    const lastTrainingDateInDiscipline = await getLastTrainingDate(horseId, discipline);
+    const lastTrainingDateAny = await getAnyRecentTraining(horseId);
     
     let cooldownInfo = null;
-    if (lastTrainingDate) {
+    if (lastTrainingDateAny) {
       const now = new Date();
-      const diff = now - new Date(lastTrainingDate);
+      const diff = now - new Date(lastTrainingDateAny);
       const sevenDays = 1000 * 60 * 60 * 24 * 7;
       
       if (diff < sevenDays) {
@@ -164,14 +165,14 @@ async function getTrainingStatus(horseId, discipline) {
           active: true,
           remainingDays: remainingDays,
           remainingHours: remainingHours,
-          lastTrainingDate: lastTrainingDate
+          lastTrainingDate: lastTrainingDateAny
         };
       } else {
         cooldownInfo = {
           active: false,
           remainingDays: 0,
           remainingHours: 0,
-          lastTrainingDate: lastTrainingDate
+          lastTrainingDate: lastTrainingDateAny
         };
       }
     }
@@ -180,7 +181,7 @@ async function getTrainingStatus(horseId, discipline) {
       eligible: eligibilityCheck.eligible,
       reason: eligibilityCheck.reason,
       horseAge: age,
-      lastTrainingDate: lastTrainingDate,
+      lastTrainingDate: lastTrainingDateInDiscipline, // Still show discipline-specific for UI
       cooldown: cooldownInfo
     };
 
@@ -235,39 +236,39 @@ async function getTrainableHorses(playerId) {
         continue;
       }
 
-      const trainableDisciplines = [];
-
-      // Check each discipline for cooldown eligibility
-      for (const discipline of allDisciplines) {
-        try {
-          const lastTrainingDate = await getLastTrainingDate(horse.id, discipline);
+      try {
+        // Check if horse has trained in ANY discipline within the last 7 days
+        const lastTrainingDate = await getAnyRecentTraining(horse.id);
+        
+        let isTrainable = false;
+        
+        if (!lastTrainingDate) {
+          // Horse has never trained, so it's trainable in all disciplines
+          isTrainable = true;
+        } else {
+          // Check if 7-day cooldown has passed
+          const now = new Date();
+          const diff = now - new Date(lastTrainingDate);
+          const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 days in milliseconds
           
-          // If never trained or cooldown period has passed, discipline is trainable
-          if (!lastTrainingDate) {
-            trainableDisciplines.push(discipline);
-          } else {
-            const now = new Date();
-            const diff = now - new Date(lastTrainingDate);
-            const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 days in milliseconds
-            
-            if (diff >= sevenDays) {
-              trainableDisciplines.push(discipline);
-            }
+          if (diff >= sevenDays) {
+            isTrainable = true;
           }
-        } catch (error) {
-          logger.warn(`[trainingController.getTrainableHorses] Error checking ${discipline} for horse ${horse.id}: ${error.message}`);
-          // Continue checking other disciplines even if one fails
         }
-      }
 
-      // Only include horses that have at least one trainable discipline
-      if (trainableDisciplines.length > 0) {
-        trainableHorses.push({
-          horseId: horse.id,
-          name: horse.name,
-          age: horse.age,
-          trainableDisciplines: trainableDisciplines
-        });
+        // If horse is trainable, it can train in all disciplines (since cooldown is global)
+        if (isTrainable) {
+          trainableHorses.push({
+            horseId: horse.id,
+            name: horse.name,
+            age: horse.age,
+            trainableDisciplines: allDisciplines // All disciplines available since cooldown is global
+          });
+        }
+        
+      } catch (error) {
+        logger.warn(`[trainingController.getTrainableHorses] Error checking training eligibility for horse ${horse.id}: ${error.message}`);
+        // Continue checking other horses even if one fails
       }
     }
 
