@@ -7,10 +7,11 @@ describe('Foal Enrichment API Integration Tests', () => {
   let testBreed;
 
   beforeAll(async () => {
-    // Create test breed
+    // Try to find existing breed or create a unique one
+    const uniqueBreedName = `Test Breed for Enrichment ${Date.now()}`;
     testBreed = await prisma.breed.create({
       data: {
-        name: 'Test Breed for Enrichment',
+        name: uniqueBreedName,
         description: 'Test breed for foal enrichment testing'
       }
     });
@@ -18,7 +19,7 @@ describe('Foal Enrichment API Integration Tests', () => {
     // Create test foal
     testFoal = await prisma.horse.create({
       data: {
-        name: 'Test Enrichment Foal',
+        name: `Test Enrichment Foal ${Date.now()}`,
         age: 0,
         breedId: testBreed.id,
         bond_score: 50,
@@ -57,7 +58,7 @@ describe('Foal Enrichment API Integration Tests', () => {
 
       // Verify foal data
       expect(response.body.data.foal.id).toBe(testFoal.id);
-      expect(response.body.data.foal.name).toBe('Test Enrichment Foal');
+      expect(response.body.data.foal.name).toBe(testFoal.name);
 
       // Verify activity data
       expect(response.body.data.activity.name).toBe('Trailer Exposure');
@@ -305,4 +306,4 @@ describe('Foal Enrichment API Integration Tests', () => {
       }
     });
   });
-}); 
+});
