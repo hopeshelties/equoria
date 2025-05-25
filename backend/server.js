@@ -1,11 +1,11 @@
 // Update server.js to trigger the database connection by importing db/index.js
-require('./db'); // This will initialize the pool and attempt connection
+import './db/index.js'; // This will initialize the pool and attempt connection
 
-const app = require('./app');
-const { port } = require('./config/config'); // Corrected path to config
+import app from './app.js';
+import config from './config/config.js';
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(config.port, () => {
+  console.log(`Server running on port ${config.port}`);
 });
 
 // Database connection logic removed as per this refactoring step.

@@ -166,4 +166,128 @@ async function getHorseById(id) {
   }
 }
 
-export { createHorse, getHorseById };
+/**
+ * Update a horse's discipline score by adding points
+ * @param {number} horseId - ID of the horse to update
+ * @param {string} discipline - Discipline to update (e.g., "Dressage", "Show Jumping")
+ * @param {number} pointsToAdd - Points to add to the discipline score
+ * @returns {Object} - Updated horse object with relations
+ * @throws {Error} - If validation fails or database error occurs
+ */
+async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
+  try {
+    // Validate input parameters
+    const numericId = parseInt(horseId, 10);
+    if (isNaN(numericId) || numericId <= 0) {
+      throw new Error('Invalid horse ID provided');
+    }
+
+    if (!discipline || typeof discipline !== 'string') {
+      throw new Error('Discipline must be a non-empty string');
+    }
+
+    if (typeof pointsToAdd !== 'number' || pointsToAdd <= 0) {
+      throw new Error('Points to add must be a positive number');
+    }
+
+    logger.info(`[horseModel.updateDisciplineScore] Updating ${discipline} score for horse ${numericId} by +${pointsToAdd}`);
+
+    // First, get the current horse to check if it exists and get current scores
+    const currentHorse = await prisma.horse.findUnique({
+      where: { id: numericId },
+      select: { disciplineScores: true }
+    });
+
+    if (!currentHorse) {
+      throw new Error(`Horse with ID ${numericId} not found`);
+    }
+
+    // Get current discipline scores or initialize empty object
+    const currentScores = currentHorse.disciplineScores || {};
+    
+    // Update the specific discipline score
+    const currentScore = currentScores[discipline] || 0;
+    const newScore = currentScore + pointsToAdd;
+    
+    const updatedScores = {
+      ...currentScores,
+      [discipline]: newScore
+    };
+
+    // Update the horse with new discipline scores
+    const updatedHorse = await prisma.horse.update({
+      where: { id: numericId },
+      data: {
+        disciplineScores: updatedScores
+      },
+      include: {
+        breed: true,
+        owner: true,
+        stable: true,
+        player: true
+      }
+    });
+
+    logger.info(`[horseModel.updateDisciplineScore] Successfully updated ${discipline} score for horse ${numericId}: ${currentScore} -> ${newScore}`);
+    return updatedHorse;
+
+  } catch (error) {
+    logger.error('[horseModel.updateDisciplineScore] Database error: %o', error);
+    throw new Error('Database error in updateDisciplineScore: ' + error.message);
+  }
+}
+
+/**
+ * Get a horse's discipline scores
+ * @param {number} horseId - ID of the horse
+ * @returns {Object} - Discipline scores object or empty object if none exist
+ * @throws {Error} - If validation fails or database error occurs
+ */
+async function getDisciplineScores(horseId) {
+  try {
+    const numericId = parseInt(horseId, 10);
+    if (isNaN(numericId) || numericId <= 0) {
+      throw new Error('Invalid horse ID provided');
+    }
+
+    const horse = await prisma.horse.findUnique({
+      where: { id: numericId },
+      select: { disciplineScores: true }
+    });
+
+    if (!horse) {
+      throw new Error(`Horse with ID ${numericId} not found`);
+    }
+
+    return horse.disciplineScores || {};
+
+  } catch (error) {
+    logger.error('[horseModel.getDisciplineScores] Database error: %o', error);
+    throw new Error('Database error in getDisciplineScores: ' + error.message);
+  }
+}
+
+/**
+ * Increment a horse's discipline score by +5 (convenience function for training)
+ * @param {number} horseId - ID of the horse to update
+ * @param {string} discipline - Discipline to increment (e.g., "Dressage", "Show Jumping")
+ * @returns {Object} - Updated horse object with relations
+ * @throws {Error} - If validation fails or database error occurs
+ */
+async function incrementDisciplineScore(horseId, discipline) {
+  try {
+    logger.info(`[horseModel.incrementDisciplineScore] Incrementing ${discipline} score for horse ${horseId} by +5`);
+    
+    // Use the existing updateDisciplineScore function with +5 points
+    const updatedHorse = await updateDisciplineScore(horseId, discipline, 5);
+    
+    logger.info(`[horseModel.incrementDisciplineScore] Successfully incremented ${discipline} score for horse ${horseId}`);
+    return updatedHorse;
+
+  } catch (error) {
+    logger.error('[horseModel.incrementDisciplineScore] Error: %o', error);
+    throw error; // Re-throw the error from updateDisciplineScore (already has proper error message)
+  }
+}
+
+export { createHorse, getHorseById, updateDisciplineScore, getDisciplineScores, incrementDisciplineScore };

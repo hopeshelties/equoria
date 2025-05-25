@@ -1,9 +1,9 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { handlePing } = require('../controllers/pingController'); // Import from controller
-const { validatePing } = require('../middleware/validatePing'); // Import validation middleware
+import { handlePing } from '../controllers/pingController.js'; // Import from controller
+import { validatePing } from '../middleware/validatePing.js'; // Import validation middleware
 
 // Apply validation middleware before the controller
 router.get('/', validatePing, handlePing);
 
-module.exports = router; 
+export default router; 

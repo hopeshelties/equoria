@@ -1,8 +1,8 @@
-const express = require('express');
-const { body, validationResult } = require('express-validator');
+import express from 'express';
+import { body, validationResult } from 'express-validator';
 // Will import dynamically in route handler
-const { getHorseById } = require('../models/horseModel.js');
-const logger = require('../utils/logger.js');
+// import { getHorseById } from '../models/horseModel.js';
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -116,7 +116,7 @@ router.get('/show/:showId/results', async (req, res) => {
     }
 
     // Import here to avoid circular dependency issues
-    const { getResultsByShow } = require('../models/resultModel.js');
+    const { getResultsByShow } = await import('../models/resultModel.js');
     const results = await getResultsByShow(showId);
 
     logger.info(`[competitionRoutes.GET /show/${showId}/results] Retrieved ${results.length} results`);
@@ -154,7 +154,7 @@ router.get('/horse/:horseId/results', async (req, res) => {
     }
 
     // Import here to avoid circular dependency issues
-    const { getResultsByHorse } = require('../models/resultModel.js');
+    const { getResultsByHorse } = await import('../models/resultModel.js');
     const results = await getResultsByHorse(horseId);
 
     logger.info(`[competitionRoutes.GET /horse/${horseId}/results] Retrieved ${results.length} results`);
@@ -176,4 +176,4 @@ router.get('/horse/:horseId/results', async (req, res) => {
   }
 });
 
-module.exports = router; 
+export default router; 

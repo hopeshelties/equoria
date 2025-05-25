@@ -1,7 +1,7 @@
 // middleware/validatePing.js
-const { query, validationResult } = require('express-validator');
+import { query, validationResult } from 'express-validator';
 
-exports.validatePing = [
+export const validatePing = [
   query('name')
     .optional()
     .isString().withMessage('Name must be a string')

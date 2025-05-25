@@ -1,12 +1,14 @@
-const express = require('express');
-const morgan = require('morgan'); // Re-import morgan
-const config = require('./config/config');
-const logger = require('./utils/logger'); // Updated logger import path
-const pingRoute = require('./routes/ping'); // Require the new ping route
-const breedRoutes = require('./routes/breedRoutes'); // <--- Add this line
-const competitionRoutes = require('./routes/competitionRoutes'); // Competition routes
-const { handleValidationErrors } = require('./middleware/validationErrorHandler'); // Example, if you create it
-const errorHandler = require('./middleware/errorHandler'); // Import error handler
+import express from 'express';
+import morgan from 'morgan'; // Re-import morgan
+import config from './config/config.js';
+import logger from './utils/logger.js'; // Updated logger import path
+import pingRoute from './routes/ping.js'; // Require the new ping route
+import breedRoutes from './routes/breedRoutes.js'; // <--- Add this line
+import competitionRoutes from './routes/competitionRoutes.js'; // Competition routes
+import horseRoutes from './routes/horseRoutes.js'; // Horse routes
+import trainingRoutes from './routes/trainingRoutes.js'; // Training routes
+// import { handleValidationErrors } from './middleware/validationErrorHandler.js'; // Example, if you create it
+import errorHandler from './middleware/errorHandler.js'; // Import error handler
 
 const app = express();
 
@@ -29,6 +31,8 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use('/ping', pingRoute);
 app.use('/api/breeds', breedRoutes); // <--- Add this line to mount the breed routes
 app.use('/api/competition', competitionRoutes); // Mount competition routes
+app.use('/api/horses', horseRoutes); // Mount horse routes
+app.use('/api/training', trainingRoutes); // Mount training routes
 
 // Old direct routes removed as per refactoring for /ping.
 // The default '/' route can be re-added or managed elsewhere if needed.
@@ -36,4 +40,4 @@ app.use('/api/competition', competitionRoutes); // Mount competition routes
 // Error handling middleware - must be last
 app.use(errorHandler);
 
-module.exports = app; 
+export default app; 
