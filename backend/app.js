@@ -8,8 +8,10 @@ import competitionRoutes from './routes/competitionRoutes.js'; // Competition ro
 import horseRoutes from './routes/horseRoutes.js'; // Horse routes
 import trainingRoutes from './routes/trainingRoutes.js'; // Training routes
 import foalRoutes from './routes/foalRoutes.js'; // Foal routes
+import adminRoutes from './routes/adminRoutes.js'; // Admin routes
 // import { handleValidationErrors } from './middleware/validationErrorHandler.js'; // Example, if you create it
 import errorHandler from './middleware/errorHandler.js'; // Import error handler
+import cronJobService from './services/cronJobs.js'; // Cron job service
 
 const app = express();
 
@@ -35,6 +37,13 @@ app.use('/api/competition', competitionRoutes); // Mount competition routes
 app.use('/api/horses', horseRoutes); // Mount horse routes
 app.use('/api/training', trainingRoutes); // Mount training routes
 app.use('/api/foals', foalRoutes); // Mount foal routes
+app.use('/api/admin', adminRoutes); // Mount admin routes
+
+// Initialize cron job service
+if (config.env !== 'test') {
+  cronJobService.start();
+  logger.info('[app] Cron job service initialized');
+}
 
 // Old direct routes removed as per refactoring for /ping.
 // The default '/' route can be re-added or managed elsewhere if needed.

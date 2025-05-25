@@ -69,6 +69,9 @@ model Horse {
   // New bonding and stress tracking fields
   bond_score            Int?     @default(50)  // Bonding score between horse and handler (0-100)
   stress_level          Int?     @default(0)   // Current stress level of the horse (0-100)
+  
+  // Epigenetic traits system
+  epigenetic_modifiers  Json?    @default("{\"positive\": [], \"negative\": [], \"hidden\": []}")  // Traits revealed through foal development
 
   competitionResults    CompetitionResult[]
   trainingLogs          TrainingLog[]
