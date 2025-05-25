@@ -381,3 +381,202 @@ Each section should include:
 - Edge cases: negative levels, large numbers, empty disciplines, non-array types
 - Detailed reporting: specific error messages and multiple reason accumulation
 - Integration ready: designed for use in competition systems and UI components
+
+# Mock Show Generation Utility Functions
+
+### `backend/utils/generateMockShows.js` - `generateMockShows(count: number)`
+- Generates realistic mock shows for testing and seeding purposes.
+- Purpose: Creates test data for competition simulation system and database seeding.
+- Parameters: `count` (number - number of shows to generate, defaults to 10)
+- Validation: Throws error if count is not a non-negative number
+- Returns: Array of show objects with all required properties
+- Show properties generated:
+  - `id`: Sequential integer starting from 1
+  - `name`: Realistic format "{Season} {Adjective} - {Discipline}"
+  - `discipline`: Randomly selected from all valid disciplines in statMap
+  - `levelMin`: Random integer 1-7
+  - `levelMax`: Random integer levelMin+1 to min(10, levelMin+3)
+  - `entryFee`: Random integer 100-500
+  - `prize`: Random integer 500-2000
+  - `runDate`: Random date ±30 days from today
+- Word banks: 5 seasons, 20 adjectives for realistic name generation
+- Used in: Database seeding, testing competition systems, mock data generation
+- Tests: `backend/tests/generateMockShows.test.js` - 20 test cases covering all generation logic
+
+### `backend/utils/generateMockShows.js` - `generateSingleMockShow(overrides: Object)`
+- Generates a single mock show with optional property overrides.
+- Purpose: Creates customized test shows for specific testing scenarios.
+- Parameters: `overrides` (object - properties to override in generated show, defaults to empty)
+- Returns: Single show object with default generation + specified overrides
+- Features: Maintains all generation constraints for non-overridden properties
+- Used in: Unit testing, specific test scenarios, custom show creation
+- Tests: Covered in generateMockShows test suite with override scenarios
+
+### Mock Show Generation Logic
+- **Name Generation:** Combines random season + adjective + discipline for realistic variety
+- **Level Constraints:** Ensures levelMax > levelMin and levelMax ≤ 10
+- **Financial Ranges:** Entry fees 100-500, prizes 500-2000 for game balance
+- **Date Distribution:** ±30 days from current date for realistic scheduling
+- **Discipline Integration:** Uses getAllDisciplines() from statMap for consistency
+- **ID Management:** Sequential IDs starting from 1 for predictable testing
+
+# Show Seeding Functions
+
+### `backend/seed/seedShows.js` - `seedShows(count: number)`
+- Main seeding function that populates database with mock shows.
+- Purpose: Creates sample show data for development and testing environments.
+- Parameters: `count` (number - number of shows to create, defaults to 10)
+- Returns: Boolean - true if successful, false if there were issues
+- Features:
+  - Duplicate prevention via name checking
+  - Comprehensive error handling and logging
+  - Success/failure statistics reporting
+  - Graceful handling of database errors
+- Process: Generate mock shows → check duplicates → create in database → report results
+- Used in: Database initialization, development environment setup
+- CLI: Available via `npm run seed:shows` and `npm run seed:shows:dev`
+
+### `backend/seed/seedShows.js` - `createShow(showData: Object)`
+- Creates a single show record in the database.
+- Purpose: Handles individual show creation with proper error handling.
+- Parameters: `showData` (object - show data matching Show model schema)
+- Returns: Created show object or null if failed
+- Database operations: Uses Prisma Show.create() with all required fields
+- Error handling: Logs specific error messages, returns null on failure
+- Used in: Show seeding operations, individual show creation
+
+### `backend/seed/seedShows.js` - `checkShowExists(name: string)`
+- Checks if a show with the given name already exists in the database.
+- Purpose: Prevents duplicate show creation during seeding operations.
+- Parameters: `name` (string - show name to check)
+- Returns: Boolean - true if show exists, false otherwise
+- Error handling: Returns false and logs warning on database errors
+- Database operations: Uses Prisma Show.findFirst() with name filter
+- Used in: Duplicate prevention during seeding
+
+### Show Seeding Integration
+- **Database Schema:** Uses Show model with unique name constraint
+- **Environment Support:** Separate scripts for development and production
+- **Prisma Integration:** Uses correct Prisma client path for monorepo structure
+- **CLI Scripts:** `npm run seed:shows` (production), `npm run seed:shows:dev` (development)
+- **Error Resilience:** Continues seeding on individual failures, provides summary statistics
+- **Logging:** Comprehensive console output with emojis for easy status identification
+
+# Competition System Functions
+
+### Database Schema - `CompetitionResult` Model
+- **Table:** `competition_results`
+- **Purpose:** Stores competition results linking horses to shows with scores and placements
+- **Fields:**
+  - `id` (SERIAL PK) - Unique result identifier
+  - `horseId` (INTEGER FK) - References horse table
+  - `showId` (INTEGER FK) - References show table  
+  - `score` (FLOAT) - Final competition score
+  - `placement` (STRING, nullable) - "1st", "2nd", "3rd", or null for non-podium
+  - `discipline` (STRING) - Competition discipline (redundant for history)
+  - `runDate` (DATETIME) - When the show was run
+  - `createdAt` (DATETIME) - Record creation timestamp
+- **Relations:** Belongs to Horse and Show models
+- **Migration:** `20250525044738_add_competition_results`
+
+### `backend/models/resultModel.js` - `saveResult(resultData: Object)`
+- Saves a competition result to the database with comprehensive validation.
+- Purpose: Records individual horse performance in competitions for leaderboards and history.
+- Parameters: `resultData` (object with horseId, showId, score, placement, discipline, runDate - all required except placement)
+- Validation: 
+  - Required fields: horseId, showId, score, discipline, runDate
+  - Score must be a number
+  - Horse/Show IDs must be positive integers
+  - Placement can be null for non-top-3 finishers
+- Returns: Created result object with horse and show relations included
+- Throws: Error with descriptive message for validation failures or database errors
+- Used in: Competition completion, result recording systems
+- Tests: `backend/tests/resultModel.test.js` - 11 test cases covering all validation scenarios
+
+### `backend/models/resultModel.js` - `getResultsByHorse(horseId: number)`
+- Retrieves all competition results for a specific horse.
+- Purpose: Provides horse competition history for profile views and performance tracking.
+- Parameters: `horseId` (number - horse ID, validated as positive integer)
+- Validation: Horse ID must be a positive integer
+- Returns: Array of result objects with show and horse relations included
+- Relations included: show, horse.breed
+- Throws: Error for invalid horse ID or database errors
+- Used in: Horse profile pages, performance analytics, competition history
+- Tests: `backend/tests/resultModel.test.js` - 4 test cases covering success, not found, and validation scenarios
+
+### `backend/models/resultModel.js` - `getResultsByShow(showId: number)`
+- Retrieves all competition results for a specific show.
+- Purpose: Provides show leaderboards and complete competition results.
+- Parameters: `showId` (number - show ID, validated as positive integer)
+- Validation: Show ID must be a positive integer
+- Returns: Array of result objects with horse and show relations included
+- Relations included: horse.breed, show
+- Throws: Error for invalid show ID or database errors
+- Used in: Show leaderboards, competition results pages, historical data
+- Tests: `backend/tests/resultModel.test.js` - 4 test cases covering success, not found, and validation scenarios
+
+### `backend/models/resultModel.js` - `getResultById(resultId: number)`
+- Retrieves a specific competition result by ID.
+- Purpose: Fetches individual result details for detailed views or verification.
+- Parameters: `resultId` (number - result ID, validated as positive integer)
+- Validation: Result ID must be a positive integer
+- Returns: Result object with full relations if found, null if not found
+- Relations included: horse.breed, show
+- Throws: Error for invalid result ID or database errors
+- Used in: Result detail views, administrative verification, data analysis
+- Tests: `backend/tests/resultModel.test.js` - 4 test cases covering success, not found, and validation scenarios
+
+### `backend/controllers/competitionController.js` - `enterAndRunShow(horseIds: Array, show: Object)`
+- Orchestrates the complete competition process from entry to result recording.
+- Purpose: Handles horse entry validation, competition simulation, and result persistence.
+- Parameters: 
+  - `horseIds` (array of numbers - horse IDs to enter, required)
+  - `show` (object - show details with id, discipline, levelMin, levelMax, runDate, required)
+- Process Flow:
+  1. Validates input parameters
+  2. Fetches horse data for each ID
+  3. Checks eligibility using `isHorseEligibleForShow()`
+  4. Filters out horses that already entered this show
+  5. Runs `simulateCompetition()` on valid horses
+  6. Saves results using `resultModel.saveResult()`
+  7. Assigns placements ("1st", "2nd", "3rd") to top 3 finishers
+- Returns: Object with success status, results array, and summary statistics
+- Error Handling: Graceful handling of missing horses, simulation failures, and database errors
+- Used in: Competition entry systems, show management, automated competitions
+- Tests: `backend/tests/competitionController.test.js` - 10 test cases covering all scenarios
+
+### `backend/routes/competitionRoutes.js` - Competition REST API
+- **Base Path:** `/api/competition`
+- **Purpose:** Provides REST endpoints for competition entry and result retrieval
+- **Middleware:** Express-validator for request validation, comprehensive error handling
+
+#### `POST /api/competition/enter-show`
+- Enters horses into a show and runs the competition.
+- **Request Body:** `{ showId: number, horseIds: number[] }`
+- **Validation:** 
+  - showId must be positive integer
+  - horseIds must be non-empty array of positive integers
+- **Response:** Competition results with success status and summary statistics
+- **Error Handling:** 400 for validation errors, 500 for server errors
+- **Used in:** Competition entry forms, automated show systems
+
+#### `GET /api/competition/show/:showId/results`
+- Retrieves all results for a specific show.
+- **Parameters:** `showId` (URL parameter, validated as positive integer)
+- **Response:** Array of results with horse and show details
+- **Used in:** Show leaderboards, competition history pages
+
+#### `GET /api/competition/horse/:horseId/results`
+- Retrieves all competition results for a specific horse.
+- **Parameters:** `horseId` (URL parameter, validated as positive integer)
+- **Response:** Array of results with show and horse details
+- **Used in:** Horse profile pages, performance tracking
+
+### Competition System Integration
+- **Database Schema:** CompetitionResult model with proper foreign key relationships
+- **Eligibility System:** Integrates with `isHorseEligibleForShow()` for entry validation
+- **Simulation Engine:** Uses `simulateCompetition()` for realistic competition scoring
+- **Duplicate Prevention:** Checks existing results to prevent multiple entries in same show
+- **Placement Logic:** Automatically assigns "1st", "2nd", "3rd" to top 3 finishers
+- **Error Resilience:** Comprehensive error handling with detailed logging and graceful failures
+- **Test Coverage:** 33 total tests (23 resultModel + 10 competitionController) with 100% coverage

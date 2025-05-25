@@ -9,7 +9,9 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node seed/horseSeed.js",
-    "seed:dev": "cross-env NODE_ENV=development node seed/horseSeed.js"
+    "seed:dev": "cross-env NODE_ENV=development node seed/horseSeed.js",
+    "seed:shows": "node seed/seedShows.js",
+    "seed:shows:dev": "cross-env NODE_ENV=development node seed/seedShows.js"
   },
   "keywords": [],
   "author": "",

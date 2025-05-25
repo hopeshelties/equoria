@@ -4,6 +4,7 @@ const config = require('./config/config');
 const logger = require('./utils/logger'); // Updated logger import path
 const pingRoute = require('./routes/ping'); // Require the new ping route
 const breedRoutes = require('./routes/breedRoutes'); // <--- Add this line
+const competitionRoutes = require('./routes/competitionRoutes'); // Competition routes
 const { handleValidationErrors } = require('./middleware/validationErrorHandler'); // Example, if you create it
 const errorHandler = require('./middleware/errorHandler'); // Import error handler
 
@@ -27,6 +28,7 @@ app.use(express.json()); // Middleware to parse JSON bodies
 // Mount the ping route
 app.use('/ping', pingRoute);
 app.use('/api/breeds', breedRoutes); // <--- Add this line to mount the breed routes
+app.use('/api/competition', competitionRoutes); // Mount competition routes
 
 // Old direct routes removed as per refactoring for /ping.
 // The default '/' route can be re-added or managed elsewhere if needed.

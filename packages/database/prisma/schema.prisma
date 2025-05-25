@@ -62,6 +62,8 @@ model Horse {
   last_vetted_date      DateTime?
   tack                  Json?
   trainingCooldown      DateTime?
+
+  competitionResults CompetitionResult[]
 }
 
 model Player {
@@ -100,4 +102,38 @@ model Stable {
   name String?
 
   horses Horse[]
+}
+
+model Show {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  discipline String
+  levelMin   Int
+  levelMax   Int
+  entryFee   Int
+  prize      Int
+  runDate    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  competitionResults CompetitionResult[]
+
+  @@map("shows")
+}
+
+model CompetitionResult {
+  id         Int      @id @default(autoincrement())
+  score      Float
+  placement  String?
+  discipline String
+  runDate    DateTime
+  createdAt  DateTime @default(now())
+
+  horse   Horse @relation(fields: [horseId], references: [id])
+  horseId Int
+
+  show   Show @relation(fields: [showId], references: [id])
+  showId Int
+
+  @@map("competition_results")
 } 
