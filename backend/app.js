@@ -7,6 +7,7 @@ import breedRoutes from './routes/breedRoutes.js'; // <--- Add this line
 import competitionRoutes from './routes/competitionRoutes.js'; // Competition routes
 import horseRoutes from './routes/horseRoutes.js'; // Horse routes
 import trainingRoutes from './routes/trainingRoutes.js'; // Training routes
+import foalRoutes from './routes/foalRoutes.js'; // Foal routes
 // import { handleValidationErrors } from './middleware/validationErrorHandler.js'; // Example, if you create it
 import errorHandler from './middleware/errorHandler.js'; // Import error handler
 
@@ -33,6 +34,7 @@ app.use('/api/breeds', breedRoutes); // <--- Add this line to mount the breed ro
 app.use('/api/competition', competitionRoutes); // Mount competition routes
 app.use('/api/horses', horseRoutes); // Mount horse routes
 app.use('/api/training', trainingRoutes); // Mount training routes
+app.use('/api/foals', foalRoutes); // Mount foal routes
 
 // Old direct routes removed as per refactoring for /ping.
 // The default '/' route can be re-added or managed elsewhere if needed.

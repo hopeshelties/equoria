@@ -68,6 +68,8 @@ model Horse {
 
   competitionResults CompetitionResult[]
   trainingLogs       TrainingLog[]
+  foalDevelopment    FoalDevelopment?
+  foalActivities     FoalActivity[]
 }
 
 model Player {
@@ -155,4 +157,35 @@ model TrainingLog {
   horseId Int
 
   @@map("training_logs")
+}
+
+model FoalDevelopment {
+  id                  Int      @id @default(autoincrement())
+  currentDay          Int      @default(0)
+  bondingLevel        Int      @default(50)
+  stressLevel         Int      @default(20)
+  completedActivities Json     @default("{}")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  foal   Horse @relation(fields: [foalId], references: [id])
+  foalId Int   @unique
+
+  @@map("foal_development")
+}
+
+model FoalActivity {
+  id            Int      @id @default(autoincrement())
+  day           Int
+  activityType  String
+  outcome       String
+  bondingChange Int
+  stressChange  Int
+  description   String
+  createdAt     DateTime @default(now())
+
+  foal   Horse @relation(fields: [foalId], references: [id])
+  foalId Int
+
+  @@map("foal_activities")
 } 
