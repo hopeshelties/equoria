@@ -61,7 +61,8 @@ describe('horseModel', () => {
         include: {
           breed: true,
           owner: true,
-          stable: true
+          stable: true,
+          player: true
         }
       });
       expect(result).toEqual(expectedHorse);
@@ -101,7 +102,8 @@ describe('horseModel', () => {
         include: {
           breed: true,
           owner: true,
-          stable: true
+          stable: true,
+          player: true
         }
       });
       expect(result).toEqual(expectedHorse);
@@ -160,7 +162,8 @@ describe('horseModel', () => {
           include: {
             breed: true,
             owner: true,
-            stable: true
+            stable: true,
+            player: true
           }
         })
       );
@@ -222,7 +225,8 @@ describe('horseModel', () => {
         include: {
           breed: true,
           owner: true,
-          stable: true
+          stable: true,
+          player: true
         }
       });
       expect(result).toEqual(expectedHorse);

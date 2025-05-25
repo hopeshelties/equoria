@@ -195,7 +195,7 @@ describe('horseSeed', () => {
 
       await ensureReferencedRecordsExist();
 
-      expect(console.warn).toHaveBeenCalledWith('[seed] Could not ensure User ID 1. If horses rely on it, they may fail to seed or have null ownerId. Error:', error.message);
+      expect(console.warn).toHaveBeenCalledWith('[seed] Could not ensure User ID 1. Error:', error.message);
       expect(console.warn).toHaveBeenCalledWith('[seed] Could not ensure User ID 2. Error:', error.message);
     });
   });

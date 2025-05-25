@@ -209,3 +209,40 @@ Each section should include:
 - Maps to "players" table using @@map("players")
 - Maintains 1:N relationship with Horse model via horses field
 - Backward compatible with existing User model through optional playerId on Horse
+
+# Player Seeding Functions
+
+### `backend/seed/horseSeed.js` - `checkPlayerExists(email: string)`
+- Checks if a player with the given email already exists in the database.
+- Purpose: Prevents duplicate player creation during seeding operations.
+- Parameters: `email` (string - player email to check)
+- Returns: Boolean - true if player exists, false otherwise
+- Error handling: Returns false and logs warning on database errors
+- Database operations: Uses `prisma.player.findUnique()`
+- Used in: Duplicate prevention during player seeding
+- Tests: Covered through integration testing scenarios
+
+### `backend/seed/horseSeed.js` - `seedPlayerWithHorses()`
+- Creates a test player with 2 linked horses for development and testing purposes.
+- Purpose: Provides sample player data with proper Horse-Player relationships for testing.
+- Parameters: None
+- Returns: Boolean - true if successful, false if there were issues
+- Features: 
+  - Creates player with UUID "test-player-uuid-123"
+  - Links 2 horses (Starlight and Comet) to the player
+  - Includes comprehensive horse data with all schema fields
+  - Proper breed relationship handling
+- Player data: Test Player (test@example.com) with money: 500, level: 3, xp: 1000
+- Horse data: Starlight (4yo Mare) and Comet (6yo Stallion), both Thoroughbreds
+- Error handling: Comprehensive logging and graceful failure handling
+- Integration: Uses `createPlayer()` and `createHorse()` for consistent validation
+- Used in: Development database seeding, integration testing setup
+- Tests: Validated through integration tests in `tests/integration/player.test.js`
+
+### `backend/seed/horseSeed.js` - Enhanced Main Function
+- Updated main seeding orchestration to include both horse and player seeding
+- Executes `seedHorses()` followed by `seedPlayerWithHorses()`
+- Provides comprehensive success/failure reporting for both operations
+- Maintains backward compatibility with existing horse-only seeding
+- Proper cleanup and Prisma client disconnection
+- Exit code handling for CI/CD integration
