@@ -16,51 +16,51 @@ import logger from '../utils/logger.js';
  * @returns {Object} - Created result object with relations
  */
 async function saveResult(resultData) {
+  const {
+    horseId,
+    showId,
+    score,
+    placement,
+    discipline,
+    runDate,
+    showName,
+    prizeWon = 0,
+    statGains = null
+  } = resultData;
+
+  // Validate required fields
+  if (horseId === undefined || horseId === null) {
+    throw new Error('Horse ID is required');
+  }
+  if (showId === undefined || showId === null) {
+    throw new Error('Show ID is required');
+  }
+  if (score === undefined || score === null) {
+    throw new Error('Score is required');
+  }
+  if (!discipline) {
+    throw new Error('Discipline is required');
+  }
+  if (!runDate) {
+    throw new Error('Run date is required');
+  }
+
+  if (!showName || typeof showName !== 'string') {
+    throw new Error('Show name is required');
+  }
+
+  // Validate data types
+  if (typeof score !== 'number') {
+    throw new Error('Score must be a number');
+  }
+  if (!Number.isInteger(horseId) || horseId <= 0) {
+    throw new Error('Horse ID must be a positive integer');
+  }
+  if (!Number.isInteger(showId) || showId <= 0) {
+    throw new Error('Show ID must be a positive integer');
+  }
+
   try {
-    const {
-      horseId,
-      showId,
-      score,
-      placement,
-      discipline,
-      runDate,
-      showName,
-      prizeWon = 0,
-      statGains = null
-    } = resultData;
-
-    // Validate required fields
-    if (horseId === undefined || horseId === null) {
-      throw new Error('Horse ID is required');
-    }
-    if (showId === undefined || showId === null) {
-      throw new Error('Show ID is required');
-    }
-    if (score === undefined || score === null) {
-      throw new Error('Score is required');
-    }
-    if (!discipline) {
-      throw new Error('Discipline is required');
-    }
-    if (!runDate) {
-      throw new Error('Run date is required');
-    }
-
-    if (!showName || typeof showName !== 'string') {
-      throw new Error('Show name is required');
-    }
-
-    // Validate data types
-    if (typeof score !== 'number') {
-      throw new Error('Score must be a number');
-    }
-    if (!Number.isInteger(horseId) || horseId <= 0) {
-      throw new Error('Horse ID must be a positive integer');
-    }
-    if (!Number.isInteger(showId) || showId <= 0) {
-      throw new Error('Show ID must be a positive integer');
-    }
-
     // Create the result
     const result = await prisma.competitionResult.create({
       data: {
@@ -99,13 +99,13 @@ async function saveResult(resultData) {
  * @returns {Array} - Array of result objects with relations
  */
 async function getResultsByHorse(horseId) {
-  try {
-    // Validate horseId
-    const numericId = parseInt(horseId, 10);
-    if (isNaN(numericId) || numericId <= 0) {
-      throw new Error('Horse ID must be a positive integer');
-    }
+  // Validate horseId
+  const numericId = parseInt(horseId, 10);
+  if (isNaN(numericId) || numericId <= 0) {
+    throw new Error('Horse ID must be a positive integer');
+  }
 
+  try {
     const results = await prisma.competitionResult.findMany({
       where: { horseId: numericId },
       include: {
@@ -134,13 +134,13 @@ async function getResultsByHorse(horseId) {
  * @returns {Array} - Array of result objects with relations, ordered by score (highest first)
  */
 async function getResultsByShow(showId) {
-  try {
-    // Validate showId
-    const numericId = parseInt(showId, 10);
-    if (isNaN(numericId) || numericId <= 0) {
-      throw new Error('Show ID must be a positive integer');
-    }
+  // Validate showId
+  const numericId = parseInt(showId, 10);
+  if (isNaN(numericId) || numericId <= 0) {
+    throw new Error('Show ID must be a positive integer');
+  }
 
+  try {
     const results = await prisma.competitionResult.findMany({
       where: { showId: numericId },
       include: {
@@ -169,13 +169,13 @@ async function getResultsByShow(showId) {
  * @returns {Object|null} - Result object with relations or null if not found
  */
 async function getResultById(resultId) {
-  try {
-    // Validate resultId
-    const numericId = parseInt(resultId, 10);
-    if (isNaN(numericId) || numericId <= 0) {
-      throw new Error('Result ID must be a positive integer');
-    }
+  // Validate resultId
+  const numericId = parseInt(resultId, 10);
+  if (isNaN(numericId) || numericId <= 0) {
+    throw new Error('Result ID must be a positive integer');
+  }
 
+  try {
     const result = await prisma.competitionResult.findUnique({
       where: { id: numericId },
       include: {

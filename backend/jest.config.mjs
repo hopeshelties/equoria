@@ -13,5 +13,17 @@ export default {
       'jest': true
     },
     setupFilesAfterEnv: [], // Can add setup files if needed
-    verbose: true
+    verbose: true,
+    // Explicitly define test patterns to exclude node_modules
+    testMatch: [
+      '**/tests/**/*.test.js',
+      '**/models/**/*.test.js',
+      '**/seed/**/*.test.js'
+    ],
+    // Explicitly ignore node_modules
+    testPathIgnorePatterns: [
+      '/node_modules/',
+      '/build/',
+      '/dist/'
+    ]
   };

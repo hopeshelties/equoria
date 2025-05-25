@@ -109,17 +109,20 @@ describe('generateMockShows', () => {
     });
 
     it('should generate run dates within ±30 days of today', () => {
-      const shows = generateMockShows(20);
       const today = new Date();
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(today.getDate() - 30);
       const thirtyDaysFromNow = new Date(today);
       thirtyDaysFromNow.setDate(today.getDate() + 30);
       
+      // Generate shows after setting up date boundaries
+      const shows = generateMockShows(20);
+      
       shows.forEach(show => {
         expect(show.runDate).toBeInstanceOf(Date);
-        expect(show.runDate.getTime()).toBeGreaterThanOrEqual(thirtyDaysAgo.getTime());
-        expect(show.runDate.getTime()).toBeLessThanOrEqual(thirtyDaysFromNow.getTime());
+        // Add a small buffer (1 second) to account for timing precision
+        expect(show.runDate.getTime()).toBeGreaterThanOrEqual(thirtyDaysAgo.getTime() - 1000);
+        expect(show.runDate.getTime()).toBeLessThanOrEqual(thirtyDaysFromNow.getTime() + 1000);
       });
     });
 
