@@ -1,5 +1,6 @@
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
+import { applyEpigeneticTraitsAtBirth } from '../utils/atBirthTraits.js';
 
 async function createHorse(horseData) {
   try {
@@ -84,6 +85,41 @@ async function createHorse(horseData) {
       stableRelation = { stableId };
     }
 
+    // Apply at-birth traits if this is a newborn with parents
+    let epigeneticModifiers = horseData.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+
+    if (age === 0 && sire_id && dam_id) {
+      try {
+        logger.info(`[horseModel.createHorse] Applying at-birth traits for newborn with sire ${sire_id} and dam ${dam_id}`);
+
+        const atBirthResult = await applyEpigeneticTraitsAtBirth({
+          sireId: sire_id,
+          damId: dam_id,
+          mareStress: horseData.mareStress,
+          feedQuality: horseData.feedQuality
+        });
+
+        // Merge at-birth traits with any existing traits
+        epigeneticModifiers = {
+          positive: [...(epigeneticModifiers.positive || []), ...(atBirthResult.traits.positive || [])],
+          negative: [...(epigeneticModifiers.negative || []), ...(atBirthResult.traits.negative || [])],
+          hidden: [...(epigeneticModifiers.hidden || []), ...(atBirthResult.traits.hidden || [])]
+        };
+
+        logger.info(`[horseModel.createHorse] Applied at-birth traits: ${JSON.stringify(atBirthResult.traits)}`);
+
+        // Log breeding analysis for debugging
+        if (atBirthResult.breedingAnalysis) {
+          const analysis = atBirthResult.breedingAnalysis;
+          logger.info(`[horseModel.createHorse] Breeding analysis - Lineage specialization: ${analysis.lineage.disciplineSpecialization}, Inbreeding: ${analysis.inbreeding.inbreedingDetected}`);
+        }
+
+      } catch (error) {
+        logger.error(`[horseModel.createHorse] Error applying at-birth traits: ${error.message}`);
+        // Continue with horse creation even if trait application fails
+      }
+    }
+
     // Create horse with all provided fields
     const horse = await prisma.horse.create({
       data: {
@@ -119,7 +155,8 @@ async function createHorse(horseData) {
         ...(sale_price !== undefined && { sale_price }),
         ...(health_status && { health_status }),
         ...(last_vetted_date && { last_vetted_date: new Date(last_vetted_date) }),
-        ...(tack && { tack })
+        ...(tack && { tack }),
+        epigenetic_modifiers: epigeneticModifiers
       },
       include: {
         breed: true,
@@ -133,7 +170,7 @@ async function createHorse(horseData) {
     return horse;
   } catch (error) {
     logger.error('[horseModel.createHorse] Database error: %o', error);
-    throw new Error('Database error in createHorse: ' + error.message);
+    throw new Error(`Database error in createHorse: ${error.message}`);
   }
 }
 
@@ -162,7 +199,7 @@ async function getHorseById(id) {
     return horse; // Returns null if not found, which is Prisma's default
   } catch (error) {
     logger.error('[horseModel.getHorseById] Database error: %o', error);
-    throw new Error('Database error in getHorseById: ' + error.message);
+    throw new Error(`Database error in getHorseById: ${error.message}`);
   }
 }
 
@@ -233,7 +270,7 @@ async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
 
   } catch (error) {
     logger.error('[horseModel.updateDisciplineScore] Database error: %o', error);
-    throw new Error('Database error in updateDisciplineScore: ' + error.message);
+    throw new Error(`Database error in updateDisciplineScore: ${error.message}`);
   }
 }
 
@@ -263,7 +300,7 @@ async function getDisciplineScores(horseId) {
 
   } catch (error) {
     logger.error('[horseModel.getDisciplineScores] Database error: %o', error);
-    throw new Error('Database error in getDisciplineScores: ' + error.message);
+    throw new Error(`Database error in getDisciplineScores: ${error.message}`);
   }
 }
 
