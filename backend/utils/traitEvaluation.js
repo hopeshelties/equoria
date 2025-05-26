@@ -245,7 +245,7 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
     for (const [traitKey, traitDef] of Object.entries(TRAIT_DEFINITIONS.negative)) {
       if (existingTraits.has(traitKey)) {continue;}
 
-      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge, 'negative')) {
+      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge)) {
         if (Math.random() < traitDef.baseChance) {
           // Check for conflicts
           if (!hasTraitConflict(traitKey, existingTraits)) {
@@ -267,7 +267,7 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
     for (const [traitKey, traitDef] of Object.entries(TRAIT_DEFINITIONS.rare)) {
       if (existingTraits.has(traitKey)) {continue;}
 
-      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge, 'rare')) {
+      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge)) {
         if (Math.random() < traitDef.baseChance) {
           // Check for conflicts
           if (!hasTraitConflict(traitKey, existingTraits)) {
