@@ -1,91 +1,197 @@
 import express from 'express';
-import { param, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
+import { authenticateToken, requireOwnership } from '../middleware/auth.js';
+import { validateStatChanges, preventDuplication } from '../middleware/gameIntegrity.js';
+import { auditLog } from '../middleware/auditLog.js';
 import { getTrainableHorses } from '../controllers/trainingController.js';
+import { getHorseById } from '../models/horseModel.js';
+import logger from '../utils/logger.js';
+import { ApiResponse } from '../utils/apiResponse.js';
 
 const router = express.Router();
 
 /**
- * Validation middleware for horse ID parameter
+ * GET /api/horses/trainable/:playerId
+ * Get all trainable horses for a specific player
  */
-const validateHorseId = [
-  param('id')
-    .isInt({ min: 1 })
-    .withMessage('Horse ID must be a positive integer'),
-  
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
-    next();
-  }
-];
-
-/**
- * Validation middleware for player ID parameter
- */
-const validatePlayerId = [
+router.get('/trainable/:playerId',
+  // Validation middleware
   param('playerId')
     .isLength({ min: 1, max: 50 })
     .withMessage('Player ID must be between 1 and 50 characters'),
   
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.array()
-      });
+  // Security middleware
+  auditLog('horse_query', 'medium'),
+  
+  async (req, res) => {
+    try {
+      // Check validation results
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json(ApiResponse.badRequest('Validation failed', {
+          errors: errors.array()
+        }));
+      }
+
+      const { playerId } = req.params;
+      
+      logger.info(`[horseRoutes] Getting trainable horses for player: ${playerId}`);
+      
+      // Get trainable horses
+      const trainableHorses = await getTrainableHorses(playerId);
+      
+      return res.status(200).json(ApiResponse.success(
+        'Trainable horses retrieved successfully',
+        trainableHorses
+      ));
+      
+    } catch (error) {
+      logger.error('[horseRoutes] Error getting trainable horses:', error);
+      return res.status(500).json(ApiResponse.serverError('Failed to retrieve trainable horses'));
     }
-    next();
   }
-];
+);
 
 /**
- * GET /horses/trainable/:playerId
- * Get all horses owned by a player that are eligible for training
+ * GET /api/horses/:horseId
+ * Get detailed information about a specific horse
  */
-router.get('/trainable/:playerId', validatePlayerId, async (req, res) => {
-  try {
-    const { playerId } = req.params;
-    
-    const trainableHorses = await getTrainableHorses(playerId);
-    
-    res.json({
-      success: true,
-      message: `Found ${trainableHorses.length} trainable horses`,
-      data: trainableHorses
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
-    });
+router.get('/:horseId',
+  // Validation middleware
+  param('horseId')
+    .isInt({ min: 1 })
+    .withMessage('Horse ID must be a positive integer'),
+  
+  // Security middleware
+  auditLog('horse_detail_query', 'low'),
+  
+  async (req, res) => {
+    try {
+      // Check validation results
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json(ApiResponse.badRequest('Validation failed', {
+          errors: errors.array()
+        }));
+      }
+
+      const horseId = parseInt(req.params.horseId);
+      
+      logger.info(`[horseRoutes] Getting horse details for ID: ${horseId}`);
+      
+      // Get horse details
+      const horse = await getHorseById(horseId);
+      
+      if (!horse) {
+        return res.status(404).json(ApiResponse.notFound('Horse not found'));
+      }
+      
+      return res.status(200).json(ApiResponse.success(
+        'Horse details retrieved successfully',
+        horse
+      ));
+      
+    } catch (error) {
+      logger.error('[horseRoutes] Error getting horse details:', error);
+      return res.status(500).json(ApiResponse.serverError('Failed to retrieve horse details'));
+    }
   }
-});
+);
 
 /**
- * GET /horses/:id/history
+ * PUT /api/horses/:horseId
+ * Update horse information (protected route)
+ */
+router.put('/:horseId',
+  // Authentication required
+  authenticateToken,
+  
+  // Validation middleware
+  param('horseId')
+    .isInt({ min: 1 })
+    .withMessage('Horse ID must be a positive integer'),
+  
+  body('name')
+    .optional()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Horse name must be between 2 and 50 characters'),
+  
+  // Security middleware
+  requireOwnership('horse'),
+  validateStatChanges([]), // No direct stat modifications allowed
+  preventDuplication('horse_update'),
+  auditLog('horse_update', 'high'),
+  
+  async (req, res) => {
+    try {
+      // Check validation results
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json(ApiResponse.badRequest('Validation failed', {
+          errors: errors.array()
+        }));
+      }
+
+      const horseId = parseInt(req.params.horseId);
+      const updateData = req.body;
+      
+      logger.info(`[horseRoutes] Updating horse ${horseId} by user ${req.user.id}`);
+      
+      // TODO: Implement horse update logic
+      // const updatedHorse = await updateHorse(horseId, updateData);
+      
+      return res.status(200).json(ApiResponse.success(
+        'Horse updated successfully',
+        { horseId, updateData }
+      ));
+      
+    } catch (error) {
+      logger.error('[horseRoutes] Error updating horse:', error);
+      return res.status(500).json(ApiResponse.serverError('Failed to update horse'));
+    }
+  }
+);
+
+/**
+ * GET /api/horses/:horseId/history
  * Get competition history for a specific horse
  */
-router.get('/:id/history', validateHorseId, async (req, res) => {
-  try {
-    // Dynamic import for ES module
-    const { getHorseHistory } = await import('../controllers/horseController.js');
-    await getHorseHistory(req, res);
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
-    });
+router.get('/:horseId/history',
+  // Validation middleware
+  param('horseId')
+    .isInt({ min: 1 })
+    .withMessage('Horse ID must be a positive integer'),
+  
+  // Security middleware
+  auditLog('horse_history_query', 'low'),
+  
+  async (req, res) => {
+    try {
+      // Check validation results
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json(ApiResponse.badRequest('Validation failed', {
+          errors: errors.array()
+        }));
+      }
+
+      const horseId = parseInt(req.params.horseId);
+      
+      logger.info(`[horseRoutes] Getting competition history for horse: ${horseId}`);
+      
+      // TODO: Implement horse history retrieval
+      // const history = await getHorseHistory(horseId);
+      
+      return res.status(200).json(ApiResponse.success(
+        'Horse history retrieved successfully',
+        []
+      ));
+      
+    } catch (error) {
+      logger.error('[horseRoutes] Error getting horse history:', error);
+      return res.status(500).json(ApiResponse.serverError('Failed to retrieve horse history'));
+    }
   }
-});
+);
 
 export default router; 

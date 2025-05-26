@@ -1,56 +1,111 @@
 import express from 'express';
-import morgan from 'morgan'; // Re-import morgan
+import cors from 'cors';
+import morgan from 'morgan';
 import config from './config/config.js';
-import logger from './utils/logger.js'; // Updated logger import path
-import pingRoute from './routes/ping.js'; // Require the new ping route
-import breedRoutes from './routes/breedRoutes.js'; // <--- Add this line
-import competitionRoutes from './routes/competitionRoutes.js'; // Competition routes
-import horseRoutes from './routes/horseRoutes.js'; // Horse routes
-import trainingRoutes from './routes/trainingRoutes.js'; // Training routes
-import foalRoutes from './routes/foalRoutes.js'; // Foal routes
+import logger from './utils/logger.js';
+import errorHandler from './middleware/errorHandler.js';
+import { responseHandler } from './utils/apiResponse.js';
+import { securityHeaders, corsOptions, sanitizeInput, apiRateLimit } from './middleware/security.js';
+import { healthCheckHandler, livenessHandler, readinessHandler } from './utils/healthCheck.js';
+
+// Import routes
+import pingRoutes from './routes/ping.js';
+import trainingRoutes from './routes/trainingRoutes.js';
+import competitionRoutes from './routes/competitionRoutes.js';
+import traitDiscoveryRoutes from './routes/traitDiscoveryRoutes.js';
+import horseRoutes from './routes/horseRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import traitDiscoveryRoutes from './routes/traitDiscoveryRoutes.js'; // Admin routes
-// import { handleValidationErrors } from './middleware/validationErrorHandler.js'; // Example, if you create it
-import errorHandler from './middleware/errorHandler.js'; // Import error handler
-import cronJobService from './services/cronJobs.js'; // Cron job service
+import foalRoutes from './routes/foalRoutes.js';
 
 const app = express();
 
-// Middleware
-// Integrate morgan with winston for HTTP request logging
-if (config.env !== 'test') {
-  // Morgan stream piped to Winston
-  const morganStream = {
-    write: (message) => {
-      // Remove newline characters from morgan's output to avoid double newlines in winston logs
-      logger.info(message.trim());
-    },
-  };
-  app.use(morgan('dev', { stream: morganStream }));
-}
+// Trust proxy for accurate IP addresses
+app.set('trust proxy', 1);
 
-app.use(express.json()); // Middleware to parse JSON bodies
+// Security headers (must be first)
+app.use(securityHeaders);
 
-// Mount the ping route
-app.use('/ping', pingRoute);
-app.use('/api/breeds', breedRoutes); // <--- Add this line to mount the breed routes
-app.use('/api/competition', competitionRoutes); // Mount competition routes
-app.use('/api/horses', horseRoutes); // Mount horse routes
-app.use('/api/training', trainingRoutes); // Mount training routes
-app.use('/api/foals', foalRoutes); // Mount foal routes
-app.use('/api/admin', adminRoutes); // Mount admin routes
-app.use('/api/traits', traitDiscoveryRoutes); // Mount trait discovery routes
+// CORS configuration
+app.use(cors(corsOptions));
 
-// Initialize cron job service
-if (config.env !== 'test') {
-  cronJobService.start();
-  logger.info('[app] Cron job service initialized');
-}
+// Request logging
+app.use(morgan('combined', {
+  stream: {
+    write: (message) => logger.info(message.trim())
+  }
+}));
 
-// Old direct routes removed as per refactoring for /ping.
-// The default '/' route can be re-added or managed elsewhere if needed.
+// Body parsing middleware
+app.use(express.json({ 
+  limit: '10mb',
+  verify: (req, res, buf) => {
+    // Store raw body for signature verification if needed
+    req.rawBody = buf;
+  }
+}));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Error handling middleware - must be last
+// Rate limiting (apply to all routes)
+app.use(apiRateLimit);
+
+// Input sanitization (apply to all routes)
+app.use(sanitizeInput);
+
+// Response helper middleware
+app.use(responseHandler);
+
+// Health check endpoints (no auth required)
+app.get('/health', healthCheckHandler);
+app.get('/health/live', livenessHandler);
+app.get('/health/ready', readinessHandler);
+
+// API routes
+app.use('/ping', pingRoutes);
+app.use('/api/training', trainingRoutes);
+app.use('/api/competition', competitionRoutes);
+app.use('/api/traits', traitDiscoveryRoutes);
+app.use('/api/horses', horseRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/foals', foalRoutes);
+
+// 404 handler for undefined routes
+app.use('*', (req, res) => {
+  logger.warn(`[app] 404 - Route not found: ${req.method} ${req.originalUrl} from IP: ${req.ip}`);
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    path: req.originalUrl,
+    method: req.method
+  });
+});
+
+// Global error handler (must be last)
 app.use(errorHandler);
+
+// Graceful shutdown handling
+process.on('SIGTERM', () => {
+  logger.info('[app] SIGTERM received, shutting down gracefully');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  logger.info('[app] SIGINT received, shutting down gracefully');
+  process.exit(0);
+});
+
+// Unhandled promise rejection handler
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('[app] Unhandled Promise Rejection:', reason);
+  // Don't exit in production, just log
+  if (config.env === 'development') {
+    process.exit(1);
+  }
+});
+
+// Uncaught exception handler
+process.on('uncaughtException', (error) => {
+  logger.error('[app] Uncaught Exception:', error);
+  process.exit(1);
+});
 
 export default app; 
