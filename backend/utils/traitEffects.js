@@ -212,6 +212,117 @@ const traitEffects = {
     description: 'Benefits from specialized bloodline heritage'
   },
 
+  people_trusting: {
+    // Bonding effects
+    bondingBonus: 0.30, // 30% faster bonding with humans
+    handlerCompatibility: 0.25, // 25% better handler relationships
+    groomingBondingBonus: 0.20, // 20% bonus from grooming
+
+    // Training effects
+    trainingCooperation: 0.20, // 20% more cooperative during training
+    handlerTrustBonus: 0.15, // 15% bonus when working with trusted handlers
+
+    // Competition effects
+    crowdComfort: 0.15, // 15% less stress from crowds
+    competitionHandlerBonus: 0.10, // 10% bonus with familiar handlers
+
+    // General effects
+    stressReduction: 8, // -8 base stress from human interaction
+    socialComfort: true, // Comfortable in social situations
+
+    description: 'Naturally trusting and cooperative with humans'
+  },
+
+  legacy_talent: {
+    // Training effects
+    trainingXpModifier: 0.20, // 20% more XP from training
+    statGainChanceModifier: 0.15, // 15% higher chance of stat gains
+    disciplineInheritanceBonus: 0.25, // 25% bonus in inherited discipline
+
+    // Competition effects
+    competitionScoreModifier: 0.06, // +6% to final score
+    legacyPressureResistance: 0.20, // 20% resistance to legacy pressure
+    competitionConfidenceBoost: 8, // +8 confidence in competitions
+
+    // General effects
+    naturalTalent: true, // Natural aptitude for inherited discipline
+    prestigeBonus: 0.15, // 15% bonus to prestige gains
+
+    // Breeding effects
+    traitInheritanceBonus: 0.20, // 20% better trait inheritance to offspring
+
+    description: 'Inherits exceptional talent from distinguished lineage'
+  },
+
+  discipline_affinity_racing: {
+    // Training effects
+    trainingXpModifier: 0.15, // 15% more XP in racing training
+    racingTrainingBonus: 0.25, // 25% bonus to racing-specific training
+
+    // Competition effects
+    competitionScoreModifier: 0.08, // +8% to racing competition scores
+    racingConfidenceBonus: 0.20, // 20% confidence boost in racing
+
+    // Stat effects
+    baseStatBoost: {
+      speed: 3,
+      stamina: 2
+    },
+
+    // Discipline-specific bonuses
+    disciplineModifiers: {
+      'Racing': 0.12
+    },
+
+    description: 'Natural affinity for racing inherited from lineage'
+  },
+
+  discipline_affinity_jumping: {
+    // Training effects
+    trainingXpModifier: 0.15, // 15% more XP in jumping training
+    jumpingTrainingBonus: 0.25, // 25% bonus to jumping-specific training
+
+    // Competition effects
+    competitionScoreModifier: 0.08, // +8% to jumping competition scores
+    jumpingConfidenceBonus: 0.20, // 20% confidence boost in jumping
+
+    // Stat effects
+    baseStatBoost: {
+      boldness: 3,
+      balance: 2
+    },
+
+    // Discipline-specific bonuses
+    disciplineModifiers: {
+      'Show Jumping': 0.12
+    },
+
+    description: 'Natural affinity for jumping inherited from lineage'
+  },
+
+  discipline_affinity_dressage: {
+    // Training effects
+    trainingXpModifier: 0.15, // 15% more XP in dressage training
+    dressageTrainingBonus: 0.25, // 25% bonus to dressage-specific training
+
+    // Competition effects
+    competitionScoreModifier: 0.08, // +8% to dressage competition scores
+    dressageConfidenceBonus: 0.20, // 20% confidence boost in dressage
+
+    // Stat effects
+    baseStatBoost: {
+      obedience: 3,
+      flexibility: 2
+    },
+
+    // Discipline-specific bonuses
+    disciplineModifiers: {
+      'Dressage': 0.12
+    },
+
+    description: 'Natural affinity for dressage inherited from lineage'
+  },
+
 
 
   // ===== NEGATIVE TRAITS =====
@@ -309,6 +420,79 @@ const traitEffects = {
       'Show Jumping': -0.06,
       'Racing': -0.05
     }
+  },
+
+  reactive: {
+    // Training effects
+    trainingStressIncrease: 0.30, // 30% more stress from training
+    trainingUnpredictability: 0.25, // 25% more unpredictable during training
+    handlerDifficulty: 0.20, // 20% more difficult for handlers
+
+    // Competition effects
+    competitionScoreModifier: -0.05, // -5% to final score
+    competitionStressRisk: 15, // +15 stress risk in competitions
+    crowdReactivity: 0.30, // 30% more reactive to crowds
+    environmentalSensitivity: 0.25, // 25% more sensitive to environment changes
+
+    // Bonding effects
+    bondingInconsistency: 0.30, // 30% more inconsistent bonding
+    trustDifficulty: 0.25, // 25% harder to build trust
+
+    // General effects
+    stressAccumulation: 1.30, // 30% faster stress accumulation
+    temperamentInstability: true, // More prone to temperament changes
+    unpredictableBehavior: true, // May react unpredictably
+
+    // Discipline-specific penalties
+    disciplineModifiers: {
+      'Racing': -0.07,
+      'Show Jumping': -0.06,
+      'Eventing': -0.06,
+      'Dressage': -0.05
+    },
+
+    description: 'Highly reactive to stimuli and prone to stress responses'
+  },
+
+  low_immunity: {
+    // Health effects
+    illnessRisk: 0.40, // 40% higher risk of illness
+    illnessRecoveryPenalty: 0.35, // 35% slower recovery from illness
+    vaccineEffectiveness: 0.70, // 30% reduced vaccine effectiveness
+
+    // Training effects
+    trainingHealthRisk: 0.25, // 25% higher health risk from training
+    trainingIntensityLimit: 0.15, // 15% lower max training intensity
+    trainingConsistencyPenalty: 0.20, // 20% less consistent training due to health
+
+    // Competition effects
+    competitionScoreModifier: -0.04, // -4% to final score
+    competitionHealthRisk: 0.30, // 30% higher health risk in competitions
+    performanceInconsistency: 0.25, // 25% more inconsistent due to health
+
+    // General effects
+    stressFromIllness: 1.25, // 25% more stress when ill
+    environmentalSensitivity: 0.20, // 20% more sensitive to environmental factors
+    seasonalVulnerability: true, // More vulnerable to seasonal changes
+
+    // Recovery effects
+    generalRecoveryPenalty: 0.25, // 25% slower general recovery
+    stressRecoveryPenalty: 0.15, // 15% slower stress recovery when ill
+
+    // All disciplines affected due to health concerns
+    disciplineModifiers: {
+      'Racing': -0.05,
+      'Dressage': -0.03,
+      'Show Jumping': -0.04,
+      'Cross Country': -0.06,
+      'Endurance': -0.08,
+      'Reining': -0.03,
+      'Driving': -0.03,
+      'Trail': -0.02,
+      'Eventing': -0.05
+    },
+
+    description: 'Weakened immune system leading to frequent health issues'
   },
 
   aggressive: {
