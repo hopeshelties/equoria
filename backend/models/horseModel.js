@@ -4,8 +4,8 @@ import logger from '../utils/logger.js';
 async function createHorse(horseData) {
   try {
     const {
-      name, 
-      age, 
+      name,
+      age,
       breedId,
       breed,
       ownerId,
@@ -154,11 +154,11 @@ async function getHorseById(id) {
         stable: true
       }
     });
-    
+
     if (horse) {
       logger.info(`[horseModel.getHorseById] Successfully found horse: ${horse.name} (ID: ${horse.id})`);
     }
-    
+
     return horse; // Returns null if not found, which is Prisma's default
   } catch (error) {
     logger.error('[horseModel.getHorseById] Database error: %o', error);
@@ -204,11 +204,11 @@ async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
 
     // Get current discipline scores or initialize empty object
     const currentScores = currentHorse.disciplineScores || {};
-    
+
     // Update the specific discipline score
     const currentScore = currentScores[discipline] || 0;
     const newScore = currentScore + pointsToAdd;
-    
+
     const updatedScores = {
       ...currentScores,
       [discipline]: newScore
@@ -268,19 +268,20 @@ async function getDisciplineScores(horseId) {
 }
 
 /**
- * Increment a horse's discipline score by +5 (convenience function for training)
+ * Increment a horse's discipline score by a specified amount (convenience function for training)
  * @param {number} horseId - ID of the horse to update
  * @param {string} discipline - Discipline to increment (e.g., "Dressage", "Show Jumping")
+ * @param {number} amount - Amount to increment (defaults to 5 for backward compatibility)
  * @returns {Object} - Updated horse object with relations
  * @throws {Error} - If validation fails or database error occurs
  */
-async function incrementDisciplineScore(horseId, discipline) {
+async function incrementDisciplineScore(horseId, discipline, amount = 5) {
   try {
-    logger.info(`[horseModel.incrementDisciplineScore] Incrementing ${discipline} score for horse ${horseId} by +5`);
-    
-    // Use the existing updateDisciplineScore function with +5 points
-    const updatedHorse = await updateDisciplineScore(horseId, discipline, 5);
-    
+    logger.info(`[horseModel.incrementDisciplineScore] Incrementing ${discipline} score for horse ${horseId} by +${amount}`);
+
+    // Use the existing updateDisciplineScore function with specified amount
+    const updatedHorse = await updateDisciplineScore(horseId, discipline, amount);
+
     logger.info(`[horseModel.incrementDisciplineScore] Successfully incremented ${discipline} score for horse ${horseId}`);
     return updatedHorse;
 

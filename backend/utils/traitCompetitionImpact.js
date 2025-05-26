@@ -4,6 +4,7 @@
  */
 
 import logger from './logger.js';
+import { getTraitEffects } from './traitEffects.js';
 
 /**
  * Trait impact definitions for different competition disciplines
@@ -223,7 +224,7 @@ const TRAIT_COMPETITION_EFFECTS = {
 };
 
 /**
- * Calculate trait-based competition impact for a horse
+ * Calculate trait-based competition impact for a horse using the new trait effects system
  * @param {Object} horse - Horse object with epigenetic_modifiers
  * @param {string} discipline - Competition discipline
  * @param {number} baseScore - Base competition score before trait modifiers
@@ -257,10 +258,10 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
       return result;
     }
 
-    // Process each trait
+    // Process each trait using the new trait effects system
     allVisibleTraits.forEach(traitName => {
-      const traitEffect = TRAIT_COMPETITION_EFFECTS[traitName];
-      if (!traitEffect) {
+      const traitEffects = getTraitEffects(traitName);
+      if (!traitEffects) {
         logger.warn(`[traitCompetitionImpact] Unknown trait: ${traitName}`);
         return;
       }
@@ -271,42 +272,47 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
       let isSpecialized = false;
 
       // Check for discipline-specific effects first
-      if (traitEffect.disciplines && traitEffect.disciplines[discipline]) {
-        const disciplineEffect = traitEffect.disciplines[discipline];
-        traitModifier = disciplineEffect.scoreModifier;
-        effectDescription = disciplineEffect.description;
+      if (traitEffects.disciplineModifiers && traitEffects.disciplineModifiers[discipline]) {
+        traitModifier = traitEffects.disciplineModifiers[discipline];
+        effectDescription = `Specialized ${discipline} performance modifier`;
         isSpecialized = true;
         result.details.disciplineSpecific += Math.abs(traitModifier);
-      } else {
-        // Use general effects
-        traitModifier = traitEffect.general.scoreModifier;
-        effectDescription = traitEffect.general.description;
+      } else if (traitEffects.competitionScoreModifier) {
+        // Use general competition score modifier
+        traitModifier = traitEffects.competitionScoreModifier;
+        effectDescription = 'General competition performance modifier';
         result.details.generalEffects += Math.abs(traitModifier);
       }
 
-      // Track trait application
-      const traitApplication = {
-        name: traitName,
-        type: traitEffect.type,
-        modifier: traitModifier,
-        description: effectDescription,
-        isSpecialized,
-        discipline: isSpecialized ? discipline : 'general'
-      };
+      // Only process traits that have competition effects
+      if (traitModifier !== 0) {
+        // Determine trait type based on modifier
+        const traitType = traitModifier > 0 ? 'positive' : 'negative';
 
-      result.appliedTraits.push(traitApplication);
+        // Track trait application
+        const traitApplication = {
+          name: traitName,
+          type: traitType,
+          modifier: traitModifier,
+          description: effectDescription,
+          isSpecialized,
+          discipline: isSpecialized ? discipline : 'general'
+        };
 
-      // Categorize bonuses and penalties
-      if (traitModifier > 0) {
-        result.traitBonuses.push(traitApplication);
-        result.details.positiveTraits++;
-      } else if (traitModifier < 0) {
-        result.traitPenalties.push(traitApplication);
-        result.details.negativeTraits++;
+        result.appliedTraits.push(traitApplication);
+
+        // Categorize bonuses and penalties
+        if (traitModifier > 0) {
+          result.traitBonuses.push(traitApplication);
+          result.details.positiveTraits++;
+        } else if (traitModifier < 0) {
+          result.traitPenalties.push(traitApplication);
+          result.details.negativeTraits++;
+        }
+
+        // Add to total modifier
+        result.totalScoreModifier += traitModifier;
       }
-
-      // Add to total modifier
-      result.totalScoreModifier += traitModifier;
     });
 
     // Apply diminishing returns for multiple traits

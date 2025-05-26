@@ -105,7 +105,7 @@ describe('Competition Simulation with Trait Impact', () => {
       const fragileTrait = traitDetails.find(t => t.name === 'fragile');
 
       expect(nervousTrait.specialized).toBe(true); // Nervous has specialized penalty for Show Jumping
-      expect(nervousTrait.modifier).toBe(-7); // -7% converted to percentage
+      expect(nervousTrait.modifier).toBe(-5); // -5% converted to percentage
       expect(fragileTrait.specialized).toBe(true); // Fragile has specialized penalty for Show Jumping
     });
 

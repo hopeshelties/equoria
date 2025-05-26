@@ -53,7 +53,7 @@ const DISCOVERY_CONDITIONS = {
 
   // Training-based discoveries (requires training data)
   CONSISTENT_TRAINING: {
-    condition: async (horse) => {
+    condition: async(horse) => {
       const recentTraining = await prisma.trainingLog.count({
         where: {
           horseId: horse.id,
@@ -287,18 +287,18 @@ function selectTraitsToReveal(hiddenTraits, conditions) {
 
   // Reveal traits based on condition priority and trait rarity
   for (const condition of sortedConditions) {
-    if (traitsToReveal.length >= 3) break; // Limit revelations per check
+    if (traitsToReveal.length >= 3) {break;} // Limit revelations per check
 
     const suitableTraits = hiddenTraits.filter(trait => {
-      if (traitsToReveal.includes(trait)) return false;
+      if (traitsToReveal.includes(trait)) {return false;}
 
       const traitDef = getTraitDefinition(trait);
-      if (!traitDef) return false;
+      if (!traitDef) {return false;}
 
       // Match trait rarity to condition priority
-      if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') return true;
-      if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) return true;
-      if (condition.priority === 'medium' && ['common', 'rare'].includes(traitDef.rarity)) return true;
+      if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') {return true;}
+      if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) {return true;}
+      if (condition.priority === 'medium' && ['common', 'rare'].includes(traitDef.rarity)) {return true;}
 
       return traitDef.rarity === 'common';
     });
@@ -362,12 +362,12 @@ async function updateHorseTraits(horseId, currentTraits, traitsToReveal) {
  */
 function getDiscoveryReason(trait, conditions) {
   const traitDef = getTraitDefinition(trait);
-  if (!traitDef) return 'Unknown discovery condition';
+  if (!traitDef) {return 'Unknown discovery condition';}
 
   // Find the most relevant condition
   const relevantCondition = conditions.find(condition => {
-    if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') return true;
-    if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) return true;
+    if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') {return true;}
+    if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) {return true;}
     return condition.priority === 'medium' || condition.priority === 'low';
   });
 

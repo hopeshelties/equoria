@@ -1,6 +1,7 @@
 import { getLastTrainingDate, getHorseAge, logTrainingSession, getAnyRecentTraining } from '../models/trainingModel.js';
 import { incrementDisciplineScore, getHorseById } from '../models/horseModel.js';
 import { getPlayerWithHorses, addXp } from '../models/playerModel.js';
+import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -82,7 +83,7 @@ async function canTrain(horseId, discipline) {
 }
 
 /**
- * Train a horse in a specific discipline (with eligibility validation)
+ * Train a horse in a specific discipline (with eligibility validation and trait effects)
  * @param {number} horseId - ID of the horse to train
  * @param {string} discipline - Discipline to train in
  * @returns {Object} - Training result with success status, updated horse, and next eligible date
@@ -106,34 +107,90 @@ async function trainHorse(horseId, discipline) {
       };
     }
 
+    // Get horse data with traits for effect calculations
+    const horse = await getHorseById(horseId);
+    if (!horse) {
+      throw new Error('Horse not found');
+    }
+
+    // Get horse traits and calculate combined effects
+    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const allTraits = [...(traits.positive || []), ...(traits.negative || [])];
+    const traitEffects = getCombinedTraitEffects(allTraits);
+
+    logger.info(`[trainingController.trainHorse] Horse ${horseId} has traits: ${allTraits.join(', ')}`);
+
+    // Check for training-blocking traits
+    if (traitEffects.statGainBlocked) {
+      logger.warn('[trainingController.trainHorse] Training blocked by trait effects (burnout)');
+      return {
+        success: false,
+        reason: 'Horse is experiencing burnout and cannot gain from training',
+        updatedHorse: null,
+        message: 'Training not effective: Horse is experiencing burnout',
+        nextEligible: null
+      };
+    }
+
     // Log the training session
     const trainingLog = await logTrainingSession({ horseId, discipline });
 
-    // Update the horse's discipline score by +5
-    const updatedHorse = await incrementDisciplineScore(horseId, discipline);
+    // Calculate base discipline score increase (default +5)
+    let disciplineScoreIncrease = 5;
 
-    // NEW: Award XP to horse owner for training
+    // Apply trait effects to training
+    if (traitEffects.trainingXpModifier) {
+      disciplineScoreIncrease = Math.round(disciplineScoreIncrease * (1 + traitEffects.trainingXpModifier));
+      logger.info(`[trainingController.trainHorse] Trait XP modifier applied: ${(traitEffects.trainingXpModifier * 100).toFixed(1)}%`);
+    }
+
+    // Ensure minimum gain of 1 point
+    disciplineScoreIncrease = Math.max(1, disciplineScoreIncrease);
+
+    // Update the horse's discipline score with trait-modified amount
+    const updatedHorse = await incrementDisciplineScore(horseId, discipline, disciplineScoreIncrease);
+
+    // Calculate XP award with trait effects
+    let baseXp = 5;
+    if (traitEffects.trainingXpModifier) {
+      baseXp = Math.round(baseXp * (1 + traitEffects.trainingXpModifier));
+    }
+
+    // Award XP to horse owner for training
     try {
       if (updatedHorse && updatedHorse.ownerId) {
-        const xpResult = await addXp(updatedHorse.ownerId, 5);
-        logger.info(`[trainingController.trainHorse] Awarded 5 XP to player ${updatedHorse.ownerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
+        const xpResult = await addXp(updatedHorse.ownerId, baseXp);
+        logger.info(`[trainingController.trainHorse] Awarded ${baseXp} XP to player ${updatedHorse.ownerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
       }
     } catch (error) {
       logger.error(`[trainingController.trainHorse] Failed to award training XP: ${error.message}`);
       // Continue with training completion even if XP award fails
     }
 
-    // Calculate next eligible training date (7 days from now)
+    // Calculate next eligible training date (7 days from now, potentially modified by traits)
     const nextEligible = new Date();
-    nextEligible.setDate(nextEligible.getDate() + 7);
+    let cooldownDays = 7;
 
-    logger.info(`[trainingController.trainHorse] Successfully trained horse ${horseId} in ${discipline} (Log ID: ${trainingLog.id})`);
+    // Some traits might affect training frequency in the future
+    if (traitEffects.trainingTimeReduction) {
+      cooldownDays = Math.max(5, Math.round(cooldownDays * (1 - traitEffects.trainingTimeReduction)));
+      logger.info(`[trainingController.trainHorse] Training cooldown reduced by trait effects to ${cooldownDays} days`);
+    }
+
+    nextEligible.setDate(nextEligible.getDate() + cooldownDays);
+
+    logger.info(`[trainingController.trainHorse] Successfully trained horse ${horseId} in ${discipline} (Log ID: ${trainingLog.id}, Score +${disciplineScoreIncrease})`);
 
     return {
       success: true,
-      updatedHorse: updatedHorse,
-      message: `Horse trained successfully in ${discipline}. +5 added.`,
-      nextEligible: nextEligible.toISOString()
+      updatedHorse,
+      message: `Horse trained successfully in ${discipline}. +${disciplineScoreIncrease} added.`,
+      nextEligible: nextEligible.toISOString(),
+      traitEffects: {
+        appliedTraits: allTraits,
+        scoreModifier: disciplineScoreIncrease - 5, // Show the trait bonus/penalty
+        xpModifier: baseXp - 5 // Show the XP trait bonus/penalty
+      }
     };
 
   } catch (error) {
@@ -174,8 +231,8 @@ async function getTrainingStatus(horseId, discipline) {
 
         cooldownInfo = {
           active: true,
-          remainingDays: remainingDays,
-          remainingHours: remainingHours,
+          remainingDays,
+          remainingHours,
           lastTrainingDate: lastTrainingDateAny
         };
       } else {
@@ -311,12 +368,17 @@ async function trainRouteHandler(req, res) {
       const disciplineScores = result.updatedHorse?.disciplineScores || {};
       const updatedScore = disciplineScores[discipline] || 0;
 
-      // Format response according to Task 2.6 specifications
+      // Calculate actual score increase from trait effects
+      const baseIncrease = 5;
+      const actualIncrease = baseIncrease + (result.traitEffects?.scoreModifier || 0);
+
+      // Format response with trait effects information
       res.json({
         success: true,
-        message: `${result.updatedHorse.name} trained in ${discipline}. +5 added.`,
-        updatedScore: updatedScore,
-        nextEligibleDate: result.nextEligible
+        message: `${result.updatedHorse.name} trained in ${discipline}. +${actualIncrease} added.`,
+        updatedScore,
+        nextEligibleDate: result.nextEligible,
+        traitEffects: result.traitEffects
       });
     } else {
       // Return failure response for ineligible training
