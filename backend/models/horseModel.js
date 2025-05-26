@@ -9,7 +9,6 @@ async function createHorse(horseData) {
       breedId,
       breed,
       ownerId,
-      playerId,
       stableId,
       sex,
       date_of_birth,
@@ -57,11 +56,11 @@ async function createHorse(horseData) {
       // Handle Prisma relation format: { connect: { id: 1 } }
       breedRelation = { breed };
     } else if (breedId) {
-      // Handle direct breedId
-      breedRelation = { breedId };
+      // Handle direct breedId by converting to Prisma relation format
+      breedRelation = { breed: { connect: { id: breedId } } };
     } else if (breed && typeof breed === 'number') {
       // Handle case where breed is passed as a number (treat as breedId)
-      breedRelation = { breedId: breed };
+      breedRelation = { breed: { connect: { id: breed } } };
     } else {
       throw new Error('Invalid breed format. Use breedId (number) or breed: { connect: { id: number } }');
     }
@@ -69,19 +68,15 @@ async function createHorse(horseData) {
     // Prepare owner relationship if provided
     let ownerRelation = {};
     if (ownerId) {
-      ownerRelation = { ownerId };
+      ownerRelation = { owner: { connect: { id: ownerId } } };
     }
 
-    // Prepare player relationship if provided
-    let playerRelation = {};
-    if (playerId) {
-      playerRelation = { playerId };
-    }
+    // Note: Player relationship removed - using User (owner) relationship instead
 
     // Prepare stable relationship if provided
     let stableRelation = {};
     if (stableId) {
-      stableRelation = { stableId };
+      stableRelation = { stable: { connect: { id: stableId } } };
     }
 
     // Create horse with all provided fields
@@ -91,7 +86,6 @@ async function createHorse(horseData) {
         age,
         ...breedRelation,
         ...ownerRelation,
-        ...playerRelation,
         ...stableRelation,
         ...(sex && { sex }),
         ...(date_of_birth && { date_of_birth: new Date(date_of_birth) }),
@@ -124,8 +118,7 @@ async function createHorse(horseData) {
       include: {
         breed: true,
         owner: true,
-        stable: true,
-        player: true
+        stable: true
       }
     });
 
@@ -223,8 +216,7 @@ async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
       include: {
         breed: true,
         owner: true,
-        stable: true,
-        player: true
+        stable: true
       }
     });
 

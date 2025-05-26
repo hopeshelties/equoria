@@ -227,7 +227,7 @@ async function seedHorses() {
       const horseCreateData = {
         name: horseData.name,
         age: horseData.age,
-        breedId: breed.id,
+        breed: { connect: { id: breed.id } },
         ownerId: horseData.ownerId,
         stableId: horseData.stableId,
         sex: horseData.sex,
@@ -345,7 +345,7 @@ async function seedPlayerWithHorses() {
     const horseData1 = {
       name: 'Starlight',
       age: 4,
-      breedId: thoroughbredBreed.id,
+      breed: { connect: { id: thoroughbredBreed.id } },
       playerId: createdPlayer.id,
       sex: 'Mare',
       date_of_birth: new Date('2020-08-15'),
@@ -371,7 +371,7 @@ async function seedPlayerWithHorses() {
     const horseData2 = {
       name: 'Comet',
       age: 6,
-      breedId: thoroughbredBreed.id,
+      breed: { connect: { id: thoroughbredBreed.id } },
       playerId: createdPlayer.id,
       sex: 'Stallion',
       date_of_birth: new Date('2018-04-22'),

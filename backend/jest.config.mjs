@@ -12,7 +12,7 @@ export default {
     globals: {
       'jest': true
     },
-    setupFilesAfterEnv: [], // Can add setup files if needed
+    setupFilesAfterEnv: ['<rootDir>/tests/setup.js'], // Load test environment configuration
     verbose: true,
     // Explicitly define test patterns to exclude node_modules
     testMatch: [

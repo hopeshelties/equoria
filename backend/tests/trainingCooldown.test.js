@@ -22,7 +22,7 @@ describe('trainingCooldown', () => {
     const horseData = {
       name: `Test Training Horse ${Date.now()}`,
       age: 5,
-      breedId: testBreed.id,
+      breed: { connect: { id: testBreed.id } },
       sex: 'Mare',
       date_of_birth: new Date('2019-01-01'),
       health_status: 'Excellent'

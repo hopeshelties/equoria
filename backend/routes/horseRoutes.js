@@ -11,14 +11,14 @@ import { ApiResponse } from '../utils/apiResponse.js';
 const router = express.Router();
 
 /**
- * GET /api/horses/trainable/:playerId
- * Get all trainable horses for a specific player
+ * GET /api/horses/trainable/:userId
+ * Get all trainable horses for a specific user
  */
-router.get('/trainable/:playerId',
+router.get('/trainable/:userId',
   // Validation middleware
-  param('playerId')
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Player ID must be between 1 and 50 characters'),
+  param('userId')
+    .isInt({ min: 1 })
+    .withMessage('User ID must be a positive integer'),
   
   // Security middleware
   auditLog('horse_query', 'medium'),
@@ -33,12 +33,12 @@ router.get('/trainable/:playerId',
         }));
       }
 
-      const { playerId } = req.params;
+      const userId = parseInt(req.params.userId);
       
-      logger.info(`[horseRoutes] Getting trainable horses for player: ${playerId}`);
+      logger.info(`[horseRoutes] Getting trainable horses for user: ${userId}`);
       
       // Get trainable horses
-      const trainableHorses = await getTrainableHorses(playerId);
+      const trainableHorses = await getTrainableHorses(userId);
       
       return res.status(200).json(ApiResponse.success(
         'Trainable horses retrieved successfully',

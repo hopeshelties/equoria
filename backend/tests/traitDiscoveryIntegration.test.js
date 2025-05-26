@@ -21,7 +21,7 @@ describe('Trait Discovery API Integration Tests', () => {
       data: {
         name: 'High Bond Foal',
         age: 0,
-        breedId: testBreed.id,
+        breed: { connect: { id: testBreed.id } },
         bond_score: 85,
         stress_level: 15,
         epigenetic_modifiers: {
@@ -36,7 +36,7 @@ describe('Trait Discovery API Integration Tests', () => {
       data: {
         name: 'Low Stats Foal',
         age: 0,
-        breedId: testBreed.id,
+        breed: { connect: { id: testBreed.id } },
         bond_score: 30,
         stress_level: 70,
         epigenetic_modifiers: {
@@ -51,7 +51,7 @@ describe('Trait Discovery API Integration Tests', () => {
       data: {
         name: 'Adult Horse',
         age: 5,
-        breedId: testBreed.id,
+        breed: { connect: { id: testBreed.id } },
         bond_score: 90,
         stress_level: 10,
         epigenetic_modifiers: {
@@ -399,7 +399,7 @@ describe('Trait Discovery API Integration Tests', () => {
         data: {
           name: 'Fresh Workflow Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 85,
           stress_level: 15,
           epigenetic_modifiers: {

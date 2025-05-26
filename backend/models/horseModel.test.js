@@ -38,13 +38,13 @@ describe('horseModel', () => {
       const horseData = {
         name: 'Test Horse',
         age: 5,
-        breedId: 1
+        breed: { connect: { id: 1 } }
       };
       const expectedHorse = { 
         id: 1, 
         name: 'Test Horse', 
         age: 5, 
-        breedId: 1,
+        breed: { connect: { id: 1 } },
         createdAt: new Date(),
         breed: { id: 1, name: 'Arabian' }
       };
@@ -58,7 +58,7 @@ describe('horseModel', () => {
         data: {
           name: 'Test Horse',
           age: 5,
-          breedId: 1
+          breed: { connect: { id: 1 } }
         },
         include: {
           breed: true,
@@ -83,7 +83,7 @@ describe('horseModel', () => {
         id: 2, 
         name: 'Connected Horse', 
         age: 3, 
-        breedId: 2,
+        breed: { connect: { id: 2 } },
         createdAt: new Date(),
         breed: { id: 2, name: 'Thoroughbred' }
       };
@@ -115,7 +115,7 @@ describe('horseModel', () => {
       const horseData = {
         name: 'Full Horse',
         age: 7,
-        breedId: 1,
+        breed: { connect: { id: 1 } },
         ownerId: 1,
         stableId: 1,
         sex: 'stallion',
@@ -130,7 +130,7 @@ describe('horseModel', () => {
         id: 3, 
         name: 'Full Horse', 
         age: 7, 
-        breedId: 1,
+        breed: { connect: { id: 1 } },
         ownerId: 1,
         stableId: 1,
         sex: 'stallion',
@@ -150,7 +150,7 @@ describe('horseModel', () => {
           data: expect.objectContaining({
             name: 'Full Horse',
             age: 7,
-            breedId: 1,
+            breed: { connect: { id: 1 } },
             ownerId: 1,
             stableId: 1,
             sex: 'stallion',
@@ -173,14 +173,14 @@ describe('horseModel', () => {
     });
 
     it('should throw an error if name is missing', async () => {
-      const horseData = { age: 3, breedId: 1 };
+      const horseData = { age: 3, breed: { connect: { id: 1 } } };
 
       await expect(createHorse(horseData)).rejects.toThrow('Horse name is required');
       expect(mockPrisma.horse.create).not.toHaveBeenCalled();
     });
 
     it('should throw an error if age is missing', async () => {
-      const horseData = { name: 'No Age Horse', breedId: 1 };
+      const horseData = { name: 'No Age Horse', breed: { connect: { id: 1 } } };
 
       await expect(createHorse(horseData)).rejects.toThrow('Horse age is required');
       expect(mockPrisma.horse.create).not.toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe('horseModel', () => {
         id: 4, 
         name: 'Number Breed Horse', 
         age: 4, 
-        breedId: 3,
+        breed: { connect: { id: 3 } },
         createdAt: new Date()
       };
       
@@ -222,7 +222,7 @@ describe('horseModel', () => {
         data: {
           name: 'Number Breed Horse',
           age: 4,
-          breedId: 3
+          breed: { connect: { id: 3 } }
         },
         include: {
           breed: true,
@@ -235,7 +235,7 @@ describe('horseModel', () => {
     });
 
     it('should throw an error if Prisma client fails to create', async () => {
-      const horseData = { name: 'Error Horse', age: 3, breedId: 1 };
+      const horseData = { name: 'Error Horse', age: 3, breed: { connect: { id: 1 } } };
       const dbError = new Error('DB create error');
       mockPrisma.horse.create.mockRejectedValue(dbError);
 
@@ -252,7 +252,7 @@ describe('horseModel', () => {
         id: horseId, 
         name: 'Found Horse', 
         age: 7, 
-        breedId: 1,
+        breed: { connect: { id: 1 } },
         createdAt: new Date(),
         breed: { id: 1, name: 'Arabian' },
         owner: { id: 1, name: 'John Doe' },

@@ -60,7 +60,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Good Condition Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 85,
           stress_level: 15,
           epigenetic_modifiers: {
@@ -107,7 +107,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Poor Condition Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 25,
           stress_level: 85,
           epigenetic_modifiers: {
@@ -154,7 +154,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Completed Development Foal',
           age: 1,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 75,
           stress_level: 25,
           epigenetic_modifiers: {
@@ -195,7 +195,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'No Development Record Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 60,
           stress_level: 30,
           epigenetic_modifiers: {
@@ -224,7 +224,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Existing Traits Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 80,
           stress_level: 20,
           epigenetic_modifiers: {
@@ -283,7 +283,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Multi Test Foal 1',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 70,
           stress_level: 30,
           epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
@@ -294,7 +294,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Multi Test Foal 2',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 40,
           stress_level: 60,
           epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
@@ -341,7 +341,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Manual Evaluation Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 75,
           stress_level: 25,
           epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
@@ -372,7 +372,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Development List Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 65,
           stress_level: 35,
           epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
@@ -452,7 +452,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Error Test Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 50,
           stress_level: 50,
           epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
@@ -483,7 +483,7 @@ describe('Cron Jobs Integration Tests', () => {
         data: {
           name: 'Missing Modifiers Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 60,
           stress_level: 40
           // No epigenetic_modifiers field

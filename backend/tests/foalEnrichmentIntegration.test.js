@@ -21,7 +21,7 @@ describe('Foal Enrichment API Integration Tests', () => {
       data: {
         name: 'Test Enrichment Foal',
         age: 0,
-        breedId: testBreed.id,
+        breed: { connect: { id: testBreed.id } },
         bond_score: 50,
         stress_level: 20
       }
@@ -286,7 +286,7 @@ describe('Foal Enrichment API Integration Tests', () => {
         data: {
           name: 'Extreme Test Foal',
           age: 0,
-          breedId: testBreed.id,
+          breed: { connect: { id: testBreed.id } },
           bond_score: 95,
           stress_level: 5
         }

@@ -141,7 +141,7 @@ describe('Training System Complete Test', () => {
         data: {
           name: 'Training Horse 1',
           age: 4,
-          breedId: breed.id,
+          breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'mare',
           health_status: 'Good'
@@ -151,7 +151,7 @@ describe('Training System Complete Test', () => {
         data: {
           name: 'Training Horse 2', 
           age: 5,
-          breedId: breed.id,
+          breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'stallion',
           health_status: 'Good'
@@ -161,7 +161,7 @@ describe('Training System Complete Test', () => {
         data: {
           name: 'Young Horse',
           age: 2,
-          breedId: breed.id,
+          breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'colt',
           health_status: 'Good'

@@ -1,6 +1,6 @@
 import { getLastTrainingDate, getHorseAge, logTrainingSession, getAnyRecentTraining } from '../models/trainingModel.js';
 import { incrementDisciplineScore, getHorseById } from '../models/horseModel.js';
-import { getPlayerWithHorses } from '../models/playerModel.js';
+import { getUserWithHorses } from '../models/userModel.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -196,30 +196,30 @@ async function getTrainingStatus(horseId, discipline) {
 }
 
 /**
- * Get all horses owned by a player that are eligible for training in at least one discipline
- * @param {string} playerId - UUID of the player
+ * Get all horses owned by a user that are eligible for training in at least one discipline
+ * @param {number} userId - ID of the user
  * @returns {Array} - Array of horses with their trainable disciplines
  * @throws {Error} - If validation fails or database error occurs
  */
-async function getTrainableHorses(playerId) {
+async function getTrainableHorses(userId) {
   try {
     // Validate input parameters
-    if (!playerId) {
-      throw new Error('Player ID is required');
+    if (!userId) {
+      throw new Error('User ID is required');
     }
 
-    logger.info(`[trainingController.getTrainableHorses] Getting trainable horses for player ${playerId}`);
+    logger.info(`[trainingController.getTrainableHorses] Getting trainable horses for user ${userId}`);
 
-    // Get player with their horses
-    const player = await getPlayerWithHorses(playerId);
+    // Get user with their horses
+    const user = await getUserWithHorses(userId);
     
-    if (!player) {
-      logger.warn(`[trainingController.getTrainableHorses] Player ${playerId} not found`);
+    if (!user) {
+      logger.warn(`[trainingController.getTrainableHorses] User ${userId} not found`);
       return [];
     }
 
-    if (!player.horses || player.horses.length === 0) {
-      logger.info(`[trainingController.getTrainableHorses] Player ${playerId} has no horses`);
+    if (!user.horses || user.horses.length === 0) {
+      logger.info(`[trainingController.getTrainableHorses] User ${userId} has no horses`);
       return [];
     }
 
@@ -229,7 +229,7 @@ async function getTrainableHorses(playerId) {
     const trainableHorses = [];
 
     // Check each horse for training eligibility
-    for (const horse of player.horses) {
+    for (const horse of user.horses) {
       // Skip horses under 3 years old
       if (horse.age < 3) {
         logger.debug(`[trainingController.getTrainableHorses] Horse ${horse.id} (${horse.name}) is too young (${horse.age} years)`);
@@ -272,7 +272,7 @@ async function getTrainableHorses(playerId) {
       }
     }
 
-    logger.info(`[trainingController.getTrainableHorses] Found ${trainableHorses.length} trainable horses for player ${playerId}`);
+    logger.info(`[trainingController.getTrainableHorses] Found ${trainableHorses.length} trainable horses for user ${userId}`);
     return trainableHorses;
 
   } catch (error) {

@@ -35,7 +35,7 @@ describe('horseModel - Additional Tests', () => {
 
 describe('updateDisciplineScore', () => {
   it('should update discipline score for existing horse', async () => {
-    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breedId: 1 };
+    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breed: { connect: { id: 1 } } };
     const mockFoundHorse = { 
       id: 1, 
       disciplineScores: null,
@@ -60,7 +60,7 @@ describe('updateDisciplineScore', () => {
     const horse = await createHorse({
       name: 'Test Horse',
       age: 4,
-      breedId: 1
+      breed: { connect: { id: 1 } }
     });
 
     const updatedHorse = await updateDisciplineScore(horse.id, 'Dressage', 5);
@@ -71,7 +71,7 @@ describe('updateDisciplineScore', () => {
   });
 
   it('should add to existing discipline score', async () => {
-    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breedId: 1 };
+    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breed: { connect: { id: 1 } } };
     const mockFoundHorse1 = { id: 1, disciplineScores: null };
     const mockFoundHorse2 = { id: 1, disciplineScores: { 'Dressage': 5 } };
     const mockUpdatedHorse1 = { id: 1, disciplineScores: { 'Dressage': 5 } };
@@ -88,7 +88,7 @@ describe('updateDisciplineScore', () => {
     const horse = await createHorse({
       name: 'Test Horse',
       age: 4,
-      breedId: 1
+      breed: { connect: { id: 1 } }
     });
 
     // First training session
@@ -101,7 +101,7 @@ describe('updateDisciplineScore', () => {
   });
 
   it('should handle multiple disciplines independently', async () => {
-    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breedId: 1 };
+    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breed: { connect: { id: 1 } } };
     const mockFoundHorse1 = { id: 1, disciplineScores: null };
     const mockFoundHorse2 = { id: 1, disciplineScores: { 'Dressage': 5 } };
     const mockUpdatedHorse1 = { id: 1, disciplineScores: { 'Dressage': 5 } };
@@ -118,7 +118,7 @@ describe('updateDisciplineScore', () => {
     const horse = await createHorse({
       name: 'Test Horse',
       age: 4,
-      breedId: 1
+      breed: { connect: { id: 1 } }
     });
 
     await updateDisciplineScore(horse.id, 'Dressage', 5);
@@ -149,7 +149,7 @@ describe('updateDisciplineScore', () => {
     const horse = await createHorse({
       name: 'Test Horse',
       age: 4,
-      breedId: 1
+      breed: { connect: { id: 1 } }
     });
 
     await expect(updateDisciplineScore(horse.id, '', 5))
@@ -163,7 +163,7 @@ describe('updateDisciplineScore', () => {
     const horse = await createHorse({
       name: 'Test Horse',
       age: 4,
-      breedId: 1
+      breed: { connect: { id: 1 } }
     });
 
     await expect(updateDisciplineScore(horse.id, 'Dressage', 0))
@@ -179,7 +179,7 @@ describe('updateDisciplineScore', () => {
 
 describe('getDisciplineScores', () => {
   it('should return empty object for horse with no scores', async () => {
-    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breedId: 1 };
+    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breed: { connect: { id: 1 } } };
     const mockHorseWithNoScores = { 
       id: 1, 
       disciplineScores: null
@@ -191,7 +191,7 @@ describe('getDisciplineScores', () => {
     const horse = await createHorse({
       name: 'Test Horse',
       age: 4,
-      breedId: 1
+      breed: { connect: { id: 1 } }
     });
 
     const scores = await getDisciplineScores(horse.id);
@@ -199,7 +199,7 @@ describe('getDisciplineScores', () => {
   });
 
   it('should return discipline scores for horse with scores', async () => {
-    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breedId: 1 };
+    const mockHorse = { id: 1, name: 'Test Horse', age: 4, breed: { connect: { id: 1 } } };
     const mockHorseWithScores = { 
       id: 1, 
       disciplineScores: { 'Dressage': 5, 'Show Jumping': 3 }
@@ -211,7 +211,7 @@ describe('getDisciplineScores', () => {
     const horse = await createHorse({
       name: 'Test Horse',
       age: 4,
-      breedId: 1
+      breed: { connect: { id: 1 } }
     });
 
     const scores = await getDisciplineScores(horse.id);

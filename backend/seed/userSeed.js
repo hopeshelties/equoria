@@ -1,0 +1,129 @@
+import prisma from '../db/index.js';
+import bcrypt from 'bcrypt';
+import logger from '../utils/logger.js';
+
+/**
+ * Creates a test user with horses for development and testing
+ */
+async function seedUserWithHorses() {
+  try {
+    console.log('🌱 Starting user and horse seeding...');
+
+    // Check if test user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'test@example.com' }
+    });
+
+    if (existingUser) {
+      console.log('✅ Test user already exists, skipping creation');
+      return true;
+    }
+
+    // Create test user
+    const hashedPassword = await bcrypt.hash('TestPassword123!', 10);
+    
+    const testUser = await prisma.user.create({
+      data: {
+        name: 'Test User',
+        email: 'test@example.com',
+        password: hashedPassword,
+        money: 5000,
+        level: 5,
+        xp: 2500,
+        settings: {
+          darkMode: true,
+          notifications: true
+        }
+      }
+    });
+
+    console.log(`✅ Created test user: ${testUser.name} (ID: ${testUser.id})`);
+
+    // Ensure we have a breed
+    let breed = await prisma.breed.findFirst();
+    if (!breed) {
+      breed = await prisma.breed.create({
+        data: {
+          name: 'Thoroughbred',
+          description: 'A hot-blooded horse breed best known for its use in horse racing.'
+        }
+      });
+      console.log(`✅ Created breed: ${breed.name}`);
+    }
+
+    // Create test horses linked to the user
+    const horses = await Promise.all([
+      prisma.horse.create({
+        data: {
+          name: 'Thunder',
+          age: 4,
+          breed: { connect: { id: breed.id } },
+          ownerId: testUser.id,
+          sex: 'stallion',
+          health_status: 'Good',
+          disciplineScores: {
+            Racing: 15,
+            Dressage: 10
+          }
+        }
+      }),
+      prisma.horse.create({
+        data: {
+          name: 'Lightning',
+          age: 5,
+          breed: { connect: { id: breed.id } },
+          ownerId: testUser.id,
+          sex: 'mare',
+          health_status: 'Good',
+          disciplineScores: {
+            'Show Jumping': 20,
+            'Cross Country': 12
+          }
+        }
+      }),
+      prisma.horse.create({
+        data: {
+          name: 'Young Star',
+          age: 2,
+          breed: { connect: { id: breed.id } },
+          ownerId: testUser.id,
+          sex: 'colt',
+          health_status: 'Good'
+        }
+      })
+    ]);
+
+    console.log(`✅ Created ${horses.length} horses for test user:`);
+    horses.forEach(horse => {
+      console.log(`   - ${horse.name} (${horse.age} years old, ${horse.sex})`);
+    });
+
+    console.log('🎉 User and horse seeding completed successfully!');
+    return true;
+
+  } catch (error) {
+    console.error('❌ Error seeding user and horses:', error);
+    return false;
+  }
+}
+
+// Run the seeding function
+seedUserWithHorses()
+  .then((success) => {
+    if (success) {
+      console.log('✅ Seeding completed successfully');
+      process.exit(0);
+    } else {
+      console.log('❌ Seeding failed');
+      process.exit(1);
+    }
+  })
+  .catch((error) => {
+    console.error('❌ Seeding error:', error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+
+export { seedUserWithHorses }; 
