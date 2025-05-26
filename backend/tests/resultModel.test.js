@@ -1,4 +1,9 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock Prisma client
 const mockPrisma = {
@@ -12,12 +17,12 @@ const mockPrisma = {
 };
 
 // Mock the database import
-jest.unstable_mockModule('../db/index.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: mockPrisma
 }));
 
 // Import the module under test after mocking
-const { saveResult, getResultsByHorse, getResultsByShow, getResultById } = await import('../models/resultModel.js');
+const { saveResult, getResultsByHorse, getResultsByShow, getResultById } = await import(join(__dirname, '../models/resultModel.js'));
 
 describe('resultModel', () => {
   beforeEach(() => {
@@ -448,4 +453,4 @@ describe('resultModel', () => {
       await expect(getResultById(1)).rejects.toThrow('Database error in getResultById: Database connection failed');
     });
   });
-}); 
+});

@@ -4,6 +4,11 @@
  */
 
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock dependencies
 const mockPrisma = {
@@ -37,24 +42,24 @@ const mockLogger = {
 };
 
 // Mock the imports
-jest.unstable_mockModule('../db/index.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: mockPrisma
 }));
 
-jest.unstable_mockModule('../utils/logger.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
   default: mockLogger
 }));
 
 // Import the module under test
-const { 
-  assignGroomToFoal, 
-  ensureDefaultGroomAssignment, 
+const {
+  assignGroomToFoal,
+  ensureDefaultGroomAssignment,
   getOrCreateDefaultGroom,
   calculateGroomInteractionEffects,
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
   PERSONALITY_TRAITS
-} = await import('../utils/groomSystem.js');
+} = await import(join(__dirname, '../utils/groomSystem.js'));
 
 describe('Groom Assignment System', () => {
   beforeEach(() => {
@@ -214,7 +219,7 @@ describe('Groom Assignment System', () => {
         speciality: 'foal_care',
         playerId: 'player-1'
       });
-      
+
       // Mock the assignGroomToFoal call
       mockPrisma.horse.findUnique.mockResolvedValue({ id: 1, name: 'Test Foal', age: 1 });
       mockPrisma.groom.findUnique.mockResolvedValue({
@@ -380,7 +385,7 @@ describe('Groom Assignment System', () => {
 
       // Should not throw error, should use defaults
       const effects = calculateGroomInteractionEffects(invalidGroom, { id: 1, bond_score: 50 }, 'daily_care', 60);
-      
+
       expect(effects).toHaveProperty('bondingChange');
       expect(effects).toHaveProperty('stressChange');
       expect(effects).toHaveProperty('cost');

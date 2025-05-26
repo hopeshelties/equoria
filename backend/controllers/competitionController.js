@@ -1,5 +1,6 @@
 import { getHorseById } from '../models/horseModel.js';
 import { saveResult, getResultsByShow } from '../models/resultModel.js';
+import { addXp } from '../models/playerModel.js';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
 import {
@@ -173,6 +174,36 @@ async function enterAndRunShow(horseIds, show) {
           } catch (error) {
             logger.error(`[competitionController.enterAndRunShow] Failed to update horse rewards for ${simResult.horseId}: ${error.message}`);
             // Continue with other horses even if one update fails
+          }
+        }
+
+        // NEW: Award XP to horse owner based on placement
+        if (simResult.placement) {
+          try {
+            // Get horse to find owner
+            const horse = await getHorseById(simResult.horseId);
+            if (horse && horse.ownerId) {
+              let xpAmount = 0;
+              switch (simResult.placement) {
+                case '1st':
+                  xpAmount = 20;
+                  break;
+                case '2nd':
+                  xpAmount = 15;
+                  break;
+                case '3rd':
+                  xpAmount = 10;
+                  break;
+              }
+
+              if (xpAmount > 0) {
+                const xpResult = await addXp(horse.ownerId, xpAmount);
+                logger.info(`[competitionController.enterAndRunShow] Awarded ${xpAmount} XP to player ${horse.ownerId} for ${simResult.placement} place${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
+              }
+            }
+          } catch (error) {
+            logger.error(`[competitionController.enterAndRunShow] Failed to award XP for horse ${simResult.horseId}: ${error.message}`);
+            // Continue with other horses even if XP award fails
           }
         }
       }

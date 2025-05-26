@@ -1,4 +1,9 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock dependencies
 const mockHorseModel = {
@@ -30,20 +35,20 @@ const mockPlayerUpdates = {
 };
 
 // Mock the imports
-jest.unstable_mockModule('../models/horseModel.js', () => mockHorseModel);
-jest.unstable_mockModule('../models/resultModel.js', () => mockResultModel);
-jest.unstable_mockModule('../logic/simulateCompetition.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => mockHorseModel);
+jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => mockResultModel);
+jest.unstable_mockModule(join(__dirname, '../logic/simulateCompetition.js'), () => ({
   simulateCompetition: mockSimulateCompetition
 }));
-jest.unstable_mockModule('../utils/isHorseEligible.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/isHorseEligible.js'), () => ({
   isHorseEligibleForShow: mockIsHorseEligibleForShow
 }));
-jest.unstable_mockModule('../utils/competitionRewards.js', () => mockCompetitionRewards);
-jest.unstable_mockModule('../utils/horseUpdates.js', () => mockHorseUpdates);
-jest.unstable_mockModule('../utils/playerUpdates.js', () => mockPlayerUpdates);
+jest.unstable_mockModule(join(__dirname, '../utils/competitionRewards.js'), () => mockCompetitionRewards);
+jest.unstable_mockModule(join(__dirname, '../utils/horseUpdates.js'), () => mockHorseUpdates);
+jest.unstable_mockModule(join(__dirname, '../utils/playerUpdates.js'), () => mockPlayerUpdates);
 
 // Import the module under test after mocking
-const { enterAndRunShow } = await import('../controllers/competitionController.js');
+const { enterAndRunShow } = await import(join(__dirname, '../controllers/competitionController.js'));
 
 describe('competitionController', () => {
   beforeEach(() => {

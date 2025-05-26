@@ -1,4 +1,9 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock the trainingModel functions
 const mockGetHorseAge = jest.fn();
@@ -13,24 +18,24 @@ const mockGetHorseById = jest.fn();
 // Mock the playerModel functions
 const mockGetPlayerWithHorses = jest.fn();
 
-jest.unstable_mockModule('../models/trainingModel.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/trainingModel.js'), () => ({
   getHorseAge: mockGetHorseAge,
   getLastTrainingDate: mockGetLastTrainingDate,
   logTrainingSession: mockLogTrainingSession,
   getAnyRecentTraining: mockGetAnyRecentTraining
 }));
 
-jest.unstable_mockModule('../models/horseModel.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
   incrementDisciplineScore: mockIncrementDisciplineScore,
   getHorseById: mockGetHorseById
 }));
 
-jest.unstable_mockModule('../models/playerModel.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => ({
   getPlayerWithHorses: mockGetPlayerWithHorses
 }));
 
 // Import the module after mocking
-const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses } = await import('../controllers/trainingController.js');
+const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses } = await import(join(__dirname, '../controllers/trainingController.js'));
 
 describe('trainingController', () => {
   beforeEach(() => {
@@ -317,7 +322,7 @@ describe('trainingController', () => {
       // Both should be blocked due to global cooldown
       expect(racingResult.eligible).toBe(false);
       expect(racingResult.reason).toBe('Training cooldown active for this horse');
-      
+
       expect(jumpingResult.eligible).toBe(false);
       expect(jumpingResult.reason).toBe('Training cooldown active for this horse');
     });
@@ -610,4 +615,4 @@ describe('trainingController', () => {
       });
     });
   });
-}); 
+});

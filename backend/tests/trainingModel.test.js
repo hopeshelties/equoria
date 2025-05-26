@@ -1,11 +1,16 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock the Prisma client
 const mockTrainingLogCreate = jest.fn();
 const mockTrainingLogFindFirst = jest.fn();
 const mockHorseFindUnique = jest.fn();
 
-jest.unstable_mockModule('../db/index.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: {
     trainingLog: {
       create: mockTrainingLogCreate,
@@ -18,7 +23,7 @@ jest.unstable_mockModule('../db/index.js', () => ({
 }));
 
 // Import the module after mocking
-const { logTrainingSession, getLastTrainingDate, getHorseAge } = await import('../models/trainingModel.js');
+const { logTrainingSession, getLastTrainingDate, getHorseAge } = await import(join(__dirname, '../models/trainingModel.js'));
 
 describe('trainingModel', () => {
   beforeEach(() => {
@@ -68,10 +73,10 @@ describe('trainingModel', () => {
     it('should throw error if horseId is not a positive integer', async () => {
       await expect(logTrainingSession({ horseId: -1, discipline: 'Racing' }))
         .rejects.toThrow('Horse ID must be a positive integer');
-      
+
       await expect(logTrainingSession({ horseId: 0, discipline: 'Racing' }))
         .rejects.toThrow('Horse ID must be a positive integer');
-      
+
       await expect(logTrainingSession({ horseId: 'invalid', discipline: 'Racing' }))
         .rejects.toThrow('Horse ID must be a positive integer');
     });
@@ -116,10 +121,10 @@ describe('trainingModel', () => {
     it('should throw error if horseId is not a positive integer', async () => {
       await expect(getLastTrainingDate(-1, 'Racing'))
         .rejects.toThrow('Horse ID must be a positive integer');
-      
+
       await expect(getLastTrainingDate(0, 'Racing'))
         .rejects.toThrow('Horse ID must be a positive integer');
-      
+
       await expect(getLastTrainingDate('invalid', 'Racing'))
         .rejects.toThrow('Horse ID must be a positive integer');
     });
@@ -127,7 +132,7 @@ describe('trainingModel', () => {
     it('should throw error if discipline is missing', async () => {
       await expect(getLastTrainingDate(5, ''))
         .rejects.toThrow('Discipline is required');
-      
+
       await expect(getLastTrainingDate(5, null))
         .rejects.toThrow('Discipline is required');
     });
@@ -167,10 +172,10 @@ describe('trainingModel', () => {
     it('should throw error if horseId is not a positive integer', async () => {
       await expect(getHorseAge(-1))
         .rejects.toThrow('Horse ID must be a positive integer');
-      
+
       await expect(getHorseAge(0))
         .rejects.toThrow('Horse ID must be a positive integer');
-      
+
       await expect(getHorseAge('invalid'))
         .rejects.toThrow('Horse ID must be a positive integer');
     });
@@ -202,9 +207,9 @@ describe('trainingModel', () => {
 
       const age = await getHorseAge(5);
       expect(age).toBe(2);
-      
+
       // In the actual training logic, this would prevent training
       // since horse is under 3 years old
     });
   });
-}); 
+});

@@ -1,4 +1,9 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock the database
 const mockPrisma = {
@@ -23,16 +28,16 @@ const mockLogger = {
 };
 
 // Mock modules
-jest.unstable_mockModule('../db/index.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: mockPrisma
 }));
 
-jest.unstable_mockModule('../utils/logger.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
   default: mockLogger
 }));
 
 // Import after mocking
-const { getFoalDevelopment, completeActivity, advanceDay } = await import('../models/foalModel.js');
+const { getFoalDevelopment, completeActivity, advanceDay } = await import(join(__dirname, '../models/foalModel.js'));
 
 describe('foalModel', () => {
   beforeEach(() => {
@@ -249,4 +254,4 @@ describe('foalModel', () => {
       await expect(advanceDay('invalid')).rejects.toThrow('Foal ID must be a positive integer');
     });
   });
-}); 
+});

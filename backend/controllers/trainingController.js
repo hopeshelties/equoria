@@ -1,6 +1,6 @@
 import { getLastTrainingDate, getHorseAge, logTrainingSession, getAnyRecentTraining } from '../models/trainingModel.js';
 import { incrementDisciplineScore, getHorseById } from '../models/horseModel.js';
-import { getPlayerWithHorses } from '../models/playerModel.js';
+import { getPlayerWithHorses, addXp } from '../models/playerModel.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -31,7 +31,7 @@ async function canTrain(horseId, discipline) {
 
     // Check horse age requirement (must be 3+ years old)
     const age = await getHorseAge(parsedHorseId);
-    
+
     if (age === null) {
       logger.warn(`[trainingController.canTrain] Horse ${parsedHorseId} not found`);
       return {
@@ -50,16 +50,16 @@ async function canTrain(horseId, discipline) {
 
     // Check cooldown period (7 days since last training in ANY discipline)
     const lastTrainingDate = await getAnyRecentTraining(parsedHorseId);
-    
+
     if (lastTrainingDate) {
       const now = new Date();
       const diff = now - new Date(lastTrainingDate);
       const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 days in milliseconds
-      
+
       if (diff < sevenDays) {
         const remainingTime = sevenDays - diff;
         const remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
-        
+
         logger.info(`[trainingController.canTrain] Horse ${parsedHorseId} still in cooldown for any training (${remainingDays} days remaining)`);
         return {
           eligible: false,
@@ -94,7 +94,7 @@ async function trainHorse(horseId, discipline) {
 
     // Check if horse is eligible to train
     const eligibilityCheck = await canTrain(horseId, discipline);
-    
+
     if (!eligibilityCheck.eligible) {
       logger.warn(`[trainingController.trainHorse] Training rejected: ${eligibilityCheck.reason}`);
       return {
@@ -108,16 +108,27 @@ async function trainHorse(horseId, discipline) {
 
     // Log the training session
     const trainingLog = await logTrainingSession({ horseId, discipline });
-    
+
     // Update the horse's discipline score by +5
     const updatedHorse = await incrementDisciplineScore(horseId, discipline);
-    
+
+    // NEW: Award XP to horse owner for training
+    try {
+      if (updatedHorse && updatedHorse.ownerId) {
+        const xpResult = await addXp(updatedHorse.ownerId, 5);
+        logger.info(`[trainingController.trainHorse] Awarded 5 XP to player ${updatedHorse.ownerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
+      }
+    } catch (error) {
+      logger.error(`[trainingController.trainHorse] Failed to award training XP: ${error.message}`);
+      // Continue with training completion even if XP award fails
+    }
+
     // Calculate next eligible training date (7 days from now)
     const nextEligible = new Date();
     nextEligible.setDate(nextEligible.getDate() + 7);
-    
+
     logger.info(`[trainingController.trainHorse] Successfully trained horse ${horseId} in ${discipline} (Log ID: ${trainingLog.id})`);
-    
+
     return {
       success: true,
       updatedHorse: updatedHorse,
@@ -144,23 +155,23 @@ async function getTrainingStatus(horseId, discipline) {
 
     // Get eligibility check (now uses global cooldown)
     const eligibilityCheck = await canTrain(horseId, discipline);
-    
+
     // Get additional status information
     const age = await getHorseAge(horseId);
     const lastTrainingDateInDiscipline = await getLastTrainingDate(horseId, discipline);
     const lastTrainingDateAny = await getAnyRecentTraining(horseId);
-    
+
     let cooldownInfo = null;
     if (lastTrainingDateAny) {
       const now = new Date();
       const diff = now - new Date(lastTrainingDateAny);
       const sevenDays = 1000 * 60 * 60 * 24 * 7;
-      
+
       if (diff < sevenDays) {
         const remainingTime = sevenDays - diff;
         const remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
         const remainingHours = Math.ceil(remainingTime / (1000 * 60 * 60));
-        
+
         cooldownInfo = {
           active: true,
           remainingDays: remainingDays,
@@ -186,7 +197,7 @@ async function getTrainingStatus(horseId, discipline) {
     };
 
     logger.info(`[trainingController.getTrainingStatus] Training status retrieved for horse ${horseId}: eligible=${status.eligible}`);
-    
+
     return status;
 
   } catch (error) {
@@ -212,7 +223,7 @@ async function getTrainableHorses(playerId) {
 
     // Get player with their horses
     const player = await getPlayerWithHorses(playerId);
-    
+
     if (!player) {
       logger.warn(`[trainingController.getTrainableHorses] Player ${playerId} not found`);
       return [];
@@ -225,7 +236,7 @@ async function getTrainableHorses(playerId) {
 
     // Define all available disciplines
     const allDisciplines = ['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western'];
-    
+
     const trainableHorses = [];
 
     // Check each horse for training eligibility
@@ -239,9 +250,9 @@ async function getTrainableHorses(playerId) {
       try {
         // Check if horse has trained in ANY discipline within the last 7 days
         const lastTrainingDate = await getAnyRecentTraining(horse.id);
-        
+
         let isTrainable = false;
-        
+
         if (!lastTrainingDate) {
           // Horse has never trained, so it's trainable in all disciplines
           isTrainable = true;
@@ -250,7 +261,7 @@ async function getTrainableHorses(playerId) {
           const now = new Date();
           const diff = now - new Date(lastTrainingDate);
           const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 days in milliseconds
-          
+
           if (diff >= sevenDays) {
             isTrainable = true;
           }
@@ -265,7 +276,7 @@ async function getTrainableHorses(playerId) {
             trainableDisciplines: allDisciplines // All disciplines available since cooldown is global
           });
         }
-        
+
       } catch (error) {
         logger.warn(`[trainingController.getTrainableHorses] Error checking training eligibility for horse ${horse.id}: ${error.message}`);
         // Continue checking other horses even if one fails
@@ -289,17 +300,17 @@ async function getTrainableHorses(playerId) {
 async function trainRouteHandler(req, res) {
   try {
     const { horseId, discipline } = req.body;
-    
+
     logger.info(`[trainingController.trainRouteHandler] Training request for horse ${horseId} in ${discipline}`);
-    
+
     // Call the existing trainHorse function
     const result = await trainHorse(horseId, discipline);
-    
+
     if (result.success) {
       // Extract the updated score for the specific discipline
       const disciplineScores = result.updatedHorse?.disciplineScores || {};
       const updatedScore = disciplineScores[discipline] || 0;
-      
+
       // Format response according to Task 2.6 specifications
       res.json({
         success: true,
@@ -314,7 +325,7 @@ async function trainRouteHandler(req, res) {
         message: result.message
       });
     }
-    
+
   } catch (error) {
     logger.error(`[trainingController.trainRouteHandler] Error: ${error.message}`);
     res.status(500).json({
@@ -331,4 +342,4 @@ export {
   getTrainingStatus,
   getTrainableHorses,
   trainRouteHandler
-}; 
+};
