@@ -7,6 +7,7 @@
  * - Test both horses with and without the trait
  */
 
+import { jest } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
 describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => {
@@ -36,32 +37,39 @@ describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => 
   }
 
   it('should apply +5 flat bonus for discipline_affinity_jump trait in Show Jumping', () => {
-    // Create two identical horses, one with discipline affinity trait
-    const horseWithAffinity = createDemoHorse(1, 'JumpSpecialist', 'discipline_affinity_show_jumping');
-    const horseWithoutAffinity = createDemoHorse(2, 'RegularHorse');
+    // Mock Math.random to ensure deterministic results
+    const mockRandom = jest.spyOn(Math, 'random');
+    mockRandom.mockReturnValue(0.5); // Neutral luck (0% modifier)
 
-    const show = {
-      id: 1,
-      name: 'Show Jumping Competition',
-      discipline: 'Show Jumping'
-    };
+    try {
+      // Create two identical horses, one with discipline affinity trait
+      const horseWithAffinity = createDemoHorse(1, 'JumpSpecialist', 'discipline_affinity_show_jumping');
+      const horseWithoutAffinity = createDemoHorse(2, 'RegularHorse');
 
-    // Run competition simulation
-    const results = simulateCompetition([horseWithAffinity, horseWithoutAffinity], show);
+      const show = {
+        id: 1,
+        name: 'Show Jumping Competition',
+        discipline: 'Show Jumping'
+      };
 
-    // Find results for each horse
-    const affinityResult = results.find(r => r.horseId === 1);
-    const regularResult = results.find(r => r.horseId === 2);
+      // Run competition simulation
+      const results = simulateCompetition([horseWithAffinity, horseWithoutAffinity], show);
 
-    // The horse with affinity should have a higher score
-    // Since all other factors are identical, the difference should be approximately +5
-    // (accounting for random luck modifier which can vary ±9%)
-    expect(affinityResult.score).toBeGreaterThan(regularResult.score);
+      // Find results for each horse
+      const affinityResult = results.find(r => r.horseId === 1);
+      const regularResult = results.find(r => r.horseId === 2);
 
-    // The score difference should be close to 5 points (within random variance)
-    const scoreDifference = affinityResult.score - regularResult.score;
-    expect(scoreDifference).toBeGreaterThan(0);
-    expect(scoreDifference).toBeLessThan(15); // Should be around 5 ± random variance
+      // The horse with affinity should have a higher score
+      // Since all other factors are identical and luck is neutral, the difference should be approximately +5
+      expect(affinityResult.score).toBeGreaterThan(regularResult.score);
+
+      // The score difference should be close to 5 points (with neutral luck)
+      const scoreDifference = affinityResult.score - regularResult.score;
+      expect(scoreDifference).toBeGreaterThan(0);
+      expect(scoreDifference).toBeLessThan(15); // Should be around 5 with some trait effects
+    } finally {
+      mockRandom.mockRestore();
+    }
   });
 
   it('should demonstrate the exact code pattern from TASK 9 specification', () => {

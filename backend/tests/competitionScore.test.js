@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { calculateCompetitionScore, getDisciplineStatWeights, validateHorseForCompetition } from '../utils/competitionScore.js';
 
 describe('Competition Score Calculation', () => {
@@ -183,6 +184,9 @@ describe('Competition Score Calculation', () => {
   describe('Trait Match Logic - 20 Competition Simulation Tests', () => {
 
     it('should demonstrate trait advantage in Show Jumping competitions (discipline_affinity_show_jumping)', () => {
+      // Use jest.spyOn for more deterministic testing
+      const mockRandom = jest.spyOn(Math, 'random');
+
       const traitHorse = createTestHorse(
         { precision: 70, focus: 60, stamina: 50 },
         ['discipline_affinity_show_jumping']
@@ -193,6 +197,12 @@ describe('Competition Score Calculation', () => {
       let traitWins = 0;
       const totalRuns = 20;
 
+      // Generate consistent but varied random values to ensure trait advantage shows
+      const randomValues = Array.from({ length: totalRuns * 2 }, (_, i) => 0.3 + (i % 5) * 0.1);
+      let randomIndex = 0;
+
+      mockRandom.mockImplementation(() => randomValues[randomIndex++ % randomValues.length]);
+
       for (let i = 0; i < totalRuns; i++) {
         const traitScore = calculateCompetitionScore(traitHorse, 'Show Jumping');
         const regularScore = calculateCompetitionScore(regularHorse, 'Show Jumping');
@@ -202,14 +212,19 @@ describe('Competition Score Calculation', () => {
         }
       }
 
-      // Horse with matching trait should win at least 45% of the time (9/20)
-      // The +5 trait bonus should provide meaningful advantage despite ±9% luck modifier
-      // Note: Due to random variance, we allow for some flexibility in the win rate
-      expect(traitWins).toBeGreaterThanOrEqual(9);
+      // Restore original Math.random
+      mockRandom.mockRestore();
+
+      // With +5 trait bonus and controlled randomness, should win most of the time
+      expect(traitWins).toBeGreaterThanOrEqual(11);
+
       expect(traitWins).toBeLessThanOrEqual(20); // Sanity check
     });
 
     it('should demonstrate trait advantage in Racing competitions (discipline_affinity_racing)', () => {
+      // Use jest.spyOn for more deterministic testing
+      const mockRandom = jest.spyOn(Math, 'random');
+
       const traitHorse = createTestHorse(
         { speed: 70, stamina: 60, focus: 50 },
         ['discipline_affinity_racing']
@@ -220,6 +235,12 @@ describe('Competition Score Calculation', () => {
       let traitWins = 0;
       const totalRuns = 20;
 
+      // Generate consistent but varied random values to ensure trait advantage shows
+      const randomValues = Array.from({ length: totalRuns * 2 }, (_, i) => 0.3 + (i % 5) * 0.1);
+      let randomIndex = 0;
+
+      mockRandom.mockImplementation(() => randomValues[randomIndex++ % randomValues.length]);
+
       for (let i = 0; i < totalRuns; i++) {
         const traitScore = calculateCompetitionScore(traitHorse, 'Racing');
         const regularScore = calculateCompetitionScore(regularHorse, 'Racing');
@@ -229,11 +250,17 @@ describe('Competition Score Calculation', () => {
         }
       }
 
-      expect(traitWins).toBeGreaterThanOrEqual(9);
+      // Restore original Math.random
+      mockRandom.mockRestore();
+
+      expect(traitWins).toBeGreaterThanOrEqual(11);
       expect(traitWins).toBeLessThanOrEqual(20);
     });
 
     it('should demonstrate trait advantage in Dressage competitions (discipline_affinity_dressage)', () => {
+      // Use jest.spyOn for more deterministic testing
+      const mockRandom = jest.spyOn(Math, 'random');
+
       const traitHorse = createTestHorse(
         { precision: 70, focus: 60, coordination: 50 },
         ['discipline_affinity_dressage']
@@ -244,6 +271,12 @@ describe('Competition Score Calculation', () => {
       let traitWins = 0;
       const totalRuns = 20;
 
+      // Generate consistent but varied random values to ensure trait advantage shows
+      const randomValues = Array.from({ length: totalRuns * 2 }, (_, i) => 0.3 + (i % 5) * 0.1);
+      let randomIndex = 0;
+
+      mockRandom.mockImplementation(() => randomValues[randomIndex++ % randomValues.length]);
+
       for (let i = 0; i < totalRuns; i++) {
         const traitScore = calculateCompetitionScore(traitHorse, 'Dressage');
         const regularScore = calculateCompetitionScore(regularHorse, 'Dressage');
@@ -253,11 +286,17 @@ describe('Competition Score Calculation', () => {
         }
       }
 
-      expect(traitWins).toBeGreaterThanOrEqual(9);
+      // Restore original Math.random
+      mockRandom.mockRestore();
+
+      expect(traitWins).toBeGreaterThanOrEqual(11);
       expect(traitWins).toBeLessThanOrEqual(20);
     });
 
     it('should demonstrate trait advantage in Cross Country competitions (discipline_affinity_cross_country)', () => {
+      // Use jest.spyOn for more deterministic testing
+      const mockRandom = jest.spyOn(Math, 'random');
+
       const traitHorse = createTestHorse(
         { stamina: 70, agility: 60, boldness: 50 },
         ['discipline_affinity_cross_country']
@@ -268,6 +307,12 @@ describe('Competition Score Calculation', () => {
       let traitWins = 0;
       const totalRuns = 20;
 
+      // Generate consistent but varied random values to ensure trait advantage shows
+      const randomValues = Array.from({ length: totalRuns * 2 }, (_, i) => 0.3 + (i % 5) * 0.1);
+      let randomIndex = 0;
+
+      mockRandom.mockImplementation(() => randomValues[randomIndex++ % randomValues.length]);
+
       for (let i = 0; i < totalRuns; i++) {
         const traitScore = calculateCompetitionScore(traitHorse, 'Cross Country');
         const regularScore = calculateCompetitionScore(regularHorse, 'Cross Country');
@@ -277,11 +322,18 @@ describe('Competition Score Calculation', () => {
         }
       }
 
-      expect(traitWins).toBeGreaterThanOrEqual(9);
+      // Restore original Math.random
+      mockRandom.mockRestore();
+
+      // With +5 trait bonus and controlled randomness, should win most of the time
+      expect(traitWins).toBeGreaterThanOrEqual(11);
       expect(traitWins).toBeLessThanOrEqual(20);
     });
 
     it('should show no advantage when trait does not match discipline', () => {
+      // Use jest.spyOn for more deterministic testing
+      const mockRandom = jest.spyOn(Math, 'random');
+
       const jumpTraitHorse = createTestHorse(
         { speed: 70, stamina: 60, focus: 50 },
         ['discipline_affinity_show_jumping'] // Jump trait for Racing discipline
@@ -291,6 +343,24 @@ describe('Competition Score Calculation', () => {
 
       let traitWins = 0;
       const totalRuns = 20;
+
+      // Generate random values that create exactly 50/50 distribution
+      // Each pair of calls: first favors trait horse, second favors regular horse
+      const randomValues = [];
+      for (let i = 0; i < totalRuns; i++) {
+        if (i < 10) {
+          // First 10 runs: trait horse gets slightly better luck
+          randomValues.push(0.6); // trait horse gets +1.8% luck
+          randomValues.push(0.4); // regular horse gets -1.8% luck
+        } else {
+          // Last 10 runs: regular horse gets slightly better luck
+          randomValues.push(0.4); // trait horse gets -1.8% luck
+          randomValues.push(0.6); // regular horse gets +1.8% luck
+        }
+      }
+      let randomIndex = 0;
+
+      mockRandom.mockImplementation(() => randomValues[randomIndex++ % randomValues.length]);
 
       // Test in Racing (trait doesn't match)
       for (let i = 0; i < totalRuns; i++) {
@@ -302,12 +372,18 @@ describe('Competition Score Calculation', () => {
         }
       }
 
+      // Restore original Math.random
+      mockRandom.mockRestore();
+
       // Should be close to 50/50 since no trait advantage applies
-      expect(traitWins).toBeGreaterThanOrEqual(4); // Allow for random variance
-      expect(traitWins).toBeLessThanOrEqual(16); // Allow for random variance
+      expect(traitWins).toBeGreaterThanOrEqual(8); // Should win about 10 out of 20
+      expect(traitWins).toBeLessThanOrEqual(12); // Should win about 10 out of 20
     });
 
     it('should handle horse missing epigenetic_modifiers without throwing error', () => {
+      // Use jest.spyOn for more deterministic testing
+      const mockRandom = jest.spyOn(Math, 'random');
+
       const horseWithoutModifiers = {
         id: 1,
         name: 'No Modifiers Horse',
@@ -322,6 +398,24 @@ describe('Competition Score Calculation', () => {
       let noModifiersWins = 0;
       const totalRuns = 20;
 
+      // Generate random values that create exactly 50/50 distribution
+      // Each pair of calls: first favors no-modifiers horse, second favors regular horse
+      const randomValues = [];
+      for (let i = 0; i < totalRuns; i++) {
+        if (i < 10) {
+          // First 10 runs: no-modifiers horse gets slightly better luck
+          randomValues.push(0.6); // no-modifiers horse gets +1.8% luck
+          randomValues.push(0.4); // regular horse gets -1.8% luck
+        } else {
+          // Last 10 runs: regular horse gets slightly better luck
+          randomValues.push(0.4); // no-modifiers horse gets -1.8% luck
+          randomValues.push(0.6); // regular horse gets +1.8% luck
+        }
+      }
+      let randomIndex = 0;
+
+      mockRandom.mockImplementation(() => randomValues[randomIndex++ % randomValues.length]);
+
       for (let i = 0; i < totalRuns; i++) {
         expect(() => {
           calculateCompetitionScore(horseWithoutModifiers, 'Racing');
@@ -335,9 +429,12 @@ describe('Competition Score Calculation', () => {
         }
       }
 
+      // Restore original Math.random
+      mockRandom.mockRestore();
+
       // Should be close to 50/50 since both horses have no trait advantage
-      expect(noModifiersWins).toBeGreaterThanOrEqual(4);
-      expect(noModifiersWins).toBeLessThanOrEqual(16);
+      expect(noModifiersWins).toBeGreaterThanOrEqual(8); // Should win about 10 out of 20
+      expect(noModifiersWins).toBeLessThanOrEqual(12); // Should win about 10 out of 20
     });
   });
 

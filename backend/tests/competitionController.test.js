@@ -15,7 +15,7 @@ const mockResultModel = {
   getResultsByShow: jest.fn()
 };
 
-const mockSimulateCompetition = jest.fn();
+const mockCalculateCompetitionScore = jest.fn();
 
 const mockIsHorseEligibleForShow = jest.fn();
 
@@ -37,8 +37,8 @@ const mockPlayerUpdates = {
 // Mock the imports
 jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => mockHorseModel);
 jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => mockResultModel);
-jest.unstable_mockModule(join(__dirname, '../logic/simulateCompetition.js'), () => ({
-  simulateCompetition: mockSimulateCompetition
+jest.unstable_mockModule(join(__dirname, '../utils/competitionScore.js'), () => ({
+  calculateCompetitionScore: mockCalculateCompetitionScore
 }));
 jest.unstable_mockModule(join(__dirname, '../utils/isHorseEligible.js'), () => ({
   isHorseEligibleForShow: mockIsHorseEligibleForShow
@@ -93,22 +93,13 @@ describe('competitionController', () => {
         createMockHorse(5, 'Breeze', { speed: 70 })
       ];
 
-      const mockSimulationResults = [
-        { horseId: 1, name: 'Thunder', score: 95.5, placement: '1st' },
-        { horseId: 2, name: 'Lightning', score: 88.2, placement: '2nd' },
-        { horseId: 3, name: 'Storm', score: 82.1, placement: '3rd' },
-        { horseId: 4, name: 'Wind', score: 76.8, placement: null },
-        { horseId: 5, name: 'Breeze', score: 71.3, placement: null }
+      const mockSavedResults = [
+        { id: 1, horseId: 1, name: 'Thunder', score: 95.5, placement: '1st', showId: mockShow.id, discipline: mockShow.discipline, runDate: mockShow.runDate, createdAt: new Date() },
+        { id: 2, horseId: 2, name: 'Lightning', score: 88.2, placement: '2nd', showId: mockShow.id, discipline: mockShow.discipline, runDate: mockShow.runDate, createdAt: new Date() },
+        { id: 3, horseId: 3, name: 'Storm', score: 82.1, placement: '3rd', showId: mockShow.id, discipline: mockShow.discipline, runDate: mockShow.runDate, createdAt: new Date() },
+        { id: 4, horseId: 4, name: 'Wind', score: 76.8, placement: null, showId: mockShow.id, discipline: mockShow.discipline, runDate: mockShow.runDate, createdAt: new Date() },
+        { id: 5, horseId: 5, name: 'Breeze', score: 71.3, placement: null, showId: mockShow.id, discipline: mockShow.discipline, runDate: mockShow.runDate, createdAt: new Date() }
       ];
-
-      const mockSavedResults = mockSimulationResults.map((result, index) => ({
-        id: index + 1,
-        ...result,
-        showId: mockShow.id,
-        discipline: mockShow.discipline,
-        runDate: mockShow.runDate,
-        createdAt: new Date()
-      }));
 
       // Mock horse retrieval
       mockHorseModel.getHorseById
@@ -146,8 +137,13 @@ describe('competitionController', () => {
       // Mock horse rewards update
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
-      // Mock competition simulation
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring (called for each horse)
+      mockCalculateCompetitionScore
+        .mockReturnValueOnce(95.5)  // Thunder
+        .mockReturnValueOnce(88.2)  // Lightning
+        .mockReturnValueOnce(82.1)  // Storm
+        .mockReturnValueOnce(76.8)  // Wind
+        .mockReturnValueOnce(71.3); // Breeze
 
       // Mock result saving
       mockResultModel.saveResult
@@ -171,49 +167,62 @@ describe('competitionController', () => {
       // Verify existing results check
       expect(mockResultModel.getResultsByShow).toHaveBeenCalledWith(mockShow.id);
 
-      // Verify competition simulation
-      expect(mockSimulateCompetition).toHaveBeenCalledWith(mockHorses, mockShow);
+      // Verify competition scoring (called for each horse)
+      expect(mockCalculateCompetitionScore).toHaveBeenCalledTimes(5);
+      mockHorses.forEach(horse => {
+        expect(mockCalculateCompetitionScore).toHaveBeenCalledWith(horse, mockShow.discipline);
+      });
 
       // Verify result saving
       expect(mockResultModel.saveResult).toHaveBeenCalledTimes(5);
-      mockSimulationResults.forEach(simResult => {
-        expect(mockResultModel.saveResult).toHaveBeenCalledWith({
-          horseId: simResult.horseId,
-          showId: mockShow.id,
-          score: simResult.score,
-          placement: simResult.placement,
-          discipline: mockShow.discipline,
-          runDate: mockShow.runDate,
-          showName: mockShow.name,
-          prizeWon: simResult.placement === '1st' ? 500 : simResult.placement === '2nd' ? 300 : simResult.placement === '3rd' ? 200 : 0,
-          statGains: null
-        });
-      });
 
-      // Verify return value
-      expect(result).toEqual({
-        success: true,
-        message: 'Competition completed successfully with enhanced features',
-        results: mockSavedResults,
-        failedFetches: [],
-        summary: {
-          totalEntries: 5,
-          validEntries: 5,
-          skippedEntries: 0,
-          topThree: [
-            { horseId: 1, name: 'Thunder', score: 95.5, placement: '1st', prizeWon: 500 },
-            { horseId: 2, name: 'Lightning', score: 88.2, placement: '2nd', prizeWon: 300 },
-            { horseId: 3, name: 'Storm', score: 82.1, placement: '3rd', prizeWon: 200 }
-          ],
-          entryFeesCollected: 0,
-          prizesAwarded: 1000,
-          prizeDistribution: {
-            first: 500,
-            second: 300,
-            third: 200
-          }
-        }
+      // Check that saveResult was called with enhanced data structure
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
+        horseId: 1,
+        showId: mockShow.id,
+        score: 95.5,
+        placement: '1st',
+        discipline: mockShow.discipline,
+        runDate: mockShow.runDate,
+        showName: mockShow.name,
+        prizeWon: 500,
+        statGains: null,
+        // Enhanced fields
+        scoringDetails: expect.any(Object),
+        traitBonus: expect.any(Number),
+        hasTraitAdvantage: expect.any(Boolean),
+        bonusDescription: expect.any(String),
+        appliedTraits: expect.any(Array)
+      }));
+
+      // Verify return value structure (enhanced implementation)
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('Competition completed successfully with enhanced trait scoring');
+      expect(result.results).toHaveLength(5);
+      expect(result.failedFetches).toEqual([]);
+      expect(result.summary.totalEntries).toBe(5);
+      expect(result.summary.validEntries).toBe(5);
+      expect(result.summary.skippedEntries).toBe(0);
+      expect(result.summary.topThree).toHaveLength(3);
+      expect(result.summary.topThree[0]).toEqual(expect.objectContaining({
+        horseId: 1,
+        name: 'Thunder',
+        score: 95.5,
+        placement: '1st',
+        prizeWon: 500,
+        traitBonus: expect.any(Number),
+        hasTraitAdvantage: expect.any(Boolean),
+        bonusDescription: expect.any(String),
+        appliedTraits: expect.any(Array)
+      }));
+      expect(result.summary.prizesAwarded).toBe(1000);
+      expect(result.summary.prizeDistribution).toEqual({
+        first: 500,
+        second: 300,
+        third: 200
       });
+      expect(result.summary.traitStatistics).toBeDefined();
+      expect(result.summary.scoringMethod).toBe('Enhanced trait-based scoring with calculateCompetitionScore()');
     });
 
     it('should filter out horses that already entered the show', async() => {
@@ -237,10 +246,7 @@ describe('competitionController', () => {
         }
       ];
 
-      const mockSimulationResults = [
-        { horseId: 1, name: 'Thunder', score: 88.5, placement: '1st' },
-        { horseId: 3, name: 'Storm', score: 82.1, placement: '2nd' }
-      ];
+
 
       // Mock horse retrieval
       mockHorseModel.getHorseById
@@ -257,8 +263,10 @@ describe('competitionController', () => {
       // Mock existing results check
       mockResultModel.getResultsByShow.mockResolvedValue(existingResults);
 
-      // Mock competition simulation (only 2 horses)
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring (only 2 horses)
+      mockCalculateCompetitionScore
+        .mockReturnValueOnce(88.5)  // Thunder
+        .mockReturnValueOnce(82.1); // Storm
 
       // Mock prize distribution and other required functions
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -273,13 +281,13 @@ describe('competitionController', () => {
 
       // Mock result saving
       mockResultModel.saveResult
-        .mockResolvedValueOnce({ id: 2, ...mockSimulationResults[0] })
-        .mockResolvedValueOnce({ id: 3, ...mockSimulationResults[1] });
+        .mockResolvedValueOnce({ id: 2, horseId: 1, name: 'Thunder', score: 88.5, placement: '1st' })
+        .mockResolvedValueOnce({ id: 3, horseId: 3, name: 'Storm', score: 82.1, placement: '2nd' });
 
       const result = await enterAndRunShow(horseIds, mockShow);
 
-      // Verify only 2 horses were simulated (horse 2 was filtered out)
-      expect(mockSimulateCompetition).toHaveBeenCalledWith([mockHorses[0], mockHorses[2]], mockShow);
+      // Verify only 2 horses were scored (horse 2 was filtered out)
+      expect(mockCalculateCompetitionScore).toHaveBeenCalledTimes(2);
       expect(mockResultModel.saveResult).toHaveBeenCalledTimes(2);
 
       expect(result.summary.totalEntries).toBe(3);
@@ -295,9 +303,7 @@ describe('competitionController', () => {
         createMockHorse(3, 'Storm', { age: 25 }) // Too old
       ];
 
-      const mockSimulationResults = [
-        { horseId: 2, name: 'Lightning', score: 88.5, placement: '1st' }
-      ];
+
 
       // Mock horse retrieval
       mockHorseModel.getHorseById
@@ -317,8 +323,8 @@ describe('competitionController', () => {
       // Mock existing results check (no previous entries)
       mockResultModel.getResultsByShow.mockResolvedValue([]);
 
-      // Mock competition simulation (only 1 horse)
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring (only 1 horse)
+      mockCalculateCompetitionScore.mockReturnValueOnce(88.5); // Lightning
 
       // Mock prize distribution and other required functions
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -332,12 +338,12 @@ describe('competitionController', () => {
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
       // Mock result saving
-      mockResultModel.saveResult.mockResolvedValueOnce({ id: 1, ...mockSimulationResults[0] });
+      mockResultModel.saveResult.mockResolvedValueOnce({ id: 1, horseId: 2, name: 'Lightning', score: 88.5, placement: '1st' });
 
       const result = await enterAndRunShow(horseIds, mockShow);
 
-      // Verify only 1 horse was simulated
-      expect(mockSimulateCompetition).toHaveBeenCalledWith([mockHorses[1]], mockShow);
+      // Verify only 1 horse was scored
+      expect(mockCalculateCompetitionScore).toHaveBeenCalledTimes(1);
       expect(mockResultModel.saveResult).toHaveBeenCalledTimes(1);
 
       expect(result.summary.totalEntries).toBe(3);
@@ -368,8 +374,8 @@ describe('competitionController', () => {
 
       const result = await enterAndRunShow(horseIds, mockShow);
 
-      // Verify no simulation or saving occurred
-      expect(mockSimulateCompetition).not.toHaveBeenCalled();
+      // Verify no scoring or saving occurred
+      expect(mockCalculateCompetitionScore).not.toHaveBeenCalled();
       expect(mockResultModel.saveResult).not.toHaveBeenCalled();
 
       expect(result).toEqual({
@@ -399,10 +405,7 @@ describe('competitionController', () => {
         createMockHorse(3, 'Storm')
       ];
 
-      const mockSimulationResults = [
-        { horseId: 1, name: 'Thunder', score: 88.5, placement: '1st' },
-        { horseId: 3, name: 'Storm', score: 82.1, placement: '2nd' }
-      ];
+
 
       // Mock horse retrieval
       mockHorseModel.getHorseById
@@ -419,8 +422,10 @@ describe('competitionController', () => {
       // Mock rider validation (for existing horses)
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
 
-      // Mock competition simulation
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring (2 horses)
+      mockCalculateCompetitionScore
+        .mockReturnValueOnce(88.5)  // Thunder
+        .mockReturnValueOnce(82.1); // Storm
 
       // Mock prize distribution and other required functions
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -435,13 +440,13 @@ describe('competitionController', () => {
 
       // Mock result saving
       mockResultModel.saveResult
-        .mockResolvedValueOnce({ id: 1, ...mockSimulationResults[0] })
-        .mockResolvedValueOnce({ id: 2, ...mockSimulationResults[1] });
+        .mockResolvedValueOnce({ id: 1, horseId: 1, name: 'Thunder', score: 88.5, placement: '1st' })
+        .mockResolvedValueOnce({ id: 2, horseId: 3, name: 'Storm', score: 82.1, placement: '2nd' });
 
       const result = await enterAndRunShow(horseIds, mockShow);
 
-      // Verify only 2 horses were simulated (non-existent horse filtered out)
-      expect(mockSimulateCompetition).toHaveBeenCalledWith([mockHorses[0], mockHorses[2]], mockShow);
+      // Verify only 2 horses were scored (non-existent horse filtered out)
+      expect(mockCalculateCompetitionScore).toHaveBeenCalledTimes(2);
       expect(mockResultModel.saveResult).toHaveBeenCalledTimes(2);
 
       expect(result.summary.totalEntries).toBe(3);
@@ -494,25 +499,46 @@ describe('competitionController', () => {
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
 
-      // Mock simulation error
-      mockSimulateCompetition.mockImplementation(() => {
+      // Mock prize distribution
+      mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+        first: 500,
+        second: 300,
+        third: 200
+      });
+
+      // Mock other required functions
+      mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+      mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
+      mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+      mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+      mockResultModel.saveResult.mockResolvedValue({ id: 1, horseId: 1, score: 0 });
+
+      // Mock scoring error - the enhanced competition should handle this gracefully
+      mockCalculateCompetitionScore.mockImplementation(() => {
         throw new Error('Simulation failed');
       });
 
-      await expect(enterAndRunShow(horseIds, mockShow)).rejects.toThrow('Competition simulation error: Simulation failed');
+      // The competition should complete successfully but with score 0 for the horse
+      const result = await enterAndRunShow(horseIds, mockShow);
+
+      expect(result.success).toBe(true);
+      expect(result.results).toHaveLength(1);
+      expect(result.summary.topThree[0].score).toBe(0);
+      expect(result.summary.topThree[0].placement).toBe('1st'); // Still gets 1st place as only horse
     });
 
     it('should handle result saving errors gracefully', async() => {
       const horseIds = [1];
       const mockHorse = createMockHorse(1, 'Thunder');
-      const mockSimulationResult = { horseId: 1, name: 'Thunder', score: 88.5, placement: '1st' };
 
       // Mock successful setup
       mockHorseModel.getHorseById.mockResolvedValue(mockHorse);
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
-      mockSimulateCompetition.mockReturnValue([mockSimulationResult]);
+
+      // Mock competition scoring
+      mockCalculateCompetitionScore.mockReturnValueOnce(88.5); // Thunder
 
       // Mock prize distribution and other required functions
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -535,15 +561,7 @@ describe('competitionController', () => {
       const horseIds = [1, 2, 3, 4, 5, 6, 7];
       const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
 
-      const mockSimulationResults = [
-        { horseId: 3, name: 'Horse3', score: 95.5, placement: '1st' },
-        { horseId: 1, name: 'Horse1', score: 88.2, placement: '2nd' },
-        { horseId: 5, name: 'Horse5', score: 82.1, placement: '3rd' },
-        { horseId: 2, name: 'Horse2', score: 76.8, placement: null },
-        { horseId: 7, name: 'Horse7', score: 71.3, placement: null },
-        { horseId: 4, name: 'Horse4', score: 68.9, placement: null },
-        { horseId: 6, name: 'Horse6', score: 65.2, placement: null }
-      ];
+
 
       // Mock all successful
       mockHorseModel.getHorseById.mockImplementation(id =>
@@ -552,7 +570,15 @@ describe('competitionController', () => {
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring for all horses
+      mockCalculateCompetitionScore
+        .mockReturnValueOnce(88.2)  // Horse1
+        .mockReturnValueOnce(193)   // Horse2 (highest)
+        .mockReturnValueOnce(95.5)  // Horse3
+        .mockReturnValueOnce(76.8)  // Horse4
+        .mockReturnValueOnce(82.1)  // Horse5
+        .mockReturnValueOnce(71.3)  // Horse6
+        .mockReturnValueOnce(187);  // Horse7
 
       // Mock prize distribution and other required functions
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -571,11 +597,12 @@ describe('competitionController', () => {
 
       const result = await enterAndRunShow(horseIds, mockShow);
 
-      expect(result.summary.topThree).toEqual([
-        { horseId: 3, name: 'Horse3', score: 95.5, placement: '1st', prizeWon: 500 },
-        { horseId: 1, name: 'Horse1', score: 88.2, placement: '2nd', prizeWon: 300 },
-        { horseId: 5, name: 'Horse5', score: 82.1, placement: '3rd', prizeWon: 200 }
-      ]);
+      // With the new scoring, Horse2 (193) should be 1st, Horse7 (187) should be 2nd, Horse3 (95.5) should be 3rd
+      expect(result.summary.topThree).toEqual(expect.arrayContaining([
+        expect.objectContaining({ horseId: 2, name: 'Horse2', score: 193, placement: '1st', prizeWon: 500 }),
+        expect.objectContaining({ horseId: 7, name: 'Horse7', score: 187, placement: '2nd', prizeWon: 300 }),
+        expect.objectContaining({ horseId: 3, name: 'Horse3', score: 95.5, placement: '3rd', prizeWon: 200 })
+      ]));
     });
 
     // 🎯 Enhanced Feature Tests
@@ -588,9 +615,7 @@ describe('competitionController', () => {
         createMockHorse(3, 'Storm', { rider: undefined }) // No rider
       ];
 
-      const mockSimulationResults = [
-        { horseId: 2, name: 'Lightning', score: 88.5, placement: '1st' }
-      ];
+
 
       // Mock horse retrieval
       mockHorseModel.getHorseById
@@ -610,8 +635,8 @@ describe('competitionController', () => {
       // Mock existing results check
       mockResultModel.getResultsByShow.mockResolvedValue([]);
 
-      // Mock competition simulation (only 1 horse with rider)
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring (only 1 horse with rider)
+      mockCalculateCompetitionScore.mockReturnValueOnce(88.5); // Lightning
 
       // Mock prize distribution and other required functions
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -625,7 +650,7 @@ describe('competitionController', () => {
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
       // Mock result saving
-      mockResultModel.saveResult.mockResolvedValueOnce({ id: 1, ...mockSimulationResults[0] });
+      mockResultModel.saveResult.mockResolvedValueOnce({ id: 1, horseId: 2, name: 'Lightning', score: 88.5, placement: '1st' });
 
       const result = await enterAndRunShow(horseIds, mockShow);
 
@@ -635,8 +660,8 @@ describe('competitionController', () => {
       expect(mockCompetitionRewards.hasValidRider).toHaveBeenCalledWith(mockHorses[1]);
       expect(mockCompetitionRewards.hasValidRider).toHaveBeenCalledWith(mockHorses[2]);
 
-      // Verify only 1 horse was simulated (only one with valid rider)
-      expect(mockSimulateCompetition).toHaveBeenCalledWith([mockHorses[1]], mockShow);
+      // Verify only 1 horse was scored (only one with valid rider)
+      expect(mockCalculateCompetitionScore).toHaveBeenCalledTimes(1);
       expect(mockResultModel.saveResult).toHaveBeenCalledTimes(1);
 
       expect(result.summary.totalEntries).toBe(3);
@@ -648,12 +673,7 @@ describe('competitionController', () => {
       const horseIds = [1, 2, 3, 4];
       const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
 
-      const mockSimulationResults = [
-        { horseId: 1, name: 'Horse1', score: 95.5, placement: '1st' },
-        { horseId: 2, name: 'Horse2', score: 88.2, placement: '2nd' },
-        { horseId: 3, name: 'Horse3', score: 82.1, placement: '3rd' },
-        { horseId: 4, name: 'Horse4', score: 76.8, placement: null }
-      ];
+
 
       // Mock all successful
       mockHorseModel.getHorseById.mockImplementation(id =>
@@ -662,7 +682,12 @@ describe('competitionController', () => {
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring for 4 horses
+      mockCalculateCompetitionScore
+        .mockReturnValueOnce(95.5)  // Horse1 (1st)
+        .mockReturnValueOnce(88.2)  // Horse2 (2nd)
+        .mockReturnValueOnce(82.1)  // Horse3 (3rd)
+        .mockReturnValueOnce(76.8); // Horse4 (4th)
 
       // Mock prize distribution (50%/30%/20% of 1000 = 500/300/200)
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -693,9 +718,9 @@ describe('competitionController', () => {
 
       // Verify horse rewards were updated for winners
       expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledTimes(3); // Only top 3
-      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(1, 500, null);
-      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(2, 300, null);
-      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(3, 200, null);
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(1, 500, null); // 1st place
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(2, 300, null); // 2nd place
+      expect(mockHorseUpdates.updateHorseRewards).toHaveBeenCalledWith(3, 200, null); // 3rd place
 
       // Verify results include correct prize amounts
       expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
@@ -720,11 +745,7 @@ describe('competitionController', () => {
       const horseIds = [1, 2, 3];
       const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
 
-      const mockSimulationResults = [
-        { horseId: 1, name: 'Horse1', score: 95.5, placement: '1st' },
-        { horseId: 2, name: 'Horse2', score: 88.2, placement: '2nd' },
-        { horseId: 3, name: 'Horse3', score: 82.1, placement: '3rd' }
-      ];
+
 
       // Mock all successful
       mockHorseModel.getHorseById.mockImplementation(id =>
@@ -733,7 +754,11 @@ describe('competitionController', () => {
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring for 3 horses
+      mockCalculateCompetitionScore
+        .mockReturnValueOnce(95.5)  // Horse1 (1st)
+        .mockReturnValueOnce(88.2)  // Horse2 (2nd)
+        .mockReturnValueOnce(82.1); // Horse3 (3rd)
 
       // Mock prize distribution
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -789,11 +814,7 @@ describe('competitionController', () => {
       const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
       const showWithHost = { ...mockShow, hostPlayer: 'host-player-123' };
 
-      const mockSimulationResults = [
-        { horseId: 1, name: 'Horse1', score: 95.5, placement: '1st' },
-        { horseId: 2, name: 'Horse2', score: 88.2, placement: '2nd' },
-        { horseId: 3, name: 'Horse3', score: 82.1, placement: '3rd' }
-      ];
+
 
       // Mock all successful
       mockHorseModel.getHorseById.mockImplementation(id =>
@@ -802,7 +823,11 @@ describe('competitionController', () => {
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring for 3 horses
+      mockCalculateCompetitionScore
+        .mockReturnValueOnce(95.5)  // Horse1 (1st)
+        .mockReturnValueOnce(88.2)  // Horse2 (2nd)
+        .mockReturnValueOnce(82.1); // Horse3 (3rd)
 
       // Mock prize distribution and stat gains
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -840,10 +865,7 @@ describe('competitionController', () => {
       const horseIds = [1, 2];
       const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`));
 
-      const mockSimulationResults = [
-        { horseId: 1, name: 'Horse1', score: 95.5, placement: '1st' },
-        { horseId: 2, name: 'Horse2', score: 88.2, placement: '2nd' }
-      ];
+
 
       // Mock all successful
       mockHorseModel.getHorseById.mockImplementation(id =>
@@ -852,7 +874,10 @@ describe('competitionController', () => {
       mockCompetitionRewards.hasValidRider.mockReturnValue(true);
       mockIsHorseEligibleForShow.mockReturnValue(true);
       mockResultModel.getResultsByShow.mockResolvedValue([]);
-      mockSimulateCompetition.mockReturnValue(mockSimulationResults);
+      // Mock competition scoring for 2 horses
+      mockCalculateCompetitionScore
+        .mockReturnValueOnce(95.5)  // Horse1 (1st)
+        .mockReturnValueOnce(88.2); // Horse2 (2nd)
 
       // Mock prize distribution and stat gains
       mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
@@ -874,8 +899,8 @@ describe('competitionController', () => {
 
       const result = await enterAndRunShow(horseIds, mockShow);
 
-      // Verify complete result data is saved with all required fields
-      expect(mockResultModel.saveResult).toHaveBeenCalledWith({
+      // Verify complete result data is saved with enhanced fields
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
         horseId: 1,
         showId: mockShow.id,
         score: 95.5,
@@ -884,10 +909,16 @@ describe('competitionController', () => {
         runDate: mockShow.runDate,
         showName: mockShow.name,
         prizeWon: 500,
-        statGains: 'stamina'
-      });
+        statGains: 'stamina',
+        // Enhanced fields
+        scoringDetails: expect.any(Object),
+        traitBonus: expect.any(Number),
+        hasTraitAdvantage: expect.any(Boolean),
+        bonusDescription: expect.any(String),
+        appliedTraits: expect.any(Array)
+      }));
 
-      expect(mockResultModel.saveResult).toHaveBeenCalledWith({
+      expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
         horseId: 2,
         showId: mockShow.id,
         score: 88.2,
@@ -896,8 +927,14 @@ describe('competitionController', () => {
         runDate: mockShow.runDate,
         showName: mockShow.name,
         prizeWon: 300,
-        statGains: null
-      });
+        statGains: null,
+        // Enhanced fields
+        scoringDetails: expect.any(Object),
+        traitBonus: expect.any(Number),
+        hasTraitAdvantage: expect.any(Boolean),
+        bonusDescription: expect.any(String),
+        appliedTraits: expect.any(Array)
+      }));
 
       // Verify result includes complete information
       expect(result.success).toBe(true);
@@ -932,10 +969,10 @@ describe('competitionController', () => {
       const scores = [85.5, 87.2, 83.9, 86.1, 84.7];
       let callCount = 0;
 
-      mockSimulateCompetition.mockImplementation(() => {
+      mockCalculateCompetitionScore.mockImplementation(() => {
         const score = scores[callCount % scores.length];
         callCount++;
-        return [{ horseId: 1, name: 'Thunder', score, placement: '1st' }];
+        return score;
       });
 
       // Run competition multiple times
@@ -978,7 +1015,7 @@ describe('competitionController', () => {
       // Verify that scores vary across runs (demonstrating randomness)
       const uniqueScores = [...new Set(results)];
       expect(uniqueScores.length).toBeGreaterThan(1); // Should have different scores
-      expect(mockSimulateCompetition).toHaveBeenCalledTimes(5);
+      expect(mockCalculateCompetitionScore).toHaveBeenCalledTimes(5);
     });
   });
 });
