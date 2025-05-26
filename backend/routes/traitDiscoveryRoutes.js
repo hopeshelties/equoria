@@ -6,6 +6,66 @@ import logger from '../utils/logger.js';
 const router = express.Router();
 
 /**
+ * POST /api/traits/discover/batch
+ * Trigger trait discovery for multiple foals
+ * NOTE: This route must come BEFORE /discover/:foalId to avoid route conflicts
+ */
+router.post('/discover/batch',
+  [
+    body('foalIds')
+      .isArray({ min: 1 })
+      .withMessage('foalIds must be a non-empty array')
+      .custom((foalIds) => {
+        if (!foalIds.every(id => Number.isInteger(Number(id)) && Number(id) > 0)) {
+          throw new Error('All foal IDs must be positive integers');
+        }
+        return true;
+      })
+  ],
+  async (req, res) => {
+    try {
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array()
+        });
+      }
+
+      const { foalIds } = req.body;
+      logger.info(`[traitDiscoveryRoutes] POST /discover/batch - Processing ${foalIds.length} foals`);
+
+      const results = await batchRevealTraits(foalIds);
+
+      const summary = {
+        totalFoals: foalIds.length,
+        successfulDiscoveries: results.filter(r => !r.error).length,
+        failedDiscoveries: results.filter(r => r.error).length,
+        totalTraitsRevealed: results.reduce((sum, r) => sum + (r.traitsRevealed?.length || 0), 0)
+      };
+
+      res.json({
+        success: true,
+        message: `Batch discovery completed for ${foalIds.length} foals`,
+        data: {
+          results,
+          summary
+        }
+      });
+
+    } catch (error) {
+      logger.error(`[traitDiscoveryRoutes] POST /discover/batch error: ${error.message}`);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error during batch trait discovery'
+      });
+    }
+  }
+);
+
+/**
  * POST /api/traits/discover/:foalId
  * Trigger trait discovery for a specific foal
  */
@@ -118,65 +178,6 @@ router.get('/progress/:foalId',
       res.status(500).json({
         success: false,
         message: 'Internal server error while getting discovery progress'
-      });
-    }
-  }
-);
-
-/**
- * POST /api/traits/discover/batch
- * Trigger trait discovery for multiple foals
- */
-router.post('/discover/batch',
-  [
-    body('foalIds')
-      .isArray({ min: 1 })
-      .withMessage('foalIds must be a non-empty array')
-      .custom((foalIds) => {
-        if (!foalIds.every(id => Number.isInteger(Number(id)) && Number(id) > 0)) {
-          throw new Error('All foal IDs must be positive integers');
-        }
-        return true;
-      })
-  ],
-  async (req, res) => {
-    try {
-      // Check for validation errors
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: 'Validation failed',
-          errors: errors.array()
-        });
-      }
-
-      const { foalIds } = req.body;
-      logger.info(`[traitDiscoveryRoutes] POST /discover/batch - Processing ${foalIds.length} foals`);
-
-      const results = await batchRevealTraits(foalIds);
-
-      const summary = {
-        totalFoals: foalIds.length,
-        successfulDiscoveries: results.filter(r => !r.error).length,
-        failedDiscoveries: results.filter(r => r.error).length,
-        totalTraitsRevealed: results.reduce((sum, r) => sum + (r.traitsRevealed?.length || 0), 0)
-      };
-
-      res.json({
-        success: true,
-        message: `Batch discovery completed for ${foalIds.length} foals`,
-        data: {
-          results,
-          summary
-        }
-      });
-
-    } catch (error) {
-      logger.error(`[traitDiscoveryRoutes] POST /discover/batch error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'Internal server error during batch trait discovery'
       });
     }
   }

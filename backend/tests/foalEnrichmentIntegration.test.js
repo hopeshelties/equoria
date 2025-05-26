@@ -7,10 +7,11 @@ describe('Foal Enrichment API Integration Tests', () => {
   let testBreed;
 
   beforeAll(async () => {
-    // Create test breed
+    // Create test breed with unique name
+    const uniqueBreedName = `Test Breed for Enrichment ${Date.now()}`;
     testBreed = await prisma.breed.create({
       data: {
-        name: 'Test Breed for Enrichment',
+        name: uniqueBreedName,
         description: 'Test breed for foal enrichment testing'
       }
     });
@@ -28,12 +29,20 @@ describe('Foal Enrichment API Integration Tests', () => {
   });
 
   afterAll(async () => {
-    // Clean up test data
-    await prisma.foalTrainingHistory.deleteMany({
-      where: { horse_id: testFoal.id }
-    });
-    await prisma.horse.delete({ where: { id: testFoal.id } });
-    await prisma.breed.delete({ where: { id: testBreed.id } });
+    try {
+      // Clean up test data
+      if (testFoal?.id) {
+        await prisma.foalTrainingHistory.deleteMany({
+          where: { horse_id: testFoal.id }
+        });
+        await prisma.horse.delete({ where: { id: testFoal.id } });
+      }
+      if (testBreed?.id) {
+        await prisma.breed.delete({ where: { id: testBreed.id } });
+      }
+    } catch (error) {
+      console.warn('Cleanup error in foalEnrichmentIntegration test:', error.message);
+    }
     await prisma.$disconnect();
   });
 

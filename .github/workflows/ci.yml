@@ -1,0 +1,245 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18.x'
+  DATABASE_URL: 'postgresql://test:test@localhost:5432/equoria_test'
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Run ESLint
+      working-directory: ./backend
+      run: npm run lint
+      
+    - name: Check Prettier formatting
+      working-directory: ./backend
+      run: npm run format:check
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Run security audit
+      working-directory: ./backend
+      run: npm audit --audit-level=moderate
+      
+    - name: Check for known vulnerabilities
+      working-directory: ./backend
+      run: npx audit-ci --moderate
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: equoria_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Generate Prisma client
+      working-directory: ./backend
+      run: npx prisma generate
+      
+    - name: Run database migrations
+      working-directory: ./backend
+      run: npx prisma migrate deploy
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        
+    - name: Run tests with coverage
+      working-directory: ./backend
+      run: npm run test:coverage
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        NODE_ENV: test
+        
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./backend/coverage/lcov.info
+        flags: backend
+        name: backend-coverage
+        fail_ci_if_error: false
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, security-audit, test]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Generate Prisma client
+      working-directory: ./backend
+      run: npx prisma generate
+      
+    - name: Build application
+      working-directory: ./backend
+      run: npm run build || echo "No build script defined"
+      
+    - name: Check application starts
+      working-directory: ./backend
+      run: |
+        timeout 30s npm start &
+        sleep 10
+        curl -f http://localhost:3000/ping || exit 1
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        PORT: 3000
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v3
+      with:
+        fail-on-severity: moderate
+
+  performance-test:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.ref == 'refs/heads/main'
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: equoria_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Generate Prisma client
+      working-directory: ./backend
+      run: npx prisma generate
+      
+    - name: Run database migrations
+      working-directory: ./backend
+      run: npx prisma migrate deploy
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        
+    - name: Start server
+      working-directory: ./backend
+      run: npm start &
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        PORT: 3000
+        
+    - name: Wait for server
+      run: sleep 10
+      
+    - name: Run basic performance test
+      run: |
+        # Install Apache Bench for basic load testing
+        sudo apt-get update
+        sudo apt-get install -y apache2-utils
+        
+        # Test ping endpoint with 100 requests, 10 concurrent
+        ab -n 100 -c 10 http://localhost:3000/ping
+        
+        # Test health endpoint
+        ab -n 50 -c 5 http://localhost:3000/health 

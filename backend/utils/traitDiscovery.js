@@ -116,7 +116,7 @@ export async function revealTraits(foalId) {
     // Get foal's enrichment activity history
     const activities = await prisma.foalTrainingHistory.findMany({
       where: { horse_id: Number(foalId) },
-      orderBy: { created_at: 'desc' }
+      orderBy: { createdAt: 'desc' }
     });
 
     // Get current traits
@@ -124,7 +124,7 @@ export async function revealTraits(foalId) {
     
     // Track discovery results
     const discoveryResults = {
-      foalId: foalId,
+      foalId: Number(foalId),
       foalName: foal.name,
       conditionsMet: [],
       traitsRevealed: [],
@@ -174,7 +174,7 @@ export async function revealTraits(foalId) {
       });
 
       // Log the discovery event
-      await logTraitDiscovery(foalId, discoveryResults);
+      await logTraitDiscovery(foalId, discoveryResults, foal);
       
       logger.info(`[traitDiscovery.revealTraits] Revealed ${discoveryResults.traitsRevealed.length} traits for foal ${foalId}`);
     } else {
@@ -290,8 +290,9 @@ function getTraitCategory(traitKey) {
  * Log trait discovery event for audit trail
  * @param {number} foalId - ID of the foal
  * @param {Object} discoveryResults - Results of the discovery process
+ * @param {Object} foal - Foal object with development data
  */
-async function logTraitDiscovery(foalId, discoveryResults) {
+async function logTraitDiscovery(foalId, discoveryResults, foal) {
   try {
     const logEntry = {
       foalId: Number(foalId),
@@ -306,11 +307,11 @@ async function logTraitDiscovery(foalId, discoveryResults) {
     await prisma.foalTrainingHistory.create({
       data: {
         horse_id: Number(foalId),
-        activityType: 'trait_discovery',
-        activityName: 'Trait Discovery Event',
-        bondingChange: 0,
-        stressChange: 0,
-        notes: JSON.stringify(logEntry)
+        day: foal.foalDevelopment?.currentDay || 0,
+        activity: 'trait_discovery',
+        outcome: `Trait Discovery Event: ${logEntry.summary}`,
+        bond_change: 0,
+        stress_change: 0
       }
     });
 
@@ -370,7 +371,7 @@ export async function getDiscoveryProgress(foalId) {
     });
 
     const progress = {
-      foalId: foalId,
+      foalId: Number(foalId),
       foalName: foal.name,
       currentStats: {
         bondScore: foal.bond_score || 0,

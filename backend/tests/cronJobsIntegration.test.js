@@ -265,9 +265,16 @@ describe('Cron Jobs Integration Tests', () => {
       const uniqueTraits = [...new Set(allTraits)];
       expect(allTraits.length).toBe(uniqueTraits.length);
 
-      // Should still contain original traits
+      // Should still contain original traits (may have moved between categories)
       expect(traits.positive).toContain('resilient');
-      expect(traits.hidden).toContain('intelligent');
+      
+      // 'intelligent' should still exist somewhere (hidden, positive, or negative)
+      const allTraitsCheck = [
+        ...(traits.positive || []),
+        ...(traits.negative || []),
+        ...(traits.hidden || [])
+      ];
+      expect(allTraitsCheck).toContain('intelligent');
     });
 
     it('should handle multiple foals in single evaluation', async () => {

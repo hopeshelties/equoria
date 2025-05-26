@@ -27,7 +27,7 @@ describe('Trait Discovery API Integration Tests', () => {
         epigenetic_modifiers: {
           positive: [],
           negative: [],
-          hidden: ['intelligent', 'calm', 'athletic']
+          hidden: ['intelligent', 'calm', 'athletic', 'resilient', 'bold']
         }
       }
     });
@@ -42,7 +42,7 @@ describe('Trait Discovery API Integration Tests', () => {
         epigenetic_modifiers: {
           positive: [],
           negative: [],
-          hidden: ['resilient']
+          hidden: ['resilient', 'nervous', 'stubborn']
         }
       }
     });
@@ -260,12 +260,20 @@ describe('Trait Discovery API Integration Tests', () => {
 
   describe('POST /api/traits/discover/batch', () => {
     it('should process multiple foals in batch', async () => {
+      console.log('Batch test foal IDs:', [testFoals[0].id, testFoals[1].id]);
+      
       const response = await request(app)
         .post('/api/traits/discover/batch')
         .send({
           foalIds: [testFoals[0].id, testFoals[1].id]
-        })
-        .expect(200);
+        });
+        
+      if (response.status !== 200) {
+        console.log('Batch discovery error response:', response.body);
+        console.log('Status:', response.status);
+      }
+      
+      expect(response.status).toBe(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('results');
@@ -386,7 +394,48 @@ describe('Trait Discovery API Integration Tests', () => {
 
   describe('Real-time trait discovery workflow', () => {
     it('should demonstrate complete trait discovery workflow', async () => {
-      const foalId = testFoals[0].id;
+      // Create a fresh foal with guaranteed hidden traits for this test
+      const freshFoal = await prisma.horse.create({
+        data: {
+          name: 'Fresh Workflow Foal',
+          age: 0,
+          breedId: testBreed.id,
+          bond_score: 85,
+          stress_level: 15,
+          epigenetic_modifiers: {
+            positive: [],
+            negative: [],
+            hidden: ['intelligent', 'calm', 'athletic', 'resilient', 'bold']
+          }
+        }
+      });
+
+      // Add to cleanup array
+      testFoals.push(freshFoal);
+
+      // Create foal development record
+      await prisma.foalDevelopment.create({
+        data: {
+          foalId: freshFoal.id,
+          currentDay: 3,
+          bondingLevel: 85,
+          stressLevel: 15
+        }
+      });
+
+      // Create some enrichment activities
+      await prisma.foalTrainingHistory.create({
+        data: {
+          horse_id: freshFoal.id,
+          day: 1,
+          activity: 'gentle_handling',
+          outcome: 'Gentle Touch - Successful bonding session',
+          bond_change: 5,
+          stress_change: -2
+        }
+      });
+
+      const foalId = freshFoal.id;
 
       // 1. Check initial progress
       const progressResponse = await request(app)
@@ -394,6 +443,8 @@ describe('Trait Discovery API Integration Tests', () => {
         .expect(200);
 
       const initialHiddenCount = progressResponse.body.data.hiddenTraitsCount;
+      console.log('Initial hidden count:', initialHiddenCount);
+      console.log('Progress response:', JSON.stringify(progressResponse.body.data, null, 2));
       expect(initialHiddenCount).toBeGreaterThan(0);
 
       // 2. Check conditions without discovery
