@@ -21,12 +21,19 @@ const optionalVars = {
   NODE_ENV: 'development',
   JWT_SECRET: 'your-super-secret-jwt-key-change-in-production',
   JWT_EXPIRES_IN: '7d',
+  JWT_REFRESH_EXPIRES_IN: '30d',
   BCRYPT_ROUNDS: '12',
   RATE_LIMIT_WINDOW_MS: '900000', // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: '100',
+  AUTH_RATE_LIMIT_MAX: '5',
   LOG_LEVEL: 'info',
   CORS_ORIGIN: 'http://localhost:3000',
-  SESSION_SECRET: 'your-session-secret-change-in-production'
+  CORS_CREDENTIALS: 'true',
+  SESSION_SECRET: 'your-session-secret-change-in-production',
+  ENABLE_AUDIT_LOGGING: 'true',
+  ENABLE_SECURITY_ALERTS: 'true',
+  SKIP_AUTH_FOR_TESTING: 'false',
+  ENABLE_DEBUG_ROUTES: 'false'
 };
 
 // Check for missing required variables
@@ -114,26 +121,21 @@ const config = {
   port: PORT,
   dbUrl: DATABASE_URL,
   env: NODE_ENV,
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  },
-  bcrypt: {
-    rounds: BCRYPT_ROUNDS,
-  },
-  rateLimit: {
-    windowMs: RATE_LIMIT_WINDOW_MS,
-    maxRequests: RATE_LIMIT_MAX_REQUESTS,
-  },
-  cors: {
-    origin: process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()),
-  },
-  session: {
-    secret: process.env.SESSION_SECRET,
-  },
-  logging: {
-    level: process.env.LOG_LEVEL,
-  },
+  jwtSecret: process.env.JWT_SECRET,
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN,
+  jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+  bcryptRounds: BCRYPT_ROUNDS,
+  rateLimitWindowMs: RATE_LIMIT_WINDOW_MS,
+  rateLimitMaxRequests: RATE_LIMIT_MAX_REQUESTS,
+  authRateLimitMax: parseInt(process.env.AUTH_RATE_LIMIT_MAX, 10),
+  corsOrigin: process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()),
+  corsCredentials: process.env.CORS_CREDENTIALS === 'true',
+  sessionSecret: process.env.SESSION_SECRET,
+  logLevel: process.env.LOG_LEVEL,
+  enableAuditLogging: process.env.ENABLE_AUDIT_LOGGING === 'true',
+  enableSecurityAlerts: process.env.ENABLE_SECURITY_ALERTS === 'true',
+  skipAuthForTesting: process.env.SKIP_AUTH_FOR_TESTING === 'true',
+  enableDebugRoutes: process.env.ENABLE_DEBUG_ROUTES === 'true'
 };
 
 // Log successful configuration (without sensitive data)

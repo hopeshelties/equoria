@@ -1,5 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
+import config from '../config/config.js';
 
 // Rate limiting configuration
 export const createRateLimit = (windowMs = 15 * 60 * 1000, max = 100) => {
@@ -12,6 +13,10 @@ export const createRateLimit = (windowMs = 15 * 60 * 1000, max = 100) => {
     },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    skip: (req) => {
+      // Skip rate limiting for health checks and in test environment
+      return req.path.startsWith('/health') || config.env === 'test';
+    }
   });
 };
 

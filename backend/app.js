@@ -16,6 +16,7 @@ import traitDiscoveryRoutes from './routes/traitDiscoveryRoutes.js';
 import horseRoutes from './routes/horseRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import foalRoutes from './routes/foalRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 
@@ -64,6 +65,7 @@ app.use('/ping', pingRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/competition', competitionRoutes);
 app.use('/api/traits', traitDiscoveryRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/horses', horseRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/foals', foalRoutes);
