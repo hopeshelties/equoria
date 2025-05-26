@@ -204,6 +204,11 @@ function analyzeDisciplineSpecialization(lineage) {
       disciplineCounts[ancestor.discipline] = (disciplineCounts[ancestor.discipline] || 0) + 1;
     }
 
+    // Check most_competed_discipline field (primary field for discipline specialization)
+    if (ancestor && ancestor.most_competed_discipline) {
+      disciplineCounts[ancestor.most_competed_discipline] = (disciplineCounts[ancestor.most_competed_discipline] || 0) + 1;
+    }
+
     // Also check disciplineScores for highest scoring discipline
     if (ancestor && ancestor.disciplineScores) {
       const highestDiscipline = getHighestScoringDiscipline(ancestor.disciplineScores);

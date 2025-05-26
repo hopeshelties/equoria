@@ -4,7 +4,7 @@ import { getHealthModifier } from '../utils/healthBonus.js';
 import { applyRiderModifiers } from '../utils/riderBonus.js';
 
 describe('Competition Simulation System', () => {
-  
+
   describe('getStatScore', () => {
     const testHorse = {
       speed: 80,
@@ -118,28 +118,28 @@ describe('Competition Simulation System', () => {
 
     it('should simulate competition with 5 horses and return correct rankings', () => {
       const horses = [
-        createTestHorse(1, 'Nova', { 
-          speed: 90, stamina: 80, focus: 70, 
+        createTestHorse(1, 'Nova', {
+          speed: 90, stamina: 80, focus: 70,
           trait: 'Racing', // Matches discipline for +5 bonus
           health: 'Excellent', // +5% health bonus
           trainingScore: 80
         }),
-        createTestHorse(2, 'Ashen', { 
+        createTestHorse(2, 'Ashen', {
           speed: 85, stamina: 75, focus: 65,
           trainingScore: 70,
           rider: { bonusPercent: 0.05, penaltyPercent: 0 } // +5% rider bonus
         }),
-        createTestHorse(3, 'Dart', { 
+        createTestHorse(3, 'Dart', {
           speed: 80, stamina: 70, focus: 60,
           trainingScore: 60,
           health: 'Very Good' // +3% health bonus
         }),
-        createTestHorse(4, 'Milo', { 
+        createTestHorse(4, 'Milo', {
           speed: 75, stamina: 65, focus: 55,
           trainingScore: 40,
           rider: { bonusPercent: 0, penaltyPercent: 0.08 } // -8% rider penalty
         }),
-        createTestHorse(5, 'Zuri', { 
+        createTestHorse(5, 'Zuri', {
           speed: 70, stamina: 60, focus: 50,
           trainingScore: 30,
           health: 'Bad' // -5% health penalty
@@ -173,7 +173,7 @@ describe('Competition Simulation System', () => {
       // Run multiple simulations to account for random luck modifier
       let traitMatchWins = 0;
       const totalRuns = 20; // Increase sample size for more reliable results
-      
+
       for (let i = 0; i < totalRuns; i++) {
         const horses = [
           createTestHorse(1, 'TraitMatch', { trait: 'Racing' }), // Matches show discipline
@@ -181,7 +181,7 @@ describe('Competition Simulation System', () => {
         ];
 
         const results = simulateCompetition(horses, sampleShow);
-        
+
         if (results[0].name === 'TraitMatch') {
           traitMatchWins++;
         }
@@ -190,9 +190,9 @@ describe('Competition Simulation System', () => {
       // The +5 trait bonus should provide advantage over random luck modifier (±9%)
       // Lowered threshold to account for statistical variance in random testing
       expect(traitMatchWins).toBeGreaterThanOrEqual(11); // At least 11 out of 20 wins (55%)
-      
+
       // Also verify that trait matching provides some advantage (not 50/50)
-            expect(traitMatchWins).toBeGreaterThan(9); // Better than random chance
+      expect(traitMatchWins).toBeGreaterThan(9); // Better than random chance
     });
 
     it('should handle horses with missing optional fields', () => {
@@ -208,7 +208,7 @@ describe('Competition Simulation System', () => {
       ];
 
       const results = simulateCompetition(horses, sampleShow);
-      
+
       expect(results).toHaveLength(1);
       expect(results[0].score).toBeGreaterThan(0);
       expect(results[0].placement).toBe('1st');
@@ -221,7 +221,7 @@ describe('Competition Simulation System', () => {
 
     it('should validate inputs', () => {
       const horses = [createTestHorse(1, 'Test')];
-      
+
       expect(() => simulateCompetition('not-array', sampleShow)).toThrow('Horses must be an array');
       expect(() => simulateCompetition(horses, null)).toThrow('Show object with discipline is required');
       expect(() => simulateCompetition(horses, {})).toThrow('Show object with discipline is required');
@@ -231,13 +231,13 @@ describe('Competition Simulation System', () => {
       const horses = [
         {
           id: 1,
-          name: 'ErrorHorse',
+          name: 'ErrorHorse'
           // Missing required stats - should cause error but not crash
         }
       ];
 
       const results = simulateCompetition(horses, sampleShow);
-      
+
       expect(results).toHaveLength(1);
       expect(results[0].score).toBe(0); // Error should result in 0 score
       expect(results[0].name).toBe('ErrorHorse');
@@ -246,7 +246,7 @@ describe('Competition Simulation System', () => {
     it('should verify complete scoring formula with random luck modifier', () => {
       const horse = createTestHorse(1, 'TestHorse', {
         speed: 80, // Primary stat for Racing
-        stamina: 60, // Secondary stat for Racing  
+        stamina: 60, // Secondary stat for Racing
         focus: 40, // Tertiary stat for Racing
         trait: 'Racing', // +5 trait bonus
         trainingScore: 20, // +20 training
@@ -256,20 +256,20 @@ describe('Competition Simulation System', () => {
       });
 
       const results = simulateCompetition([horse], sampleShow);
-      
+
       // Manual calculation (before random luck modifier):
       // Base: (80 * 0.5) + (60 * 0.3) + (40 * 0.2) = 40 + 18 + 8 = 66
       // Trait: +5 = 71
-      // Training: +20 = 91  
+      // Training: +20 = 91
       // Tack: +15 = 106
       // Rider: 106 * 1.03 = 109.18
       // Health: 109.18 * 1.05 = 114.639
       // Random luck: ±9% of 114.639 = ±10.32, so range is 104.32 to 124.96
-      
+
       const baseScore = 114.639;
       const minExpected = baseScore * 0.91; // -9% luck
       const maxExpected = baseScore * 1.09; // +9% luck
-      
+
       expect(results[0].score).toBeGreaterThanOrEqual(minExpected);
       expect(results[0].score).toBeLessThanOrEqual(maxExpected);
       expect(results[0].score).toBeGreaterThan(0);
@@ -296,7 +296,7 @@ describe('Competition Simulation System', () => {
       // Verify that we get different scores due to random luck modifier
       const uniqueScores = new Set(scores);
       expect(uniqueScores.size).toBeGreaterThan(1); // Should have multiple different scores
-      
+
       // Verify all scores are within reasonable range
       const minScore = Math.min(...scores);
       const maxScore = Math.max(...scores);
@@ -304,4 +304,4 @@ describe('Competition Simulation System', () => {
       expect(minScore).toBeGreaterThan(0); // All scores should be positive
     });
   });
-}); 
+});
