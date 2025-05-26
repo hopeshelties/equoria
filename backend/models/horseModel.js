@@ -701,6 +701,183 @@ async function getAllTraits(horseId) {
   }
 }
 
+// ============================================================================
+// INSTANCE-STYLE HELPER METHODS (as requested in TASK 7)
+// ============================================================================
+
+/**
+ * Check if a horse has a specific trait (instance-style helper)
+ * @param {number} horseId - ID of the horse
+ * @param {string} traitName - Name of the trait to check
+ * @returns {boolean} - True if the horse has the trait (in any category)
+ */
+async function hasTrait(horseId, traitName) {
+  try {
+    logger.info(`[horseModel.hasTrait] Checking if horse ${horseId} has trait '${traitName}'`);
+
+    // Validate inputs
+    const numericId = parseInt(horseId, 10);
+    if (isNaN(numericId) || numericId <= 0) {
+      throw new Error('Invalid horse ID provided');
+    }
+
+    if (!traitName || typeof traitName !== 'string') {
+      throw new Error('Trait name must be a non-empty string');
+    }
+
+    const horse = await prisma.horse.findUnique({
+      where: { id: numericId },
+      select: {
+        id: true,
+        name: true,
+        epigenetic_modifiers: true
+      }
+    });
+
+    if (!horse) {
+      throw new Error(`Horse with ID ${horseId} not found`);
+    }
+
+    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+
+    const hasPositive = (traits.positive || []).includes(traitName);
+    const hasNegative = (traits.negative || []).includes(traitName);
+    const hasHidden = (traits.hidden || []).includes(traitName);
+
+    const result = hasPositive || hasNegative || hasHidden;
+
+    logger.info(`[horseModel.hasTrait] Horse ${horseId} ${result ? 'has' : 'does not have'} trait '${traitName}'`);
+
+    return result;
+
+  } catch (error) {
+    logger.error(`[horseModel.hasTrait] Error checking trait: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Get positive traits for a horse (instance-style helper)
+ * @param {number} horseId - ID of the horse
+ * @returns {string[]} - Array of positive trait names
+ */
+async function getPositiveTraitsArray(horseId) {
+  try {
+    logger.info(`[horseModel.getPositiveTraitsArray] Getting positive traits for horse ${horseId}`);
+
+    // Validate ID
+    const numericId = parseInt(horseId, 10);
+    if (isNaN(numericId) || numericId <= 0) {
+      throw new Error('Invalid horse ID provided');
+    }
+
+    const horse = await prisma.horse.findUnique({
+      where: { id: numericId },
+      select: {
+        id: true,
+        name: true,
+        epigenetic_modifiers: true
+      }
+    });
+
+    if (!horse) {
+      throw new Error(`Horse with ID ${horseId} not found`);
+    }
+
+    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const positiveTraits = traits.positive || [];
+
+    logger.info(`[horseModel.getPositiveTraitsArray] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`);
+
+    return positiveTraits;
+
+  } catch (error) {
+    logger.error(`[horseModel.getPositiveTraitsArray] Error getting positive traits: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Get negative traits for a horse (instance-style helper)
+ * @param {number} horseId - ID of the horse
+ * @returns {string[]} - Array of negative trait names
+ */
+async function getNegativeTraitsArray(horseId) {
+  try {
+    logger.info(`[horseModel.getNegativeTraitsArray] Getting negative traits for horse ${horseId}`);
+
+    // Validate ID
+    const numericId = parseInt(horseId, 10);
+    if (isNaN(numericId) || numericId <= 0) {
+      throw new Error('Invalid horse ID provided');
+    }
+
+    const horse = await prisma.horse.findUnique({
+      where: { id: numericId },
+      select: {
+        id: true,
+        name: true,
+        epigenetic_modifiers: true
+      }
+    });
+
+    if (!horse) {
+      throw new Error(`Horse with ID ${horseId} not found`);
+    }
+
+    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const negativeTraits = traits.negative || [];
+
+    logger.info(`[horseModel.getNegativeTraitsArray] Found ${negativeTraits.length} negative traits for horse ${horseId}: ${negativeTraits.join(', ')}`);
+
+    return negativeTraits;
+
+  } catch (error) {
+    logger.error(`[horseModel.getNegativeTraitsArray] Error getting negative traits: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Add a trait to a horse (instance-style helper)
+ * @param {number} horseId - ID of the horse
+ * @param {string} traitName - Name of the trait to add
+ * @param {string} category - Category of the trait ('positive' or 'negative')
+ * @returns {Object} - Updated horse object with new trait
+ */
+async function addTrait(horseId, traitName, category) {
+  try {
+    logger.info(`[horseModel.addTrait] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`);
+
+    // Validate inputs
+    const numericId = parseInt(horseId, 10);
+    if (isNaN(numericId) || numericId <= 0) {
+      throw new Error('Invalid horse ID provided');
+    }
+
+    if (!traitName || typeof traitName !== 'string') {
+      throw new Error('Trait name must be a non-empty string');
+    }
+
+    // For the instance-style helper, we only support 'positive' and 'negative' as requested
+    const validCategories = ['positive', 'negative'];
+    if (!validCategories.includes(category)) {
+      throw new Error(`Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`);
+    }
+
+    // Use the existing addTraitSafely function which handles all the logic
+    const updatedHorse = await addTraitSafely(horseId, traitName, category);
+
+    logger.info(`[horseModel.addTrait] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`);
+
+    return updatedHorse;
+
+  } catch (error) {
+    logger.error(`[horseModel.addTrait] Error adding trait: ${error.message}`);
+    throw error;
+  }
+}
+
 export {
   createHorse,
   getHorseById,
@@ -712,5 +889,10 @@ export {
   hasTraitPresent,
   addTraitSafely,
   removeTraitSafely,
-  getAllTraits
+  getAllTraits,
+  // Instance-style helper methods (TASK 7)
+  hasTrait,
+  getPositiveTraitsArray,
+  getNegativeTraitsArray,
+  addTrait
 };
