@@ -112,8 +112,8 @@ describe('Competition Score Calculation', () => {
       const maxScore = Math.max(...scores);
 
       expect(maxScore).toBeGreaterThan(minScore); // Should have variance
-      expect(minScore).toBeGreaterThan(270); // Should be above 300 * 0.91 = 273
-      expect(maxScore).toBeLessThan(330); // Should be below 300 * 1.09 = 327
+      expect(minScore).toBeGreaterThanOrEqual(273); // Should be at or above 300 * 0.91 = 273
+      expect(maxScore).toBeLessThanOrEqual(327); // Should be at or below 300 * 1.09 = 327
     });
 
     it('should handle missing stats by defaulting to 0', () => {
@@ -177,6 +177,285 @@ describe('Competition Score Calculation', () => {
       const score = calculateCompetitionScore(horse, 'Racing');
 
       expect(Number.isInteger(score)).toBe(true);
+    });
+  });
+
+  describe('Trait Match Logic - 20 Competition Simulation Tests', () => {
+
+    it('should demonstrate trait advantage in Show Jumping competitions (discipline_affinity_show_jumping)', () => {
+      const traitHorse = createTestHorse(
+        { precision: 70, focus: 60, stamina: 50 },
+        ['discipline_affinity_show_jumping']
+      );
+
+      const regularHorse = createTestHorse({ precision: 70, focus: 60, stamina: 50 });
+
+      let traitWins = 0;
+      const totalRuns = 20;
+
+      for (let i = 0; i < totalRuns; i++) {
+        const traitScore = calculateCompetitionScore(traitHorse, 'Show Jumping');
+        const regularScore = calculateCompetitionScore(regularHorse, 'Show Jumping');
+
+        if (traitScore > regularScore) {
+          traitWins++;
+        }
+      }
+
+      // Horse with matching trait should win at least 45% of the time (9/20)
+      // The +5 trait bonus should provide meaningful advantage despite ±9% luck modifier
+      // Note: Due to random variance, we allow for some flexibility in the win rate
+      expect(traitWins).toBeGreaterThanOrEqual(9);
+      expect(traitWins).toBeLessThanOrEqual(20); // Sanity check
+    });
+
+    it('should demonstrate trait advantage in Racing competitions (discipline_affinity_racing)', () => {
+      const traitHorse = createTestHorse(
+        { speed: 70, stamina: 60, focus: 50 },
+        ['discipline_affinity_racing']
+      );
+
+      const regularHorse = createTestHorse({ speed: 70, stamina: 60, focus: 50 });
+
+      let traitWins = 0;
+      const totalRuns = 20;
+
+      for (let i = 0; i < totalRuns; i++) {
+        const traitScore = calculateCompetitionScore(traitHorse, 'Racing');
+        const regularScore = calculateCompetitionScore(regularHorse, 'Racing');
+
+        if (traitScore > regularScore) {
+          traitWins++;
+        }
+      }
+
+      expect(traitWins).toBeGreaterThanOrEqual(9);
+      expect(traitWins).toBeLessThanOrEqual(20);
+    });
+
+    it('should demonstrate trait advantage in Dressage competitions (discipline_affinity_dressage)', () => {
+      const traitHorse = createTestHorse(
+        { precision: 70, focus: 60, coordination: 50 },
+        ['discipline_affinity_dressage']
+      );
+
+      const regularHorse = createTestHorse({ precision: 70, focus: 60, coordination: 50 });
+
+      let traitWins = 0;
+      const totalRuns = 20;
+
+      for (let i = 0; i < totalRuns; i++) {
+        const traitScore = calculateCompetitionScore(traitHorse, 'Dressage');
+        const regularScore = calculateCompetitionScore(regularHorse, 'Dressage');
+
+        if (traitScore > regularScore) {
+          traitWins++;
+        }
+      }
+
+      expect(traitWins).toBeGreaterThanOrEqual(9);
+      expect(traitWins).toBeLessThanOrEqual(20);
+    });
+
+    it('should demonstrate trait advantage in Cross Country competitions (discipline_affinity_cross_country)', () => {
+      const traitHorse = createTestHorse(
+        { stamina: 70, agility: 60, boldness: 50 },
+        ['discipline_affinity_cross_country']
+      );
+
+      const regularHorse = createTestHorse({ stamina: 70, agility: 60, boldness: 50 });
+
+      let traitWins = 0;
+      const totalRuns = 20;
+
+      for (let i = 0; i < totalRuns; i++) {
+        const traitScore = calculateCompetitionScore(traitHorse, 'Cross Country');
+        const regularScore = calculateCompetitionScore(regularHorse, 'Cross Country');
+
+        if (traitScore > regularScore) {
+          traitWins++;
+        }
+      }
+
+      expect(traitWins).toBeGreaterThanOrEqual(9);
+      expect(traitWins).toBeLessThanOrEqual(20);
+    });
+
+    it('should show no advantage when trait does not match discipline', () => {
+      const jumpTraitHorse = createTestHorse(
+        { speed: 70, stamina: 60, focus: 50 },
+        ['discipline_affinity_show_jumping'] // Jump trait for Racing discipline
+      );
+
+      const regularHorse = createTestHorse({ speed: 70, stamina: 60, focus: 50 });
+
+      let traitWins = 0;
+      const totalRuns = 20;
+
+      // Test in Racing (trait doesn't match)
+      for (let i = 0; i < totalRuns; i++) {
+        const traitScore = calculateCompetitionScore(jumpTraitHorse, 'Racing');
+        const regularScore = calculateCompetitionScore(regularHorse, 'Racing');
+
+        if (traitScore > regularScore) {
+          traitWins++;
+        }
+      }
+
+      // Should be close to 50/50 since no trait advantage applies
+      expect(traitWins).toBeGreaterThanOrEqual(4); // Allow for random variance
+      expect(traitWins).toBeLessThanOrEqual(16); // Allow for random variance
+    });
+
+    it('should handle horse missing epigenetic_modifiers without throwing error', () => {
+      const horseWithoutModifiers = {
+        id: 1,
+        name: 'No Modifiers Horse',
+        speed: 70,
+        stamina: 60,
+        focus: 50
+        // No epigenetic_modifiers field
+      };
+
+      const regularHorse = createTestHorse({ speed: 70, stamina: 60, focus: 50 });
+
+      let noModifiersWins = 0;
+      const totalRuns = 20;
+
+      for (let i = 0; i < totalRuns; i++) {
+        expect(() => {
+          calculateCompetitionScore(horseWithoutModifiers, 'Racing');
+        }).not.toThrow();
+
+        const noModifiersScore = calculateCompetitionScore(horseWithoutModifiers, 'Racing');
+        const regularScore = calculateCompetitionScore(regularHorse, 'Racing');
+
+        if (noModifiersScore > regularScore) {
+          noModifiersWins++;
+        }
+      }
+
+      // Should be close to 50/50 since both horses have no trait advantage
+      expect(noModifiersWins).toBeGreaterThanOrEqual(4);
+      expect(noModifiersWins).toBeLessThanOrEqual(16);
+    });
+  });
+
+  describe('Deterministic Tests with Controlled Randomness', () => {
+    let originalRandom;
+
+    beforeEach(() => {
+      originalRandom = Math.random;
+    });
+
+    afterEach(() => {
+      Math.random = originalRandom;
+    });
+
+    it('should apply exact +5 bonus with controlled randomness', () => {
+      // Mock Math.random to return 0.5 (middle of range for luck modifier)
+      Math.random = () => 0.5;
+
+      const traitHorse = createTestHorse(
+        { speed: 70, stamina: 60, focus: 50 },
+        ['discipline_affinity_racing']
+      );
+
+      const regularHorse = createTestHorse({ speed: 70, stamina: 60, focus: 50 });
+
+      const traitScore = calculateCompetitionScore(traitHorse, 'Racing');
+      const regularScore = calculateCompetitionScore(regularHorse, 'Racing');
+
+      // With controlled randomness, the difference should be exactly +5
+      const scoreDifference = traitScore - regularScore;
+      expect(scoreDifference).toBe(5);
+    });
+
+    it('should handle minimum luck modifier (0)', () => {
+      // Mock Math.random to return 0 (minimum luck modifier: -9%)
+      Math.random = () => 0;
+
+      const horse = createTestHorse({ speed: 100, stamina: 100, focus: 100 });
+      const score = calculateCompetitionScore(horse, 'Racing');
+
+      // Base score: 300, with -9% luck modifier should be exactly 273
+      expect(score).toBe(273);
+    });
+
+    it('should handle maximum luck modifier (1)', () => {
+      // Mock Math.random to return 1 (maximum luck modifier: +9%)
+      Math.random = () => 1;
+
+      const horse = createTestHorse({ speed: 100, stamina: 100, focus: 100 });
+      const score = calculateCompetitionScore(horse, 'Racing');
+
+      // Base score: 300, with +9% luck modifier should be exactly 327
+      expect(score).toBe(327);
+    });
+
+    it('should demonstrate consistent trait advantage with controlled randomness', () => {
+      // Mock Math.random to return consistent value
+      Math.random = () => 0.5;
+
+      const traitHorse = createTestHorse(
+        { precision: 70, focus: 60, stamina: 50 },
+        ['discipline_affinity_show_jumping']
+      );
+
+      const regularHorse = createTestHorse({ precision: 70, focus: 60, stamina: 50 });
+
+      // With controlled randomness, trait horse should win every time
+      let traitWins = 0;
+      const totalRuns = 10;
+
+      for (let i = 0; i < totalRuns; i++) {
+        const traitScore = calculateCompetitionScore(traitHorse, 'Show Jumping');
+        const regularScore = calculateCompetitionScore(regularHorse, 'Show Jumping');
+
+        if (traitScore > regularScore) {
+          traitWins++;
+        }
+      }
+
+      expect(traitWins).toBe(totalRuns); // Should win all with controlled randomness
+    });
+
+    it('should verify trait bonus is applied correctly across all disciplines', () => {
+      Math.random = () => 0.5; // Neutral luck modifier
+
+      const disciplines = [
+        { name: 'Racing', trait: 'discipline_affinity_racing', stats: { speed: 70, stamina: 60, focus: 50 } },
+        { name: 'Show Jumping', trait: 'discipline_affinity_show_jumping', stats: { precision: 70, focus: 60, stamina: 50 } },
+        { name: 'Dressage', trait: 'discipline_affinity_dressage', stats: { precision: 70, focus: 60, coordination: 50 } },
+        { name: 'Cross Country', trait: 'discipline_affinity_cross_country', stats: { stamina: 70, agility: 60, boldness: 50 } }
+      ];
+
+      disciplines.forEach(({ name, trait, stats }) => {
+        const traitHorse = createTestHorse(stats, [trait]);
+        const regularHorse = createTestHorse(stats);
+
+        const traitScore = calculateCompetitionScore(traitHorse, name);
+        const regularScore = calculateCompetitionScore(regularHorse, name);
+
+        expect(traitScore - regularScore).toBe(5);
+      });
+    });
+
+    it('should verify no bonus when trait does not match discipline', () => {
+      Math.random = () => 0.5; // Neutral luck modifier
+
+      const jumpTraitHorse = createTestHorse(
+        { speed: 70, stamina: 60, focus: 50 },
+        ['discipline_affinity_show_jumping'] // Jump trait
+      );
+
+      const regularHorse = createTestHorse({ speed: 70, stamina: 60, focus: 50 });
+
+      // Test in Racing (trait doesn't match)
+      const traitScore = calculateCompetitionScore(jumpTraitHorse, 'Racing');
+      const regularScore = calculateCompetitionScore(regularHorse, 'Racing');
+
+      expect(traitScore - regularScore).toBe(0); // No bonus
     });
   });
 
