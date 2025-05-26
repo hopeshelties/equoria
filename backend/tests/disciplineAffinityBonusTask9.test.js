@@ -136,9 +136,11 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
       const wrongAffinityResult = results.find(r => r.horseId === 1);
       const regularResult = results.find(r => r.horseId === 2);
 
-      // Scores should be similar since no affinity bonus is applied
+      // Since both horses have identical stats and no discipline affinity bonus is applied,
+      // the score difference should only be due to random luck modifier (±9%)
+      // With base scores around 130-150, this can create differences up to ~27 points
       const scoreDifference = Math.abs(wrongAffinityResult.score - regularResult.score);
-      expect(scoreDifference).toBeLessThan(15); // Should be within random variance range
+      expect(scoreDifference).toBeLessThan(30); // Allow for ±9% luck variance
     });
 
     it('should NOT apply bonus for discipline_affinity_show_jumping trait in Racing competition', () => {
@@ -155,8 +157,11 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
       const wrongAffinityResult = results.find(r => r.horseId === 1);
       const regularResult = results.find(r => r.horseId === 2);
 
+      // Since both horses have identical stats and no discipline affinity bonus is applied,
+      // the score difference should only be due to random luck modifier (±9%)
+      // With base scores around 130-150, this can create differences up to ~27 points
       const scoreDifference = Math.abs(wrongAffinityResult.score - regularResult.score);
-      expect(scoreDifference).toBeLessThan(15);
+      expect(scoreDifference).toBeLessThan(30); // Allow for ±9% luck variance
     });
   });
 
