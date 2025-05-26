@@ -1,7 +1,114 @@
+import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import request from 'supertest';
-import app from '../app.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Mock the database module BEFORE importing the app
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+  default: {
+    horse: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      findMany: jest.fn()
+    },
+    breed: {
+      findUnique: jest.fn()
+    },
+    player: {
+      findUnique: jest.fn()
+    },
+    $disconnect: jest.fn()
+  }
+}));
+
+// Now import the app and the mocked modules
+const app = (await import('../app.js')).default;
+const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
 
 describe('Foal Creation Integration Tests', () => {
+  const mockBreed = {
+    id: 1,
+    name: 'Test Breed',
+    description: 'Test breed for foal creation'
+  };
+
+  const mockSire = {
+    id: 1,
+    name: 'Test Sire',
+    age: 5,
+    sex: 'stallion',
+    breedId: 1,
+    ownerId: 'test-owner-1',
+    stress_level: 10,
+    feed_quality: 'premium',
+    epigenetic_modifiers: {
+      positive: ['resilient'],
+      negative: [],
+      hidden: []
+    }
+  };
+
+  const mockDam = {
+    id: 2,
+    name: 'Test Dam',
+    age: 4,
+    sex: 'mare',
+    breedId: 1,
+    ownerId: 'test-owner-1',
+    stress_level: 15,
+    feed_quality: 'good',
+    epigenetic_modifiers: {
+      positive: ['calm'],
+      negative: [],
+      hidden: []
+    }
+  };
+
+  const mockCreatedFoal = {
+    id: 3,
+    name: 'Integration Test Foal',
+    age: 0,
+    sex: 'filly',
+    breedId: 1,
+    sire_id: 1,
+    dam_id: 2,
+    ownerId: 'test-owner-1',
+    health_status: 'Good',
+    epigenetic_modifiers: {
+      positive: ['resilient'],
+      negative: [],
+      hidden: ['bold']
+    }
+  };
+
+  beforeEach(() => {
+    // Reset all mocks before each test
+    jest.clearAllMocks();
+
+    // Setup default mock responses
+    mockPrisma.breed.findUnique.mockResolvedValue(mockBreed);
+
+    mockPrisma.horse.findUnique.mockImplementation(({ where }) => {
+      if (where.id === 1) {
+        return Promise.resolve(mockSire);
+      }
+      if (where.id === 2) {
+        return Promise.resolve(mockDam);
+      }
+      if (where.id === 999999 || where.id === 999998) {
+        return Promise.resolve(null);
+      }
+      return Promise.resolve(null);
+    });
+
+    mockPrisma.horse.findMany.mockResolvedValue([]);
+
+    mockPrisma.horse.create.mockResolvedValue(mockCreatedFoal);
+  });
+
   describe('POST /api/horses/foals', () => {
     it('should validate required fields for foal creation', async() => {
       const response = await request(app)
@@ -149,14 +256,20 @@ describe('Foal Creation Integration Tests', () => {
     });
 
     it('should successfully create a foal with existing sire and dam', async() => {
-      // Use existing horses from the test database (IDs 1 and 2 exist)
+      // Update the mock to return the foal with the correct name
+      const customFoal = {
+        ...mockCreatedFoal,
+        name: 'Integration Test Foal',
+        sex: 'filly'
+      };
+      mockPrisma.horse.create.mockResolvedValue(customFoal);
+
       const validFoalData = {
         name: 'Integration Test Foal',
         breedId: 1,
         sire_id: 1,
         dam_id: 2,
         sex: 'filly'
-        // No foreign key references that might not exist
       };
 
       const response = await request(app)

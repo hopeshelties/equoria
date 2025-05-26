@@ -11,6 +11,7 @@ import logger from '../utils/logger.js';
  * Final Score Formula:
  * finalScore = baseStatScore                  // 50/30/20 weighted
  *            + legacyTraitBonus              // +5 if horse trait matches discipline (legacy)
+ *            + disciplineAffinityBonus       // TASK 9: +5 if horse has discipline_affinity_* trait
  *            + trainingScore                 // 0–100
  *            + tack bonuses                 // saddle + bridle
  *            + rider bonus/penalty          // % boost and reduction
@@ -45,6 +46,16 @@ function simulateCompetition(horses, show) {
       // 2. Add legacy trait bonus (+5 if horse trait matches show discipline)
       const legacyTraitBonus = (horse.trait === show.discipline) ? 5 : 0;
 
+      // 2.5. TASK 9: Add discipline affinity trait bonus (+5 if horse has matching discipline_affinity trait)
+      let disciplineAffinityBonus = 0;
+      const eventType = show.discipline.toLowerCase().replace(/\s+/g, '_'); // Convert "Show Jumping" to "show_jumping"
+      const affinityTrait = `discipline_affinity_${eventType}`;
+
+      if (horse.epigenetic_modifiers?.positive?.includes(affinityTrait)) {
+        disciplineAffinityBonus = 5;
+        logger.info(`[simulateCompetition] Horse ${horse.name}: Discipline affinity bonus applied for ${affinityTrait} (+5 points)`);
+      }
+
       // 3. Add training score (0-100, default to 0 if not provided)
       const trainingScore = horse.trainingScore || 0;
 
@@ -54,7 +65,7 @@ function simulateCompetition(horses, show) {
       const tackBonus = saddleBonus + bridleBonus;
 
       // 5. Calculate subtotal before percentage modifiers
-      const subtotal = baseScore + legacyTraitBonus + trainingScore + tackBonus;
+      const subtotal = baseScore + legacyTraitBonus + disciplineAffinityBonus + trainingScore + tackBonus;
 
       // 6. Apply rider modifiers (bonus and penalty as percentages)
       const riderBonusPercent = (horse.rider && horse.rider.bonusPercent) || 0;
@@ -143,7 +154,7 @@ function simulateCompetition(horses, show) {
 
     } catch (error) {
       // If there's an error calculating score for a horse, give them a score of 0
-      console.warn(`Error calculating score for horse ${horse.id || 'unknown'}: ${error.message}`);
+      logger.warn(`Error calculating score for horse ${horse.id || 'unknown'}: ${error.message}`);
       return {
         horseId: horse.id,
         name: horse.name || 'Unknown',
