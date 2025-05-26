@@ -328,4 +328,65 @@ async function incrementDisciplineScore(horseId, discipline, amount = 5) {
   }
 }
 
-export { createHorse, getHorseById, updateDisciplineScore, getDisciplineScores, incrementDisciplineScore };
+/**
+ * Update a specific stat for a horse
+ * @param {number} horseId - ID of the horse to update
+ * @param {string} statName - Name of the stat to update (speed, stamina, balance, etc.)
+ * @param {number} amount - Amount to add to the stat
+ * @returns {Object} - Updated horse object
+ */
+async function updateHorseStat(horseId, statName, amount) {
+  try {
+    logger.info(`[horseModel.updateHorseStat] Updating ${statName} by ${amount} for horse ${horseId}`);
+
+    // Validate stat name
+    const validStats = ['speed', 'stamina', 'balance', 'boldness', 'flexibility', 'obedience', 'focus'];
+    if (!validStats.includes(statName)) {
+      throw new Error(`Invalid stat name: ${statName}. Valid stats: ${validStats.join(', ')}`);
+    }
+
+    // Validate amount
+    if (typeof amount !== 'number' || amount < 0) {
+      throw new Error('Amount must be a positive number');
+    }
+
+    // Get current horse data
+    const currentHorse = await prisma.horse.findUnique({
+      where: { id: horseId },
+      select: {
+        id: true,
+        name: true,
+        [statName]: true
+      }
+    });
+
+    if (!currentHorse) {
+      throw new Error(`Horse with ID ${horseId} not found`);
+    }
+
+    const currentValue = currentHorse[statName] || 0;
+    const newValue = Math.min(100, currentValue + amount); // Cap at 100
+
+    // Update the stat
+    const updatedHorse = await prisma.horse.update({
+      where: { id: horseId },
+      data: { [statName]: newValue },
+      include: {
+        breed: true,
+        owner: true,
+        stable: true,
+        player: true
+      }
+    });
+
+    logger.info(`[horseModel.updateHorseStat] Updated ${statName} for horse ${horseId}: ${currentValue} -> ${newValue} (+${amount})`);
+
+    return updatedHorse;
+
+  } catch (error) {
+    logger.error(`[horseModel.updateHorseStat] Error updating stat: ${error.message}`);
+    throw error;
+  }
+}
+
+export { createHorse, getHorseById, updateDisciplineScore, getDisciplineScores, incrementDisciplineScore, updateHorseStat };

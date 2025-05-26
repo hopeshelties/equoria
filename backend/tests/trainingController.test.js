@@ -14,6 +14,7 @@ const mockGetAnyRecentTraining = jest.fn();
 // Mock the horseModel functions
 const mockIncrementDisciplineScore = jest.fn();
 const mockGetHorseById = jest.fn();
+const mockUpdateHorseStat = jest.fn();
 
 // Mock the playerModel functions
 const mockGetPlayerWithHorses = jest.fn();
@@ -28,7 +29,8 @@ jest.unstable_mockModule(join(__dirname, '../models/trainingModel.js'), () => ({
 
 jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
   incrementDisciplineScore: mockIncrementDisciplineScore,
-  getHorseById: mockGetHorseById
+  getHorseById: mockGetHorseById,
+  updateHorseStat: mockUpdateHorseStat
 }));
 
 jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => ({
@@ -165,6 +167,7 @@ describe('trainingController', () => {
       mockGetAnyRecentTraining.mockClear();
       mockLogTrainingSession.mockClear();
       mockIncrementDisciplineScore.mockClear();
+      mockUpdateHorseStat.mockClear();
     });
 
     it('should successfully train eligible horse', async() => {
@@ -185,6 +188,11 @@ describe('trainingController', () => {
         breed: { id: 1, name: 'Thoroughbred' },
         ownerId: 'test-player-123'
       });
+      mockUpdateHorseStat.mockResolvedValue({
+        id: 1,
+        name: 'Test Horse',
+        speed: 15 // Updated stat
+      });
       mockAddXp.mockResolvedValue({
         id: 'test-player-123',
         xp: 105,
@@ -197,7 +205,7 @@ describe('trainingController', () => {
       const result = await trainHorse(1, 'Racing');
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Horse trained successfully in Racing. +5 added.');
+      expect(result.message).toContain('Horse trained successfully in Racing. +5 added.');
       expect(result.updatedHorse.name).toBe('Test Horse');
       expect(result.nextEligible).toBeDefined();
       expect(result.traitEffects).toBeDefined();

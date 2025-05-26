@@ -36,26 +36,35 @@ const traitEffects = {
   },
 
   calm: {
+    // Bonding effects
+    bondingBonus: 0.15, // 15% faster bonding
+    bondingConsistency: 0.20, // 20% more consistent bonding
+
     // Training effects
     suppressTemperamentDrift: true,
     trainingStressReduction: 0.20, // 20% less stress from training
     trainingFocusBonus: 0.15, // 15% better focus during training
+    trainingConsistencyBonus: 0.15, // 15% more consistent training
 
     // Competition effects
     competitionStressResistance: 0.25, // 25% less stress impact
     competitionFocusBonus: 0.10, // 10% better focus in competitions
     competitionScoreModifier: 0.025, // +2.5% to final score
+    competitionConsistency: 0.15, // 15% more consistent performance
 
     // General effects
     baseStressReduction: 5, // -5 base stress level
     temperamentStability: true, // Prevents negative temperament changes
+    stressRecoveryBonus: 0.15, // 15% faster stress recovery
 
     // Discipline-specific bonuses
     disciplineModifiers: {
       'Dressage': 0.05,
       'Driving': 0.04,
       'Trail': 0.03
-    }
+    },
+
+    description: 'Maintains composure and bonds steadily in all situations'
   },
 
   bold: {
@@ -148,9 +157,70 @@ const traitEffects = {
     }
   },
 
+  eager_learner: {
+    // Training effects
+    trainingXpModifier: 0.25, // 25% more XP from training
+    statGainChanceModifier: 0.10, // +10% chance for stat gains
+    baseStatBoost: 1, // +1 to stat gains when they occur
+
+    // Competition effects
+    competitionScoreModifier: 0.02, // +2% to final score
+    learningFromCompetition: 0.15, // 15% bonus learning from competitions
+
+    // General effects
+    motivationBonus: 0.20, // 20% higher motivation
+    trainingConsistencyBonus: 0.15, // 15% more consistent training results
+
+    description: 'Learns quickly and eagerly from all experiences'
+  },
+
+  social: {
+    // Bonding effects
+    bondingBonus: 0.25, // 25% faster bonding
+    groomingBondingBonus: 0.30, // 30% bonus from grooming
+    trainingBondingBonus: 0.20, // 20% bonus from training
+
+    // Training effects
+    groupTrainingBonus: 0.15, // 15% bonus when training with others
+    handlerCompatibility: 0.20, // 20% better handler relationships
+
+    // Competition effects
+    crowdComfort: 0.10, // 10% less stress from crowds
+    competitionSocialBonus: 0.05, // 5% bonus in social competition environments
+
+    // General effects
+    stressReduction: 5, // -5 base stress from social interaction
+    temperamentStability: true, // More stable temperament
+
+    description: 'Thrives on social interaction and bonds easily'
+  },
+
+  specialized_lineage: {
+    // Training effects
+    trainingXpModifier: 0.15, // 15% more XP from training
+    trainingSpecializationBonus: 0.20, // 20% bonus in specialized discipline
+
+    // Competition effects
+    competitionScoreModifier: 0.04, // +4% to final score
+    disciplineConfidenceBonus: 0.15, // 15% confidence boost in specialized discipline
+
+    // General effects
+    learningRate: 1.20, // 20% faster learning in specialized areas
+    adaptabilityBonus: 0.10, // 10% better adaptation to new training
+
+    // Note: Discipline-specific bonuses are handled separately based on lineage analysis
+    description: 'Benefits from specialized bloodline heritage'
+  },
+
+
+
   // ===== NEGATIVE TRAITS =====
 
   nervous: {
+    // Bonding effects
+    bondingPenalty: 0.20, // 20% slower bonding
+    bondingInconsistency: 0.25, // 25% more inconsistent bonding
+
     // Training effects
     trainingStressIncrease: 0.25, // 25% more stress from training
     trainingInconsistency: 0.15, // 15% more inconsistent results
@@ -169,8 +239,33 @@ const traitEffects = {
       'Racing': -0.06,
       'Show Jumping': -0.05,
       'Eventing': -0.04
-    }
+    },
+
+    description: 'Struggles with stress and performs inconsistently under pressure'
   },
+
+  antisocial: {
+    // Bonding effects
+    bondingPenalty: 0.30, // 30% slower bonding
+    groomingBondingPenalty: 0.25, // 25% penalty from grooming
+    handlerDifficulty: 0.25, // 25% more difficult handler relationships
+
+    // Training effects
+    groupTrainingPenalty: 0.20, // 20% penalty when training with others
+    isolationPreference: true, // Prefers isolated training
+
+    // Competition effects
+    crowdStress: 0.15, // 15% more stress from crowds
+    competitionSocialPenalty: 0.08, // 8% penalty in social environments
+
+    // General effects
+    stressIncrease: 10, // +10 base stress from social situations
+    temperamentInstability: 0.15, // 15% more temperament drift
+
+    description: 'Prefers solitude and struggles with social interaction'
+  },
+
+
 
   lazy: {
     // Training effects

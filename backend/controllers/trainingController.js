@@ -1,5 +1,5 @@
 import { getLastTrainingDate, getHorseAge, logTrainingSession, getAnyRecentTraining } from '../models/trainingModel.js';
-import { incrementDisciplineScore, getHorseById } from '../models/horseModel.js';
+import { incrementDisciplineScore, getHorseById, updateHorseStat } from '../models/horseModel.js';
 import { getPlayerWithHorses, addXp } from '../models/playerModel.js';
 import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import logger from '../utils/logger.js';
@@ -147,6 +147,65 @@ async function trainHorse(horseId, discipline) {
     // Ensure minimum gain of 1 point
     disciplineScoreIncrease = Math.max(1, disciplineScoreIncrease);
 
+    // Check for stat gain chance with trait effects
+    let statGainOccurred = false;
+    let statGainDetails = null;
+
+    // Base stat gain chance is 15% for training
+    let statGainChance = 0.15;
+
+    // Apply trait effects to stat gain chance
+    if (traitEffects.statGainChanceModifier) {
+      statGainChance = Math.max(0, Math.min(1, statGainChance + traitEffects.statGainChanceModifier));
+      logger.info(`[trainingController.trainHorse] Stat gain chance modified by traits: ${(statGainChance * 100).toFixed(1)}%`);
+    }
+
+    // Roll for stat gain
+    if (Math.random() < statGainChance) {
+      statGainOccurred = true;
+
+      // Determine which stat to improve based on discipline
+      const disciplineStatMap = {
+        'Racing': ['speed', 'stamina', 'focus'],
+        'Dressage': ['balance', 'obedience', 'flexibility'],
+        'Show Jumping': ['boldness', 'balance', 'focus'],
+        'Cross Country': ['stamina', 'boldness', 'balance'],
+        'Endurance': ['stamina', 'focus', 'balance'],
+        'Reining': ['obedience', 'balance', 'focus'],
+        'Driving': ['obedience', 'focus', 'stamina'],
+        'Trail': ['focus', 'balance', 'stamina'],
+        'Eventing': ['stamina', 'boldness', 'balance']
+      };
+
+      const relevantStats = disciplineStatMap[discipline] || ['speed', 'stamina', 'focus'];
+      const statToImprove = relevantStats[Math.floor(Math.random() * relevantStats.length)];
+
+      // Calculate stat gain amount (base 1-3 points)
+      let statGainAmount = Math.floor(Math.random() * 3) + 1;
+
+      // Apply trait effects to stat gain amount
+      if (traitEffects.baseStatBoost) {
+        statGainAmount += traitEffects.baseStatBoost;
+        logger.info(`[trainingController.trainHorse] Stat gain boosted by traits: +${traitEffects.baseStatBoost}`);
+      }
+
+      statGainDetails = {
+        stat: statToImprove,
+        amount: statGainAmount,
+        traitModified: !!(traitEffects.statGainChanceModifier || traitEffects.baseStatBoost)
+      };
+
+      // Update the horse's stat (this would need to be implemented in horseModel)
+      try {
+        await updateHorseStat(horseId, statToImprove, statGainAmount);
+        logger.info(`[trainingController.trainHorse] Stat gain: ${statToImprove} +${statGainAmount}`);
+      } catch (error) {
+        logger.error(`[trainingController.trainHorse] Failed to update stat: ${error.message}`);
+        statGainOccurred = false;
+        statGainDetails = null;
+      }
+    }
+
     // Update the horse's discipline score with trait-modified amount
     const updatedHorse = await incrementDisciplineScore(horseId, discipline, disciplineScoreIncrease);
 
@@ -184,12 +243,15 @@ async function trainHorse(horseId, discipline) {
     return {
       success: true,
       updatedHorse,
-      message: `Horse trained successfully in ${discipline}. +${disciplineScoreIncrease} added.`,
+      message: `Horse trained successfully in ${discipline}. +${disciplineScoreIncrease} added.${statGainOccurred ? ` Stat gain: ${statGainDetails.stat} +${statGainDetails.amount}` : ''}`,
       nextEligible: nextEligible.toISOString(),
+      statGain: statGainOccurred ? statGainDetails : null,
       traitEffects: {
         appliedTraits: allTraits,
         scoreModifier: disciplineScoreIncrease - 5, // Show the trait bonus/penalty
-        xpModifier: baseXp - 5 // Show the XP trait bonus/penalty
+        xpModifier: baseXp - 5, // Show the XP trait bonus/penalty
+        statGainChanceModifier: traitEffects.statGainChanceModifier || 0,
+        baseStatBoost: traitEffects.baseStatBoost || 0
       }
     };
 

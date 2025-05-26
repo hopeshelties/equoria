@@ -2,6 +2,7 @@ import { getStatScore } from '../utils/getStatScore.js';
 import { getHealthModifier } from '../utils/healthBonus.js';
 import { applyRiderModifiers } from '../utils/riderBonus.js';
 import { calculateTraitCompetitionImpact } from '../utils/traitCompetitionImpact.js';
+import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -64,9 +65,42 @@ function simulateCompetition(horses, show) {
       const healthModifier = getHealthModifier(horse.health || 'Good');
       const scoreAfterHealth = scoreAfterRider * (1 + healthModifier);
 
-      // 8. NEW: Apply trait-based competition impact
-      const traitImpact = calculateTraitCompetitionImpact(horse, show.discipline, scoreAfterHealth);
-      const scoreAfterTraits = scoreAfterHealth + traitImpact.finalScoreAdjustment;
+      // 8. Calculate stress response during competition
+      let competitionStressImpact = 0;
+      const baseStressLevel = horse.stress_level || 0;
+
+      if (baseStressLevel > 0) {
+        // Get trait effects for stress resistance
+        const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+        const allTraits = [...(traits.positive || []), ...(traits.negative || [])];
+        const traitEffects = getCombinedTraitEffects(allTraits);
+
+        // Base stress impact: higher stress = lower performance
+        let stressImpactPercent = baseStressLevel * 0.002; // 0.2% per stress point
+
+        // Apply trait-based stress resistance
+        if (traitEffects.competitionStressResistance) {
+          stressImpactPercent *= (1 - traitEffects.competitionStressResistance);
+          logger.info(`[simulateCompetition] Horse ${horse.name}: Stress resistance applied, ${(traitEffects.competitionStressResistance * 100).toFixed(1)}% reduction`);
+        }
+
+        // Apply stress reduction from calm/resilient traits
+        if (traitEffects.trainingStressReduction) {
+          stressImpactPercent *= (1 - traitEffects.trainingStressReduction * 0.5); // Half effect in competition
+        }
+
+        competitionStressImpact = scoreAfterHealth * stressImpactPercent;
+
+        if (competitionStressImpact > 0) {
+          logger.info(`[simulateCompetition] Horse ${horse.name}: Stress impact -${competitionStressImpact.toFixed(1)} points (${baseStressLevel} stress level)`);
+        }
+      }
+
+      const scoreAfterStress = scoreAfterHealth - competitionStressImpact;
+
+      // 9. NEW: Apply trait-based competition impact
+      const traitImpact = calculateTraitCompetitionImpact(horse, show.discipline, scoreAfterStress);
+      const scoreAfterTraits = scoreAfterStress + traitImpact.finalScoreAdjustment;
 
       // Log trait impact for analysis
       if (traitImpact.appliedTraits.length > 0) {
@@ -96,6 +130,14 @@ function simulateCompetition(horses, show) {
             specialized: trait.isSpecialized,
             description: trait.description
           }))
+        },
+        // NEW: Include stress impact details
+        stressDetails: {
+          baseStressLevel,
+          stressImpact: Math.round(competitionStressImpact * 10) / 10,
+          stressResistanceApplied: !!(traitImpact.appliedTraits.some(t =>
+            ['resilient', 'calm'].includes(t.traitName)
+          ))
         }
       };
 
