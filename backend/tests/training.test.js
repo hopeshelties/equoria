@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
+import { withSeededPlayerAuth } from './helpers/testAuth.js';
 
 // Custom Jest matcher for toBeOneOf
 expect.extend({
@@ -28,7 +29,7 @@ describe('Training System Integration Tests', () => {
   describe('Age Requirement Tests', () => {
     it('should block training for horse under 3 years old', async () => {
       // First, let's get the trainable horses to find the actual IDs
-      const trainableResponse = await request(app)
+      const trainableResponse = await withSeededPlayerAuth(request(app))
         .get(`/api/horses/trainable/${existingPlayerId}`);
 
       expect(trainableResponse.status).toBe(200);
@@ -42,7 +43,7 @@ describe('Training System Integration Tests', () => {
       // Try to train a horse that should be eligible (this will help us understand the system)
       const firstHorse = trainableResponse.body.data[0];
       
-      const response = await request(app)
+      const response = await withSeededPlayerAuth(request(app))
         .post('/api/training/train')
         .send({
           horseId: firstHorse.horseId,

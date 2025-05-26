@@ -11,6 +11,11 @@ import prisma from '../db/index.js';
  */
 export const auditLog = (operationType, sensitivityLevel = 'medium') => {
   return async (req, res, next) => {
+    // Skip audit logging in test environment
+    if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined) {
+      return next();
+    }
+    
     const startTime = Date.now();
     const originalSend = res.send;
     

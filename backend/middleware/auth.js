@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import config from '../config/config.js';
 import logger from '../utils/logger.js';
 import { ApiResponse } from '../utils/apiResponse.js';
+import prisma from '../db/index.js';
 
 /**
  * JWT Authentication Middleware
@@ -18,10 +19,10 @@ export const authenticateToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, config.jwt.secret);
+    const decoded = jwt.verify(token, config.jwtSecret);
     
     // Additional security checks
-    if (!decoded.userId || !decoded.email) {
+    if (!decoded.id || !decoded.email) {
       logger.warn(`[auth] Invalid token structure from IP: ${req.ip}`);
       return res.status(401).json(ApiResponse.unauthorized('Invalid token structure'));
     }
@@ -34,9 +35,9 @@ export const authenticateToken = (req, res, next) => {
 
     // Add user info to request
     req.user = {
-      id: decoded.userId,
+      id: decoded.id,
       email: decoded.email,
-      role: decoded.role || 'player',
+      role: decoded.role || 'user',
       permissions: decoded.permissions || []
     };
 
@@ -187,7 +188,7 @@ export const hashPassword = async (password) => {
     throw new Error('Password must be at least 8 characters long');
   }
   
-  return await bcrypt.hash(password, config.bcrypt.rounds);
+  return await bcrypt.hash(password, config.bcryptRounds);
 };
 
 /**
@@ -202,17 +203,17 @@ export const verifyPassword = async (password, hashedPassword) => {
  */
 export const generateToken = (user) => {
   const payload = {
-    userId: user.id,
+    id: user.id,
     email: user.email,
-    role: user.role || 'player',
+    role: user.role || 'user',
     permissions: user.permissions || [],
     iat: Math.floor(Date.now() / 1000),
     // Add anti-tampering data
     fingerprint: generateFingerprint(user)
   };
 
-  return jwt.sign(payload, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn,
+  return jwt.sign(payload, config.jwtSecret, {
+    expiresIn: config.jwtExpiresIn,
     issuer: 'equoria-api',
     audience: 'equoria-client'
   });

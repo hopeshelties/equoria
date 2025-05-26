@@ -15,7 +15,10 @@ export const createRateLimit = (windowMs = 15 * 60 * 1000, max = 100) => {
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     skip: (req) => {
       // Skip rate limiting for health checks and in test environment
-      return req.path.startsWith('/health') || config.env === 'test';
+      return req.path.startsWith('/health') || 
+             config.env === 'test' || 
+             process.env.NODE_ENV === 'test' ||
+             process.env.JEST_WORKER_ID !== undefined; // Jest test environment
     }
   });
 };
