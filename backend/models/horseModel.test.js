@@ -63,7 +63,12 @@ describe('horseModel', () => {
         data: {
           name: 'Test Horse',
           age: 5,
-          breedId: 1
+          breedId: 1,
+          epigenetic_modifiers: {
+            positive: [],
+            negative: [],
+            hidden: []
+          }
         },
         include: {
           breed: true,
@@ -104,6 +109,11 @@ describe('horseModel', () => {
           age: 3,
           breed: {
             connect: { id: 2 }
+          },
+          epigenetic_modifiers: {
+            positive: [],
+            negative: [],
+            hidden: []
           }
         },
         include: {
@@ -227,7 +237,12 @@ describe('horseModel', () => {
         data: {
           name: 'Number Breed Horse',
           age: 4,
-          breedId: 3
+          breedId: 3,
+          epigenetic_modifiers: {
+            positive: [],
+            negative: [],
+            hidden: []
+          }
         },
         include: {
           breed: true,
