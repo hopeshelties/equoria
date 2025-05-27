@@ -1,5 +1,13 @@
 import express from 'express';
-import leaderboardController from '../controllers/leaderboardController.js';
+import {
+  getTopPlayersByLevel,
+  getTopPlayersByXP,
+  getTopHorsesByEarnings,
+  getTopHorsesByPerformance,
+  getTopPlayersByHorseEarnings,
+  getRecentWinners,
+  getLeaderboardStats
+} from '../controllers/leaderboardController.js';
 import auth from '../middleware/auth.js';
 
 const router = express.Router();
@@ -72,7 +80,7 @@ const router = express.Router();
  *                         hasMore:
  *                           type: boolean
  */
-router.get('/players/level', auth, leaderboardController.getTopPlayersByLevel);
+router.get('/players/level', auth, getTopPlayersByLevel);
 
 /**
  * @swagger
@@ -109,7 +117,7 @@ router.get('/players/level', auth, leaderboardController.getTopPlayersByLevel);
  *       200:
  *         description: List of top players by XP
  */
-router.get('/players/xp', auth, leaderboardController.getTopPlayersByXP);
+router.get('/players/xp', auth, getTopPlayersByXP);
 
 /**
  * @swagger
@@ -144,7 +152,7 @@ router.get('/players/xp', auth, leaderboardController.getTopPlayersByXP);
  *       200:
  *         description: List of top horses by earnings
  */
-router.get('/horses/earnings', auth, leaderboardController.getTopHorsesByEarnings);
+router.get('/horses/earnings', auth, getTopHorsesByEarnings);
 
 /**
  * @swagger
@@ -186,7 +194,7 @@ router.get('/horses/earnings', auth, leaderboardController.getTopHorsesByEarning
  *       200:
  *         description: List of top horses by performance
  */
-router.get('/horses/performance', auth, leaderboardController.getTopHorsesByPerformance);
+router.get('/horses/performance', auth, getTopHorsesByPerformance);
 
 /**
  * @swagger
@@ -216,7 +224,7 @@ router.get('/horses/performance', auth, leaderboardController.getTopHorsesByPerf
  *       200:
  *         description: List of top players by horse earnings
  */
-router.get('/players/horse-earnings', auth, leaderboardController.getTopPlayersByHorseEarnings);
+router.get('/players/horse-earnings', auth, getTopPlayersByHorseEarnings);
 
 /**
  * @swagger
@@ -244,7 +252,7 @@ router.get('/players/horse-earnings', auth, leaderboardController.getTopPlayersB
  *       200:
  *         description: List of recent competition winners
  */
-router.get('/recent-winners', auth, leaderboardController.getRecentWinners);
+router.get('/recent-winners', auth, getRecentWinners);
 
 /**
  * @swagger
@@ -276,6 +284,6 @@ router.get('/recent-winners', auth, leaderboardController.getRecentWinners);
  *                     topPerformers:
  *                       type: object
  */
-router.get('/stats', auth, leaderboardController.getLeaderboardStats);
+router.get('/stats', auth, getLeaderboardStats);
 
 export default router;

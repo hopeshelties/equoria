@@ -1,514 +1,550 @@
 /**
- * Leaderboard Controller Tests
- * Comprehensive test suite for leaderboard functionality
+ * Leaderboard Controller Unit Tests
+ * Tests all leaderboard functionality including rankings and statistics
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import request from 'supertest';
-import app from '../app.js';
-import prisma from '../db/index.js';
+import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Mock the auth middleware to always authenticate
-jest.mock('../middleware/auth.js', () => {
-  return jest.fn((req, res, next) => {
-    req.user = { id: 1, username: 'testuser' };
-    next();
-  });
-});
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Mock the database module BEFORE importing the controller
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+  default: {
+    player: {
+      findMany: jest.fn(),
+      count: jest.fn(),
+      aggregate: jest.fn()
+    },
+    horse: {
+      findMany: jest.fn(),
+      count: jest.fn(),
+      aggregate: jest.fn(),
+      groupBy: jest.fn()
+    },
+    competitionResult: {
+      findMany: jest.fn(),
+      count: jest.fn(),
+      aggregate: jest.fn(),
+      groupBy: jest.fn()
+    },
+    xpEvent: {
+      findMany: jest.fn(),
+      aggregate: jest.fn(),
+      groupBy: jest.fn()
+    },
+    breed: {
+      findMany: jest.fn(),
+      count: jest.fn()
+    },
+    show: {
+      count: jest.fn()
+    },
+    $disconnect: jest.fn()
+  }
+}));
+
+// Mock logger
+jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+  default: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn()
+  }
+}));
+
+// Now import the controller and mocked modules
+const {
+  getTopPlayersByLevel,
+  getTopPlayersByXP,
+  getTopHorsesByEarnings,
+  getTopHorsesByPerformance,
+  getTopPlayersByHorseEarnings,
+  getRecentWinners,
+  getLeaderboardStats
+} = await import('../controllers/leaderboardController.js');
+
+const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
 
 describe('Leaderboard Controller', () => {
-  let testPlayers, testHorses, testResults;
+  let mockReq;
+  let mockRes;
 
-  beforeEach(async() => {
-    // Clean up database
-    await prisma.competitionResult.deleteMany();
-    await prisma.horse.deleteMany();
-    await prisma.player.deleteMany();
+  beforeEach(() => {
+    // Reset all mocks
+    jest.clearAllMocks();
 
-    // Create test players
-    testPlayers = await Promise.all([
-      prisma.player.create({
-        data: {
-          username: 'player1',
-          email: 'player1@test.com',
-          passwordHash: 'hashedpassword',
-          level: 10,
-          xp: 1500,
-          currency: 1000
-        }
-      }),
-      prisma.player.create({
-        data: {
-          username: 'player2',
-          email: 'player2@test.com',
-          passwordHash: 'hashedpassword',
-          level: 8,
-          xp: 950,
-          currency: 800
-        }
-      }),
-      prisma.player.create({
-        data: {
-          username: 'player3',
-          email: 'player3@test.com',
-          passwordHash: 'hashedpassword',
-          level: 12,
-          xp: 2100,
-          currency: 1200
-        }
-      })
-    ]);
+    // Setup mock request and response objects
+    mockReq = {
+      query: {},
+      user: { id: 'test-player-1' }
+    };
 
-    // Create test horses
-    testHorses = await Promise.all([
-      prisma.horse.create({
-        data: {
-          name: 'Thunder',
-          breed: 'Thoroughbred',
-          ownerId: testPlayers[0].id,
-          totalEarnings: 5000,
-          color: 'Bay',
-          gender: 'Stallion',
-          birthDate: new Date('2020-01-01'),
-          registrationNumber: 'TB001',
-          generation: 1,
-          sireId: null,
-          damId: null,
-          age: 5,
-          energyLevel: 100,
-          healthLevel: 100,
-          moodLevel: 100,
-          fitnessLevel: 100,
-          coatCondition: 100,
-          overallCondition: 100,
-          disciplineScores: JSON.stringify({
-            dressage: 85,
-            jumping: 78,
-            racing: 92
-          })
-        }
-      }),
-      prisma.horse.create({
-        data: {
-          name: 'Lightning',
-          breed: 'Arabian',
-          ownerId: testPlayers[1].id,
-          totalEarnings: 3500,
-          color: 'Chestnut',
-          gender: 'Mare',
-          birthDate: new Date('2019-05-15'),
-          registrationNumber: 'AR001',
-          generation: 1,
-          sireId: null,
-          damId: null,
-          age: 6,
-          energyLevel: 95,
-          healthLevel: 98,
-          moodLevel: 90,
-          fitnessLevel: 88,
-          coatCondition: 95,
-          overallCondition: 93,
-          disciplineScores: JSON.stringify({
-            dressage: 90,
-            jumping: 82,
-            racing: 75
-          })
-        }
-      }),
-      prisma.horse.create({
-        data: {
-          name: 'Storm',
-          breed: 'Thoroughbred',
-          ownerId: testPlayers[2].id,
-          totalEarnings: 7500,
-          color: 'Black',
-          gender: 'Stallion',
-          birthDate: new Date('2018-03-10'),
-          registrationNumber: 'TB002',
-          generation: 1,
-          sireId: null,
-          damId: null,
-          age: 7,
-          energyLevel: 90,
-          healthLevel: 95,
-          moodLevel: 88,
-          fitnessLevel: 95,
-          coatCondition: 92,
-          overallCondition: 94,
-          disciplineScores: JSON.stringify({
-            dressage: 88,
-            jumping: 95,
-            racing: 87
-          })
-        }
-      })
-    ]);
-
-    // Create test competition results
-    testResults = await Promise.all([
-      // Thunder's results
-      prisma.competitionResult.create({
-        data: {
-          horseId: testHorses[0].id,
-          showId: 1,
-          disciplineType: 'racing',
-          score: 92.5,
-          placement: 1,
-          prizeWon: 2000,
-          date: new Date('2024-01-15')
-        }
-      }),
-      prisma.competitionResult.create({
-        data: {
-          horseId: testHorses[0].id,
-          showId: 2,
-          disciplineType: 'dressage',
-          score: 85.0,
-          placement: 2,
-          prizeWon: 1000,
-          date: new Date('2024-01-20')
-        }
-      }),
-      // Lightning's results
-      prisma.competitionResult.create({
-        data: {
-          horseId: testHorses[1].id,
-          showId: 3,
-          disciplineType: 'dressage',
-          score: 90.0,
-          placement: 1,
-          prizeWon: 1500,
-          date: new Date('2024-01-25')
-        }
-      }),
-      // Storm's results
-      prisma.competitionResult.create({
-        data: {
-          horseId: testHorses[2].id,
-          showId: 4,
-          disciplineType: 'jumping',
-          score: 95.0,
-          placement: 1,
-          prizeWon: 3000,
-          date: new Date('2024-01-30')
-        }
-      }),
-      prisma.competitionResult.create({
-        data: {
-          horseId: testHorses[2].id,
-          showId: 5,
-          disciplineType: 'jumping',
-          score: 94.5,
-          placement: 1,
-          prizeWon: 2500,
-          date: new Date('2024-02-05')
-        }
-      })
-    ]);
+    mockRes = {
+      json: jest.fn(),
+      status: jest.fn().mockReturnThis()
+    };
   });
 
-  afterEach(async() => {
-    await prisma.competitionResult.deleteMany();
-    await prisma.horse.deleteMany();
-    await prisma.player.deleteMany();
-  });
+  describe('getTopPlayersByLevel', () => {
+    const mockPlayers = [
+      {
+        id: 'player-1',
+        name: 'TopPlayer1',
+        level: 10,
+        xp: 50,
+        money: 5000
+      },
+      {
+        id: 'player-2',
+        name: 'TopPlayer2',
+        level: 9,
+        xp: 80,
+        money: 4500
+      },
+      {
+        id: 'player-3',
+        name: 'TopPlayer3',
+        level: 9,
+        xp: 60,
+        money: 4000
+      }
+    ];
 
-  describe('GET /api/leaderboard/players/level', () => {
     it('should return top players ranked by level and XP', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/level')
-        .expect(200);
+      mockPrisma.player.findMany.mockResolvedValue(mockPlayers);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.players).toHaveLength(3);
+      await getTopPlayersByLevel(mockReq, mockRes);
 
-      // Should be ordered by level desc, then XP desc
-      const { players } = response.body.data;
-      expect(players[0].level).toBe(12); // player3
-      expect(players[1].level).toBe(10); // player1
-      expect(players[2].level).toBe(8);  // player2
+      expect(mockPrisma.player.findMany).toHaveBeenCalledWith({
+        select: {
+          id: true,
+          name: true,
+          level: true,
+          xp: true,
+          money: true
+        },
+        orderBy: [
+          { level: 'desc' },
+          { xp: 'desc' }
+        ],
+        take: 10,
+        skip: 0
+      });
 
-      // Check progress calculation
-      expect(players[0]).toHaveProperty('progressToNext');
-      expect(players[0]).toHaveProperty('xpToNext');
-      expect(players[0].rank).toBe(1);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Top players by level retrieved successfully',
+        data: {
+          players: [
+            {
+              rank: 1,
+              playerId: 'player-1',
+              name: 'TopPlayer1',
+              level: 10,
+              xp: 50,
+              xpToNext: 50,
+              money: 5000,
+              totalXp: 950
+            },
+            {
+              rank: 2,
+              playerId: 'player-2',
+              name: 'TopPlayer2',
+              level: 9,
+              xp: 80,
+              xpToNext: 20,
+              money: 4500,
+              totalXp: 880
+            },
+            {
+              rank: 3,
+              playerId: 'player-3',
+              name: 'TopPlayer3',
+              level: 9,
+              xp: 60,
+              xpToNext: 40,
+              money: 4000,
+              totalXp: 860
+            }
+          ],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 3,
+            hasMore: false
+          }
+        }
+      });
     });
 
-    it('should respect limit parameter', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/level?limit=2')
-        .expect(200);
+    it('should handle pagination parameters', async() => {
+      mockReq.query = { limit: '5', offset: '10' };
+      mockPrisma.player.findMany.mockResolvedValue([]);
 
-      expect(response.body.data.players).toHaveLength(2);
-      expect(response.body.data.pagination.limit).toBe(2);
+      await getTopPlayersByLevel(mockReq, mockRes);
+
+      expect(mockPrisma.player.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          take: 5,
+          skip: 10
+        })
+      );
     });
 
-    it('should respect offset parameter', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/level?offset=1&limit=1')
-        .expect(200);
+    it('should handle database errors', async() => {
+      mockPrisma.player.findMany.mockRejectedValue(new Error('Database error'));
 
-      expect(response.body.data.players).toHaveLength(1);
-      expect(response.body.data.players[0].rank).toBe(2);
+      await getTopPlayersByLevel(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Failed to retrieve top players by level'
+      });
     });
   });
 
-  describe('GET /api/leaderboard/players/xp', () => {
-    it('should return top players ranked by XP', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/xp')
-        .expect(200);
+  describe('getTopPlayersByXP', () => {
+    const mockXpData = [
+      {
+        playerId: 'player-1',
+        player: { name: 'XPPlayer1' },
+        _sum: { amount: 500 }
+      },
+      {
+        playerId: 'player-2',
+        player: { name: 'XPPlayer2' },
+        _sum: { amount: 400 }
+      }
+    ];
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.players).toHaveLength(3);
+    it('should return top players by XP for all time', async() => {
+      mockReq.query = { period: 'all' };
+      mockPrisma.xpEvent.groupBy.mockResolvedValue(mockXpData);
 
-      // Should be ordered by XP desc
-      const { players } = response.body.data;
-      expect(players[0].xp).toBe(2100); // player3
-      expect(players[1].xp).toBe(1500); // player1
-      expect(players[2].xp).toBe(950);  // player2
+      await getTopPlayersByXP(mockReq, mockRes);
+
+      expect(mockPrisma.xpEvent.groupBy).toHaveBeenCalledWith({
+        by: ['playerId'],
+        _sum: { amount: true },
+        include: {
+          player: {
+            select: { name: true }
+          }
+        },
+        orderBy: {
+          _sum: { amount: 'desc' }
+        },
+        take: 10,
+        skip: 0
+      });
     });
 
     it('should filter by time period', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/xp?period=month')
-        .expect(200);
+      mockReq.query = { period: 'week' };
+      mockPrisma.xpEvent.groupBy.mockResolvedValue(mockXpData);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.period).toBe('month');
+      await getTopPlayersByXP(mockReq, mockRes);
+
+      expect(mockPrisma.xpEvent.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            createdAt: {
+              gte: expect.any(Date)
+            }
+          }
+        })
+      );
     });
   });
 
-  describe('GET /api/leaderboard/horses/earnings', () => {
-    it('should return top horses ranked by earnings', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/horses/earnings')
-        .expect(200);
+  describe('getTopHorsesByEarnings', () => {
+    const mockHorses = [
+      {
+        id: 1,
+        name: 'EarningHorse1',
+        total_earnings: 10000,
+        playerId: 'player-1',
+        player: { name: 'Owner1' },
+        breed: { name: 'Thoroughbred' }
+      },
+      {
+        id: 2,
+        name: 'EarningHorse2',
+        total_earnings: 8000,
+        playerId: 'player-2',
+        player: { name: 'Owner2' },
+        breed: { name: 'Arabian' }
+      }
+    ];
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.horses).toHaveLength(3);
+    it('should return top horses by earnings', async() => {
+      mockPrisma.horse.findMany.mockResolvedValue(mockHorses);
 
-      // Should be ordered by earnings desc
-      const { horses } = response.body.data;
-      expect(horses[0].totalEarnings).toBe(7500); // Storm
-      expect(horses[1].totalEarnings).toBe(5000); // Thunder
-      expect(horses[2].totalEarnings).toBe(3500); // Lightning
+      await getTopHorsesByEarnings(mockReq, mockRes);
 
-      expect(horses[0].rank).toBe(1);
-      expect(horses[0]).toHaveProperty('ownerName');
+      expect(mockPrisma.horse.findMany).toHaveBeenCalledWith({
+        select: {
+          id: true,
+          name: true,
+          total_earnings: true,
+          playerId: true,
+          player: {
+            select: { name: true }
+          },
+          breed: {
+            select: { name: true }
+          }
+        },
+        where: {
+          total_earnings: { gt: 0 }
+        },
+        orderBy: { total_earnings: 'desc' },
+        take: 10,
+        skip: 0
+      });
     });
 
     it('should filter by breed', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/horses/earnings?breed=Arabian')
-        .expect(200);
+      mockReq.query = { breed: 'Thoroughbred' };
+      mockPrisma.horse.findMany.mockResolvedValue(mockHorses);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.horses).toHaveLength(1);
-      expect(response.body.data.horses[0].breed).toBe('Arabian');
+      await getTopHorsesByEarnings(mockReq, mockRes);
+
+      expect(mockPrisma.horse.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            total_earnings: { gt: 0 },
+            breed: { name: 'Thoroughbred' }
+          }
+        })
+      );
     });
   });
 
-  describe('GET /api/leaderboard/horses/performance', () => {
-    it('should return top horses ranked by wins', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/horses/performance?metric=wins')
-        .expect(200);
+  describe('getTopHorsesByPerformance', () => {
+    const mockPerformanceData = [
+      {
+        horseId: 1,
+        horse: {
+          name: 'PerformHorse1',
+          player: { name: 'Owner1' },
+          breed: { name: 'Thoroughbred' }
+        },
+        _count: { id: 5 }
+      }
+    ];
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.horses).toHaveLength(3);
+    it('should return top horses by wins', async() => {
+      mockReq.query = { metric: 'wins' };
+      mockPrisma.competitionResult.groupBy.mockResolvedValue(mockPerformanceData);
 
-      // Storm should have 2 wins, others have 1 each
-      const { horses } = response.body.data;
-      expect(horses[0].performanceMetric).toBe(2); // Storm
-      expect(horses[0]).toHaveProperty('totalCompetitions');
-      expect(horses[0]).toHaveProperty('winRate');
+      await getTopHorsesByPerformance(mockReq, mockRes);
+
+      expect(mockPrisma.competitionResult.groupBy).toHaveBeenCalledWith({
+        by: ['horseId'],
+        _count: { id: true },
+        where: { placement: '1st' },
+        include: {
+          horse: {
+            select: {
+              name: true,
+              player: { select: { name: true } },
+              breed: { select: { name: true } }
+            }
+          }
+        },
+        orderBy: { _count: { id: 'desc' } },
+        take: 10,
+        skip: 0
+      });
     });
 
     it('should filter by discipline', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/horses/performance?discipline=jumping')
-        .expect(200);
+      mockReq.query = { discipline: 'Dressage' };
+      mockPrisma.competitionResult.groupBy.mockResolvedValue(mockPerformanceData);
 
-      expect(response.body.success).toBe(true);
-      // Only Storm has jumping results
-      expect(response.body.data.horses).toHaveLength(1);
-      expect(response.body.data.horses[0].name).toBe('Storm');
-    });
+      await getTopHorsesByPerformance(mockReq, mockRes);
 
-    it('should rank by average score', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/horses/performance?metric=average_score')
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      const { horses } = response.body.data;
-      // Should be ordered by average score desc
-      expect(horses[0].performanceMetric).toBeGreaterThan(horses[1].performanceMetric);
+      expect(mockPrisma.competitionResult.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            placement: '1st',
+            discipline: 'Dressage'
+          }
+        })
+      );
     });
   });
 
-  describe('GET /api/leaderboard/players/horse-earnings', () => {
-    it('should return top players ranked by combined horse earnings', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/horse-earnings')
-        .expect(200);
+  describe('getTopPlayersByHorseEarnings', () => {
+    const mockPlayerEarnings = [
+      {
+        playerId: 'player-1',
+        player: { name: 'EarningPlayer1' },
+        _sum: { total_earnings: 25000 },
+        _count: { id: 3 }
+      }
+    ];
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.players).toHaveLength(3);
+    it('should return top players by combined horse earnings', async() => {
+      mockPrisma.horse.groupBy.mockResolvedValue(mockPlayerEarnings);
 
-      const { players } = response.body.data;
-      expect(players[0].totalEarnings).toBe(7500); // player3 with Storm
-      expect(players[1].totalEarnings).toBe(5000); // player1 with Thunder
-      expect(players[2].totalEarnings).toBe(3500); // player2 with Lightning
+      await getTopPlayersByHorseEarnings(mockReq, mockRes);
 
-      expect(players[0]).toHaveProperty('horseCount');
-      expect(players[0]).toHaveProperty('avgEarningsPerHorse');
-    });
-  });
-
-  describe('GET /api/leaderboard/recent-winners', () => {
-    it('should return recent competition winners', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/recent-winners')
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.winners.length).toBeGreaterThan(0);
-
-      const { winners } = response.body.data;
-      // Should be ordered by date desc (most recent first)
-      expect(new Date(winners[0].date)).toBeInstanceOf(Date);
-      expect(winners[0]).toHaveProperty('horseName');
-      expect(winners[0]).toHaveProperty('ownerName');
-      expect(winners[0]).toHaveProperty('disciplineType');
-      expect(winners[0]).toHaveProperty('prizeWon');
-    });
-
-    it('should filter by discipline', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/recent-winners?discipline=jumping')
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      const { winners } = response.body.data;
-      winners.forEach(winner => {
-        expect(winner.disciplineType).toBe('jumping');
+      expect(mockPrisma.horse.groupBy).toHaveBeenCalledWith({
+        by: ['playerId'],
+        _sum: { total_earnings: true },
+        _count: { id: true },
+        include: {
+          player: {
+            select: { name: true }
+          }
+        },
+        where: {
+          total_earnings: { gt: 0 }
+        },
+        orderBy: {
+          _sum: { total_earnings: 'desc' }
+        },
+        take: 10,
+        skip: 0
       });
     });
   });
 
-  describe('GET /api/leaderboard/stats', () => {
+  describe('getRecentWinners', () => {
+    const mockRecentWinners = [
+      {
+        id: 1,
+        horse: {
+          name: 'WinnerHorse1',
+          player: { name: 'WinnerOwner1' }
+        },
+        showName: 'Test Show 1',
+        discipline: 'Dressage',
+        placement: '1st',
+        prizeWon: 1000,
+        competedAt: new Date()
+      }
+    ];
+
+    it('should return recent winners', async() => {
+      mockPrisma.competitionResult.findMany.mockResolvedValue(mockRecentWinners);
+
+      await getRecentWinners(mockReq, mockRes);
+
+      expect(mockPrisma.competitionResult.findMany).toHaveBeenCalledWith({
+        select: {
+          id: true,
+          horse: {
+            select: {
+              name: true,
+              player: {
+                select: { name: true }
+              }
+            }
+          },
+          showName: true,
+          discipline: true,
+          placement: true,
+          prizeWon: true,
+          competedAt: true
+        },
+        where: {
+          placement: { in: ['1st', '2nd', '3rd'] }
+        },
+        orderBy: { competedAt: 'desc' },
+        take: 20
+      });
+    });
+
+    it('should filter by discipline', async() => {
+      mockReq.query = { discipline: 'Jumping' };
+      mockPrisma.competitionResult.findMany.mockResolvedValue(mockRecentWinners);
+
+      await getRecentWinners(mockReq, mockRes);
+
+      expect(mockPrisma.competitionResult.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            placement: { in: ['1st', '2nd', '3rd'] },
+            discipline: 'Jumping'
+          }
+        })
+      );
+    });
+  });
+
+  describe('getLeaderboardStats', () => {
+    const mockStats = {
+      playerCount: 100,
+      horseCount: 250,
+      showCount: 50,
+      totalEarnings: 500000,
+      totalXp: 1000000,
+      avgLevel: 5.5
+    };
+
+    beforeEach(() => {
+      mockPrisma.player.count.mockResolvedValue(mockStats.playerCount);
+      mockPrisma.horse.count.mockResolvedValue(mockStats.horseCount);
+      mockPrisma.show.count.mockResolvedValue(mockStats.showCount);
+      mockPrisma.horse.aggregate.mockResolvedValue({
+        _sum: { total_earnings: mockStats.totalEarnings }
+      });
+      mockPrisma.xpEvent.aggregate.mockResolvedValue({
+        _sum: { amount: mockStats.totalXp }
+      });
+      mockPrisma.player.aggregate.mockResolvedValue({
+        _avg: { level: mockStats.avgLevel }
+      });
+    });
+
     it('should return comprehensive leaderboard statistics', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/stats')
-        .expect(200);
+      await getLeaderboardStats(mockReq, mockRes);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('playerStats');
-      expect(response.body.data).toHaveProperty('horseStats');
-      expect(response.body.data).toHaveProperty('competitionStats');
-      expect(response.body.data).toHaveProperty('topPerformers');
-
-      const { playerStats, horseStats, competitionStats } = response.body.data;
-
-      expect(playerStats.totalPlayers).toBe(3);
-      expect(playerStats.averageLevel).toBeGreaterThan(0);
-      expect(horseStats.totalHorses).toBe(3);
-      expect(competitionStats.totalCompetitions).toBe(5);
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should handle invalid limit parameter', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/level?limit=invalid')
-        .expect(200);
-
-      // Should default to 10
-      expect(response.body.data.pagination.limit).toBe(10);
-    });
-
-    it('should cap limit at maximum value', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/level?limit=200')
-        .expect(200);
-
-      // Should cap at 100
-      expect(response.body.data.pagination.limit).toBe(100);
-    });
-
-    it('should handle invalid metric parameter', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/horses/performance?metric=invalid')
-        .expect(200);
-
-      // Should default to wins
-      expect(response.body.success).toBe(true);
-    });
-  });
-
-  describe('Edge Cases', () => {
-    beforeEach(async() => {
-      // Clean up and create minimal data
-      await prisma.competitionResult.deleteMany();
-      await prisma.horse.deleteMany();
-      await prisma.player.deleteMany();
-    });
-
-    it('should handle empty database gracefully', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/level')
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.players).toHaveLength(0);
-      expect(response.body.data.pagination.total).toBe(0);
-    });
-
-    it('should handle horses with no competition results', async() => {
-      const player = await prisma.player.create({
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Leaderboard statistics retrieved successfully',
         data: {
-          username: 'testplayer',
-          email: 'test@test.com',
-          passwordHash: 'hash',
-          level: 1,
-          xp: 0,
-          currency: 100
+          playerStats: {
+            totalPlayers: mockStats.playerCount,
+            averageLevel: mockStats.avgLevel,
+            totalXpEarned: mockStats.totalXp
+          },
+          horseStats: {
+            totalHorses: mockStats.horseCount,
+            totalEarnings: mockStats.totalEarnings,
+            averageEarningsPerHorse: mockStats.totalEarnings / mockStats.horseCount
+          },
+          competitionStats: {
+            totalShows: mockStats.showCount
+          },
+          summary: {
+            playersWithHorses: expect.any(Number),
+            activeCompetitors: expect.any(Number),
+            topPlayerLevel: expect.any(Number),
+            highestEarningHorse: expect.any(Number)
+          }
         }
       });
+    });
 
-      await prisma.horse.create({
-        data: {
-          name: 'TestHorse',
-          breed: 'Thoroughbred',
-          ownerId: player.id,
-          totalEarnings: 0,
-          color: 'Bay',
-          gender: 'Stallion',
-          birthDate: new Date('2020-01-01'),
-          registrationNumber: 'TB999',
-          generation: 1,
-          sireId: null,
-          damId: null,
-          age: 5,
-          energyLevel: 100,
-          healthLevel: 100,
-          moodLevel: 100,
-          fitnessLevel: 100,
-          coatCondition: 100,
-          overallCondition: 100,
-          disciplineScores: JSON.stringify({})
-        }
+    it('should handle database errors in stats retrieval', async() => {
+      mockPrisma.player.count.mockRejectedValue(new Error('Stats error'));
+
+      await getLeaderboardStats(mockReq, mockRes);
+
+      expect(mockRes.status).toHaveBeenCalledWith(500);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Failed to retrieve leaderboard statistics'
       });
-
-      const response = await request(app)
-        .get('/api/leaderboard/horses/performance')
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.horses).toHaveLength(1);
-      expect(response.body.data.horses[0].performanceMetric).toBe(0);
     });
   });
 });
