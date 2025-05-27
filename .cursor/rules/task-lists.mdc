@@ -41,8 +41,8 @@ Guidelines for creating and managing task lists in Markdown files to track proje
    
    ### Relevant Files
    
-   - path/to/file1.ts - Description of purpose
-   - path/to/file2.ts - Description of purpose
+   - path/to/file1.js - Description of purpose
+   - path/to/file2.js - Description of purpose
    ```
 
 ## Task List Maintenance

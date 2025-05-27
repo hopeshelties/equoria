@@ -310,14 +310,141 @@ async function checkUserExists(email) {
   }
 }
 
-// Helper to seed a User with 2 Horses
+// Helper to check if player already exists
+async function checkPlayerExists(email) {
+  const { default: prisma } = await import('../db/index.js');
+  try {
+    const existingPlayer = await prisma.player.findUnique({
+      where: { email },
+    });
+    return existingPlayer !== null;
+  } catch (error) {
+    console.warn(`[seed] Failed to check if player "${email}" exists: ${error.message}`);
+    return false;
+  }
+}
+
+// Helper to seed a Player with 2 Horses
+async function seedPlayerWithHorses() {
+  const { createPlayer } = await import('../models/playerModel.js');
+  const { createHorse } = await import('../models/horseModel.js');
+  const { default: prisma } = await import('../db/index.js');
+  
+  console.log('[seed] Starting to seed Player with Horses...');
+  
+  const playerEmail = 'player@example.com';
+  
+  try {
+    const playerExists = await checkPlayerExists(playerEmail);
+    if (playerExists) {
+      console.log(`[seed] Player "${playerEmail}" already exists, skipping player creation...`);
+      return true;
+    }
+
+    const thoroughbredBreed = await findOrCreateBreed('Thoroughbred');
+    
+    if (!thoroughbredBreed) {
+      console.error('[seed] Failed to create/find Thoroughbred breed for player horses');
+      return false;
+    }
+
+    // Create Player with specific UUID for testing
+    const playerData = {
+      name: 'Test Player',
+      email: playerEmail,
+      password: 'hashedpassword123',
+      money: 500,
+      level: 3,
+      xp: 1000,
+      settings: { 
+        darkMode: true, 
+        notifications: true,
+        soundEnabled: false,
+        autoSave: true
+      }
+    };
+
+    const createdPlayer = await createPlayer(playerData);
+    console.log(`[seed] Successfully created player: ${createdPlayer.name} (ID: ${createdPlayer.id})`);
+
+    const horseData1 = {
+      name: 'Starlight',
+      age: 4,
+      breed: { connect: { id: thoroughbredBreed.id } },
+      ownerId: createdPlayer.id, // Use ownerId since Horse model references User table
+      sex: 'Mare',
+      date_of_birth: new Date('2020-08-15'),
+      genotype: { coat: 'EE/AA', dilution: 'nCr', markings: ['Star'] },
+      phenotypic_markings: { face: 'Star', legs: ['Sock'] },
+      final_display_color: 'Bay',
+      shade: 'Dark',
+      trait: 'Elegant',
+      temperament: 'Gentle',
+      precision: 85,
+      strength: 75,
+      speed: 80,
+      agility: 88,
+      endurance: 82,
+      intelligence: 90,
+      personality: 'Gentle',
+      total_earnings: 8500,
+      for_sale: false,
+      health_status: 'Excellent',
+      last_vetted_date: new Date('2024-06-01')
+    };
+
+    const horseData2 = {
+      name: 'Comet',
+      age: 6,
+      breed: { connect: { id: thoroughbredBreed.id } },
+      ownerId: createdPlayer.id, // Use ownerId since Horse model references User table
+      sex: 'Stallion',
+      date_of_birth: new Date('2018-04-22'),
+      genotype: { coat: 'ee/AA', dilution: 'ChCh', markings: ['Blaze'] },
+      phenotypic_markings: { face: 'Blaze', legs: ['Stocking', 'Sock'] },
+      final_display_color: 'Champagne',
+      shade: 'Golden',
+      trait: 'Swift',
+      temperament: 'Spirited',
+      precision: 78,
+      strength: 85,
+      speed: 92,
+      agility: 80,
+      endurance: 88,
+      intelligence: 85,
+      personality: 'Spirited',
+      total_earnings: 15200,
+      stud_status: 'Private Stud',
+      stud_fee: 750,
+      for_sale: false,
+      health_status: 'Very Good',
+      last_vetted_date: new Date('2024-05-20')
+    };
+
+    const horse1 = await createHorse(horseData1);
+    console.log(`[seed] Successfully created horse: ${horse1.name} (ID: ${horse1.id}) for player ${createdPlayer.name}`);
+    
+    const horse2 = await createHorse(horseData2);
+    console.log(`[seed] Successfully created horse: ${horse2.name} (ID: ${horse2.id}) for player ${createdPlayer.name}`);
+
+    console.log('[seed] Successfully seeded Player with 2 Horses');
+    return true;
+
+  } catch (error) {
+    console.error(`[seed] Failed to seed Player with Horses: ${error.message}`);
+    console.error(`[seed] Error details:`, error.stack);
+    return false;
+  }
+}
+
+// Helper to seed a User with 2 Horses (for backward compatibility)
 async function seedUserWithHorses() {
   const { createHorse } = await import('../models/horseModel.js');
   const { default: prisma } = await import('../db/index.js');
   
   console.log('[seed] Starting to seed User with Horses...');
   
-  const userEmail = 'test@example.com';
+  const userEmail = 'user@example.com';
   
   try {
     const userExists = await checkUserExists(userEmail);
@@ -353,54 +480,52 @@ async function seedUserWithHorses() {
     console.log(`[seed] Successfully created user: ${createdUser.name} (ID: ${createdUser.id})`);
 
     const horseData1 = {
-      name: 'Starlight',
-      age: 4,
+      name: 'Thunder',
+      age: 5,
       breed: { connect: { id: thoroughbredBreed.id } },
       ownerId: createdUser.id,
-      sex: 'Mare',
-      date_of_birth: new Date('2020-08-15'),
+      sex: 'Stallion',
+      date_of_birth: new Date('2019-03-10'),
       genotype: { coat: 'EE/AA', dilution: 'nCr', markings: ['Star'] },
       phenotypic_markings: { face: 'Star', legs: ['Sock'] },
       final_display_color: 'Bay',
       shade: 'Dark',
-      trait: 'Elegant',
-      temperament: 'Gentle',
-      precision: 85,
-      strength: 75,
-      speed: 80,
-      agility: 88,
-      endurance: 82,
-      intelligence: 90,
-      personality: 'Gentle',
-      total_earnings: 8500,
+      trait: 'Strong',
+      temperament: 'Calm',
+      precision: 80,
+      strength: 90,
+      speed: 85,
+      agility: 75,
+      endurance: 88,
+      intelligence: 82,
+      personality: 'Calm',
+      total_earnings: 12000,
       for_sale: false,
       health_status: 'Excellent',
       last_vetted_date: new Date('2024-06-01')
     };
 
     const horseData2 = {
-      name: 'Comet',
-      age: 6,
-      breed: { connect: { id: thoroughbredBreed.id } },
+      name: 'Lightning',
+      age: 3,
+      breed: { connect: { id: arabianBreed.id } },
       ownerId: createdUser.id,
-      sex: 'Stallion',
-      date_of_birth: new Date('2018-04-22'),
+      sex: 'Mare',
+      date_of_birth: new Date('2021-07-15'),
       genotype: { coat: 'ee/AA', dilution: 'ChCh', markings: ['Blaze'] },
-      phenotypic_markings: { face: 'Blaze', legs: ['Stocking', 'Sock'] },
-      final_display_color: 'Champagne',
-      shade: 'Golden',
-      trait: 'Swift',
-      temperament: 'Spirited',
-      precision: 78,
-      strength: 85,
-      speed: 92,
-      agility: 80,
-      endurance: 88,
-      intelligence: 85,
-      personality: 'Spirited',
-      total_earnings: 15200,
-      stud_status: 'Private Stud',
-      stud_fee: 750,
+      phenotypic_markings: { face: 'Blaze', legs: ['Stocking'] },
+      final_display_color: 'Chestnut',
+      shade: 'Light',
+      trait: 'Fast',
+      temperament: 'Energetic',
+      precision: 85,
+      strength: 70,
+      speed: 95,
+      agility: 90,
+      endurance: 80,
+      intelligence: 88,
+      personality: 'Energetic',
+      total_earnings: 5000,
       for_sale: false,
       health_status: 'Very Good',
       last_vetted_date: new Date('2024-05-20')
@@ -431,8 +556,9 @@ async function main() {
     
     const horseSuccess = await seedHorses();
     const userSuccess = await seedUserWithHorses();
+    const playerSuccess = await seedPlayerWithHorses();
     
-    if (!horseSuccess || !userSuccess) {
+    if (!horseSuccess || !userSuccess || !playerSuccess) {
       console.error('[seed] Seeding completed with issues. Exiting with error code.');
       process.exit(1);
     }
@@ -450,7 +576,7 @@ async function main() {
 }
 
 // Export functions for testing
-export { sampleHorses, findOrCreateBreed, ensureReferencedRecordsExist, checkHorseExists, seedHorses, seedUserWithHorses, checkUserExists };
+export { sampleHorses, findOrCreateBreed, ensureReferencedRecordsExist, checkHorseExists, seedHorses, seedUserWithHorses, seedPlayerWithHorses, checkUserExists, checkPlayerExists };
 
 // Only run the main function if this script is executed directly (not imported)
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('horseSeed.js')) {

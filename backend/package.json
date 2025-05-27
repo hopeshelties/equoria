@@ -8,6 +8,7 @@
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.mjs",
     "test:watch": "npm run test -- --watch",
     "test:coverage": "npm run test -- --coverage",
+    "test:seed": "cross-env NODE_ENV=test node seed-test-data.js",
     "dev": "nodemon server.js",
     "start": "node server.js",
     "lint": "eslint . --ext .js",

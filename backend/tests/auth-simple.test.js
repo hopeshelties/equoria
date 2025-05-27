@@ -35,7 +35,32 @@ describe('Authentication Controller (Simple)', () => {
   });
 
   beforeEach(async () => {
-    // Clean up test users
+    // Delete in order to avoid foreign key constraint violations
+    // 1. Delete training logs first
+    await prisma.trainingLog.deleteMany({
+      where: {
+        horse: {
+          owner: {
+            email: {
+              contains: 'test'
+            }
+          }
+        }
+      }
+    });
+    
+    // 2. Delete horses
+    await prisma.horse.deleteMany({
+      where: {
+        owner: {
+          email: {
+            contains: 'test'
+          }
+        }
+      }
+    });
+    
+    // 3. Then delete users
     await prisma.user.deleteMany({
       where: {
         email: {
@@ -46,6 +71,32 @@ describe('Authentication Controller (Simple)', () => {
   });
 
   afterAll(async () => {
+    // Delete in order to avoid foreign key constraint violations
+    // 1. Delete training logs first
+    await prisma.trainingLog.deleteMany({
+      where: {
+        horse: {
+          owner: {
+            email: {
+              contains: 'test'
+            }
+          }
+        }
+      }
+    });
+    
+    // 2. Delete horses
+    await prisma.horse.deleteMany({
+      where: {
+        owner: {
+          email: {
+            contains: 'test'
+          }
+        }
+      }
+    });
+    
+    // 3. Then delete users
     await prisma.user.deleteMany({
       where: {
         email: {

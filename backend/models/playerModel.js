@@ -111,19 +111,22 @@ export async function createPlayer(playerData) {
 
 /**
  * Retrieves a player by ID
- * @param {string} id - Player UUID
+ * @param {string|number} id - Player ID
  * @returns {Object|null} - Player object if found, null otherwise
  * @throws {Error} - Validation or database errors
  */
 export async function getPlayerById(id) {
   try {
-    // Validate UUID format
-    if (!isValidUUID(id)) {
+    // Validate ID format
+    if (!isValidUserId(id)) {
       throw new Error('Invalid player ID format');
     }
 
+    // Convert to integer for database query
+    const playerId = parseInt(id, 10);
+
     const player = await prisma.user.findUnique({
-      where: { id }
+      where: { id: playerId }
     });
 
     if (player) {
@@ -181,19 +184,22 @@ export async function getPlayerByEmail(email) {
 
 /**
  * Retrieves a player with their horses
- * @param {string} id - Player UUID
+ * @param {string|number} id - Player ID
  * @returns {Object|null} - Player object with horses if found, null otherwise
  * @throws {Error} - Validation or database errors
  */
 export async function getPlayerWithHorses(id) {
   try {
-    // Validate UUID format
-    if (!isValidUUID(id)) {
+    // Validate ID format
+    if (!isValidUserId(id)) {
       throw new Error('Invalid player ID format');
     }
 
+    // Convert to integer for database query
+    const playerId = parseInt(id, 10);
+
     const player = await prisma.user.findUnique({
-      where: { id },
+      where: { id: playerId },
       include: {
         horses: {
           include: {
@@ -225,15 +231,15 @@ export async function getPlayerWithHorses(id) {
 
 /**
  * Updates a player's information
- * @param {string} id - Player UUID
+ * @param {string|number} id - Player ID
  * @param {Object} updateData - Data to update
  * @returns {Object} - Updated player object
  * @throws {Error} - Validation or database errors
  */
 export async function updatePlayer(id, updateData) {
   try {
-    // Validate UUID format
-    if (!isValidUUID(id)) {
+    // Validate ID format
+    if (!isValidUserId(id)) {
       throw new Error('Invalid player ID format');
     }
 
@@ -242,8 +248,11 @@ export async function updatePlayer(id, updateData) {
       throw new Error('No update data provided');
     }
 
+    // Convert to integer for database query
+    const playerId = parseInt(id, 10);
+
     const updatedPlayer = await prisma.user.update({
-      where: { id },
+      where: { id: playerId },
       data: updateData
     });
 
@@ -264,19 +273,22 @@ export async function updatePlayer(id, updateData) {
 
 /**
  * Deletes a player from the database
- * @param {string} id - Player UUID
+ * @param {string|number} id - Player ID
  * @returns {Object} - Deleted player object
  * @throws {Error} - Validation or database errors
  */
 export async function deletePlayer(id) {
   try {
-    // Validate UUID format
-    if (!isValidUUID(id)) {
+    // Validate ID format
+    if (!isValidUserId(id)) {
       throw new Error('Invalid player ID format');
     }
 
+    // Convert to integer for database query
+    const playerId = parseInt(id, 10);
+
     const deletedPlayer = await prisma.user.delete({
-      where: { id }
+      where: { id: playerId }
     });
 
     logger.info(`[playerModel.deletePlayer] Successfully deleted player: ${deletedPlayer.name} (ID: ${id})`);
@@ -296,15 +308,15 @@ export async function deletePlayer(id) {
 
 /**
  * Adds XP to a player's experience points
- * @param {string} playerId - Player UUID
+ * @param {string|number} playerId - Player ID
  * @param {number} amount - Amount of XP to add (must be positive)
  * @returns {Object} - Updated player object
  * @throws {Error} - Validation or database errors
  */
 export async function addXp(playerId, amount) {
   try {
-    // Validate UUID format
-    if (!isValidUUID(playerId)) {
+    // Validate ID format
+    if (!isValidUserId(playerId)) {
       throw new Error('Invalid player ID format');
     }
 
@@ -313,25 +325,28 @@ export async function addXp(playerId, amount) {
       throw new Error('XP amount must be a positive number');
     }
 
+    // Convert to integer for database query
+    const playerIdInt = parseInt(playerId, 10);
+
     // Get current player data
     const currentPlayer = await prisma.user.findUnique({
-      where: { id: playerId }
+      where: { id: playerIdInt }
     });
 
     if (!currentPlayer) {
       throw new Error('Player not found');
     }
 
-    // Add XP to current amount
+    // Calculate new XP
     const newXp = currentPlayer.xp + amount;
 
     // Update player with new XP
     const updatedPlayer = await prisma.user.update({
-      where: { id: playerId },
+      where: { id: playerIdInt },
       data: { xp: newXp }
     });
 
-    logger.info(`[playerModel.addXp] Added ${amount} XP to player: ${updatedPlayer.name} (ID: ${playerId}). New XP: ${newXp}`);
+    logger.info(`[playerModel.addXp] Added ${amount} XP to player ${updatedPlayer.name} (ID: ${playerId}). New XP: ${newXp}`);
     return updatedPlayer;
 
   } catch (error) {
@@ -347,72 +362,58 @@ export async function addXp(playerId, amount) {
 }
 
 /**
- * Checks if player has 100+ XP and levels up as needed
- * Handles multiple level-ups for large XP gains
- * @param {string} playerId - Player UUID
- * @returns {Object} - Object with updated player data and level-up information
+ * Checks if a player should level up based on their XP and levels them up if needed
+ * @param {string|number} playerId - Player ID
+ * @returns {Object} - Object with leveledUp boolean and updated player data
  * @throws {Error} - Validation or database errors
  */
 export async function levelUpIfNeeded(playerId) {
   try {
-    // Validate UUID format
-    if (!isValidUUID(playerId)) {
+    // Validate ID format
+    if (!isValidUserId(playerId)) {
       throw new Error('Invalid player ID format');
     }
 
+    // Convert to integer for database query
+    const playerIdInt = parseInt(playerId, 10);
+
     // Get current player data
-    let currentPlayer = await prisma.user.findUnique({
-      where: { id: playerId }
+    const currentPlayer = await prisma.user.findUnique({
+      where: { id: playerIdInt }
     });
 
     if (!currentPlayer) {
       throw new Error('Player not found');
     }
 
-    let { level, xp } = currentPlayer;
-    let levelsGained = 0;
-    const originalLevel = level;
-    const originalXp = xp;
-
-    // Level up while XP >= 100
-    while (xp >= 100) {
-      xp -= 100;
-      level += 1;
-      levelsGained += 1;
-    }
-
-    // Update player if any levels were gained
-    if (levelsGained > 0) {
+    // Calculate XP needed for next level (simple formula: level * 1000)
+    const xpForNextLevel = currentPlayer.level * 1000;
+    
+    if (currentPlayer.xp >= xpForNextLevel) {
+      // Player should level up
+      const newLevel = currentPlayer.level + 1;
+      
       const updatedPlayer = await prisma.user.update({
-        where: { id: playerId },
-        data: { 
-          level: level,
-          xp: xp
-        }
+        where: { id: playerIdInt },
+        data: { level: newLevel }
       });
 
-      logger.info(`[playerModel.levelUpIfNeeded] Player ${updatedPlayer.name} (ID: ${playerId}) leveled up! Levels gained: ${levelsGained} (${originalLevel} → ${level}). XP: ${originalXp} → ${xp}`);
+      logger.info(`[playerModel.levelUpIfNeeded] Player ${updatedPlayer.name} (ID: ${playerId}) leveled up to level ${newLevel}!`);
       
       return {
-        player: updatedPlayer,
         leveledUp: true,
-        levelsGained: levelsGained,
-        previousLevel: originalLevel,
-        newLevel: level,
-        previousXp: originalXp,
-        newXp: xp
+        player: updatedPlayer,
+        previousLevel: currentPlayer.level,
+        newLevel: newLevel
       };
     } else {
-      logger.info(`[playerModel.levelUpIfNeeded] Player ${currentPlayer.name} (ID: ${playerId}) does not need to level up. Current level: ${level}, XP: ${xp}`);
+      // No level up needed
+      logger.info(`[playerModel.levelUpIfNeeded] Player ${currentPlayer.name} (ID: ${playerId}) does not need to level up. XP: ${currentPlayer.xp}/${xpForNextLevel}`);
       
       return {
-        player: currentPlayer,
         leveledUp: false,
-        levelsGained: 0,
-        previousLevel: level,
-        newLevel: level,
-        previousXp: xp,
-        newXp: xp
+        player: currentPlayer,
+        xpNeeded: xpForNextLevel - currentPlayer.xp
       };
     }
 

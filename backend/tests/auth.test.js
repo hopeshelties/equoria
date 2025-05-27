@@ -6,6 +6,32 @@ import prisma from '../db/index.js';
 describe('Authentication Endpoints', () => {
   // Clean up test data before and after tests
   beforeEach(async () => {
+    // Delete in order to avoid foreign key constraint violations
+    // 1. Delete training logs first
+    await prisma.trainingLog.deleteMany({
+      where: {
+        horse: {
+          owner: {
+            email: {
+              contains: 'test'
+            }
+          }
+        }
+      }
+    });
+    
+    // 2. Delete horses
+    await prisma.horse.deleteMany({
+      where: {
+        owner: {
+          email: {
+            contains: 'test'
+          }
+        }
+      }
+    });
+    
+    // 3. Then delete users
     await prisma.user.deleteMany({
       where: {
         email: {
@@ -16,6 +42,32 @@ describe('Authentication Endpoints', () => {
   });
 
   afterAll(async () => {
+    // Delete in order to avoid foreign key constraint violations
+    // 1. Delete training logs first
+    await prisma.trainingLog.deleteMany({
+      where: {
+        horse: {
+          owner: {
+            email: {
+              contains: 'test'
+            }
+          }
+        }
+      }
+    });
+    
+    // 2. Delete horses
+    await prisma.horse.deleteMany({
+      where: {
+        owner: {
+          email: {
+            contains: 'test'
+          }
+        }
+      }
+    });
+    
+    // 3. Then delete users
     await prisma.user.deleteMany({
       where: {
         email: {
