@@ -1,6 +1,6 @@
 import { getLastTrainingDate, getHorseAge, logTrainingSession, getAnyRecentTraining } from '../models/trainingModel.js';
 import { incrementDisciplineScore, getHorseById, updateHorseStat } from '../models/horseModel.js';
-import { getPlayerWithHorses, addXp } from '../models/playerModel.js';
+import { getPlayerWithHorses, addXp, levelUpIfNeeded } from '../models/playerModel.js';
 import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import logger from '../utils/logger.js';
 
@@ -218,7 +218,12 @@ async function trainHorse(horseId, discipline) {
     // Award XP to horse owner for training
     try {
       if (updatedHorse && updatedHorse.ownerId) {
+        // Award XP using playerModel.addXp
         const xpResult = await addXp(updatedHorse.ownerId, baseXp);
+
+        // Call levelUpIfNeeded after awarding XP (as requested in task)
+        const levelUpResult = await levelUpIfNeeded(updatedHorse.ownerId);
+
         logger.info(`[trainingController.trainHorse] Awarded ${baseXp} XP to player ${updatedHorse.ownerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
       }
     } catch (error) {

@@ -296,13 +296,15 @@ export async function addXp(playerId, amount) {
     }
 
     // Calculate new XP and level
-    const newXp = currentPlayer.xp + amount;
+    let newXp = currentPlayer.xp + amount;
     let newLevel = currentPlayer.level;
     let leveledUp = false;
     let levelsGained = 0;
 
     // Check for level ups (each level requires 100 XP)
-    while (newXp >= newLevel * 100) {
+    // If xp >= 100, subtract 100 and increase level by 1
+    while (newXp >= 100) {
+      newXp -= 100;
       newLevel++;
       levelsGained++;
       leveledUp = true;
@@ -366,22 +368,28 @@ export async function levelUpIfNeeded(playerId) {
       throw new Error('Player not found');
     }
 
+    let newXp = currentPlayer.xp;
     let newLevel = currentPlayer.level;
     let leveledUp = false;
     let levelsGained = 0;
 
     // Check for level ups (each level requires 100 XP)
-    while (currentPlayer.xp >= newLevel * 100) {
+    // If xp >= 100, subtract 100 and increase level by 1
+    while (newXp >= 100) {
+      newXp -= 100;
       newLevel++;
       levelsGained++;
       leveledUp = true;
     }
 
     if (leveledUp) {
-      // Update player level
+      // Update player level and XP
       const updatedPlayer = await prisma.player.update({
         where: { id: playerId },
-        data: { level: newLevel }
+        data: {
+          level: newLevel,
+          xp: newXp
+        }
       });
 
       logger.info(`[playerModel.levelUpIfNeeded] Player ${playerId} leveled up to level ${newLevel}!`);

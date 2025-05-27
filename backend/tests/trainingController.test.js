@@ -19,6 +19,7 @@ const mockUpdateHorseStat = jest.fn();
 // Mock the playerModel functions
 const mockGetPlayerWithHorses = jest.fn();
 const mockAddXp = jest.fn();
+const mockLevelUpIfNeeded = jest.fn();
 
 jest.unstable_mockModule(join(__dirname, '../models/trainingModel.js'), () => ({
   getHorseAge: mockGetHorseAge,
@@ -35,7 +36,8 @@ jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
 
 jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => ({
   getPlayerWithHorses: mockGetPlayerWithHorses,
-  addXp: mockAddXp
+  addXp: mockAddXp,
+  levelUpIfNeeded: mockLevelUpIfNeeded
 }));
 
 // Import the module after mocking
@@ -45,6 +47,8 @@ describe('trainingController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetPlayerWithHorses.mockClear();
+    mockAddXp.mockClear();
+    mockLevelUpIfNeeded.mockClear();
   });
 
   describe('canTrain', () => {
@@ -202,6 +206,16 @@ describe('trainingController', () => {
         xpGained: 5
       });
 
+      // Mock levelUpIfNeeded call (as requested in task)
+      mockLevelUpIfNeeded.mockResolvedValue({
+        id: 'test-player-123',
+        level: 2,
+        xp: 5,
+        leveledUp: false,
+        levelsGained: 0,
+        message: 'No level up needed'
+      });
+
       const result = await trainHorse(1, 'Racing');
 
       expect(result.success).toBe(true);
@@ -210,7 +224,10 @@ describe('trainingController', () => {
       expect(result.nextEligible).toBeDefined();
       expect(result.traitEffects).toBeDefined();
       expect(result.traitEffects.appliedTraits).toEqual([]);
+
+      // Verify both XP functions are called (as requested in task)
       expect(mockAddXp).toHaveBeenCalledWith('test-player-123', 5);
+      expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('test-player-123');
     });
 
     it('should reject training for ineligible horse (under age)', async() => {
@@ -256,6 +273,106 @@ describe('trainingController', () => {
       mockLogTrainingSession.mockRejectedValue(new Error('Failed to log training'));
 
       await expect(trainHorse(1, 'Racing')).rejects.toThrow('Training failed: Failed to log training');
+    });
+
+    it('should award +5 XP and call levelUpIfNeeded after successful training', async() => {
+      // Mock successful training scenario with focus on XP system
+      mockGetHorseAge.mockResolvedValue(4);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'XP Test Horse',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'xp-test-player'
+      });
+      mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Dressage', trainedAt: new Date() });
+      mockIncrementDisciplineScore.mockResolvedValue({
+        id: 1,
+        name: 'XP Test Horse',
+        disciplineScores: { Dressage: 3 },
+        breed: { id: 1, name: 'Arabian' },
+        ownerId: 'xp-test-player'
+      });
+      mockUpdateHorseStat.mockResolvedValue({
+        id: 1,
+        name: 'XP Test Horse',
+        focus: 12 // Updated stat for Dressage
+      });
+
+      // Mock XP system - player has 90 XP, should level up after +5 XP
+      mockAddXp.mockResolvedValue({
+        id: 'xp-test-player',
+        xp: 95,
+        level: 1,
+        leveledUp: false,
+        levelsGained: 0,
+        xpGained: 5
+      });
+
+      // Mock levelUpIfNeeded - should trigger level up since player now has 95 XP
+      mockLevelUpIfNeeded.mockResolvedValue({
+        id: 'xp-test-player',
+        level: 1,
+        xp: 95,
+        leveledUp: false,
+        levelsGained: 0,
+        message: 'No level up needed'
+      });
+
+      const result = await trainHorse(1, 'Dressage');
+
+      // Verify training success
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Horse trained successfully in Dressage. +5 added.');
+
+      // Verify XP award system (as requested in task)
+      expect(mockAddXp).toHaveBeenCalledWith('xp-test-player', 5);
+      expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('xp-test-player');
+
+      // Verify call order: addXp should be called before levelUpIfNeeded
+      const addXpCall = mockAddXp.mock.invocationCallOrder[0];
+      const levelUpCall = mockLevelUpIfNeeded.mock.invocationCallOrder[0];
+      expect(addXpCall).toBeLessThan(levelUpCall);
+    });
+
+    it('should handle XP system errors gracefully without breaking training', async() => {
+      // Mock successful training scenario
+      mockGetHorseAge.mockResolvedValue(4);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'Error Test Horse',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'error-test-player'
+      });
+      mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
+      mockIncrementDisciplineScore.mockResolvedValue({
+        id: 1,
+        name: 'Error Test Horse',
+        disciplineScores: { Racing: 2 },
+        breed: { id: 1, name: 'Thoroughbred' },
+        ownerId: 'error-test-player'
+      });
+      mockUpdateHorseStat.mockResolvedValue({
+        id: 1,
+        name: 'Error Test Horse',
+        speed: 8 // Updated stat
+      });
+
+      // Mock XP system error
+      mockAddXp.mockRejectedValue(new Error('XP system unavailable'));
+
+      const result = await trainHorse(1, 'Racing');
+
+      // Training should still succeed despite XP error
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Horse trained successfully in Racing. +5 added.');
+      expect(result.updatedHorse.name).toBe('Error Test Horse');
+
+      // Verify XP was attempted
+      expect(mockAddXp).toHaveBeenCalledWith('error-test-player', 5);
+      // levelUpIfNeeded should not be called if addXp fails
+      expect(mockLevelUpIfNeeded).not.toHaveBeenCalled();
     });
   });
 
@@ -397,6 +514,16 @@ describe('trainingController', () => {
         leveledUp: true,
         levelsGained: 1,
         xpGained: 5
+      });
+
+      // Mock levelUpIfNeeded for integration test
+      mockLevelUpIfNeeded.mockResolvedValue({
+        id: 'test-player-123',
+        level: 2,
+        xp: 5,
+        leveledUp: false,
+        levelsGained: 0,
+        message: 'No level up needed'
       });
 
       const trainResult = await trainHorse(1, 'Racing');

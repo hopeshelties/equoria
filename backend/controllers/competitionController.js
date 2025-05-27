@@ -1,6 +1,6 @@
 import { getHorseById } from '../models/horseModel.js';
 import { saveResult, getResultsByShow } from '../models/resultModel.js';
-import { addXp } from '../models/playerModel.js';
+import { addXp, levelUpIfNeeded } from '../models/playerModel.js';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 import { calculateCompetitionScore } from '../utils/competitionScore.js';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
@@ -266,6 +266,7 @@ async function enterAndRunShow(horseIds, show) {
 
     // Step 8: Save results and update horse rewards
     const savedResults = [];
+    const xpEvents = []; // Track XP awards for summary
     try {
       for (const simResult of simulationResults) {
         // Calculate prize and stat gains for winners
@@ -327,7 +328,25 @@ async function enterAndRunShow(horseIds, show) {
               }
 
               if (xpAmount > 0) {
+                // Award XP using playerModel.addXp
                 const xpResult = await addXp(horse.ownerId, xpAmount);
+
+                // Call levelUpIfNeeded after awarding XP (as requested in task)
+                const levelUpResult = await levelUpIfNeeded(horse.ownerId);
+
+                // Track XP event for summary
+                const xpEvent = {
+                  playerId: horse.ownerId,
+                  horseId: horse.id,
+                  horseName: horse.name,
+                  placement: simResult.placement,
+                  xpAwarded: xpAmount,
+                  leveledUp: xpResult.leveledUp || levelUpResult.leveledUp,
+                  newLevel: levelUpResult.level,
+                  levelsGained: xpResult.levelsGained || levelUpResult.levelsGained
+                };
+                xpEvents.push(xpEvent);
+
                 logger.info(`[competitionController.enterAndRunShow] Awarded ${xpAmount} XP to player ${horse.ownerId} for ${simResult.placement} place${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
               }
             }
@@ -398,6 +417,11 @@ async function enterAndRunShow(horseIds, show) {
         entryFeesCollected: entryFeesTransferred,
         prizesAwarded: totalPrizesAwarded,
         prizeDistribution,
+
+        // NEW: XP Events tracking (as requested in task)
+        xpEvents,
+        totalXpAwarded: xpEvents.reduce((sum, event) => sum + event.xpAwarded, 0),
+        playersLeveledUp: xpEvents.filter(event => event.leveledUp).length,
 
         // NEW: Trait scoring statistics
         traitStatistics: traitStats,

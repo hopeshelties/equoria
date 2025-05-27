@@ -34,9 +34,15 @@ const mockPlayerUpdates = {
   transferEntryFees: jest.fn()
 };
 
+const mockPlayerModel = {
+  addXp: jest.fn(),
+  levelUpIfNeeded: jest.fn()
+};
+
 // Mock the imports
 jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => mockHorseModel);
 jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => mockResultModel);
+jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => mockPlayerModel);
 jest.unstable_mockModule(join(__dirname, '../utils/competitionScore.js'), () => ({
   calculateCompetitionScore: mockCalculateCompetitionScore
 }));
@@ -53,6 +59,9 @@ const { enterAndRunShow } = await import(join(__dirname, '../controllers/competi
 describe('competitionController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset player model mocks
+    mockPlayerModel.addXp.mockClear();
+    mockPlayerModel.levelUpIfNeeded.mockClear();
   });
 
   describe('enterAndRunShow', () => {
@@ -80,6 +89,7 @@ describe('competitionController', () => {
       owner: { name: 'Test Owner' },
       stable: { name: 'Test Stable' },
       rider: { name: 'Test Rider', skill: 80 }, // Add default rider
+      ownerId: `player-${id}`, // Add ownerId for XP awards
       ...overrides
     });
 
@@ -137,6 +147,23 @@ describe('competitionController', () => {
       // Mock horse rewards update
       mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
 
+      // Mock XP system for placed horses (1st, 2nd, 3rd)
+      mockPlayerModel.addXp
+        .mockResolvedValueOnce({ level: 2, xp: 10, leveledUp: true, levelsGained: 1 })  // 1st place: +20 XP
+        .mockResolvedValueOnce({ level: 1, xp: 65, leveledUp: false, levelsGained: 0 }) // 2nd place: +15 XP
+        .mockResolvedValueOnce({ level: 1, xp: 60, leveledUp: false, levelsGained: 0 }); // 3rd place: +10 XP
+
+      mockPlayerModel.levelUpIfNeeded
+        .mockResolvedValueOnce({ level: 2, xp: 10, leveledUp: false, levelsGained: 0 })  // Already leveled up
+        .mockResolvedValueOnce({ level: 1, xp: 65, leveledUp: false, levelsGained: 0 })  // No level up
+        .mockResolvedValueOnce({ level: 1, xp: 60, leveledUp: false, levelsGained: 0 });  // No level up
+
+      // Mock additional horse retrieval for XP awarding (horses are fetched again to get owner info)
+      mockHorseModel.getHorseById
+        .mockResolvedValueOnce(mockHorses[0]) // Thunder for XP
+        .mockResolvedValueOnce(mockHorses[1]) // Lightning for XP
+        .mockResolvedValueOnce(mockHorses[2]); // Storm for XP
+
       // Mock competition scoring (called for each horse)
       mockCalculateCompetitionScore
         .mockReturnValueOnce(95.5)  // Thunder
@@ -175,6 +202,18 @@ describe('competitionController', () => {
 
       // Verify result saving
       expect(mockResultModel.saveResult).toHaveBeenCalledTimes(5);
+
+      // Verify XP awards for placed horses (1st, 2nd, 3rd)
+      expect(mockPlayerModel.addXp).toHaveBeenCalledTimes(3);
+      expect(mockPlayerModel.addXp).toHaveBeenCalledWith('player-1', 20); // 1st place
+      expect(mockPlayerModel.addXp).toHaveBeenCalledWith('player-2', 15); // 2nd place
+      expect(mockPlayerModel.addXp).toHaveBeenCalledWith('player-3', 10); // 3rd place
+
+      // Verify levelUpIfNeeded calls
+      expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenCalledTimes(3);
+      expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenCalledWith('player-1');
+      expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenCalledWith('player-2');
+      expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenCalledWith('player-3');
 
       // Check that saveResult was called with enhanced data structure
       expect(mockResultModel.saveResult).toHaveBeenCalledWith(expect.objectContaining({
@@ -223,6 +262,21 @@ describe('competitionController', () => {
       });
       expect(result.summary.traitStatistics).toBeDefined();
       expect(result.summary.scoringMethod).toBe('Enhanced trait-based scoring with calculateCompetitionScore()');
+
+      // Verify XP events in response summary
+      expect(result.summary.xpEvents).toBeDefined();
+      expect(result.summary.xpEvents).toHaveLength(3);
+      expect(result.summary.xpEvents[0]).toEqual(expect.objectContaining({
+        playerId: 'player-1',
+        horseId: 1,
+        horseName: 'Thunder',
+        placement: '1st',
+        xpAwarded: 20,
+        leveledUp: true,
+        newLevel: 2
+      }));
+      expect(result.summary.totalXpAwarded).toBe(45); // 20 + 15 + 10
+      expect(result.summary.playersLeveledUp).toBe(1); // Only Thunder's owner leveled up
     });
 
     it('should filter out horses that already entered the show', async() => {
@@ -1016,6 +1070,218 @@ describe('competitionController', () => {
       const uniqueScores = [...new Set(results)];
       expect(uniqueScores.length).toBeGreaterThan(1); // Should have different scores
       expect(mockCalculateCompetitionScore).toHaveBeenCalledTimes(5);
+    });
+
+    describe('XP Award System', () => {
+      it('should award correct XP amounts for show placements', async () => {
+        const horseIds = [1, 2, 3];
+        const mockHorses = [
+          createMockHorse(1, 'Thunder', { ownerId: 'player-100' }),
+          createMockHorse(2, 'Lightning', { ownerId: 'player-200' }),
+          createMockHorse(3, 'Storm', { ownerId: 'player-300' })
+        ];
+
+        // Mock horse retrieval (initial + XP retrieval)
+        mockHorseModel.getHorseById
+          .mockResolvedValueOnce(mockHorses[0])
+          .mockResolvedValueOnce(mockHorses[1])
+          .mockResolvedValueOnce(mockHorses[2])
+          .mockResolvedValueOnce(mockHorses[0]) // For XP award
+          .mockResolvedValueOnce(mockHorses[1]) // For XP award
+          .mockResolvedValueOnce(mockHorses[2]); // For XP award
+
+        // Mock all required functions
+        mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+        mockIsHorseEligibleForShow.mockReturnValue(true);
+        mockResultModel.getResultsByShow.mockResolvedValue([]);
+        mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+          first: 500, second: 300, third: 200
+        });
+        mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+        mockCompetitionRewards.calculateEntryFees.mockReturnValue(300);
+        mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+        mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+
+        // Mock competition scoring (Thunder wins, Lightning 2nd, Storm 3rd)
+        mockCalculateCompetitionScore
+          .mockReturnValueOnce(95.5)  // Thunder - 1st
+          .mockReturnValueOnce(88.2)  // Lightning - 2nd
+          .mockReturnValueOnce(82.1); // Storm - 3rd
+
+        // Mock XP system responses
+        mockPlayerModel.addXp
+          .mockResolvedValueOnce({ level: 2, xp: 10, leveledUp: true, levelsGained: 1 })   // 1st: +20 XP, level up
+          .mockResolvedValueOnce({ level: 1, xp: 65, leveledUp: false, levelsGained: 0 })  // 2nd: +15 XP
+          .mockResolvedValueOnce({ level: 1, xp: 60, leveledUp: false, levelsGained: 0 }); // 3rd: +10 XP
+
+        mockPlayerModel.levelUpIfNeeded
+          .mockResolvedValueOnce({ level: 2, xp: 10, leveledUp: false, levelsGained: 0 })  // Already leveled
+          .mockResolvedValueOnce({ level: 1, xp: 65, leveledUp: false, levelsGained: 0 })  // No level up
+          .mockResolvedValueOnce({ level: 1, xp: 60, leveledUp: false, levelsGained: 0 }); // No level up
+
+        // Mock result saving
+        mockResultModel.saveResult
+          .mockResolvedValueOnce({ id: 1, horseId: 1, placement: '1st', score: 95.5 })
+          .mockResolvedValueOnce({ id: 2, horseId: 2, placement: '2nd', score: 88.2 })
+          .mockResolvedValueOnce({ id: 3, horseId: 3, placement: '3rd', score: 82.1 });
+
+        const result = await enterAndRunShow(horseIds, mockShow);
+
+        // Verify XP awards with correct amounts
+        expect(mockPlayerModel.addXp).toHaveBeenCalledTimes(3);
+        expect(mockPlayerModel.addXp).toHaveBeenNthCalledWith(1, 'player-100', 20); // 1st place
+        expect(mockPlayerModel.addXp).toHaveBeenNthCalledWith(2, 'player-200', 15); // 2nd place
+        expect(mockPlayerModel.addXp).toHaveBeenNthCalledWith(3, 'player-300', 10); // 3rd place
+
+        // Verify levelUpIfNeeded calls
+        expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenCalledTimes(3);
+        expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenNthCalledWith(1, 'player-100');
+        expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenNthCalledWith(2, 'player-200');
+        expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenNthCalledWith(3, 'player-300');
+
+        // Verify XP events in response
+        expect(result.summary.xpEvents).toHaveLength(3);
+        expect(result.summary.xpEvents[0]).toEqual({
+          playerId: 'player-100',
+          horseId: 1,
+          horseName: 'Thunder',
+          placement: '1st',
+          xpAwarded: 20,
+          leveledUp: true,
+          newLevel: 2,
+          levelsGained: 1
+        });
+        expect(result.summary.xpEvents[1]).toEqual({
+          playerId: 'player-200',
+          horseId: 2,
+          horseName: 'Lightning',
+          placement: '2nd',
+          xpAwarded: 15,
+          leveledUp: false,
+          newLevel: 1,
+          levelsGained: 0
+        });
+        expect(result.summary.xpEvents[2]).toEqual({
+          playerId: 'player-300',
+          horseId: 3,
+          horseName: 'Storm',
+          placement: '3rd',
+          xpAwarded: 10,
+          leveledUp: false,
+          newLevel: 1,
+          levelsGained: 0
+        });
+
+        // Verify summary statistics
+        expect(result.summary.totalXpAwarded).toBe(45); // 20 + 15 + 10
+        expect(result.summary.playersLeveledUp).toBe(1); // Only Thunder's owner leveled up
+      });
+
+      it('should not award XP for horses that do not place (4th, 5th, etc.)', async () => {
+        const horseIds = [1, 2, 3, 4, 5];
+        const mockHorses = horseIds.map(id => createMockHorse(id, `Horse${id}`, { ownerId: `player-${id}` }));
+
+        // Mock horse retrieval (initial only, no XP retrieval for non-placed horses)
+        mockHorses.forEach(horse => {
+          mockHorseModel.getHorseById.mockResolvedValueOnce(horse);
+        });
+
+        // Mock additional retrieval for placed horses only (1st, 2nd, 3rd)
+        mockHorseModel.getHorseById
+          .mockResolvedValueOnce(mockHorses[0]) // For XP award
+          .mockResolvedValueOnce(mockHorses[1]) // For XP award
+          .mockResolvedValueOnce(mockHorses[2]); // For XP award
+
+        // Mock all required functions
+        mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+        mockIsHorseEligibleForShow.mockReturnValue(true);
+        mockResultModel.getResultsByShow.mockResolvedValue([]);
+        mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+          first: 500, second: 300, third: 200
+        });
+        mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+        mockCompetitionRewards.calculateEntryFees.mockReturnValue(500);
+        mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+        mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+
+        // Mock competition scoring (5 horses, only top 3 place)
+        mockCalculateCompetitionScore
+          .mockReturnValueOnce(95.5)  // Horse1 - 1st
+          .mockReturnValueOnce(88.2)  // Horse2 - 2nd
+          .mockReturnValueOnce(82.1)  // Horse3 - 3rd
+          .mockReturnValueOnce(76.8)  // Horse4 - no placement
+          .mockReturnValueOnce(71.3); // Horse5 - no placement
+
+        // Mock XP system for only the placed horses
+        mockPlayerModel.addXp
+          .mockResolvedValueOnce({ level: 1, xp: 70, leveledUp: false, levelsGained: 0 })
+          .mockResolvedValueOnce({ level: 1, xp: 65, leveledUp: false, levelsGained: 0 })
+          .mockResolvedValueOnce({ level: 1, xp: 60, leveledUp: false, levelsGained: 0 });
+
+        mockPlayerModel.levelUpIfNeeded
+          .mockResolvedValueOnce({ level: 1, xp: 70, leveledUp: false, levelsGained: 0 })
+          .mockResolvedValueOnce({ level: 1, xp: 65, leveledUp: false, levelsGained: 0 })
+          .mockResolvedValueOnce({ level: 1, xp: 60, leveledUp: false, levelsGained: 0 });
+
+        // Mock result saving
+        mockResultModel.saveResult
+          .mockResolvedValueOnce({ id: 1, horseId: 1, placement: '1st', score: 95.5 })
+          .mockResolvedValueOnce({ id: 2, horseId: 2, placement: '2nd', score: 88.2 })
+          .mockResolvedValueOnce({ id: 3, horseId: 3, placement: '3rd', score: 82.1 })
+          .mockResolvedValueOnce({ id: 4, horseId: 4, placement: null, score: 76.8 })
+          .mockResolvedValueOnce({ id: 5, horseId: 5, placement: null, score: 71.3 });
+
+        const result = await enterAndRunShow(horseIds, mockShow);
+
+        // Verify only 3 XP awards (for placed horses only)
+        expect(mockPlayerModel.addXp).toHaveBeenCalledTimes(3);
+        expect(mockPlayerModel.levelUpIfNeeded).toHaveBeenCalledTimes(3);
+
+        // Verify XP events only for placed horses
+        expect(result.summary.xpEvents).toHaveLength(3);
+        expect(result.summary.totalXpAwarded).toBe(45); // 20 + 15 + 10
+        expect(result.summary.playersLeveledUp).toBe(0); // No level ups in this test
+      });
+
+      it('should handle XP award errors gracefully', async () => {
+        const horseIds = [1];
+        const mockHorse = createMockHorse(1, 'Thunder', { ownerId: 'player-100' });
+
+        // Mock horse retrieval
+        mockHorseModel.getHorseById
+          .mockResolvedValueOnce(mockHorse)
+          .mockResolvedValueOnce(mockHorse); // For XP award
+
+        // Mock all required functions
+        mockCompetitionRewards.hasValidRider.mockReturnValue(true);
+        mockIsHorseEligibleForShow.mockReturnValue(true);
+        mockResultModel.getResultsByShow.mockResolvedValue([]);
+        mockCompetitionRewards.calculatePrizeDistribution.mockReturnValue({
+          first: 500, second: 300, third: 200
+        });
+        mockCompetitionRewards.calculateStatGains.mockReturnValue(null);
+        mockCompetitionRewards.calculateEntryFees.mockReturnValue(100);
+        mockPlayerUpdates.transferEntryFees.mockResolvedValue(null);
+        mockHorseUpdates.updateHorseRewards.mockResolvedValue({});
+
+        // Mock competition scoring
+        mockCalculateCompetitionScore.mockReturnValueOnce(95.5);
+
+        // Mock XP system error
+        mockPlayerModel.addXp.mockRejectedValueOnce(new Error('XP system error'));
+
+        // Mock result saving
+        mockResultModel.saveResult.mockResolvedValueOnce({ id: 1, horseId: 1, placement: '1st', score: 95.5 });
+
+        // Should not throw error, but handle gracefully
+        const result = await enterAndRunShow(horseIds, mockShow);
+
+        // Competition should still succeed despite XP error
+        expect(result.success).toBe(true);
+        expect(result.results).toHaveLength(1);
+        expect(result.summary.xpEvents).toHaveLength(0); // No XP events due to error
+        expect(result.summary.totalXpAwarded).toBe(0);
+      });
     });
   });
 });

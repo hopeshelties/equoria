@@ -5,6 +5,7 @@
  * Verifies that horses with matching discipline affinity traits receive a +5 flat bonus.
  */
 
+import { jest } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
 describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
@@ -225,6 +226,17 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
 
   describe('Integration with Existing Trait System', () => {
     it('should apply discipline affinity bonus in addition to existing trait effects', () => {
+      // Mock Math.random to make the test deterministic
+      const mockRandom = jest.spyOn(Math, 'random');
+
+      // Set up deterministic random values for consistent results
+      // We need multiple calls: one for each horse's luck modifier and trait calculations
+      mockRandom
+        .mockReturnValueOnce(0.5) // Horse 1 (super specialist) - neutral luck (0% modifier)
+        .mockReturnValueOnce(0.5) // Horse 2 (affinity only) - neutral luck (0% modifier)
+        .mockReturnValueOnce(0.5) // Horse 3 (regular) - neutral luck (0% modifier)
+        .mockReturnValue(0.5);    // Any additional random calls
+
       const horseWithAffinityAndTraits = createTestHorse(1, 'SuperSpecialist', {
         positive: ['discipline_affinity_racing', 'athletic', 'resilient']
       });
@@ -242,11 +254,14 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
       const affinityResult = results.find(r => r.horseId === 2);
       const regularResult = results.find(r => r.horseId === 3);
 
-      // Super specialist should have highest score (affinity + other traits)
+      // With deterministic random values, super specialist should have highest score
       // Affinity only should be better than regular
       // Regular should have lowest score
       expect(superResult.score).toBeGreaterThan(affinityResult.score);
       expect(affinityResult.score).toBeGreaterThan(regularResult.score - 15);
+
+      // Restore Math.random
+      mockRandom.mockRestore();
     });
   });
 
