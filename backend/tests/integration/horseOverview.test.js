@@ -36,7 +36,10 @@ jest.unstable_mockModule(join(__dirname, '../../db/index.js'), () => ({
 
 // Mock the trainingModel
 jest.unstable_mockModule(join(__dirname, '../../models/trainingModel.js'), () => ({
-  getAnyRecentTraining: jest.fn()
+  getAnyRecentTraining: jest.fn(),
+  getHorseAge: jest.fn(),
+  getLastTrainingDate: jest.fn(),
+  logTrainingSession: jest.fn()
 }));
 
 // Now import the app and the mocked modules

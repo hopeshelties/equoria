@@ -66,7 +66,7 @@ describe('Dashboard Routes Integration Tests', () => {
   let testHorses;
   let testShows;
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     // Define test data
     testPlayer = {
       id: 'test-dashboard-player',
@@ -169,13 +169,13 @@ describe('Dashboard Routes Integration Tests', () => {
     });
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     // Clean up mocks
     jest.clearAllMocks();
   });
 
   describe('GET /api/player/dashboard/:playerId', () => {
-    it('should return complete dashboard data successfully', async () => {
+    it('should return complete dashboard data successfully', async() => {
       const response = await request(app)
         .get(`/api/player/dashboard/${testPlayer.id}`)
         .expect(200);
@@ -183,7 +183,7 @@ describe('Dashboard Routes Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('Dashboard data retrieved successfully');
 
-      const data = response.body.data;
+      const { data } = response.body;
 
       // Verify player info
       expect(data.player).toEqual({
@@ -215,7 +215,7 @@ describe('Dashboard Routes Integration Tests', () => {
       });
     });
 
-    it('should return 404 for non-existent player', async () => {
+    it('should return 404 for non-existent player', async() => {
       const response = await request(app)
         .get('/api/player/dashboard/nonexistent-player')
         .expect(404);
@@ -224,22 +224,22 @@ describe('Dashboard Routes Integration Tests', () => {
       expect(response.body.message).toBe('Player not found');
     });
 
-    it('should return validation error for empty player ID', async () => {
+    it('should return validation error for empty player ID', async() => {
       const response = await request(app)
         .get('/api/player/dashboard/')
         .expect(404); // Route not found since playerId is missing
     });
 
-    it('should return validation error for invalid player ID format', async () => {
+    it('should return validation error for invalid player ID format', async() => {
       const response = await request(app)
-        .get('/api/player/dashboard/' + 'x'.repeat(100)) // Too long
+        .get(`/api/player/dashboard/${'x'.repeat(100)}`) // Too long
         .expect(400);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should handle player with no horses gracefully', async () => {
+    it('should handle player with no horses gracefully', async() => {
       // Mock empty player data
       const emptyPlayer = {
         id: 'test-empty-player',
@@ -268,7 +268,7 @@ describe('Dashboard Routes Integration Tests', () => {
         .get(`/api/player/dashboard/${emptyPlayer.id}`)
         .expect(200);
 
-      const data = response.body.data;
+      const { data } = response.body;
 
       expect(data.player.name).toBe('Empty Dashboard Player');
       expect(data.horses.total).toBe(0);
@@ -279,7 +279,7 @@ describe('Dashboard Routes Integration Tests', () => {
       expect(data.recent.lastShowPlaced).toBeNull();
     });
 
-    it('should handle player with horses but no activity gracefully', async () => {
+    it('should handle player with horses but no activity gracefully', async() => {
       // Mock inactive player data
       const inactivePlayer = {
         id: 'test-inactive-player',
@@ -308,7 +308,7 @@ describe('Dashboard Routes Integration Tests', () => {
         .get(`/api/player/dashboard/${inactivePlayer.id}`)
         .expect(200);
 
-      const data = response.body.data;
+      const { data } = response.body;
 
       expect(data.player.name).toBe('Inactive Dashboard Player');
       expect(data.horses.total).toBe(1);

@@ -58,7 +58,7 @@ describe('Player Routes Integration Tests', () => {
   });
 
   describe('GET /api/player/:id/progress', () => {
-    it('should return player progress successfully', async () => {
+    it('should return player progress successfully', async() => {
       const mockPlayer = {
         id: 'test-player-123',
         name: 'Integration Test Player',
@@ -89,7 +89,7 @@ describe('Player Routes Integration Tests', () => {
       expect(mockGetPlayerById).toHaveBeenCalledWith('test-player-123');
     });
 
-    it('should return 404 for non-existent player', async () => {
+    it('should return 404 for non-existent player', async() => {
       mockGetPlayerById.mockResolvedValue(null);
 
       const response = await request(app)
@@ -102,13 +102,13 @@ describe('Player Routes Integration Tests', () => {
       });
     });
 
-    it('should return validation error for empty player ID', async () => {
+    it('should return validation error for empty player ID', async() => {
       const response = await request(app)
         .get('/api/player//progress')
         .expect(404); // Route not found for empty ID
     });
 
-    it('should return validation error for invalid player ID format', async () => {
+    it('should return validation error for invalid player ID format', async() => {
       // Single character "a" is actually valid (min: 1, max: 50)
       // So let's test with an empty string by using a different approach
       // or test that a valid short ID actually works
@@ -124,7 +124,7 @@ describe('Player Routes Integration Tests', () => {
       });
     });
 
-    it('should return validation error for extremely long player ID', async () => {
+    it('should return validation error for extremely long player ID', async() => {
       const longId = 'a'.repeat(51); // 51 characters, exceeds limit
 
       const response = await request(app)
@@ -142,7 +142,7 @@ describe('Player Routes Integration Tests', () => {
       });
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockGetPlayerById.mockRejectedValue(new Error('Database connection failed'));
 
       const response = await request(app)
@@ -156,7 +156,7 @@ describe('Player Routes Integration Tests', () => {
       });
     });
 
-    it('should calculate xpToNextLevel correctly for edge cases', async () => {
+    it('should calculate xpToNextLevel correctly for edge cases', async() => {
       const testCases = [
         {
           player: { id: 'p1', name: 'Player1', level: 1, xp: 0 },
@@ -189,7 +189,7 @@ describe('Player Routes Integration Tests', () => {
       }
     });
 
-    it('should only return required fields in response', async () => {
+    it('should only return required fields in response', async() => {
       const mockPlayer = {
         id: 'test-player-456',
         name: 'Detailed Player',
@@ -225,7 +225,7 @@ describe('Player Routes Integration Tests', () => {
       expect(response.body.data).not.toHaveProperty('updatedAt');
     });
 
-    it('should handle special characters in player ID', async () => {
+    it('should handle special characters in player ID', async() => {
       const specialId = 'player-123_test';
       const mockPlayer = {
         id: specialId,
