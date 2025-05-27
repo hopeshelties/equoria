@@ -103,7 +103,7 @@ describe('Player Routes Integration Tests', () => {
     });
 
     it('should return validation error for empty player ID', async() => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/player//progress')
         .expect(404); // Route not found for empty ID
     });

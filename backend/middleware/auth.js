@@ -25,7 +25,7 @@ export const authenticateToken = (req, res, next) => {
     jwt.verify(token, secret, (err, user) => {
       if (err) {
         logger.warn(`[auth] Invalid token for ${req.method} ${req.path} from ${req.ip}: ${err.message}`);
-        
+
         if (err.name === 'TokenExpiredError') {
           throw new AppError('Token expired', 401);
         } else if (err.name === 'JsonWebTokenError') {
@@ -47,7 +47,7 @@ export const authenticateToken = (req, res, next) => {
         status: error.status
       });
     }
-    
+
     logger.error(`[auth] Unexpected error: ${error.message}`);
     return res.status(500).json({
       success: false,
@@ -115,7 +115,7 @@ export const requireRole = (...roles) => {
           status: error.status
         });
       }
-      
+
       logger.error(`[auth] Authorization error: ${error.message}`);
       return res.status(500).json({
         success: false,
@@ -144,3 +144,6 @@ export const generateToken = (payload, expiresIn = '24h') => {
 export const generateRefreshToken = (payload) => {
   return generateToken(payload, '7d');
 };
+
+// Export authenticateToken as the default export for backward compatibility
+export default authenticateToken;

@@ -7,6 +7,24 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
 import jwt from 'jsonwebtoken';
+// We need to mock dependencies before importing the controller
+jest.mock('../../db/index.js', () => ({
+  __esModule: true,
+  default: mockPrisma
+}));
+
+// Mock logger
+jest.mock('../../utils/logger.js', () => ({
+  __esModule: true,
+  default: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn()
+  }
+}));
+
+// Now import controller after mocks are set up
 import {
   getTopPlayersByLevel,
   getTopPlayersByXP,
@@ -53,16 +71,7 @@ const mockPrisma = {
   $disconnect: jest.fn()
 };
 
-// Mock the logger
-jest.mock('../../utils/logger.js', () => ({
-  __esModule: true,
-  default: {
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn()
-  }
-}));
+
 
 // Create a test express app
 const app = express();

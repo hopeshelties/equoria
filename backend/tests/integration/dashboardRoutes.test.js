@@ -225,7 +225,7 @@ describe('Dashboard Routes Integration Tests', () => {
     });
 
     it('should return validation error for empty player ID', async() => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/player/dashboard/')
         .expect(404); // Route not found since playerId is missing
     });
