@@ -93,6 +93,7 @@ model Player {
   horses   Horse[]  // 1:N relation to Horse
   grooms   Groom[]  // 1:N relation to Groom
   groomAssignments GroomAssignment[]  // 1:N relation to GroomAssignment
+  xpEvents XpEvent[]  // 1:N relation to XpEvent
 
   @@map("players")
 }
@@ -301,4 +302,20 @@ model GroomInteraction {
   assignmentId    Int?
 
   @@map("groom_interactions")
+}
+
+model XpEvent {
+  id        Int      @id @default(autoincrement())
+  amount    Int      // Amount of XP gained/lost (positive or negative)
+  reason    String   // Reason for XP change (e.g., "Trained horse in Dressage")
+  timestamp DateTime @default(now())
+
+  // Relations
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId String
+
+  @@map("xp_events")
+  @@index([playerId])
+  @@index([timestamp])
+  @@index([playerId, timestamp])
 }

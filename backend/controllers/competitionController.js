@@ -1,6 +1,7 @@
 import { getHorseById } from '../models/horseModel.js';
 import { saveResult, getResultsByShow } from '../models/resultModel.js';
 import { addXp, levelUpIfNeeded } from '../models/playerModel.js';
+import { logXpEvent } from '../models/xpLogModel.js';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 import { calculateCompetitionScore } from '../utils/competitionScore.js';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
@@ -333,6 +334,13 @@ async function enterAndRunShow(horseIds, show) {
 
                 // Call levelUpIfNeeded after awarding XP (as requested in task)
                 const levelUpResult = await levelUpIfNeeded(horse.ownerId);
+
+                // Log XP event for auditing
+                await logXpEvent({
+                  playerId: horse.ownerId,
+                  amount: xpAmount,
+                  reason: `${simResult.placement} place with horse ${horse.name} in ${show.discipline}`
+                });
 
                 // Track XP event for summary
                 const xpEvent = {

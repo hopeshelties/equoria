@@ -289,3 +289,20 @@ create index idx_foal_training_history_horse_id on public.foal_training_history(
 create index idx_foal_training_history_day on public.foal_training_history(day);
 create index idx_foal_training_history_timestamp on public.foal_training_history(timestamp);
 create index idx_foal_training_history_horse_day on public.foal_training_history(horse_id, day);
+
+-- Add XP events log table for tracking all XP gains/losses
+DROP TABLE IF EXISTS public.xp_events CASCADE;
+CREATE TABLE public.xp_events (
+  id SERIAL PRIMARY KEY,
+  player_id VARCHAR(255) NOT NULL REFERENCES public.players(id) ON DELETE CASCADE,
+  amount INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+COMMENT ON TABLE public.xp_events IS 'Stores all XP events for auditing and analytics purposes.';
+
+-- Create indexes for performance
+CREATE INDEX idx_xp_events_player_id ON public.xp_events(player_id);
+CREATE INDEX idx_xp_events_timestamp ON public.xp_events(timestamp);
+CREATE INDEX idx_xp_events_player_timestamp ON public.xp_events(player_id, timestamp);
