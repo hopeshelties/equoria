@@ -14,6 +14,7 @@ const mockIncrementDisciplineScore = jest.fn();
 const mockLogTrainingSession = jest.fn();
 const mockGetHorseAge = jest.fn();
 const mockGetAnyRecentTraining = jest.fn();
+const mockGetLastTrainingDate = jest.fn();
 const mockGetCombinedTraitEffects = jest.fn();
 const mockUpdateHorseStat = jest.fn();
 
@@ -30,7 +31,8 @@ jest.unstable_mockModule(join(__dirname, '../../models/xpLogModel.js'), () => ({
 
 jest.unstable_mockModule(join(__dirname, '../../models/playerModel.js'), () => ({
   addXp: mockAddXp,
-  levelUpIfNeeded: mockLevelUpIfNeeded
+  levelUpIfNeeded: mockLevelUpIfNeeded,
+  getPlayerWithHorses: jest.fn()
 }));
 
 jest.unstable_mockModule(join(__dirname, '../../models/horseModel.js'), () => ({

@@ -1,5 +1,6 @@
 import { getResultsByHorse } from '../models/resultModel.js';
 import { createHorse, getHorseById } from '../models/horseModel.js';
+import { getAnyRecentTraining } from '../models/trainingModel.js';
 import { applyEpigeneticTraitsAtBirth } from '../utils/applyEpigeneticTraitsAtBirth.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
@@ -326,5 +327,133 @@ function assessFeedQualityFromMare(mare) {
   } catch (error) {
     logger.error(`[horseController.assessFeedQualityFromMare] Error assessing feed quality: ${error.message}`);
     return 50; // Default on error
+  }
+}
+
+/**
+ * Get horse overview data for detailed display
+ * Returns everything needed for the horse overview screen
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export async function getHorseOverview(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Validate horse ID
+    const horseId = parseInt(id, 10);
+    if (isNaN(horseId) || horseId <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid horse ID. Must be a positive integer.',
+        data: null
+      });
+    }
+
+    logger.info(`[horseController.getHorseOverview] Getting overview for horse ${horseId}`);
+
+    // Get full horse record with all needed data
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId },
+      select: {
+        id: true,
+        name: true,
+        age: true,
+        trait: true,
+        disciplineScores: true,
+        total_earnings: true,
+        tack: true,
+        rider: true
+      }
+    });
+
+    if (!horse) {
+      logger.warn(`[horseController.getHorseOverview] Horse ${horseId} not found`);
+      return res.status(404).json({
+        success: false,
+        message: 'Horse not found',
+        data: null
+      });
+    }
+
+    // Calculate next training date
+    let nextTrainingDate = null;
+    try {
+      const lastTrainingDate = await getAnyRecentTraining(horseId);
+      if (lastTrainingDate) {
+        const nextTraining = new Date(lastTrainingDate);
+        nextTraining.setDate(nextTraining.getDate() + 7); // Add 7 days
+
+        // Only set next training date if it's in the future
+        const now = new Date();
+        if (nextTraining > now) {
+          nextTrainingDate = nextTraining.toISOString();
+        }
+      }
+    } catch (error) {
+      logger.warn(`[horseController.getHorseOverview] Error calculating next training date: ${error.message}`);
+      // Continue with null next training date
+    }
+
+    // Get most recent show result
+    let lastShowResult = null;
+    try {
+      const recentResult = await prisma.competitionResult.findFirst({
+        where: {
+          horseId: horseId
+        },
+        orderBy: {
+          runDate: 'desc'
+        },
+        select: {
+          showName: true,
+          placement: true,
+          runDate: true
+        }
+      });
+
+      if (recentResult) {
+        lastShowResult = {
+          showName: recentResult.showName,
+          placement: recentResult.placement,
+          runDate: recentResult.runDate.toISOString()
+        };
+      }
+    } catch (error) {
+      logger.warn(`[horseController.getHorseOverview] Error getting last show result: ${error.message}`);
+      // Continue with null last show result
+    }
+
+    // Prepare response data
+    const overviewData = {
+      id: horse.id,
+      name: horse.name,
+      age: horse.age,
+      trait: horse.trait,
+      disciplineScores: horse.disciplineScores || {},
+      nextTrainingDate,
+      earnings: horse.total_earnings || 0,
+      lastShowResult,
+      rider: horse.rider,
+      tack: horse.tack || {}
+    };
+
+    logger.info(`[horseController.getHorseOverview] Successfully retrieved overview for horse ${horse.name} (ID: ${horseId})`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Horse overview retrieved successfully',
+      data: overviewData
+    });
+
+  } catch (error) {
+    logger.error(`[horseController.getHorseOverview] Error getting horse overview: ${error.message}`);
+
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error while retrieving horse overview',
+      data: null
+    });
   }
 }

@@ -1,6 +1,7 @@
 import express from 'express';
 import { param, body, validationResult } from 'express-validator';
 import { getTrainableHorses } from '../controllers/trainingController.js';
+import { getHorseOverview } from '../controllers/horseController.js';
 
 const router = express.Router();
 
@@ -151,6 +152,22 @@ router.post('/foals', validateFoalCreation, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error during foal creation',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+    });
+  }
+});
+
+/**
+ * GET /horses/:id/overview
+ * Get comprehensive overview data for a specific horse
+ */
+router.get('/:id/overview', validateHorseId, async (req, res) => {
+  try {
+    await getHorseOverview(req, res);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
     });
   }

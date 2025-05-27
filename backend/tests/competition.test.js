@@ -32,16 +32,13 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
 
   it('should demonstrate trait match fairness for Show Jumping competition', () => {
     // TASK 10: Adjust Test for Trait Match Fairness
-    // Simulate 20 matches between two horses:
-    // One with the correct trait (discipline_affinity_show_jumping) for the event
-    // One without
-    // Track wins using traitMatchWins++
+    // Run multiple test batches to get more reliable statistics
+    // Each batch simulates 20 matches, we run 3 batches and average the results
 
-    let traitMatchWins = 0;
-    const totalRuns = 20;
-
-    // Trait match should give a slight advantage (~55-75%) due to +5 score edge
-    // This balances with ±9% luck modifier for realistic outcomes
+    let totalWins = 0;
+    const batches = 3;
+    const runsPerBatch = 20;
+    const totalRuns = batches * runsPerBatch; // 60 total runs
 
     const showJumpingEvent = {
       id: 'test-show-jumping',
@@ -49,45 +46,49 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       discipline: 'Show Jumping'
     };
 
-    for (let i = 0; i < totalRuns; i++) {
-      const horses = [
-        createTestHorse(1, 'JumpSpecialist', {
-          epigenetic_modifiers: {
-            positive: ['discipline_affinity_show_jumping'], // Matches event discipline
-            negative: [],
-            hidden: []
-          }
-        }),
-        createTestHorse(2, 'RegularHorse', {
-          epigenetic_modifiers: {
-            positive: [], // No matching trait
-            negative: [],
-            hidden: []
-          }
-        })
-      ];
+    for (let batch = 0; batch < batches; batch++) {
+      let batchWins = 0;
 
-      const results = simulateCompetition(horses, showJumpingEvent);
+      for (let i = 0; i < runsPerBatch; i++) {
+        const horses = [
+          createTestHorse(1, 'JumpSpecialist', {
+            epigenetic_modifiers: {
+              positive: ['discipline_affinity_show_jumping'], // Matches event discipline
+              negative: [],
+              hidden: []
+            }
+          }),
+          createTestHorse(2, 'RegularHorse', {
+            epigenetic_modifiers: {
+              positive: [], // No matching trait
+              negative: [],
+              hidden: []
+            }
+          })
+        ];
 
-      if (results[0].name === 'JumpSpecialist') {
-        traitMatchWins++;
+        const results = simulateCompetition(horses, showJumpingEvent);
+
+        if (results[0].name === 'JumpSpecialist') {
+          batchWins++;
+        }
       }
+
+      totalWins += batchWins;
     }
 
-    // Use expect(traitMatchWins).toBeGreaterThanOrEqual(11) to confirm trait advantage is real
-    expect(traitMatchWins).toBeGreaterThanOrEqual(11);
-
-    // Confirm bonus is not negligible and not overly dominant (>50% but <100%)
-    expect(traitMatchWins).toBeGreaterThan(10); // Better than 50% (not negligible)
-    expect(traitMatchWins).toBeLessThanOrEqual(20); // Allow up to 100% in small samples
+    // With 60 total runs, expect at least 55% win rate (33+ wins)
+    // This accounts for random variance while ensuring trait advantage is meaningful
+    expect(totalWins).toBeGreaterThanOrEqual(33); // At least 55% win rate
+    expect(totalWins).toBeGreaterThan(30); // Better than 50% (not negligible)
+    expect(totalWins).toBeLessThanOrEqual(totalRuns); // Allow up to 100% in samples
   });
 
   it('should demonstrate trait match fairness for Racing competition', () => {
-    let traitMatchWins = 0;
-    const totalRuns = 20;
-
-    // Trait match should give a slight advantage (~55-75%) due to +5 score edge
-    // This balances with ±9% luck modifier for realistic outcomes
+    let totalWins = 0;
+    const batches = 3;
+    const runsPerBatch = 20;
+    const totalRuns = batches * runsPerBatch; // 60 total runs
 
     const racingEvent = {
       id: 'test-racing',
@@ -95,42 +96,47 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       discipline: 'Racing'
     };
 
-    for (let i = 0; i < totalRuns; i++) {
-      const horses = [
-        createTestHorse(1, 'RacingSpecialist', {
-          epigenetic_modifiers: {
-            positive: ['discipline_affinity_racing'], // Matches event discipline
-            negative: [],
-            hidden: []
-          }
-        }),
-        createTestHorse(2, 'RegularHorse', {
-          epigenetic_modifiers: {
-            positive: [], // No matching trait
-            negative: [],
-            hidden: []
-          }
-        })
-      ];
+    for (let batch = 0; batch < batches; batch++) {
+      let batchWins = 0;
 
-      const results = simulateCompetition(horses, racingEvent);
+      for (let i = 0; i < runsPerBatch; i++) {
+        const horses = [
+          createTestHorse(1, 'RacingSpecialist', {
+            epigenetic_modifiers: {
+              positive: ['discipline_affinity_racing'], // Matches event discipline
+              negative: [],
+              hidden: []
+            }
+          }),
+          createTestHorse(2, 'RegularHorse', {
+            epigenetic_modifiers: {
+              positive: [], // No matching trait
+              negative: [],
+              hidden: []
+            }
+          })
+        ];
 
-      if (results[0].name === 'RacingSpecialist') {
-        traitMatchWins++;
+        const results = simulateCompetition(horses, racingEvent);
+
+        if (results[0].name === 'RacingSpecialist') {
+          batchWins++;
+        }
       }
+
+      totalWins += batchWins;
     }
 
-    expect(traitMatchWins).toBeGreaterThanOrEqual(11);
-    expect(traitMatchWins).toBeGreaterThan(10); // Better than 50% (not negligible)
-    expect(traitMatchWins).toBeLessThanOrEqual(20); // Allow up to 100% in small samples
+    expect(totalWins).toBeGreaterThanOrEqual(33); // At least 55% win rate
+    expect(totalWins).toBeGreaterThan(30); // Better than 50% (not negligible)
+    expect(totalWins).toBeLessThanOrEqual(totalRuns); // Allow up to 100% in samples
   });
 
   it('should demonstrate trait match fairness for Dressage competition', () => {
-    let traitMatchWins = 0;
-    const totalRuns = 20;
-
-    // Trait match should give a slight advantage (~55-75%) due to +5 score edge
-    // This balances with ±9% luck modifier for realistic outcomes
+    let totalWins = 0;
+    const batches = 3;
+    const runsPerBatch = 20;
+    const totalRuns = batches * runsPerBatch; // 60 total runs
 
     const dressageEvent = {
       id: 'test-dressage',
@@ -138,42 +144,47 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       discipline: 'Dressage'
     };
 
-    for (let i = 0; i < totalRuns; i++) {
-      const horses = [
-        createTestHorse(1, 'DressageSpecialist', {
-          epigenetic_modifiers: {
-            positive: ['discipline_affinity_dressage'], // Matches event discipline
-            negative: [],
-            hidden: []
-          }
-        }),
-        createTestHorse(2, 'RegularHorse', {
-          epigenetic_modifiers: {
-            positive: [], // No matching trait
-            negative: [],
-            hidden: []
-          }
-        })
-      ];
+    for (let batch = 0; batch < batches; batch++) {
+      let batchWins = 0;
 
-      const results = simulateCompetition(horses, dressageEvent);
+      for (let i = 0; i < runsPerBatch; i++) {
+        const horses = [
+          createTestHorse(1, 'DressageSpecialist', {
+            epigenetic_modifiers: {
+              positive: ['discipline_affinity_dressage'], // Matches event discipline
+              negative: [],
+              hidden: []
+            }
+          }),
+          createTestHorse(2, 'RegularHorse', {
+            epigenetic_modifiers: {
+              positive: [], // No matching trait
+              negative: [],
+              hidden: []
+            }
+          })
+        ];
 
-      if (results[0].name === 'DressageSpecialist') {
-        traitMatchWins++;
+        const results = simulateCompetition(horses, dressageEvent);
+
+        if (results[0].name === 'DressageSpecialist') {
+          batchWins++;
+        }
       }
+
+      totalWins += batchWins;
     }
 
-    expect(traitMatchWins).toBeGreaterThanOrEqual(11);
-    expect(traitMatchWins).toBeGreaterThan(10); // Better than 50% (not negligible)
-    expect(traitMatchWins).toBeLessThanOrEqual(20); // Allow up to 100% in small samples
+    expect(totalWins).toBeGreaterThanOrEqual(33); // At least 55% win rate
+    expect(totalWins).toBeGreaterThan(30); // Better than 50% (not negligible)
+    expect(totalWins).toBeLessThanOrEqual(totalRuns); // Allow up to 100% in samples
   });
 
   it('should demonstrate trait match fairness for Cross Country competition', () => {
-    let traitMatchWins = 0;
-    const totalRuns = 20;
-
-    // Trait match should give a slight advantage (~55-75%) due to +5 score edge
-    // This balances with ±9% luck modifier for realistic outcomes
+    let totalWins = 0;
+    const batches = 3;
+    const runsPerBatch = 20;
+    const totalRuns = batches * runsPerBatch; // 60 total runs
 
     const crossCountryEvent = {
       id: 'test-cross-country',
@@ -181,34 +192,40 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       discipline: 'Cross Country'
     };
 
-    for (let i = 0; i < totalRuns; i++) {
-      const horses = [
-        createTestHorse(1, 'CrossCountrySpecialist', {
-          epigenetic_modifiers: {
-            positive: ['discipline_affinity_cross_country'], // Matches event discipline
-            negative: [],
-            hidden: []
-          }
-        }),
-        createTestHorse(2, 'RegularHorse', {
-          epigenetic_modifiers: {
-            positive: [], // No matching trait
-            negative: [],
-            hidden: []
-          }
-        })
-      ];
+    for (let batch = 0; batch < batches; batch++) {
+      let batchWins = 0;
 
-      const results = simulateCompetition(horses, crossCountryEvent);
+      for (let i = 0; i < runsPerBatch; i++) {
+        const horses = [
+          createTestHorse(1, 'CrossCountrySpecialist', {
+            epigenetic_modifiers: {
+              positive: ['discipline_affinity_cross_country'], // Matches event discipline
+              negative: [],
+              hidden: []
+            }
+          }),
+          createTestHorse(2, 'RegularHorse', {
+            epigenetic_modifiers: {
+              positive: [], // No matching trait
+              negative: [],
+              hidden: []
+            }
+          })
+        ];
 
-      if (results[0].name === 'CrossCountrySpecialist') {
-        traitMatchWins++;
+        const results = simulateCompetition(horses, crossCountryEvent);
+
+        if (results[0].name === 'CrossCountrySpecialist') {
+          batchWins++;
+        }
       }
+
+      totalWins += batchWins;
     }
 
-    expect(traitMatchWins).toBeGreaterThanOrEqual(11);
-    expect(traitMatchWins).toBeGreaterThan(10); // Better than 50% (not negligible)
-    expect(traitMatchWins).toBeLessThanOrEqual(20); // Allow up to 100% in small samples
+    expect(totalWins).toBeGreaterThanOrEqual(33); // At least 55% win rate
+    expect(totalWins).toBeGreaterThan(30); // Better than 50% (not negligible)
+    expect(totalWins).toBeLessThanOrEqual(totalRuns); // Allow up to 100% in samples
   });
 
   it('should verify trait advantage is consistent across multiple test runs', () => {

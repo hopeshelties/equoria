@@ -4,7 +4,6 @@
  */
 
 import logger from './logger.js';
-import { getTraitEffects } from './traitEffects.js';
 
 /**
  * Trait impact definitions for different competition disciplines
@@ -111,7 +110,7 @@ const TRAIT_COMPETITION_EFFECTS = {
       description: 'Exceptional heritage provides superior competitive edge'
     },
     disciplines: {
-      'Racing': { scoreModifier: 0.12, description: 'Elite racing genetics' },
+      'Racing': { scoreModifier: 0.10, description: 'Elite racing genetics' },
       'Dressage': { scoreModifier: 0.10, description: 'Noble bearing and exceptional movement' },
       'Show Jumping': { scoreModifier: 0.10, description: 'Championship bloodlines show' }
     }
@@ -156,7 +155,7 @@ const TRAIT_COMPETITION_EFFECTS = {
       description: 'Easily startled and stressed in competitive environments'
     },
     disciplines: {
-      'Show Jumping': { scoreModifier: -0.07, description: 'Hesitant at obstacles, may refuse' },
+      'Show Jumping': { scoreModifier: -0.05, description: 'Hesitant at obstacles, may refuse' },
       'Cross Country': { scoreModifier: -0.06, description: 'Spooked by unfamiliar terrain' },
       'Racing': { scoreModifier: -0.05, description: 'Affected by crowd noise and excitement' }
     }
@@ -258,9 +257,9 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
       return result;
     }
 
-    // Process each trait using the new trait effects system
+    // Process each trait using the trait competition effects system
     allVisibleTraits.forEach(traitName => {
-      const traitEffects = getTraitEffects(traitName);
+      const traitEffects = getTraitCompetitionEffect(traitName);
       if (!traitEffects) {
         logger.warn(`[traitCompetitionImpact] Unknown trait: ${traitName}`);
         return;
@@ -272,15 +271,15 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
       let isSpecialized = false;
 
       // Check for discipline-specific effects first
-      if (traitEffects.disciplineModifiers && traitEffects.disciplineModifiers[discipline]) {
-        traitModifier = traitEffects.disciplineModifiers[discipline];
-        effectDescription = `Specialized ${discipline} performance modifier`;
+      if (traitEffects.disciplines && traitEffects.disciplines[discipline]) {
+        traitModifier = traitEffects.disciplines[discipline].scoreModifier;
+        effectDescription = traitEffects.disciplines[discipline].description;
         isSpecialized = true;
         result.details.disciplineSpecific += Math.abs(traitModifier);
-      } else if (traitEffects.competitionScoreModifier) {
+      } else if (traitEffects.general && traitEffects.general.scoreModifier) {
         // Use general competition score modifier
-        traitModifier = traitEffects.competitionScoreModifier;
-        effectDescription = 'General competition performance modifier';
+        traitModifier = traitEffects.general.scoreModifier;
+        effectDescription = traitEffects.general.description;
         result.details.generalEffects += Math.abs(traitModifier);
       }
 

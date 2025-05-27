@@ -8,6 +8,26 @@ const __dirname = dirname(__filename);
 // Mock the playerModel functions
 const mockGetPlayerById = jest.fn();
 
+// Mock trainingController functions
+const mockGetTrainableHorses = jest.fn();
+
+// Mock prisma
+const mockPrisma = {
+  horse: {
+    count: jest.fn()
+  },
+  show: {
+    findMany: jest.fn()
+  },
+  competitionResult: {
+    count: jest.fn(),
+    findFirst: jest.fn()
+  },
+  trainingLog: {
+    findFirst: jest.fn()
+  }
+};
+
 // Mock logger
 const mockLogger = {
   info: jest.fn(),
@@ -19,17 +39,31 @@ jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => ({
   getPlayerById: mockGetPlayerById
 }));
 
+jest.unstable_mockModule(join(__dirname, '../controllers/trainingController.js'), () => ({
+  getTrainableHorses: mockGetTrainableHorses
+}));
+
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+  default: mockPrisma
+}));
+
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
   default: mockLogger
 }));
 
 // Import the module after mocking
-const { getPlayerProgress } = await import(join(__dirname, '../controllers/playerController.js'));
+const { getPlayerProgress, getDashboardData } = await import(join(__dirname, '../controllers/playerController.js'));
 
 describe('playerController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetPlayerById.mockClear();
+    mockGetTrainableHorses.mockClear();
+    mockPrisma.horse.count.mockClear();
+    mockPrisma.show.findMany.mockClear();
+    mockPrisma.competitionResult.count.mockClear();
+    mockPrisma.competitionResult.findFirst.mockClear();
+    mockPrisma.trainingLog.findFirst.mockClear();
     mockLogger.info.mockClear();
     mockLogger.warn.mockClear();
     mockLogger.error.mockClear();
@@ -229,6 +263,192 @@ describe('playerController', () => {
       expect(responseData).not.toHaveProperty('email');
       expect(responseData).not.toHaveProperty('money');
       expect(responseData).not.toHaveProperty('settings');
+    });
+  });
+
+  describe('getDashboardData', () => {
+    it('should return dashboard data successfully', async () => {
+      const mockPlayer = {
+        id: 'player-123',
+        name: 'Alex',
+        level: 4,
+        xp: 230,
+        money: 4250
+      };
+
+      const mockTrainableHorses = [
+        { horseId: 1, name: 'Thunder', age: 5 },
+        { horseId: 2, name: 'Lightning', age: 4 }
+      ];
+
+      const mockUpcomingShows = [
+        { id: 1, runDate: new Date('2025-06-05T10:00:00.000Z') },
+        { id: 2, runDate: new Date('2025-06-06T14:30:00.000Z') }
+      ];
+
+      const mockRecentTraining = {
+        trainedAt: new Date('2025-06-03T17:00:00.000Z')
+      };
+
+      const mockRecentPlacement = {
+        horse: { name: 'Nova' },
+        placement: '2nd',
+        showName: 'Spring Gala - Dressage'
+      };
+
+      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      mockPrisma.horse.count.mockResolvedValue(12);
+      mockGetTrainableHorses.mockResolvedValue(mockTrainableHorses);
+      mockPrisma.show.findMany.mockResolvedValue(mockUpcomingShows);
+      mockPrisma.competitionResult.count.mockResolvedValue(3);
+      mockPrisma.trainingLog.findFirst.mockResolvedValue(mockRecentTraining);
+      mockPrisma.competitionResult.findFirst.mockResolvedValue(mockRecentPlacement);
+
+      const req = {
+        params: { playerId: 'player-123' }
+      };
+      const res = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis()
+      };
+
+      await getDashboardData(req, res);
+
+      expect(mockGetPlayerById).toHaveBeenCalledWith('player-123');
+      expect(mockPrisma.horse.count).toHaveBeenCalledWith({
+        where: { playerId: 'player-123' }
+      });
+      expect(mockGetTrainableHorses).toHaveBeenCalledWith('player-123');
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Dashboard data retrieved successfully',
+        data: {
+          player: {
+            id: 'player-123',
+            name: 'Alex',
+            level: 4,
+            xp: 230,
+            money: 4250
+          },
+          horses: {
+            total: 12,
+            trainable: 2
+          },
+          shows: {
+            upcomingEntries: 3,
+            nextShowRuns: [
+              new Date('2025-06-05T10:00:00.000Z'),
+              new Date('2025-06-06T14:30:00.000Z')
+            ]
+          },
+          recent: {
+            lastTrained: new Date('2025-06-03T17:00:00.000Z'),
+            lastShowPlaced: {
+              horseName: 'Nova',
+              placement: '2nd',
+              show: 'Spring Gala - Dressage'
+            }
+          }
+        }
+      });
+    });
+
+    it('should return 404 when player is not found', async () => {
+      mockGetPlayerById.mockResolvedValue(null);
+
+      const req = {
+        params: { playerId: 'nonexistent-player' }
+      };
+      const res = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis()
+      };
+
+      await getDashboardData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Player not found'
+      });
+    });
+
+    it('should return 400 for invalid player ID', async () => {
+      const req = {
+        params: { playerId: null }
+      };
+      const res = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis()
+      };
+
+      await getDashboardData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Valid player ID is required'
+      });
+    });
+
+    it('should handle errors gracefully and continue with partial data', async () => {
+      const mockPlayer = {
+        id: 'player-123',
+        name: 'Alex',
+        level: 4,
+        xp: 230,
+        money: 4250
+      };
+
+      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      mockPrisma.horse.count.mockResolvedValue(5);
+      mockGetTrainableHorses.mockRejectedValue(new Error('Training service error'));
+      mockPrisma.show.findMany.mockResolvedValue([]);
+      mockPrisma.competitionResult.count.mockResolvedValue(0);
+      mockPrisma.trainingLog.findFirst.mockRejectedValue(new Error('Training log error'));
+      mockPrisma.competitionResult.findFirst.mockRejectedValue(new Error('Competition error'));
+
+      const req = {
+        params: { playerId: 'player-123' }
+      };
+      const res = {
+        json: jest.fn(),
+        status: jest.fn().mockReturnThis()
+      };
+
+      await getDashboardData(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Dashboard data retrieved successfully',
+        data: {
+          player: {
+            id: 'player-123',
+            name: 'Alex',
+            level: 4,
+            xp: 230,
+            money: 4250
+          },
+          horses: {
+            total: 5,
+            trainable: 0 // Should default to 0 when error occurs
+          },
+          shows: {
+            upcomingEntries: 0,
+            nextShowRuns: []
+          },
+          recent: {
+            lastTrained: null, // Should default to null when error occurs
+            lastShowPlaced: null // Should default to null when error occurs
+          }
+        }
+      });
+
+      // Verify warning logs were called for errors
+      expect(mockLogger.warn).toHaveBeenCalledWith('[playerController.getDashboardData] Error getting trainable horses: Training service error');
+      expect(mockLogger.warn).toHaveBeenCalledWith('[playerController.getDashboardData] Error getting recent training: Training log error');
+      expect(mockLogger.warn).toHaveBeenCalledWith('[playerController.getDashboardData] Error getting recent placement: Competition error');
     });
   });
 });

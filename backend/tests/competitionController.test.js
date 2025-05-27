@@ -39,10 +39,15 @@ const mockPlayerModel = {
   levelUpIfNeeded: jest.fn()
 };
 
+const mockXpLogModel = {
+  logXpEvent: jest.fn()
+};
+
 // Mock the imports
 jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => mockHorseModel);
 jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => mockResultModel);
 jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => mockPlayerModel);
+jest.unstable_mockModule(join(__dirname, '../models/xpLogModel.js'), () => mockXpLogModel);
 jest.unstable_mockModule(join(__dirname, '../utils/competitionScore.js'), () => ({
   calculateCompetitionScore: mockCalculateCompetitionScore
 }));
@@ -62,6 +67,15 @@ describe('competitionController', () => {
     // Reset player model mocks
     mockPlayerModel.addXp.mockClear();
     mockPlayerModel.levelUpIfNeeded.mockClear();
+    // Reset XP log model mocks
+    mockXpLogModel.logXpEvent.mockClear();
+    mockXpLogModel.logXpEvent.mockResolvedValue({
+      id: 1,
+      playerId: 'test-player',
+      amount: 5,
+      reason: 'Test XP event',
+      timestamp: new Date()
+    });
   });
 
   describe('enterAndRunShow', () => {
