@@ -1,6 +1,11 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: General coding standards for the Equoria mobile-first horse simulation game
-globs: ["**/*.js", "**/*.ts", "**/*.tsx"]
+globs: ["**/*.js", "**/*.jsx"]
 alwaysApply: true
 ---
 # General Coding Standards
@@ -49,4 +54,5 @@ alwaysApply: true
 - @docs/001_project_overview.mdc
 - @docs/002_tech_stack.mdc
 - @docs/007_frameworks.mdc
+
 - @docs/009_testing_and_tdd.mdc

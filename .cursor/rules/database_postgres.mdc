@@ -1,6 +1,11 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Guidelines for PostgreSQL database interactions in Equoria
-globs: ["backend/database/**/*.js", "backend/database/**/*.ts", "backend/database/**/*.sql"]
+globs: ["backend/database/**/*.js", "backend/database/**/*.sql"]
 alwaysApply: false
 ---
 # PostgreSQL Database Best Practices
@@ -46,4 +51,7 @@ alwaysApply: false
 - @docs/001_project_overview.mdc
 - @docs/004_breeding_mechanics.mdc
 - @docs/007_frameworks.mdc
+
+
+
 - @docs/database_schema.md

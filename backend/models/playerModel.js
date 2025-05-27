@@ -2,26 +2,22 @@ import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
 
 /**
- * Validates if a string is a valid UUID format (relaxed for testing)
- * @param {string} id - The ID to validate
- * @returns {boolean} - Whether the ID is a valid UUID format
+ * Validates if an ID is a valid user ID format (integer or string representation)
+ * @param {string|number} id - The ID to validate
+ * @returns {boolean} - Whether the ID is a valid user ID format
  */
-function isValidUUID(id) {
-  // Check if it's a string and has some reasonable UUID-like structure
-  if (!id || typeof id !== 'string') {
-    return false;
-  }
-  
-  // Strict UUID validation for production UUIDs
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  if (uuidRegex.test(id)) {
+function isValidUserId(id) {
+  // Allow numbers
+  if (typeof id === 'number' && id > 0 && Number.isInteger(id)) {
     return true;
   }
   
-  // Relaxed validation for specific mock UUID patterns that are valid
-  // Allow patterns like 'player-uuid-123', 'test-player-uuid-123', 'nonexistent-uuid', but not 'invalid-uuid'
-  if (id.startsWith('player-') || id.startsWith('test-') || id.startsWith('nonexistent-')) {
-    return true;
+  // Allow string representations of positive integers
+  if (typeof id === 'string') {
+    const numId = parseInt(id, 10);
+    if (!isNaN(numId) && numId > 0 && numId.toString() === id) {
+      return true;
+    }
   }
   
   return false;
@@ -94,7 +90,7 @@ export async function createPlayer(playerData) {
     }
 
     // Create player in database
-    const createdPlayer = await prisma.player.create({
+    const createdPlayer = await prisma.user.create({
       data: playerData
     });
 
@@ -126,7 +122,7 @@ export async function getPlayerById(id) {
       throw new Error('Invalid player ID format');
     }
 
-    const player = await prisma.player.findUnique({
+    const player = await prisma.user.findUnique({
       where: { id }
     });
 
@@ -161,7 +157,7 @@ export async function getPlayerByEmail(email) {
       throw new Error('Invalid email format');
     }
 
-    const player = await prisma.player.findUnique({
+    const player = await prisma.user.findUnique({
       where: { email }
     });
 
@@ -196,7 +192,7 @@ export async function getPlayerWithHorses(id) {
       throw new Error('Invalid player ID format');
     }
 
-    const player = await prisma.player.findUnique({
+    const player = await prisma.user.findUnique({
       where: { id },
       include: {
         horses: {
@@ -246,7 +242,7 @@ export async function updatePlayer(id, updateData) {
       throw new Error('No update data provided');
     }
 
-    const updatedPlayer = await prisma.player.update({
+    const updatedPlayer = await prisma.user.update({
       where: { id },
       data: updateData
     });
@@ -279,7 +275,7 @@ export async function deletePlayer(id) {
       throw new Error('Invalid player ID format');
     }
 
-    const deletedPlayer = await prisma.player.delete({
+    const deletedPlayer = await prisma.user.delete({
       where: { id }
     });
 
@@ -295,5 +291,139 @@ export async function deletePlayer(id) {
     // Log and re-throw database errors
     logger.error('[playerModel.deletePlayer] Database error: %o', error);
     throw new Error(`Database error in deletePlayer: ${error.message}`);
+  }
+}
+
+/**
+ * Adds XP to a player's experience points
+ * @param {string} playerId - Player UUID
+ * @param {number} amount - Amount of XP to add (must be positive)
+ * @returns {Object} - Updated player object
+ * @throws {Error} - Validation or database errors
+ */
+export async function addXp(playerId, amount) {
+  try {
+    // Validate UUID format
+    if (!isValidUUID(playerId)) {
+      throw new Error('Invalid player ID format');
+    }
+
+    // Validate amount
+    if (typeof amount !== 'number' || amount <= 0) {
+      throw new Error('XP amount must be a positive number');
+    }
+
+    // Get current player data
+    const currentPlayer = await prisma.user.findUnique({
+      where: { id: playerId }
+    });
+
+    if (!currentPlayer) {
+      throw new Error('Player not found');
+    }
+
+    // Add XP to current amount
+    const newXp = currentPlayer.xp + amount;
+
+    // Update player with new XP
+    const updatedPlayer = await prisma.user.update({
+      where: { id: playerId },
+      data: { xp: newXp }
+    });
+
+    logger.info(`[playerModel.addXp] Added ${amount} XP to player: ${updatedPlayer.name} (ID: ${playerId}). New XP: ${newXp}`);
+    return updatedPlayer;
+
+  } catch (error) {
+    if (error.message.startsWith('Invalid') || error.message.startsWith('XP amount') || error.message.startsWith('Player not found')) {
+      // Re-throw validation errors as-is
+      throw error;
+    }
+    
+    // Log and re-throw database errors
+    logger.error('[playerModel.addXp] Database error: %o', error);
+    throw new Error(`Database error in addXp: ${error.message}`);
+  }
+}
+
+/**
+ * Checks if player has 100+ XP and levels up as needed
+ * Handles multiple level-ups for large XP gains
+ * @param {string} playerId - Player UUID
+ * @returns {Object} - Object with updated player data and level-up information
+ * @throws {Error} - Validation or database errors
+ */
+export async function levelUpIfNeeded(playerId) {
+  try {
+    // Validate UUID format
+    if (!isValidUUID(playerId)) {
+      throw new Error('Invalid player ID format');
+    }
+
+    // Get current player data
+    let currentPlayer = await prisma.user.findUnique({
+      where: { id: playerId }
+    });
+
+    if (!currentPlayer) {
+      throw new Error('Player not found');
+    }
+
+    let { level, xp } = currentPlayer;
+    let levelsGained = 0;
+    const originalLevel = level;
+    const originalXp = xp;
+
+    // Level up while XP >= 100
+    while (xp >= 100) {
+      xp -= 100;
+      level += 1;
+      levelsGained += 1;
+    }
+
+    // Update player if any levels were gained
+    if (levelsGained > 0) {
+      const updatedPlayer = await prisma.user.update({
+        where: { id: playerId },
+        data: { 
+          level: level,
+          xp: xp
+        }
+      });
+
+      logger.info(`[playerModel.levelUpIfNeeded] Player ${updatedPlayer.name} (ID: ${playerId}) leveled up! Levels gained: ${levelsGained} (${originalLevel} → ${level}). XP: ${originalXp} → ${xp}`);
+      
+      return {
+        player: updatedPlayer,
+        leveledUp: true,
+        levelsGained: levelsGained,
+        previousLevel: originalLevel,
+        newLevel: level,
+        previousXp: originalXp,
+        newXp: xp
+      };
+    } else {
+      logger.info(`[playerModel.levelUpIfNeeded] Player ${currentPlayer.name} (ID: ${playerId}) does not need to level up. Current level: ${level}, XP: ${xp}`);
+      
+      return {
+        player: currentPlayer,
+        leveledUp: false,
+        levelsGained: 0,
+        previousLevel: level,
+        newLevel: level,
+        previousXp: xp,
+        newXp: xp
+      };
+    }
+
+  } catch (error) {
+    if (error.message.startsWith('Invalid') || error.message.startsWith('Player not found')) {
+      // Re-throw validation errors as-is
+      throw error;
+    }
+    
+    // Log and re-throw database errors
+    logger.error('[playerModel.levelUpIfNeeded] Database error: %o', error);
+    throw new Error(`Database error in levelUpIfNeeded: ${error.message}`);
   }
 } 

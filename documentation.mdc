@@ -196,3 +196,120 @@ The comprehensive scoring system for horse show competitions uses the following 
   ]
   ```
 
+# Foal Enrichment Activity API Functions
+
+### `backend/models/foalModel.js` - `completeEnrichmentActivity(foalId, day, activity)`
+- **Purpose:** Completes foal enrichment activities using the new foal_training_history table and updates horse bond_score and stress_level directly
+- **Parameters:** 
+  - `foalId` (number) - ID of the foal (validated as positive integer)
+  - `day` (number) - Development day 0-6 (validated range)
+  - `activity` (string) - Activity name/type (validated as non-empty string)
+- **Validation:** 
+  - Foal ID must be positive integer
+  - Day must be between 0-6 inclusive
+  - Activity must be non-empty string
+  - Horse must exist and be age 0-1 (foal age range)
+  - Activity must be appropriate for specified day
+- **Activity Matching:** Supports multiple formats (exact name, type format, case insensitive)
+- **Database Operations:**
+  - Updates Horse table: bond_score and stress_level fields
+  - Creates record in foal_training_history table
+  - Uses proper bounds checking (0-100 for both bond and stress)
+- **Returns:** Object with success status, foal info, activity details, updated levels, changes, and training record ID
+- **Error Handling:** Comprehensive validation with descriptive error messages
+- **Used in:** POST /api/foals/:foalId/enrichment endpoint
+- **Tests:** `backend/tests/foalEnrichment.test.js` - 12 unit tests covering all scenarios
+
+### `backend/routes/foalRoutes.js` - `POST /api/foals/:foalId/enrichment`
+- **Purpose:** RESTful API endpoint for completing foal enrichment activities (Task 5 implementation)
+- **Request Format:** 
+  - URL Parameter: foalId (positive integer)
+  - Body: { day: 0-6, activity: "Activity Name" }
+- **Validation Middleware:** Express-validator for comprehensive input validation
+- **Response Format:** 
+  - Success: Updated levels, changes, activity details, training record ID
+  - Error: Appropriate HTTP status codes (400, 404, 500) with descriptive messages
+- **Features:**
+  - Comprehensive request validation
+  - Detailed error handling and logging
+  - Proper HTTP status code responses
+  - Integration with completeEnrichmentActivity function
+- **Integration Tests:** `backend/tests/foalEnrichmentIntegration.test.js` - 9 comprehensive tests
+
+### Foal Activity System Enhancement
+- **Day 3 Activities Updated:** Added "Trailer Exposure" activity to day 3 activities as specified in Task 5
+- **Activity Definitions:** Complete activity system with 7 days (0-6) and 3-4 activities per day
+- **Bonding/Stress Mechanics:** 
+  - Bond scores: 0-100 range with activity-specific changes
+  - Stress levels: 0-100 range with proper bounds enforcement
+  - Activity outcomes: excellent, success, challenging based on randomized results
+- **Database Schema Integration:** Uses new foal_training_history table from migration 20250525184836
+
+### Testing Infrastructure
+- **Unit Tests:** 12 comprehensive tests with mocked dependencies
+- **Integration Tests:** 9 end-to-end tests with real database operations
+- **Demo Script:** `backend/examples/foalEnrichmentDemo.js` for interactive API demonstration
+- **Test Coverage:** 100% coverage of new enrichment functionality
+
+### Documentation and Examples
+- **API Documentation:** `backend/docs/foal-enrichment-api.md` - Complete API reference
+- **Usage Examples:** JavaScript, cURL, React Native integration examples
+- **Activity Reference:** Complete list of all 28 available activities across 7 days
+- **Error Handling Guide:** Comprehensive error scenarios and responses
+
+# Player Model XP & Level Functions (Task 3.1)
+
+### `backend/models/playerModel.js` - `addXp(playerId: string, amount: number)`
+- Adds XP to a player's experience points with comprehensive validation.
+- Purpose: Handles XP addition for game progression, training rewards, and competition bonuses.
+- Parameters: 
+  - `playerId` (string - player UUID, validated for proper format)
+  - `amount` (number - XP amount to add, must be positive)
+- Validation: UUID format validation, positive number validation, player existence check
+- Returns: Updated player object with new XP total
+- Database operations: Uses Prisma player.findUnique() and player.update()
+- Error handling: Specific errors for invalid inputs, player not found, and database failures
+- Used in: Training completion, competition rewards, achievement systems
+- Tests: `backend/models/playerModel.test.js` - 6 test cases covering all validation scenarios
+
+### `backend/models/playerModel.js` - `levelUpIfNeeded(playerId: string)`
+- Checks if player has 100+ XP and levels up as needed, handling multiple level-ups for large XP gains.
+- Purpose: Implements leveling logic where each level requires 100 XP, with automatic progression.
+- Parameters: `playerId` (string - player UUID, validated for proper format)
+- Leveling Logic:
+  - While XP >= 100: subtract 100 XP, add 1 level
+  - Handles multiple level-ups in single call for large XP gains
+  - Updates both level and remaining XP in database
+- Returns: Object with detailed level-up information:
+  - `player` (updated player object)
+  - `leveledUp` (boolean - whether any levels were gained)
+  - `levelsGained` (number - total levels gained in this call)
+  - `previousLevel` / `newLevel` (level progression tracking)
+  - `previousXp` / `newXp` (XP progression tracking)
+- Database operations: Uses Prisma player.findUnique() and player.update()
+- Error handling: UUID validation, player existence check, database error handling
+- Used in: Post-training progression, competition rewards, XP milestone processing
+- Tests: `backend/models/playerModel.test.js` - 8 test cases covering single/multiple level-ups and edge cases
+
+### `backend/models/playerModel.js` - `getPlayerById(id: string)` (Enhanced)
+- Existing function that retrieves full player record for use in progression dashboard.
+- Purpose: Fetches complete player information including current level and XP for UI display.
+- Parameters: `id` (string - player UUID, validated for proper format)
+- Returns: Complete player object with all fields including level, XP, money, settings
+- Integration: Works seamlessly with new XP and level functions for progression tracking
+- Used in: Player dashboards, progression displays, XP/level status checking
+
+### XP & Level System Design
+- **Starting Values:** Players start at level 1 with 0 XP
+- **Level Requirements:** Each level requires exactly 100 XP
+- **XP Rollover:** Excess XP carries over to next level (e.g., 250 XP = 2 levels + 50 remaining XP)
+- **Multiple Level-ups:** System handles large XP gains efficiently in single database transaction
+- **Progression Tracking:** Detailed logging and return values for UI feedback and achievement systems
+- **Database Efficiency:** Minimal database calls with comprehensive validation and error handling
+
+### Integration with Existing Systems
+- **Training System:** Can be integrated with training completion for XP rewards
+- **Competition System:** Ready for integration with competition results for XP bonuses
+- **Achievement System:** Provides foundation for level-based achievements and unlocks
+- **Player Dashboard:** Full player data available for progression display and statistics
+

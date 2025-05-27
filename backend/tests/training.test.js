@@ -203,7 +203,7 @@ describe('Training System Integration Tests', () => {
       });
     });
 
-    it('should allow training in different discipline during cooldown', async () => {
+    it('should block training in ALL disciplines when any cooldown active', async () => {
       // Get trainable horses
       const trainableResponse = await request(app)
         .get(`/api/horses/trainable/${existingPlayerId}`);
@@ -211,17 +211,18 @@ describe('Training System Integration Tests', () => {
       expect(trainableResponse.status).toBe(200);
       
       if (trainableResponse.body.data.length === 0) {
-        console.log('No trainable horses found, skipping different discipline test');
+        console.log('No trainable horses found, skipping global cooldown test');
         return;
       }
 
       const adultHorse = trainableResponse.body.data.find(horse => horse.age >= 3);
       
       if (!adultHorse) {
-        console.log('No adult horses found, skipping different discipline test');
+        console.log('No adult horses found, skipping global cooldown test');
         return;
       }
 
+      // Try to train in a different discipline (should be blocked due to global cooldown from previous Racing training)
       const response = await request(app)
         .post('/api/training/train')
         .send({
@@ -229,12 +230,10 @@ describe('Training System Integration Tests', () => {
           discipline: 'Cross Country'
         });
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(400);
       expect(response.body).toEqual({
-        success: true,
-        message: expect.stringContaining('trained in Cross Country'),
-        updatedScore: 5,
-        nextEligibleDate: expect.any(String)
+        success: false,
+        message: 'Training not allowed: Training cooldown active for this horse'
       });
     });
   });
@@ -272,7 +271,7 @@ describe('Training System Integration Tests', () => {
       expect(response.body.data.cooldown.remainingDays).toBeGreaterThan(0);
     });
 
-    it('should return correct training status for eligible discipline', async () => {
+    it('should return global cooldown status for all disciplines', async () => {
       // Get trainable horses
       const trainableResponse = await request(app)
         .get(`/api/horses/trainable/${existingPlayerId}`);
@@ -280,27 +279,29 @@ describe('Training System Integration Tests', () => {
       expect(trainableResponse.status).toBe(200);
       
       if (trainableResponse.body.data.length === 0) {
-        console.log('No trainable horses found, skipping eligible status test');
+        console.log('No trainable horses found, skipping global cooldown status test');
         return;
       }
 
       const adultHorse = trainableResponse.body.data.find(horse => horse.age >= 3);
       
       if (!adultHorse) {
-        console.log('No adult horses found, skipping eligible status test');
+        console.log('No adult horses found, skipping global cooldown status test');
         return;
       }
 
+      // Check Western discipline status (should be blocked due to global cooldown from Racing training)
       const response = await request(app)
         .get(`/api/training/status/${adultHorse.horseId}/Western`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.eligible).toBe(true);
-      expect(response.body.data.reason).toBe(null);
+      expect(response.body.data.eligible).toBe(false);
+      expect(response.body.data.reason).toBe('Training cooldown active for this horse');
       expect(response.body.data.horseAge).toBeGreaterThanOrEqual(3);
-      expect(response.body.data.lastTrainingDate).toBe(null);
-      expect(response.body.data.cooldown).toBe(null);
+      expect(response.body.data.lastTrainingDate).toBe(null); // No previous Western training
+      expect(response.body.data.cooldown.active).toBe(true); // Global cooldown active
+      expect(response.body.data.cooldown.remainingDays).toBeGreaterThan(0);
     });
 
     it('should return all training status for horse', async () => {
@@ -333,12 +334,12 @@ describe('Training System Integration Tests', () => {
       // Find Racing status (should be ineligible due to cooldown)
       const racingStatus = response.body.data.disciplines.find(d => d.discipline === 'Racing');
       expect(racingStatus.eligible).toBe(false);
-      expect(racingStatus.reason).toBe('Training cooldown active');
+      expect(racingStatus.reason).toBe('Training cooldown active for this horse');
 
-      // Find Western status (should be eligible)
+      // Find Western status (should ALSO be ineligible due to GLOBAL cooldown)
       const westernStatus = response.body.data.disciplines.find(d => d.discipline === 'Western');
-      expect(westernStatus.eligible).toBe(true);
-      expect(westernStatus.reason).toBe(null);
+      expect(westernStatus.eligible).toBe(false);
+      expect(westernStatus.reason).toBe('Training cooldown active for this horse');
     });
   });
 

@@ -1,6 +1,11 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Guidelines for Node.js/Express backend development
-globs: ["src/server/**/*.js", "src/server/**/*.ts"]
+globs: ["backend/**/*.js", "server/**/*.js"]
 alwaysApply: false
 ---
 # Node.js/Express Backend Best Practices
@@ -43,4 +48,5 @@ alwaysApply: false
 
 ## References
 - @docs/architecture.md
+
 - @docs/api_specs.md

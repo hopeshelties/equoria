@@ -1,7 +1,12 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 status: draft
 description: Guidelines for React Native frontend development in Equoria
-globs: ["frontend/**/*.tsx", "frontend/**/*.ts", "frontend/**/*.jsx", "frontend/**/*.js"]
+globs: ["frontend/**/*.jsx", "frontend/**/*.js"]
 alwaysApply: false
 ---
 # React Native Frontend Best Practices
@@ -10,7 +15,7 @@ alwaysApply: false
 - Use functional components with React Hooks (no class components).
 - Name components in PascalCase (e.g., `HorseProfileScreen`, `StableList`).
 - Keep components focused; split large screens into reusable children (e.g., `TraitCard`).
-- Define prop types with TypeScript interfaces or PropTypes.
+- Define prop types with PropTypes or JSDoc comments.
 - Destructure props: `function StableList({ horses, filter }) { ... }`.
 - Use `accessibilityRole` and `accessibilityLabel` for screen reader support.
 - Follow file structure: `frontend/components/`, `frontend/screens/`, `frontend/navigation/`.
@@ -57,4 +62,9 @@ alwaysApply: false
 - @docs/003_ui_ux_guidelines.mdc
 - @docs/007_frameworks.mdc
 - @docs/008_frontendcoding.mdc
+
+
+
+
+
 - @tailwind.config.js

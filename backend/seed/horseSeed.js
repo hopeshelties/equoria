@@ -159,7 +159,12 @@ async function ensureReferencedRecordsExist() {
     await prisma.user.upsert({
       where: { id: 1 },
       update: { name: 'Default Owner' },
-      create: { id: 1, name: 'Default Owner' },
+      create: { 
+        id: 1, 
+        name: 'Default Owner',
+        email: 'default@example.com',
+        password: 'hashedpassword123'
+      },
     });
     console.log('[seed] Ensured User ID 1 exists.');
   } catch (e) {
@@ -169,7 +174,12 @@ async function ensureReferencedRecordsExist() {
     await prisma.user.upsert({
       where: { id: 2 },
       update: { name: 'Second Owner' },
-      create: { id: 2, name: 'Second Owner' },
+      create: { 
+        id: 2, 
+        name: 'Second Owner',
+        email: 'second@example.com',
+        password: 'hashedpassword123'
+      },
     });
     console.log('[seed] Ensured User ID 2 exists.');
   } catch (e) {
@@ -286,33 +296,33 @@ async function seedHorses() {
   return true;
 }
 
-// Helper to check if player already exists
-async function checkPlayerExists(email) {
+// Helper to check if user already exists
+async function checkUserExists(email) {
   const { default: prisma } = await import('../db/index.js');
   try {
-    const existingPlayer = await prisma.player.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: { email },
     });
-    return existingPlayer !== null;
+    return existingUser !== null;
   } catch (error) {
-    console.warn(`[seed] Failed to check if player "${email}" exists: ${error.message}`);
+    console.warn(`[seed] Failed to check if user "${email}" exists: ${error.message}`);
     return false;
   }
 }
 
-// Helper to seed a Player with 2 Horses
-async function seedPlayerWithHorses() {
+// Helper to seed a User with 2 Horses
+async function seedUserWithHorses() {
   const { createHorse } = await import('../models/horseModel.js');
-  const { createPlayer } = await import('../models/playerModel.js');
+  const { default: prisma } = await import('../db/index.js');
   
-  console.log('[seed] Starting to seed Player with Horses...');
+  console.log('[seed] Starting to seed User with Horses...');
   
-  const playerEmail = 'test@example.com';
+  const userEmail = 'test@example.com';
   
   try {
-    const playerExists = await checkPlayerExists(playerEmail);
-    if (playerExists) {
-      console.log(`[seed] Player "${playerEmail}" already exists, skipping player creation...`);
+    const userExists = await checkUserExists(userEmail);
+    if (userExists) {
+      console.log(`[seed] User "${userEmail}" already exists, skipping user creation...`);
       return true;
     }
 
@@ -320,14 +330,14 @@ async function seedPlayerWithHorses() {
     const arabianBreed = await findOrCreateBreed('Arabian');
     
     if (!thoroughbredBreed || !arabianBreed) {
-      console.error('[seed] Failed to create/find required breeds for player horses');
+      console.error('[seed] Failed to create/find required breeds for user horses');
       return false;
     }
 
-    const playerData = {
-      id: 'test-player-uuid-123',
-      name: 'Test Player',
-      email: playerEmail,
+    const userData = {
+      name: 'Test User',
+      email: userEmail,
+      password: 'hashedpassword123',
       money: 500,
       level: 3,
       xp: 1000,
@@ -339,14 +349,14 @@ async function seedPlayerWithHorses() {
       }
     };
 
-    const createdPlayer = await createPlayer(playerData);
-    console.log(`[seed] Successfully created player: ${createdPlayer.name} (ID: ${createdPlayer.id})`);
+    const createdUser = await prisma.user.create({ data: userData });
+    console.log(`[seed] Successfully created user: ${createdUser.name} (ID: ${createdUser.id})`);
 
     const horseData1 = {
       name: 'Starlight',
       age: 4,
       breed: { connect: { id: thoroughbredBreed.id } },
-      playerId: createdPlayer.id,
+      ownerId: createdUser.id,
       sex: 'Mare',
       date_of_birth: new Date('2020-08-15'),
       genotype: { coat: 'EE/AA', dilution: 'nCr', markings: ['Star'] },
@@ -372,7 +382,7 @@ async function seedPlayerWithHorses() {
       name: 'Comet',
       age: 6,
       breed: { connect: { id: thoroughbredBreed.id } },
-      playerId: createdPlayer.id,
+      ownerId: createdUser.id,
       sex: 'Stallion',
       date_of_birth: new Date('2018-04-22'),
       genotype: { coat: 'ee/AA', dilution: 'ChCh', markings: ['Blaze'] },
@@ -397,16 +407,16 @@ async function seedPlayerWithHorses() {
     };
 
     const horse1 = await createHorse(horseData1);
-    console.log(`[seed] Successfully created horse: ${horse1.name} (ID: ${horse1.id}) for player ${createdPlayer.name}`);
+    console.log(`[seed] Successfully created horse: ${horse1.name} (ID: ${horse1.id}) for user ${createdUser.name}`);
     
     const horse2 = await createHorse(horseData2);
-    console.log(`[seed] Successfully created horse: ${horse2.name} (ID: ${horse2.id}) for player ${createdPlayer.name}`);
+    console.log(`[seed] Successfully created horse: ${horse2.name} (ID: ${horse2.id}) for user ${createdUser.name}`);
 
-    console.log('[seed] Successfully seeded Player with 2 Horses');
+    console.log('[seed] Successfully seeded User with 2 Horses');
     return true;
 
   } catch (error) {
-    console.error(`[seed] Failed to seed Player with Horses: ${error.message}`);
+    console.error(`[seed] Failed to seed User with Horses: ${error.message}`);
     console.error(`[seed] Error details:`, error.stack);
     return false;
   }
@@ -420,9 +430,9 @@ async function main() {
     console.log('[seed] Starting comprehensive seeding process...');
     
     const horseSuccess = await seedHorses();
-    const playerSuccess = await seedPlayerWithHorses();
+    const userSuccess = await seedUserWithHorses();
     
-    if (!horseSuccess || !playerSuccess) {
+    if (!horseSuccess || !userSuccess) {
       console.error('[seed] Seeding completed with issues. Exiting with error code.');
       process.exit(1);
     }
@@ -440,7 +450,7 @@ async function main() {
 }
 
 // Export functions for testing
-export { sampleHorses, findOrCreateBreed, ensureReferencedRecordsExist, checkHorseExists, seedHorses, seedPlayerWithHorses, checkPlayerExists };
+export { sampleHorses, findOrCreateBreed, ensureReferencedRecordsExist, checkHorseExists, seedHorses, seedUserWithHorses, checkUserExists };
 
 // Only run the main function if this script is executed directly (not imported)
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('horseSeed.js')) {

@@ -134,7 +134,17 @@ describe('Training System Complete Test', () => {
     testUser = registerResponse.body.data.user;
     
     // Create some test horses linked to this user
-    const breed = await prisma.breed.findFirst();
+    let breed = await prisma.breed.findFirst();
+    
+    // If no breed exists, create one for testing
+    if (!breed) {
+      breed = await prisma.breed.create({
+        data: {
+          name: 'Test Breed',
+          description: 'Test breed for training tests'
+        }
+      });
+    }
     
     testHorses = await Promise.all([
       prisma.horse.create({
