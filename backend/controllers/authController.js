@@ -8,7 +8,7 @@ import prisma from '../db/index.js';
 /**
  * Register a new user
  */
-export const register = async (req, res, next) => {
+export const register = async(req, res, next) => {
   try {
     const { email, password, name, username: bodyUsername, firstName, lastName } = req.body;
 
@@ -94,7 +94,7 @@ export const register = async (req, res, next) => {
 /**
  * Login user
  */
-export const login = async (req, res, next) => {
+export const login = async(req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -150,7 +150,7 @@ export const login = async (req, res, next) => {
 /**
  * Refresh access token
  */
-export const refreshToken = async (req, res, next) => {
+export const refreshToken = async(req, res, next) => {
   try {
     const { refreshToken } = req.body;
 
@@ -214,7 +214,7 @@ export const refreshToken = async (req, res, next) => {
 /**
  * Get current user profile
  */
-export const getProfile = async (req, res, next) => {
+export const getProfile = async(req, res, next) => {
   try {
     const userFromDb = await prisma.user.findUnique({
       where: { id: req.user.id },
@@ -233,7 +233,7 @@ export const getProfile = async (req, res, next) => {
     if (!userFromDb) {
       throw new AppError('User not found', 404);
     }
-    
+
     const userForResponse = { ...userFromDb, name: userFromDb.username };
 
     res.json({
@@ -249,7 +249,7 @@ export const getProfile = async (req, res, next) => {
 /**
  * Update user profile
  */
-export const updateProfile = async (req, res, next) => {
+export const updateProfile = async(req, res, next) => {
   try {
     const { firstName, lastName, username } = req.body;
     const userId = req.user.id;
@@ -302,7 +302,7 @@ export const updateProfile = async (req, res, next) => {
 /**
  * Logout user
  */
-export const logout = async (req, res, next) => {
+export const logout = async(req, res, next) => {
   try {
     // In a real application, you would invalidate the refresh token here.
     // For example, by removing it from a database of active refresh tokens.
