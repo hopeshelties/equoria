@@ -7,7 +7,7 @@ import { getPlayerById } from '../models/playerModel.js';
 import { getTrainableHorses } from '../controllers/trainingController.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
-import AppError from '../utils/appError.js';
+import AppError from '../errors/AppError.js'; // Corrected path
 
 /**
  * Get player progress information

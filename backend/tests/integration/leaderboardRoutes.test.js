@@ -52,7 +52,7 @@ const mockPrisma = {
 };
 
 // We need to mock dependencies before importing the controller
-jest.mock('db/index.js', () => ({
+jest.unstable_mockModule('../../db/index.js', () => ({
   __esModule: true,
   default: mockPrisma
 }));

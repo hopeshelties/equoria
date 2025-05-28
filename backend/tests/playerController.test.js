@@ -70,7 +70,7 @@ describe('playerController', () => {
   });
 
   describe('getPlayerProgress', () => {
-    it('should return player progress successfully', async () => {
+    it('should return player progress successfully', async() => {
       const mockPlayer = {
         id: 'player-123',
         name: 'Alex',
@@ -107,7 +107,7 @@ describe('playerController', () => {
       expect(mockLogger.info).toHaveBeenCalledWith('[playerController.getPlayerProgress] Getting progress for player player-123');
     });
 
-    it('should calculate xpToNextLevel correctly for different XP values', async () => {
+    it('should calculate xpToNextLevel correctly for different XP values', async() => {
       const testCases = [
         { xp: 0, expectedXpToNext: 100 },   // 100 - (0 % 100) = 100
         { xp: 50, expectedXpToNext: 50 },   // 100 - (50 % 100) = 50
@@ -145,7 +145,7 @@ describe('playerController', () => {
       }
     });
 
-    it('should return 404 when player is not found', async () => {
+    it('should return 404 when player is not found', async() => {
       mockGetPlayerById.mockResolvedValue(null);
 
       const req = {
@@ -166,7 +166,7 @@ describe('playerController', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith('[playerController.getPlayerProgress] Player nonexistent-player not found');
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockGetPlayerById.mockRejectedValue(new Error('Database connection failed'));
 
       const req = {
@@ -195,7 +195,7 @@ describe('playerController', () => {
       process.env.NODE_ENV = originalEnv;
     });
 
-    it('should not expose error details in production', async () => {
+    it('should not expose error details in production', async() => {
       mockGetPlayerById.mockRejectedValue(new Error('Database connection failed'));
 
       const req = {
@@ -223,7 +223,7 @@ describe('playerController', () => {
       process.env.NODE_ENV = originalEnv;
     });
 
-    it('should include all required fields in response', async () => {
+    it('should include all required fields in response', async() => {
       const mockPlayer = {
         id: 'player-456',
         name: 'Sarah',
@@ -267,7 +267,7 @@ describe('playerController', () => {
   });
 
   describe('getDashboardData', () => {
-    it('should return dashboard data successfully', async () => {
+    it('should return dashboard data successfully', async() => {
       const mockPlayer = {
         id: 'player-123',
         name: 'Alex',
@@ -354,7 +354,7 @@ describe('playerController', () => {
       });
     });
 
-    it('should return 404 when player is not found', async () => {
+    it('should return 404 when player is not found', async() => {
       mockGetPlayerById.mockResolvedValue(null);
 
       const req = {
@@ -374,7 +374,7 @@ describe('playerController', () => {
       });
     });
 
-    it('should return 400 for invalid player ID', async () => {
+    it('should return 400 for invalid player ID', async() => {
       const req = {
         params: { playerId: null }
       };
@@ -392,7 +392,7 @@ describe('playerController', () => {
       });
     });
 
-    it('should handle errors gracefully and continue with partial data', async () => {
+    it('should handle errors gracefully and continue with partial data', async() => {
       const mockPlayer = {
         id: 'player-123',
         name: 'Alex',
