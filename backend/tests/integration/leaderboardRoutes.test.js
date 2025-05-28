@@ -7,37 +7,17 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
 import jwt from 'jsonwebtoken';
-// We need to mock dependencies before importing the controller
-jest.mock('../../db/index.js', () => ({
-  __esModule: true,
-  default: mockPrisma
-}));
 
-// Mock logger
-jest.mock('../../utils/logger.js', () => ({
-  __esModule: true,
-  default: {
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn()
-  }
-}));
-
-// Now import controller after mocks are set up
-import {
-  getTopPlayersByLevel,
-  getTopPlayersByXP,
-  getTopHorsesByEarnings,
-  getTopHorsesByPerformance,
-  getTopPlayersByHorseEarnings,
-  getRecentWinners,
-  getLeaderboardStats
-} from '../../controllers/leaderboardController.js';
-
-// Create a mock prisma client
+// Create a mock prisma client - DEFINED BEFORE USAGE IN JEST.MOCK
 const mockPrisma = {
   player: {
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+    count: jest.fn(),
+    aggregate: jest.fn(),
+    findFirst: jest.fn()
+  },
+  user: { // Added user for consistency with other tests, might be needed by controller
     findMany: jest.fn(),
     findUnique: jest.fn(),
     count: jest.fn(),
@@ -71,7 +51,33 @@ const mockPrisma = {
   $disconnect: jest.fn()
 };
 
+// We need to mock dependencies before importing the controller
+jest.mock('db/index.js', () => ({
+  __esModule: true,
+  default: mockPrisma
+}));
 
+// Mock logger
+jest.mock('../../utils/logger.js', () => ({
+  __esModule: true,
+  default: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn()
+  }
+}));
+
+// Now import controller after mocks are set up
+import {
+  getTopPlayersByLevel,
+  getTopPlayersByXP,
+  getTopHorsesByEarnings,
+  getTopHorsesByPerformance,
+  getTopPlayersByHorseEarnings,
+  getRecentWinners,
+  getLeaderboardStats
+} from '../../controllers/leaderboardController.js';
 
 // Create a test express app
 const app = express();

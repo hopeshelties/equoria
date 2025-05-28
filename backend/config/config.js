@@ -6,9 +6,18 @@ import dotenv from 'dotenv';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load .env file from backend directory
-const envPath = path.resolve(__dirname, '../.env');
-dotenv.config({ path: envPath });
+const projectRoot = path.resolve(__dirname, '..'); // Resolves to the 'backend' directory
+
+// Determine NODE_ENV first
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Load environment-specific .env file first
+if (NODE_ENV === 'test') {
+  dotenv.config({ path: path.resolve(projectRoot, '.env.test') });
+}
+
+// Load the default .env file. Variables from .env.test (if loaded) will take precedence.
+dotenv.config({ path: path.resolve(projectRoot, '.env') });
 
 const requiredVars = ['DATABASE_URL', 'PORT', 'JWT_SECRET'];
 const missingVars = requiredVars.filter(key => !process.env[key]);
@@ -19,7 +28,6 @@ if (missingVars.length > 0) {
 }
 
 // NODE_ENV is optional, default to 'development' if not set
-const NODE_ENV = process.env.NODE_ENV || 'development';
 // if (process.env.NODE_ENV === undefined) {
 //   console.warn('[config] NODE_ENV environment variable is not set. Defaulting to development.');
 // }
@@ -49,7 +57,8 @@ const config = {
   dbUrl: resolvedDbUrl, // Use the potentially overridden DATABASE_URL
   env: NODE_ENV,
   jwtSecret: JWT_SECRET,
-  allowedOrigins: ALLOWED_ORIGINS
+  // Safely parse ALLOWED_ORIGINS, defaulting to an empty array if not set or empty.
+  allowedOrigins: ALLOWED_ORIGINS ? ALLOWED_ORIGINS.split(',').map(origin => origin.trim()).filter(origin => origin) : []
 };
 
 // console.log('[config] Environment variables loaded.');

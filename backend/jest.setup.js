@@ -3,7 +3,8 @@
  * Handles global test setup and teardown for proper resource cleanup
  */
 
-import { jest } from '@jest/globals';
+import './config/config.js'; // Ensure environment variables are loaded first
+import { jest, beforeAll, afterAll } from '@jest/globals'; // Added beforeAll and afterAll
 
 // Global test timeout
 jest.setTimeout(30000);
@@ -12,8 +13,8 @@ jest.setTimeout(30000);
 const prismaInstances = new Set();
 
 // Mock console methods to reduce test noise (optional)
-const originalConsoleError = console.error;
-const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error; // eslint-disable-line no-console
+const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 
 beforeAll(() => {
   // Optionally suppress console noise during tests

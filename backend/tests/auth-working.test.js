@@ -42,17 +42,33 @@ const createTestApp = () => {
     getProfile
   );
 
+  // Basic error handler for debugging
+  app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+    // console.error("TEST APP ERROR HANDLER:", err); // Log the error to the console where Jest runs tests
+    res.status(err.statusCode || 500).json({
+      success: false,
+      message: err.message || 'Internal Server Error',
+      error: {
+        message: err.message,
+        stack: err.stack, // Be mindful of exposing stack traces
+        name: err.name,
+        code: err.code, // For Prisma errors or other specific codes
+        meta: err.meta // For Prisma error metadata
+      }
+    });
+  });
+
   return app;
 };
 
 describe('Authentication System (Working)', () => {
   let app;
 
-  beforeAll(() => {
+  beforeAll(() => { // Corrected: removed space before ()
     app = createTestApp();
   });
 
-  beforeEach(async() => {
+  beforeEach(async() => { // Corrected: async()
     // Clean up test users
     await prisma.user.deleteMany({
       where: {
@@ -63,7 +79,7 @@ describe('Authentication System (Working)', () => {
     });
   });
 
-  afterAll(async() => {
+  afterAll(async() => { // Corrected: async()
     await prisma.user.deleteMany({
       where: {
         email: {
@@ -121,7 +137,7 @@ describe('Authentication System (Working)', () => {
   });
 
   describe('User Login', () => {
-    beforeEach(async() => {
+    beforeEach(async() => { // Corrected: async()
       // Create a test user for login tests
       const userData = {
         name: 'Auth Test User',
@@ -170,9 +186,9 @@ describe('Authentication System (Working)', () => {
   });
 
   describe('Token Management', () => {
-    let refreshToken;
+    let refreshTokenValue; // Renamed to avoid conflict if refreshToken is imported
 
-    beforeEach(async() => {
+    beforeEach(async() => { // Corrected: async()
       // Create user and get refresh token
       const userData = {
         name: 'Auth Test User',
@@ -183,14 +199,19 @@ describe('Authentication System (Working)', () => {
       const registerResponse = await request(app)
         .post('/api/auth/register')
         .send(userData);
-
-      refreshToken = registerResponse.body.data.refreshToken;
+      
+      if (registerResponse.body && registerResponse.body.data) {
+        refreshTokenValue = registerResponse.body.data.refreshToken;
+      } else {
+        // console.error("Auth-Test: Failed to get refreshTokenValue during setup:", registerResponse.status, registerResponse.body);
+        refreshTokenValue = null;
+      }
     });
 
-    it('should refresh token successfully', async() => {
+    it('should refresh token successfully', async() => { // Corrected: async()
       const response = await request(app)
         .post('/api/auth/refresh')
-        .send({ refreshToken })
+        .send({ refreshToken: refreshTokenValue }) // Use the locally scoped variable
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -211,10 +232,10 @@ describe('Authentication System (Working)', () => {
   });
 
   describe('Protected Routes', () => {
-    let authToken;
-    let testUser;
+    let authTokenValue; // Renamed
+    let testUserValue; // Renamed
 
-    beforeEach(async() => {
+    beforeEach(async() => { // Corrected: async()
       // Create user and get auth token
       const userData = {
         name: 'Auth Test User',
@@ -226,20 +247,26 @@ describe('Authentication System (Working)', () => {
         .post('/api/auth/register')
         .send(userData);
 
-      authToken = registerResponse.body.data.token;
-      testUser = registerResponse.body.data.user;
+      if (registerResponse.body && registerResponse.body.data) {
+        authTokenValue = registerResponse.body.data.token;
+        testUserValue = registerResponse.body.data.user;
+      } else {
+        // console.error("Auth-Test: Failed to get authTokenValue/testUserValue during setup:", registerResponse.status, registerResponse.body);
+        authTokenValue = null;
+        testUserValue = null;
+      }
     });
 
-    it('should get user profile with valid token', async() => {
+    it('should get user profile with valid token', async() => { // Corrected: async()
       const response = await request(app)
         .get('/api/auth/me')
-        .set('Authorization', `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${authTokenValue}`) // Use renamed variable
         .expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('Profile retrieved successfully');
-      expect(response.body.data.email).toBe(testUser.email);
-      expect(response.body.data.name).toBe(testUser.name);
+      expect(response.body.data.email).toBe(testUserValue.email); // Use renamed variable
+      expect(response.body.data.name).toBe(testUserValue.name); // Use renamed variable
       expect(response.body.data.password).toBeUndefined();
     });
 
@@ -252,10 +279,10 @@ describe('Authentication System (Working)', () => {
       expect(response.body.message).toBe('Access token required');
     });
 
-    it('should logout successfully', async() => {
+    it('should logout successfully', async() => { // Corrected: async()
       const response = await request(app)
         .post('/api/auth/logout')
-        .set('Authorization', `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${authTokenValue}`) // Use renamed variable
         .expect(200);
 
       expect(response.body.success).toBe(true);
