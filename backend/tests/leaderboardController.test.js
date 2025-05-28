@@ -13,7 +13,7 @@ const __dirname = dirname(__filename);
 // Mock the database module BEFORE importing the controller
 jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: {
-    player: {
+    user: {
       findMany: jest.fn(),
       count: jest.fn(),
       aggregate: jest.fn()
@@ -115,11 +115,11 @@ describe('Leaderboard Controller', () => {
     ];
 
     it('should return top players ranked by level and XP', async() => {
-      mockPrisma.player.findMany.mockResolvedValue(mockPlayers);
+      mockPrisma.user.findMany.mockResolvedValue(mockPlayers);
 
       await getTopPlayersByLevel(mockReq, mockRes);
 
-      expect(mockPrisma.player.findMany).toHaveBeenCalledWith({
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
         select: {
           id: true,
           name: true,
@@ -183,11 +183,11 @@ describe('Leaderboard Controller', () => {
 
     it('should handle pagination parameters', async() => {
       mockReq.query = { limit: '5', offset: '10' };
-      mockPrisma.player.findMany.mockResolvedValue([]);
+      mockPrisma.user.findMany.mockResolvedValue([]);
 
       await getTopPlayersByLevel(mockReq, mockRes);
 
-      expect(mockPrisma.player.findMany).toHaveBeenCalledWith(
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           take: 5,
           skip: 10
@@ -196,7 +196,7 @@ describe('Leaderboard Controller', () => {
     });
 
     it('should handle database errors', async() => {
-      mockPrisma.player.findMany.mockRejectedValue(new Error('Database error'));
+      mockPrisma.user.findMany.mockRejectedValue(new Error('Database error'));
 
       await getTopPlayersByLevel(mockReq, mockRes);
 
@@ -491,7 +491,7 @@ describe('Leaderboard Controller', () => {
     };
 
     beforeEach(() => {
-      mockPrisma.player.count.mockResolvedValue(mockStats.playerCount);
+      mockPrisma.user.count.mockResolvedValue(mockStats.playerCount);
       mockPrisma.horse.count.mockResolvedValue(mockStats.horseCount);
       mockPrisma.show.count.mockResolvedValue(mockStats.showCount);
       mockPrisma.horse.aggregate.mockResolvedValue({
@@ -500,7 +500,7 @@ describe('Leaderboard Controller', () => {
       mockPrisma.xpEvent.aggregate.mockResolvedValue({
         _sum: { amount: mockStats.totalXp }
       });
-      mockPrisma.player.aggregate.mockResolvedValue({
+      mockPrisma.user.aggregate.mockResolvedValue({
         _avg: { level: mockStats.avgLevel }
       });
     });
@@ -536,7 +536,7 @@ describe('Leaderboard Controller', () => {
     });
 
     it('should handle database errors in stats retrieval', async() => {
-      mockPrisma.player.count.mockRejectedValue(new Error('Stats error'));
+      mockPrisma.user.count.mockRejectedValue(new Error('Stats error'));
 
       await getLeaderboardStats(mockReq, mockRes);
 

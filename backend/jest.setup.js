@@ -18,15 +18,17 @@ const originalConsoleWarn = console.warn;
 beforeAll(() => {
   // Optionally suppress console noise during tests
   // Uncomment if you want quieter test output
-  // console.error = jest.fn();
-  // console.warn = jest.fn();
+  // console.error = jest.fn(); // eslint-disable-line no-console
+  // console.warn = jest.fn(); // eslint-disable-line no-console
 });
 
-afterAll(async () => {
+afterAll(async() => {
   // Restore console methods
+  // eslint-disable-next-line no-console
   console.error = originalConsoleError;
+  // eslint-disable-next-line no-console
   console.warn = originalConsoleWarn;
-  
+
   // Clean up all Prisma instances
   for (const prisma of prismaInstances) {
     try {
@@ -35,13 +37,14 @@ afterAll(async () => {
       // Ignore errors during cleanup
     }
   }
-  
+
   // Clear the set
   prismaInstances.clear();
 });
 
 // Global error handler for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
+  // eslint-disable-next-line no-console
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 

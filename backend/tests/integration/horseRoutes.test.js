@@ -48,7 +48,7 @@ describe('Horse Routes Integration Tests', () => {
     jest.clearAllMocks();
 
     // Setup database mocks
-    mockPrisma.player.findUnique.mockImplementation(({ where }) => {
+    mockPrisma.user.findUnique.mockImplementation(({ where }) => {
       if (where.id === 'test-player-uuid-123') {
         return Promise.resolve(mockPlayer);
       } else if (where.id === 'nonexistent-player-uuid-456') {

@@ -1,6 +1,6 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
-import { canTrain, trainHorse, getTrainingStatus, trainRouteHandler } from '../controllers/trainingController.js';
+import { canTrain, getTrainingStatus, trainRouteHandler, getTrainableHorses } from '../controllers/trainingController.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -35,19 +35,19 @@ router.post('/check-eligibility', [
     .isLength({ min: 1, max: 50 })
     .withMessage('Discipline must be between 1 and 50 characters'),
   handleValidationErrors
-], async (req, res) => {
+], async(req, res) => {
   try {
     const { horseId, discipline } = req.body;
-    
+
     logger.info(`[trainingRoutes.checkEligibility] Checking eligibility for horse ${horseId} in ${discipline}`);
-    
+
     const result = await canTrain(horseId, discipline);
-    
+
     res.json({
       success: true,
       data: result
     });
-    
+
   } catch (error) {
     logger.error(`[trainingRoutes.checkEligibility] Error: ${error.message}`);
     res.status(500).json({
@@ -88,19 +88,19 @@ router.get('/status/:horseId/:discipline', [
     .isLength({ min: 1, max: 50 })
     .withMessage('Discipline must be between 1 and 50 characters'),
   handleValidationErrors
-], async (req, res) => {
+], async(req, res) => {
   try {
     const { horseId, discipline } = req.params;
-    
+
     logger.info(`[trainingRoutes.getStatus] Getting training status for horse ${horseId} in ${discipline}`);
-    
+
     const status = await getTrainingStatus(parseInt(horseId), discipline);
-    
+
     res.json({
       success: true,
       data: status
     });
-    
+
   } catch (error) {
     logger.error(`[trainingRoutes.getStatus] Error: ${error.message}`);
     res.status(500).json({
@@ -112,59 +112,74 @@ router.get('/status/:horseId/:discipline', [
 });
 
 /**
- * GET /api/training/horse/:horseId/all-status
+ * GET /api/training/status/:horseId
  * Get training status for a horse across all disciplines
  */
-router.get('/horse/:horseId/all-status', [
+router.get('/status/:horseId', [
   param('horseId')
     .isInt({ min: 1 })
     .withMessage('Horse ID must be a positive integer'),
   handleValidationErrors
-], async (req, res) => {
+], async(req, res) => {
   try {
     const { horseId } = req.params;
-    
-    logger.info(`[trainingRoutes.getAllStatus] Getting all training status for horse ${horseId}`);
-    
-    // Common disciplines in the game
+    logger.info(`[trainingRoutes.getStatusAll] Getting all training statuses for horse ${horseId}`);
+
     const disciplines = ['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western'];
-    
-    const statusPromises = disciplines.map(async (discipline) => {
-      try {
-        const status = await getTrainingStatus(parseInt(horseId), discipline);
-        return {
-          discipline,
-          ...status
-        };
-      } catch (error) {
-        logger.warn(`[trainingRoutes.getAllStatus] Failed to get status for ${discipline}: ${error.message}`);
-        return {
-          discipline,
-          eligible: false,
-          reason: 'Error checking status',
-          error: error.message
-        };
-      }
+    const statusPromises = disciplines.map(async(discipline) => {
+      return getTrainingStatus(parseInt(horseId), discipline);
     });
-    
-    const allStatus = await Promise.all(statusPromises);
-    
+    const statuses = await Promise.all(statusPromises);
+
     res.json({
       success: true,
-      data: {
-        horseId: parseInt(horseId),
-        disciplines: allStatus
-      }
+      data: statuses.reduce((acc, current, index) => {
+        acc[disciplines[index]] = current;
+        return acc;
+      }, {})
     });
-    
+
   } catch (error) {
-    logger.error(`[trainingRoutes.getAllStatus] Error: ${error.message}`);
+    logger.error(`[trainingRoutes.getStatusAll] Error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to get training status for all disciplines',
+      message: 'Failed to get all training statuses for horse',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 });
 
-export default router; 
+
+/**
+ * GET /api/training/trainable/:playerId
+ * Get all horses owned by a player that are eligible for training
+ */
+router.get('/trainable/:playerId', [
+  param('playerId')
+    .isUUID()
+    .withMessage('Player ID must be a valid UUID'),
+  handleValidationErrors
+], async(req, res) => {
+  try {
+    const { playerId } = req.params;
+
+    logger.info(`[trainingRoutes.getTrainableHorses] Getting trainable horses for player ${playerId}`);
+
+    const horses = await getTrainableHorses(playerId);
+
+    res.json({
+      success: true,
+      data: horses
+    });
+
+  } catch (error) {
+    logger.error(`[trainingRoutes.getTrainableHorses] Error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get trainable horses',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+export default router;

@@ -66,7 +66,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       breed: { id: 1, name: 'Thoroughbred' }
     };
 
-    it('should apply at-birth traits for newborn with parents', async () => {
+    it('should apply at-birth traits for newborn with parents', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -126,7 +126,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       expect(result).toEqual(mockCreatedHorse);
     });
 
-    it('should pass custom mare stress and feed quality', async () => {
+    it('should pass custom mare stress and feed quality', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -166,7 +166,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       });
     });
 
-    it('should merge at-birth traits with existing traits', async () => {
+    it('should merge at-birth traits with existing traits', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -206,7 +206,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       });
     });
 
-    it('should not apply at-birth traits for older horses', async () => {
+    it('should not apply at-birth traits for older horses', async() => {
       const horseData = {
         name: 'Adult Horse',
         age: 5,
@@ -235,7 +235,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       });
     });
 
-    it('should not apply at-birth traits for horses without parents', async () => {
+    it('should not apply at-birth traits for horses without parents', async() => {
       const horseData = {
         name: 'Foundling Horse',
         age: 0,
@@ -255,7 +255,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
     });
 
-    it('should continue horse creation even if at-birth trait application fails', async () => {
+    it('should continue horse creation even if at-birth trait application fails', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -280,7 +280,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       );
     });
 
-    it('should handle missing sire_id gracefully', async () => {
+    it('should handle missing sire_id gracefully', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -296,7 +296,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
     });
 
-    it('should handle missing dam_id gracefully', async () => {
+    it('should handle missing dam_id gracefully', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -312,7 +312,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
     });
 
-    it('should log breeding analysis information', async () => {
+    it('should log breeding analysis information', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -328,11 +328,11 @@ describe('Horse Model At-Birth Traits Integration', () => {
           hidden: []
         },
         breedingAnalysis: {
-          lineage: { 
+          lineage: {
             disciplineSpecialization: true,
             specializedDiscipline: 'Racing'
           },
-          inbreeding: { 
+          inbreeding: {
             inbreedingDetected: true,
             commonAncestors: [{ id: 100, name: 'CommonAncestor' }]
           },

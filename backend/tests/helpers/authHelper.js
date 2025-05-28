@@ -11,9 +11,9 @@ export const generateTestToken = (userData = {}) => {
     role: 'user',
     fingerprint: Date.now()
   };
-  
+
   const user = { ...defaultUser, ...userData };
-  
+
   return jwt.sign(user, config.jwtSecret, {
     expiresIn: config.jwtExpiresIn || '7d'
   });
@@ -43,8 +43,11 @@ export const authHeader = (token) => {
 export const createTestUser = (overrides = {}) => {
   return {
     name: 'Test User',
+    username: 'testuser',
     email: 'test@example.com',
     password: 'TestPassword123!',
+    firstName: 'Test',
+    lastName: 'User',
     ...overrides
   };
 };
@@ -58,4 +61,4 @@ export const createLoginData = (overrides = {}) => {
     password: 'TestPassword123!',
     ...overrides
   };
-}; 
+};

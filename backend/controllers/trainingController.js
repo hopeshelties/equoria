@@ -218,21 +218,23 @@ async function trainHorse(horseId, discipline) {
 
     // Award XP to horse owner for training
     try {
-      if (updatedHorse && updatedHorse.ownerId) {
-        // Award XP using playerModel.addXp
-        const xpResult = await addXp(updatedHorse.ownerId, baseXp);
+      if (updatedHorse && updatedHorse.playerId) {
+        // Award XP using playerModel.addXp (use playerId for Player model, not ownerId for User model)
+        const xpResult = await addXp(updatedHorse.playerId, baseXp);
 
         // Call levelUpIfNeeded after awarding XP (as requested in task)
-        const levelUpResult = await levelUpIfNeeded(updatedHorse.ownerId);
+        const levelUpResult = await levelUpIfNeeded(updatedHorse.playerId);
 
         // Log XP event for auditing
         await logXpEvent({
-          playerId: updatedHorse.ownerId,
+          playerId: updatedHorse.playerId,
           amount: baseXp,
           reason: `Trained horse ${updatedHorse.name} in ${discipline}`
         });
 
-        logger.info(`[trainingController.trainHorse] Awarded ${baseXp} XP to player ${updatedHorse.ownerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
+        logger.info(`[trainingController.trainHorse] Awarded ${baseXp} XP to player ${updatedHorse.playerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.newLevel}!` : ''}`);
+      } else if (updatedHorse && !updatedHorse.playerId) {
+        logger.warn(`[trainingController.trainHorse] Horse ${updatedHorse.id} (${updatedHorse.name}) has no playerId - XP cannot be awarded`);
       }
     } catch (error) {
       logger.error(`[trainingController.trainHorse] Failed to award training XP: ${error.message}`);

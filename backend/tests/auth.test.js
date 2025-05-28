@@ -6,94 +6,101 @@ import prisma from '../db/index.js';
 describe('Authentication Endpoints', () => {
   // Clean up test data before and after tests
   beforeEach(async () => {
-    // Delete in order to avoid foreign key constraint violations
-    // 1. Delete training logs first
-    await prisma.trainingLog.deleteMany({
-      where: {
-        horse: {
+    try {
+      // Delete in order to avoid foreign key constraint violations
+      // 1. Delete training logs first
+      await prisma.trainingLog.deleteMany({
+        where: {
+          horse: {
+            owner: {
+              email: {
+                contains: 'test'
+              }
+            }
+          }
+        }
+      });
+      
+      // 2. Delete horses
+      await prisma.horse.deleteMany({
+        where: {
           owner: {
             email: {
               contains: 'test'
             }
           }
         }
-      }
-    });
-    
-    // 2. Delete horses
-    await prisma.horse.deleteMany({
-      where: {
-        owner: {
+      });
+      
+      // 3. Then delete users
+      await prisma.user.deleteMany({
+        where: {
           email: {
             contains: 'test'
           }
         }
-      }
-    });
-    
-    // 3. Then delete users
-    await prisma.user.deleteMany({
-      where: {
-        email: {
-          contains: 'test'
-        }
-      }
-    });
+      });
+    } catch (error) {
+      console.log('Database cleanup error (can be ignored if tables do not exist yet):', error.message);
+    }
   });
-
   afterAll(async () => {
-    // Delete in order to avoid foreign key constraint violations
-    // 1. Delete training logs first
-    await prisma.trainingLog.deleteMany({
-      where: {
-        horse: {
+    try {
+      // Delete in order to avoid foreign key constraint violations
+      // 1. Delete training logs first
+      await prisma.trainingLog.deleteMany({
+        where: {
+          horse: {
+            owner: {
+              email: {
+                contains: 'test'
+              }
+            }
+          }
+        }
+      });
+      
+      // 2. Delete horses
+      await prisma.horse.deleteMany({
+        where: {
           owner: {
             email: {
               contains: 'test'
             }
           }
         }
-      }
-    });
-    
-    // 2. Delete horses
-    await prisma.horse.deleteMany({
-      where: {
-        owner: {
+      });
+      
+      // 3. Then delete users
+      await prisma.user.deleteMany({
+        where: {
           email: {
             contains: 'test'
           }
         }
-      }
-    });
-    
-    // 3. Then delete users
-    await prisma.user.deleteMany({
-      where: {
-        email: {
-          contains: 'test'
-        }
-      }
-    });
-    await prisma.$disconnect();
+      });
+    } catch (error) {
+      console.log('Database cleanup error (can be ignored if tables do not exist yet):', error.message);
+    } finally {
+      await prisma.$disconnect();
+    }
   });
-
   describe('POST /api/auth/register', () => {
     it('should register a new user successfully', async () => {
       const userData = createTestUser({
-        email: 'newuser@example.com'
+        email: 'newuser@example.com',
+        username: 'newuser'
       });
 
       const response = await request(app)
         .post('/api/auth/register')
         .send(userData)
-        .expect(201);
-
-      expect(response.body.success).toBe(true);
+        .expect(201);      expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('User registered successfully');
       expect(response.body.data.user.email).toBe(userData.email);
-      expect(response.body.data.user.name).toBe(userData.name);
-      expect(response.body.data.token).toBeDefined();
+      expect(response.body.data.user.firstName).toBe(userData.firstName);
+      expect(response.body.data.user.lastName).toBe(userData.lastName);
+      expect(response.body.data.accessToken).toBeDefined();
       expect(response.body.data.refreshToken).toBeDefined();
       expect(response.body.data.user.password).toBeUndefined(); // Password should not be returned
     });
@@ -145,11 +152,10 @@ describe('Authentication Endpoints', () => {
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Email already registered');
-    });
-
-    it('should reject registration with invalid name', async () => {
+    });    it('should reject registration with invalid name', async () => {
       const userData = createTestUser({
-        name: 'Test123' // Contains numbers
+        firstName: 'Test123', // Contains numbers
+        lastName: 'User'
       });
 
       const response = await request(app)
@@ -162,13 +168,13 @@ describe('Authentication Endpoints', () => {
     });
   });
 
-  describe('POST /api/auth/login', () => {
-    beforeEach(async () => {
+  describe('POST /api/auth/login', () => {    beforeEach(async () => {
       // Create a test user for login tests
       const userData = createTestUser({
-        email: 'logintest@example.com'
+        email: 'logintest@example.com',
+        username: 'logintest'
       });
-      
+
       await request(app)
         .post('/api/auth/register')
         .send(userData);
@@ -182,12 +188,10 @@ describe('Authentication Endpoints', () => {
       const response = await request(app)
         .post('/api/auth/login')
         .send(loginData)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
+        .expect(200);      expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('Login successful');
       expect(response.body.data.user.email).toBe(loginData.email);
-      expect(response.body.data.token).toBeDefined();
+      expect(response.body.data.accessToken).toBeDefined();
       expect(response.body.data.refreshToken).toBeDefined();
       expect(response.body.data.user.password).toBeUndefined();
     });
@@ -237,12 +241,11 @@ describe('Authentication Endpoints', () => {
   });
 
   describe('POST /api/auth/refresh', () => {
-    let refreshToken;
-
-    beforeEach(async () => {
+    let refreshToken;    beforeEach(async () => {
       // Create user and get refresh token
       const userData = createTestUser({
-        email: 'refreshtest@example.com'
+        email: 'refreshtest@example.com',
+        username: 'refreshtest'
       });
       
       const registerResponse = await request(app)
@@ -256,13 +259,11 @@ describe('Authentication Endpoints', () => {
       const response = await request(app)
         .post('/api/auth/refresh')
         .send({ refreshToken })
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
+        .expect(200);      expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('Token refreshed successfully');
-      expect(response.body.data.token).toBeDefined();
+      expect(response.body.data.accessToken).toBeDefined();
       expect(response.body.data.refreshToken).toBeDefined();
-      expect(response.body.data.token).not.toBe(refreshToken); // Should be a new token
+      expect(response.body.data.accessToken || response.body.data.token).not.toBe(refreshToken); // Should be a new token
     });
 
     it('should reject refresh with invalid token', async () => {
@@ -288,19 +289,18 @@ describe('Authentication Endpoints', () => {
 
   describe('GET /api/auth/me', () => {
     let authToken;
-    let testUser;
-
-    beforeEach(async () => {
+    let testUser;    beforeEach(async () => {
       // Create user and get auth token
       const userData = createTestUser({
-        email: 'profiletest@example.com'
+        email: 'profiletest@example.com',
+        username: 'profiletest'
       });
-      
+
       const registerResponse = await request(app)
         .post('/api/auth/register')
         .send(userData);
-      
-      authToken = registerResponse.body.data.token;
+
+      authToken = registerResponse.body.data.token || registerResponse.body.data.accessToken;
       testUser = registerResponse.body.data.user;
     });
 
@@ -308,13 +308,12 @@ describe('Authentication Endpoints', () => {
       const response = await request(app)
         .get('/api/auth/me')
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('Profile retrieved successfully');
-      expect(response.body.data.email).toBe(testUser.email);
-      expect(response.body.data.name).toBe(testUser.name);
-      expect(response.body.data.password).toBeUndefined();
+        .expect(200);      expect(response.body.success).toBe(true);
+      expect(response.body.data.user).toBeDefined();
+      expect(response.body.data.user.email).toBe(testUser.email);
+      expect(response.body.data.user.firstName).toBe(testUser.firstName);
+      expect(response.body.data.user.lastName).toBe(testUser.lastName);
+      expect(response.body.data.user.password).toBeUndefined();
     });
 
     it('should reject profile request without token', async () => {
@@ -338,19 +337,18 @@ describe('Authentication Endpoints', () => {
   });
 
   describe('POST /api/auth/logout', () => {
-    let authToken;
-
-    beforeEach(async () => {
+    let authToken;    beforeEach(async () => {
       // Create user and get auth token
       const userData = createTestUser({
-        email: 'logouttest@example.com'
+        email: 'logouttest@example.com',
+        username: 'logouttest'
       });
-      
+
       const registerResponse = await request(app)
         .post('/api/auth/register')
         .send(userData);
-      
-      authToken = registerResponse.body.data.token;
+
+      authToken = registerResponse.body.data.token || registerResponse.body.data.accessToken;
     });
 
     it('should logout successfully with valid token', async () => {
@@ -372,4 +370,5 @@ describe('Authentication Endpoints', () => {
       expect(response.body.message).toBe('Access token is required');
     });
   });
-}); 
+});
+

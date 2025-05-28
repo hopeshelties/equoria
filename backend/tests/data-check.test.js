@@ -1,23 +1,23 @@
 import prisma from '../db/index.js';
 
 describe('Database Data Check', () => {
-  afterAll(async () => {
+  afterAll(async() => {
     await prisma.$disconnect();
   });
 
-  it('should check what users exist', async () => {
+  it('should check what users exist', async() => {
     const users = await prisma.user.findMany();
     console.log('Users in database:', JSON.stringify(users, null, 2));
     expect(Array.isArray(users)).toBe(true);
   });
 
-  it('should check what players exist (using user table)', async () => {
+  it('should check what players exist (using user table)', async() => {
     const players = await prisma.user.findMany();
     console.log('Players in database (from user table):', JSON.stringify(players, null, 2));
     expect(Array.isArray(players)).toBe(true);
   });
 
-  it('should check what horses exist', async () => {
+  it('should check what horses exist', async() => {
     const horses = await prisma.horse.findMany({
       include: {
         player: true,
@@ -27,4 +27,4 @@ describe('Database Data Check', () => {
     console.log('Horses in database:', JSON.stringify(horses, null, 2));
     expect(Array.isArray(horses)).toBe(true);
   });
-}); 
+});

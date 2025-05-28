@@ -10,23 +10,29 @@ import prisma from '../db/index.js';
  */
 export const register = async (req, res, next) => {
   try {
-    const { email, password, username, firstName, lastName } = req.body;
+    const { email, password, name, username: bodyUsername, firstName, lastName } = req.body;
+
+    const finalUsername = bodyUsername || name;
+
+    if (!finalUsername) {
+      throw new ValidationError('Username or name is required', 'username');
+    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
           { email: email.toLowerCase() },
-          { username: username.toLowerCase() }
+          { username: finalUsername.toLowerCase() }
         ]
       }
     });
 
     if (existingUser) {
       if (existingUser.email === email.toLowerCase()) {
-        throw new ValidationError('Email already registered', 'email', email);
+        throw new AppError('Email already registered', 409);
       } else {
-        throw new ValidationError('Username already taken', 'username', username);
+        throw new AppError('Username already taken', 409);
       }
     }
 
@@ -35,10 +41,10 @@ export const register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create user
-    const user = await prisma.user.create({
+    const createdUser = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
-        username: username.toLowerCase(),
+        username: finalUsername.toLowerCase(),
         password: hashedPassword,
         firstName,
         lastName,
@@ -57,22 +63,25 @@ export const register = async (req, res, next) => {
 
     // Generate tokens
     const tokenPayload = {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      role: user.role
+      id: createdUser.id,
+      email: createdUser.email,
+      username: createdUser.username,
+      role: createdUser.role
     };
 
     const accessToken = generateToken(tokenPayload);
-    const refreshToken = generateRefreshToken({ id: user.id });
+    const refreshToken = generateRefreshToken({ id: createdUser.id });
 
-    logger.info(`[auth] User registered successfully: ${user.email} (${user.id})`);
+    logger.info(`[auth] User registered successfully: ${createdUser.email} (${createdUser.id})`);
+
+    const userForResponse = { ...createdUser, name: createdUser.username };
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: {
-        user,
+        user: userForResponse,
+        token: accessToken, // Include both for backward compatibility
         accessToken,
         refreshToken
       }
@@ -95,14 +104,14 @@ export const login = async (req, res, next) => {
     });
 
     if (!user) {
-      throw new ValidationError('Invalid email or password', 'email', email);
+      throw new AppError('Invalid email or password', 401);
     }
 
     // Check password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       logger.warn(`[auth] Failed login attempt for ${email} from ${req.ip}`);
-      throw new ValidationError('Invalid email or password', 'password');
+      throw new AppError('Invalid email or password', 401);
     }
 
     // Generate tokens
@@ -118,6 +127,8 @@ export const login = async (req, res, next) => {
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
+    const userForResponse = { ...userWithoutPassword, name: userWithoutPassword.username };
+
 
     logger.info(`[auth] User logged in successfully: ${user.email} (${user.id})`);
 
@@ -125,7 +136,8 @@ export const login = async (req, res, next) => {
       success: true,
       message: 'Login successful',
       data: {
-        user: userWithoutPassword,
+        user: userForResponse,
+        token: accessToken, // Include both for backward compatibility
         accessToken,
         refreshToken
       }
@@ -186,13 +198,14 @@ export const refreshToken = async (req, res, next) => {
       success: true,
       message: 'Token refreshed successfully',
       data: {
+        token: newAccessToken, // Include both for backward compatibility
         accessToken: newAccessToken,
         refreshToken: newRefreshToken
       }
     });
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return next(new AppError('Invalid refresh token', 401));
+      return next(new AppError('Invalid or expired refresh token', 401));
     }
     next(error);
   }
@@ -203,7 +216,7 @@ export const refreshToken = async (req, res, next) => {
  */
 export const getProfile = async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({
+    const userFromDb = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: {
         id: true,
@@ -217,13 +230,16 @@ export const getProfile = async (req, res, next) => {
       }
     });
 
-    if (!user) {
+    if (!userFromDb) {
       throw new AppError('User not found', 404);
     }
+    
+    const userForResponse = { ...userFromDb, name: userFromDb.username };
 
     res.json({
       success: true,
-      data: { user }
+      message: 'Profile retrieved successfully',
+      data: userForResponse
     });
   } catch (error) {
     next(error);
@@ -277,6 +293,24 @@ export const updateProfile = async (req, res, next) => {
       success: true,
       message: 'Profile updated successfully',
       data: { user: updatedUser }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Logout user
+ */
+export const logout = async (req, res, next) => {
+  try {
+    // In a real application, you would invalidate the refresh token here.
+    // For example, by removing it from a database of active refresh tokens.
+    // For simplicity, we'll just send a success message.
+    logger.info(`[auth] User logged out: ${req.user?.email} (${req.user?.id})`);
+    res.status(200).json({
+      success: true,
+      message: 'Logout successful'
     });
   } catch (error) {
     next(error);

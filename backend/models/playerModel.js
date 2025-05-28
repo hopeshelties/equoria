@@ -1,56 +1,55 @@
+/**
+ * Player Model Functions
+ *
+ * These functions handle Player operations (not User operations).
+ * Player schema: UUID id, name, email, money, level, xp, settings
+ * User schema: Int id, username, firstName, lastName, password, role
+ */
+
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
 
 /**
- * Validates if an ID is a valid user ID format (integer or string representation)
- * @param {string|number} id - The ID to validate
- * @returns {boolean} - Whether the ID is a valid user ID format
+ * Validates if ID is a valid User ID (integer format)
+ * Used for legacy User model operations
+ * @param {string|number} id - ID to validate
+ * @returns {boolean} - True if valid User ID format
  */
-function isValidUserId(id) {
-  // Allow numbers
-  if (typeof id === 'number' && id > 0 && Number.isInteger(id)) {
-    return true;
-  }
-  
-  // Allow string representations of positive integers
-  if (typeof id === 'string') {
-    const numId = parseInt(id, 10);
-    if (!isNaN(numId) && numId > 0 && numId.toString() === id) {
-      return true;
-    }
+export function isValidUserId(id) {
+  if (id === undefined || id === null) {
+    return false;
   }
 
-  return false;
+  const parsedId = parseInt(id, 10);
+  return !isNaN(parsedId) && parsedId > 0 && parsedId <= Number.MAX_SAFE_INTEGER;
+}
+
+/**
+ * Validates if ID is a valid Player ID (UUID format)
+ * Used for Player model operations
+ * @param {string} id - ID to validate
+ * @returns {boolean} - True if valid Player ID format
+ */
+function isValidPlayerId(id) {
+  if (!id || typeof id !== 'string') {
+    return false;
+  }
+
+  // Accept both UUID format and test mock IDs for flexibility
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const testIdPattern = /^test-[\w-]+$/i;
+
+  return uuidPattern.test(id) || testIdPattern.test(id);
 }
 
 /**
  * Validates email format
- * @param {string} email - The email to validate
- * @returns {boolean} - Whether the email is valid
+ * @param {string} email - Email to validate
+ * @returns {boolean} - True if valid email format
  */
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
-}
-
-/**
- * Validates if an ID is a valid UUID format
- * @param {string} id - The ID to validate
- * @returns {boolean} - Whether the ID is a valid UUID format
- */
-function isValidUUID(id) {
-  // For now, accept both UUID format and test IDs like 'test-player-uuid-123'
-  if (typeof id !== 'string') {
-    return false;
-  }
-  
-  // Standard UUID format
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  
-  // Test UUID format (for testing purposes)
-  const testUuidRegex = /^test-[a-zA-Z0-9-]+$/;
-  
-  return uuidRegex.test(id) || testUuidRegex.test(id);
 }
 
 /**
@@ -109,8 +108,8 @@ export async function createPlayer(playerData) {
       throw new Error('Player xp must be non-negative');
     }
 
-    // Create player in database
-    const createdPlayer = await prisma.user.create({
+    // Create player in database using Player model
+    const createdPlayer = await prisma.player.create({
       data: playerData
     });
 
@@ -131,22 +130,19 @@ export async function createPlayer(playerData) {
 
 /**
  * Retrieves a player by ID
- * @param {string|number} id - Player ID
+ * @param {string} id - Player ID (UUID)
  * @returns {Object|null} - Player object if found, null otherwise
  * @throws {Error} - Validation or database errors
  */
 export async function getPlayerById(id) {
   try {
-    // Validate ID format
-    if (!isValidUserId(id)) {
+    // Validate ID format for Player (UUID)
+    if (!isValidPlayerId(id)) {
       throw new Error('Invalid player ID format');
     }
 
-    // Convert to integer for database query
-    const playerId = parseInt(id, 10);
-
-    const player = await prisma.user.findUnique({
-      where: { id: playerId }
+    const player = await prisma.player.findUnique({
+      where: { id }
     });
 
     if (player) {
@@ -180,7 +176,7 @@ export async function getPlayerByEmail(email) {
       throw new Error('Invalid email format');
     }
 
-    const player = await prisma.user.findUnique({
+    const player = await prisma.player.findUnique({
       where: { email }
     });
 
@@ -204,22 +200,19 @@ export async function getPlayerByEmail(email) {
 
 /**
  * Retrieves a player with their horses
- * @param {string|number} id - Player ID
+ * @param {string} id - Player ID (UUID)
  * @returns {Object|null} - Player object with horses if found, null otherwise
  * @throws {Error} - Validation or database errors
  */
 export async function getPlayerWithHorses(id) {
   try {
-    // Validate ID format
-    if (!isValidUserId(id)) {
+    // Validate ID format for Player (UUID)
+    if (!isValidPlayerId(id)) {
       throw new Error('Invalid player ID format');
     }
 
-    // Convert to integer for database query
-    const playerId = parseInt(id, 10);
-
-    const player = await prisma.user.findUnique({
-      where: { id: playerId },
+    const player = await prisma.player.findUnique({
+      where: { id },
       include: {
         horses: {
           include: {
@@ -251,15 +244,15 @@ export async function getPlayerWithHorses(id) {
 
 /**
  * Updates a player's information
- * @param {string|number} id - Player ID
+ * @param {string} id - Player ID (UUID)
  * @param {Object} updateData - Data to update
  * @returns {Object} - Updated player object
  * @throws {Error} - Validation or database errors
  */
 export async function updatePlayer(id, updateData) {
   try {
-    // Validate ID format
-    if (!isValidUserId(id)) {
+    // Validate ID format for Player (UUID)
+    if (!isValidPlayerId(id)) {
       throw new Error('Invalid player ID format');
     }
 
@@ -268,11 +261,8 @@ export async function updatePlayer(id, updateData) {
       throw new Error('No update data provided');
     }
 
-    // Convert to integer for database query
-    const playerId = parseInt(id, 10);
-
-    const updatedPlayer = await prisma.user.update({
-      where: { id: playerId },
+    const updatedPlayer = await prisma.player.update({
+      where: { id },
       data: updateData
     });
 
@@ -293,7 +283,7 @@ export async function updatePlayer(id, updateData) {
 
 /**
  * Adds XP to a player and handles automatic leveling
- * @param {string|number} playerId - Player ID (integer or string representation)
+ * @param {string} playerId - Player ID (UUID)
  * @param {number} amount - Amount of XP to add
  * @returns {Object} - Updated player object with level up info
  * @throws {Error} - Validation or database errors
@@ -308,7 +298,7 @@ export async function addXp(playerId, amount) {
       };
     }
 
-    if (!isValidUserId(playerId)) {
+    if (!isValidPlayerId(playerId)) {
       return {
         success: false,
         error: 'Invalid player ID format'
@@ -324,12 +314,9 @@ export async function addXp(playerId, amount) {
 
     logger.info(`[playerModel.addXp] Adding ${amount} XP to player ${playerId}`);
 
-    // Convert to integer for database query
-    const playerIdInt = parseInt(playerId, 10);
-
-    // Get current player data
-    const currentPlayer = await prisma.user.findUnique({
-      where: { id: playerIdInt }
+    // Get current player data using Player model
+    const currentPlayer = await prisma.player.findUnique({
+      where: { id: playerId }
     });
 
     if (!currentPlayer) {
@@ -354,14 +341,14 @@ export async function addXp(playerId, amount) {
       leveledUp = true;
     }
 
-    // Update player in database
+    // Update player in database using Player model
     const updateData = { xp: newXp };
     if (leveledUp) {
       updateData.level = newLevel;
     }
 
-    const updatedPlayer = await prisma.user.update({
-      where: { id: playerIdInt },
+    await prisma.player.update({
+      where: { id: playerId },
       data: updateData
     });
 
@@ -391,25 +378,22 @@ export async function addXp(playerId, amount) {
 
 /**
  * Checks if a player should level up and handles the level up process
- * @param {string|number} playerId - Player ID (integer or string representation)
+ * @param {string} playerId - Player ID (UUID)
  * @returns {Object} - Level up result with player data and level up info
  * @throws {Error} - Validation or database errors
  */
 export async function levelUpIfNeeded(playerId) {
   try {
     // Validate input
-    if (!isValidUserId(playerId)) {
+    if (!isValidPlayerId(playerId)) {
       throw new Error('Invalid player ID format');
     }
 
     logger.info(`[playerModel.levelUpIfNeeded] Checking level up for player ${playerId}`);
 
-    // Convert to integer for database query
-    const playerIdInt = parseInt(playerId, 10);
-
-    // Get current player data
-    const currentPlayer = await prisma.user.findUnique({
-      where: { id: playerIdInt }
+    // Get current player data using Player model
+    const currentPlayer = await prisma.player.findUnique({
+      where: { id: playerId }
     });
 
     if (!currentPlayer) {
@@ -431,9 +415,9 @@ export async function levelUpIfNeeded(playerId) {
     }
 
     if (leveledUp) {
-      // Update player level and XP
-      const updatedPlayer = await prisma.user.update({
-        where: { id: playerIdInt },
+      // Update player level and XP using Player model
+      const updatedPlayer = await prisma.player.update({
+        where: { id: playerId },
         data: {
           level: newLevel,
           xp: newXp
@@ -469,7 +453,7 @@ export async function levelUpIfNeeded(playerId) {
 
 /**
  * Gets player progress information (level, XP, XP to next level)
- * @param {string|number} playerId - Player ID (integer or string representation)
+ * @param {string} playerId - Player ID (UUID)
  * @returns {Object} - Progress information object
  * @throws {Error} - Validation or database errors
  */
@@ -483,7 +467,7 @@ export async function getPlayerProgress(playerId) {
       };
     }
 
-    if (!isValidUserId(playerId)) {
+    if (!isValidPlayerId(playerId)) {
       return {
         success: false,
         error: 'Invalid player ID format'
@@ -492,12 +476,9 @@ export async function getPlayerProgress(playerId) {
 
     logger.info(`[playerModel.getPlayerProgress] Getting progress for player ${playerId}`);
 
-    // Convert to integer for database query
-    const playerIdInt = parseInt(playerId, 10);
-
-    // Get current player data
-    const player = await prisma.user.findUnique({
-      where: { id: playerIdInt }
+    // Get current player data using Player model
+    const player = await prisma.player.findUnique({
+      where: { id: playerId }
     });
 
     if (!player) {
@@ -538,22 +519,19 @@ export async function getPlayerProgress(playerId) {
 
 /**
  * Deletes a player from the database
- * @param {string|number} id - Player ID
+ * @param {string} id - Player ID (UUID)
  * @returns {Object} - Deleted player object
  * @throws {Error} - Validation or database errors
  */
 export async function deletePlayer(id) {
   try {
-    // Validate ID format
-    if (!isValidUserId(id)) {
+    // Validate ID format for Player (UUID)
+    if (!isValidPlayerId(id)) {
       throw new Error('Invalid player ID format');
     }
 
-    // Convert to integer for database query
-    const playerId = parseInt(id, 10);
-
-    const deletedPlayer = await prisma.user.delete({
-      where: { id: playerId }
+    const deletedPlayer = await prisma.player.delete({
+      where: { id }
     });
 
     logger.info(`[playerModel.deletePlayer] Successfully deleted player: ${deletedPlayer.name} (ID: ${id})`);

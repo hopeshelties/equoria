@@ -6,7 +6,7 @@ describe('Trait Discovery API Integration Tests', () => {
   let testBreed;
   let testFoals = [];
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     // Create test breed with unique name
     const uniqueName = `Test Breed for Trait Discovery ${Date.now()}`;
     testBreed = await prisma.breed.create({
@@ -118,7 +118,7 @@ describe('Trait Discovery API Integration Tests', () => {
     });
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     // Clean up test data
     for (const foal of testFoals) {
       try {
@@ -144,7 +144,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('POST /api/traits/discover/:foalId', () => {
-    it('should discover traits for foal with high bonding', async () => {
+    it('should discover traits for foal with high bonding', async() => {
       const response = await request(app)
         .post(`/api/traits/discover/${testFoals[0].id}`)
         .expect(200);
@@ -158,7 +158,7 @@ describe('Trait Discovery API Integration Tests', () => {
 
       // Should have met some conditions due to high bonding and low stress
       expect(response.body.data.conditionsMet.length).toBeGreaterThan(0);
-      
+
       // Should have revealed some traits
       if (response.body.data.traitsRevealed.length > 0) {
         expect(response.body.data.traitsRevealed[0]).toHaveProperty('traitKey');
@@ -168,7 +168,7 @@ describe('Trait Discovery API Integration Tests', () => {
       }
     });
 
-    it('should handle foal with no discoverable traits', async () => {
+    it('should handle foal with no discoverable traits', async() => {
       const response = await request(app)
         .post(`/api/traits/discover/${testFoals[1].id}`)
         .expect(200);
@@ -176,12 +176,12 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('foalId', testFoals[1].id);
       expect(response.body.data).toHaveProperty('foalName', 'Low Stats Foal');
-      
+
       // Low stats foal should not meet many conditions
       expect(response.body.data.conditionsMet.length).toBeLessThanOrEqual(1);
     });
 
-    it('should return 400 for non-foal horse', async () => {
+    it('should return 400 for non-foal horse', async() => {
       const response = await request(app)
         .post(`/api/traits/discover/${testFoals[2].id}`)
         .expect(400);
@@ -190,7 +190,7 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.message).toContain('not a foal');
     });
 
-    it('should return 404 for non-existent foal', async () => {
+    it('should return 404 for non-existent foal', async() => {
       const response = await request(app)
         .post('/api/traits/discover/99999')
         .expect(404);
@@ -199,7 +199,7 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.message).toContain('not found');
     });
 
-    it('should return 400 for invalid foal ID', async () => {
+    it('should return 400 for invalid foal ID', async() => {
       const response = await request(app)
         .post('/api/traits/discover/invalid')
         .expect(400);
@@ -210,7 +210,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('GET /api/traits/progress/:foalId', () => {
-    it('should return discovery progress for foal', async () => {
+    it('should return discovery progress for foal', async() => {
       const response = await request(app)
         .get(`/api/traits/progress/${testFoals[0].id}`)
         .expect(200);
@@ -229,7 +229,7 @@ describe('Trait Discovery API Integration Tests', () => {
       });
 
       // Should have all discovery conditions
-      const conditions = response.body.data.conditions;
+      const { conditions } = response.body.data;
       expect(conditions).toHaveProperty('high_bonding');
       expect(conditions).toHaveProperty('low_stress');
       expect(conditions).toHaveProperty('social_activities');
@@ -248,7 +248,7 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(conditions.social_activities.progress).toBe(100);
     });
 
-    it('should return 404 for non-existent foal', async () => {
+    it('should return 404 for non-existent foal', async() => {
       const response = await request(app)
         .get('/api/traits/progress/99999')
         .expect(404);
@@ -259,20 +259,20 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('POST /api/traits/discover/batch', () => {
-    it('should process multiple foals in batch', async () => {
+    it('should process multiple foals in batch', async() => {
       console.log('Batch test foal IDs:', [testFoals[0].id, testFoals[1].id]);
-      
+
       const response = await request(app)
         .post('/api/traits/discover/batch')
         .send({
           foalIds: [testFoals[0].id, testFoals[1].id]
         });
-        
+
       if (response.status !== 200) {
         console.log('Batch discovery error response:', response.body);
         console.log('Status:', response.status);
       }
-      
+
       expect(response.status).toBe(200);
 
       expect(response.body.success).toBe(true);
@@ -285,7 +285,7 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.data.summary).toHaveProperty('failedDiscoveries');
     });
 
-    it('should handle mixed valid and invalid foals', async () => {
+    it('should handle mixed valid and invalid foals', async() => {
       const response = await request(app)
         .post('/api/traits/discover/batch')
         .send({
@@ -295,13 +295,13 @@ describe('Trait Discovery API Integration Tests', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.results).toHaveLength(3);
-      
+
       // Should have some failures
       const failedResults = response.body.data.results.filter(r => r.error);
       expect(failedResults.length).toBeGreaterThan(0);
     });
 
-    it('should return 400 for invalid request body', async () => {
+    it('should return 400 for invalid request body', async() => {
       const response = await request(app)
         .post('/api/traits/discover/batch')
         .send({
@@ -315,7 +315,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('GET /api/traits/conditions', () => {
-    it('should return all discovery conditions', async () => {
+    it('should return all discovery conditions', async() => {
       const response = await request(app)
         .get('/api/traits/conditions')
         .expect(200);
@@ -325,7 +325,7 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.data).toHaveProperty('totalConditions');
       expect(response.body.data).toHaveProperty('categories');
 
-      const conditions = response.body.data.conditions;
+      const { conditions } = response.body.data;
       expect(conditions.length).toBeGreaterThan(0);
 
       // Check structure of conditions
@@ -338,7 +338,7 @@ describe('Trait Discovery API Integration Tests', () => {
       });
 
       // Check categories
-      const categories = response.body.data.categories;
+      const { categories } = response.body.data;
       expect(categories).toHaveProperty('bonding');
       expect(categories).toHaveProperty('stress');
       expect(categories).toHaveProperty('activities');
@@ -347,7 +347,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('POST /api/traits/check-conditions/:foalId', () => {
-    it('should check conditions without triggering discovery', async () => {
+    it('should check conditions without triggering discovery', async() => {
       const response = await request(app)
         .post(`/api/traits/check-conditions/${testFoals[0].id}`)
         .expect(200);
@@ -359,7 +359,7 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.data).toHaveProperty('conditions');
       expect(response.body.data).toHaveProperty('summary');
 
-      const conditions = response.body.data.conditions;
+      const { conditions } = response.body.data;
       expect(Array.isArray(conditions)).toBe(true);
       expect(conditions.length).toBeGreaterThan(0);
 
@@ -375,14 +375,14 @@ describe('Trait Discovery API Integration Tests', () => {
       });
 
       // Summary should have proper structure
-      const summary = response.body.data.summary;
+      const { summary } = response.body.data;
       expect(summary).toHaveProperty('totalConditions');
       expect(summary).toHaveProperty('conditionsMet');
       expect(summary).toHaveProperty('averageProgress');
       expect(summary).toHaveProperty('hiddenTraitsRemaining');
     });
 
-    it('should return 404 for non-existent foal', async () => {
+    it('should return 404 for non-existent foal', async() => {
       const response = await request(app)
         .post('/api/traits/check-conditions/99999')
         .expect(404);
@@ -393,7 +393,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('Real-time trait discovery workflow', () => {
-    it('should demonstrate complete trait discovery workflow', async () => {
+    it('should demonstrate complete trait discovery workflow', async() => {
       // Create a fresh foal with guaranteed hidden traits for this test
       const freshFoal = await prisma.horse.create({
         data: {
@@ -463,7 +463,7 @@ describe('Trait Discovery API Integration Tests', () => {
       // 4. Verify traits were revealed if conditions were met
       if (metConditions.length > 0) {
         expect(discoveryResponse.body.data.conditionsMet.length).toBeGreaterThan(0);
-        
+
         // If traits were revealed, hidden count should decrease
         if (discoveryResponse.body.data.traitsRevealed.length > 0) {
           expect(discoveryResponse.body.data.summary.hiddenAfter)
@@ -481,4 +481,4 @@ describe('Trait Discovery API Integration Tests', () => {
         .toBeLessThanOrEqual(initialHiddenCount);
     });
   });
-}); 
+});

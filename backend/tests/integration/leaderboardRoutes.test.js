@@ -8,7 +8,7 @@ import request from 'supertest';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 // We need to mock dependencies before importing the controller
-jest.mock('../../db/index.js', () => ({
+jest.mock('../../packages/database/prismaClient.js', () => ({
   __esModule: true,
   default: mockPrisma
 }));
@@ -230,7 +230,7 @@ describe('Leaderboard Routes Integration Tests', () => {
   describe('GET /api/leaderboard/players/level', () => {
     it('should return top players by level', async() => {
       // Set up mock response
-      mockPrisma.player.findMany.mockResolvedValue(mockPlayers);
+      mockPrisma.user.findMany.mockResolvedValue(mockPlayers);
 
       const response = await request(app)
         .get('/api/leaderboard/players/level')
@@ -245,7 +245,7 @@ describe('Leaderboard Routes Integration Tests', () => {
       expect(response.body.data.rankings[0].level).toBe(15);
 
       // Verify database was called with correct parameters
-      expect(mockPrisma.player.findMany).toHaveBeenCalledWith({
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
         select: {
           id: true,
           name: true,
@@ -412,7 +412,7 @@ describe('Leaderboard Routes Integration Tests', () => {
         avgLevel: 9.2
       };
 
-      mockPrisma.player.count.mockResolvedValue(mockStats.playerCount);
+      mockPrisma.user.count.mockResolvedValue(mockStats.playerCount);
       mockPrisma.horse.count.mockResolvedValue(mockStats.horseCount);
       mockPrisma.show.count.mockResolvedValue(mockStats.showCount);
       mockPrisma.horse.aggregate.mockResolvedValue({
@@ -421,12 +421,12 @@ describe('Leaderboard Routes Integration Tests', () => {
       mockPrisma.xpEvent.aggregate.mockResolvedValue({
         _sum: { amount: mockStats.totalXp }
       });
-      mockPrisma.player.aggregate.mockResolvedValue({
+      mockPrisma.user.aggregate.mockResolvedValue({
         _avg: { level: mockStats.avgLevel }
       });
 
       // Mock top performers
-      mockPrisma.player.findFirst.mockResolvedValue(mockPlayers[0]);
+      mockPrisma.user.findFirst.mockResolvedValue(mockPlayers[0]);
       mockPrisma.horse.findFirst.mockResolvedValue(mockHorses[0]);
       mockPrisma.competitionResult.count.mockResolvedValue(25);
 
