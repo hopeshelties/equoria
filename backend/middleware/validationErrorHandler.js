@@ -1,13 +1,28 @@
-const { validationResult } = require('express-validator');
+import { validationResult } from 'express-validator';
+import logger from '../utils/logger.js';
 
-function handleValidationErrors(req, res, next) {
+/**
+ * Validation Error Handler Middleware
+ * Processes express-validator validation results
+ */
+export function handleValidationErrors(req, res, next) {
   const errors = validationResult(req);
+
   if (!errors.isEmpty()) {
-    // Log the errors for debugging if needed
-    // console.error('Validation errors:', errors.array()); 
-    return res.status(400).json({ errors: errors.array() });
+    const errorArray = errors.array();
+
+    logger.warn('Validation errors occurred', {
+      url: req.originalUrl,
+      method: req.method,
+      errors: errorArray
+    });
+
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errorArray
+    });
   }
+
   next();
 }
-
-module.exports = { handleValidationErrors }; 

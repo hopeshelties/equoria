@@ -1,7 +1,14 @@
-import prisma from '../db/index.js'; // Replaced pool with prisma client
+import prisma from '../db/index.js';
+import logger from '../utils/logger.js';
+import { ValidationError, NotFoundError, DatabaseError } from '../errors/index.js';
+
+/**
+ * Breed Controller
+ * Handles CRUD operations for horse breeds
+ */
 
 // Create a new breed
-async function createBreed(req, res, next) {
+export async function createBreed(req, res, next) {
   const { name, description } = req.body; // Added description
 
   try {
@@ -12,69 +19,98 @@ async function createBreed(req, res, next) {
     });
 
     if (existingBreed) {
-      // For a case-insensitive check, we might need a raw query or to query and compare manually if Prisma doesn't support it directly for findUnique with modifiers.
-      // For now, sticking to case-sensitive unique check as defined by schema.
-      // If a case-insensitive unique constraint is needed, the database schema itself should enforce it, or a workaround query used.
-      // Let's assume the unique constraint on `name` in `schema.prisma` is sufficient, or adjust if specific case-insensitivity is required here.
-      // A simple approach for case-insensitivity if the DB doesn't enforce it:
-      const breeds = await prisma.breed.findMany({ where: { name: { equals: name, mode: 'insensitive' } } });
-      if (breeds.length > 0) {
-         return res.status(409).json({ message: 'Breed name already exists (case-insensitive check).' });
-      }
+      throw new ValidationError('Breed name already exists', 'name', name);
+    }
+
+    // Additional case-insensitive check
+    const breeds = await prisma.breed.findMany({
+      where: { name: { equals: name, mode: 'insensitive' } }
+    });
+
+    if (breeds.length > 0) {
+      throw new ValidationError('Breed name already exists (case-insensitive)', 'name', name);
     }
 
     const newBreed = await prisma.breed.create({
       data: {
         name,
-        description, // Added description
+        description,
       },
     });
-    res.status(201).json(newBreed);
+
+    logger.info(`Created new breed: ${newBreed.name} (ID: ${newBreed.id})`);
+
+    res.status(201).json({
+      success: true,
+      data: newBreed,
+      message: 'Breed created successfully'
+    });
   } catch (error) {
-    // Prisma can throw specific errors, e.g., P2002 for unique constraint violation
+    logger.error(`Error creating breed: ${error.message}`);
+
+    // Handle Prisma unique constraint errors
     if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
-      return res.status(409).json({ message: 'Breed name already exists.' });
+      return next(new ValidationError('Breed name already exists', 'name', name));
     }
-    console.error('Error creating breed:', error);
-    next(error); // Pass error to the global error handler
+
+    next(new DatabaseError('Failed to create breed', error));
   }
 }
 
 // Get all breeds
-async function getAllBreeds(req, res, next) {
+export async function getAllBreeds(req, res, next) {
   try {
     const breeds = await prisma.breed.findMany({
       orderBy: {
         name: 'asc',
       },
     });
-    res.status(200).json(breeds);
+
+    logger.info(`Retrieved ${breeds.length} breeds`);
+
+    res.status(200).json({
+      success: true,
+      data: breeds,
+      count: breeds.length
+    });
   } catch (error) {
-    console.error('Error getting all breeds:', error);
-    next(error);
+    logger.error(`Error getting all breeds: ${error.message}`);
+    next(new DatabaseError('Failed to retrieve breeds', error));
   }
 }
 
 // Get a single breed by ID
-async function getBreedById(req, res, next) {
+export async function getBreedById(req, res, next) {
   const { id } = req.params;
 
   try {
-    const breed = await prisma.breed.findUnique({
-      where: { id: parseInt(id, 10) }, // Ensure id is an integer
-    });
-    if (!breed) { // Prisma findUnique returns null if not found
-      return res.status(404).json({ message: 'Breed not found.' });
+    const breedId = parseInt(id, 10);
+
+    if (isNaN(breedId) || breedId <= 0) {
+      throw new ValidationError('Invalid breed ID', 'id', id);
     }
-    res.status(200).json(breed);
+
+    const breed = await prisma.breed.findUnique({
+      where: { id: breedId },
+    });
+
+    if (!breed) {
+      throw new NotFoundError('Breed', breedId);
+    }
+
+    logger.info(`Retrieved breed: ${breed.name} (ID: ${breed.id})`);
+
+    res.status(200).json({
+      success: true,
+      data: breed
+    });
   } catch (error) {
-    console.error(`Error getting breed by id ${id}:`, error);
-    next(error);
+    logger.error(`Error getting breed by id ${id}: ${error.message}`);
+
+    if (error instanceof ValidationError || error instanceof NotFoundError) {
+      return next(error);
+    }
+
+    next(new DatabaseError('Failed to retrieve breed', error));
   }
 }
-
-module.exports = {
-  createBreed,
-  getAllBreeds,
-  getBreedById,
-}; 

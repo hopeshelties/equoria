@@ -1,306 +1,284 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { validationResult } from 'express-validator';
-import config from '../config/config.js';
+import { generateToken, generateRefreshToken } from '../middleware/auth.js';
+import { AppError, ValidationError } from '../errors/index.js';
 import logger from '../utils/logger.js';
-import { ApiResponse } from '../utils/apiResponse.js';
 import prisma from '../db/index.js';
 
 /**
- * Generate JWT token with user information
+ * Register a new user
  */
-const generateToken = (user) => {
-  const payload = {
-    id: user.id,
-    email: user.email,
-    role: user.role || 'user',
-    fingerprint: Date.now() // Simple fingerprinting
-  };
-  
-  return jwt.sign(payload, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn || '7d'
-  });
-};
-
-/**
- * Generate refresh token
- */
-const generateRefreshToken = (user) => {
-  const payload = {
-    id: user.id,
-    type: 'refresh'
-  };
-  
-  return jwt.sign(payload, config.jwtSecret, {
-    expiresIn: config.jwtRefreshExpiresIn || '30d'
-  });
-};
-
-/**
- * POST /api/auth/register
- * Register a new user account
- */
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   try {
-    // Check validation results
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json(ApiResponse.badRequest('Validation failed', {
-        errors: errors.array()
-      }));
+    const { email, password, username, firstName, lastName } = req.body;
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: email.toLowerCase() },
+          { username: username.toLowerCase() }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      if (existingUser.email === email.toLowerCase()) {
+        throw new ValidationError('Email already registered', 'email', email);
+      } else {
+        throw new ValidationError('Username already taken', 'username', username);
+      }
     }
 
-    const { name, email, password } = req.body;
-    
-    logger.info(`[authController] Registration attempt for email: ${email}`);
-    
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    });
-    
-    if (existingUser) {
-      logger.warn(`[authController] Registration failed - email already exists: ${email}`);
-      return res.status(409).json(ApiResponse.conflict('Email already registered'));
-    }
-    
     // Hash password
-    const saltRounds = parseInt(config.bcryptRounds) || 12;
+    const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
+
     // Create user
-    const newUser = await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        email: email.toLowerCase(),
+        username: username.toLowerCase(),
         password: hashedPassword,
-        role: 'user', // Default role
-        isActive: true,
-        createdAt: new Date()
+        firstName,
+        lastName,
+        role: 'user' // Default role
       },
       select: {
         id: true,
-        name: true,
         email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
         role: true,
-        isActive: true,
         createdAt: true
       }
     });
-    
-    // Generate tokens
-    const token = generateToken(newUser);
-    const refreshToken = generateRefreshToken(newUser);
-    
-    logger.info(`[authController] User registered successfully: ${email} (ID: ${newUser.id})`);
-    
-    return res.status(201).json(ApiResponse.success(
-      'User registered successfully',
-      {
-        user: newUser,
-        token,
-        refreshToken,
-        expiresIn: config.jwtExpiresIn || '7d'
-      }
-    ));
-    
-  } catch (error) {
-    logger.error('[authController] Registration error:', error);
-    return res.status(500).json(ApiResponse.serverError('Registration failed'));
-  }
-};
 
-/**
- * POST /api/auth/login
- * Authenticate user and return JWT token
- */
-export const login = async (req, res) => {
-  try {
-    // Check validation results
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json(ApiResponse.badRequest('Validation failed', {
-        errors: errors.array()
-      }));
-    }
-
-    const { email, password } = req.body;
-    
-    logger.info(`[authController] Login attempt for email: ${email} from IP: ${req.ip}`);
-    
-    // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
-    
-    if (!user) {
-      logger.warn(`[authController] Login failed - user not found: ${email}`);
-      return res.status(401).json(ApiResponse.unauthorized('Invalid email or password'));
-    }
-    
-    // Check if user is active
-    if (!user.isActive) {
-      logger.warn(`[authController] Login failed - account disabled: ${email}`);
-      return res.status(401).json(ApiResponse.unauthorized('Account is disabled'));
-    }
-    
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    
-    if (!isPasswordValid) {
-      logger.warn(`[authController] Login failed - invalid password: ${email}`);
-      return res.status(401).json(ApiResponse.unauthorized('Invalid email or password'));
-    }
-    
-    // Update last login
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLoginAt: new Date() }
-    });
-    
     // Generate tokens
-    const userForToken = {
+    const tokenPayload = {
       id: user.id,
       email: user.email,
+      username: user.username,
       role: user.role
     };
-    
-    const token = generateToken(userForToken);
-    const refreshToken = generateRefreshToken(userForToken);
-    
-    logger.info(`[authController] User logged in successfully: ${email} (ID: ${user.id})`);
-    
-    return res.status(200).json(ApiResponse.success(
-      'Login successful',
-      {
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          lastLoginAt: new Date()
-        },
-        token,
-        refreshToken,
-        expiresIn: config.jwtExpiresIn || '7d'
+
+    const accessToken = generateToken(tokenPayload);
+    const refreshToken = generateRefreshToken({ id: user.id });
+
+    logger.info(`[auth] User registered successfully: ${user.email} (${user.id})`);
+
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      data: {
+        user,
+        accessToken,
+        refreshToken
       }
-    ));
-    
+    });
   } catch (error) {
-    logger.error('[authController] Login error:', error);
-    return res.status(500).json(ApiResponse.serverError('Login failed'));
+    next(error);
   }
 };
 
 /**
- * POST /api/auth/refresh
- * Refresh JWT token using refresh token
+ * Login user
  */
-export const refreshToken = async (req, res) => {
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() }
+    });
+
+    if (!user) {
+      throw new ValidationError('Invalid email or password', 'email', email);
+    }
+
+    // Check password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      logger.warn(`[auth] Failed login attempt for ${email} from ${req.ip}`);
+      throw new ValidationError('Invalid email or password', 'password');
+    }
+
+    // Generate tokens
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role
+    };
+
+    const accessToken = generateToken(tokenPayload);
+    const refreshToken = generateRefreshToken({ id: user.id });
+
+    // Remove password from response
+    const { password: _, ...userWithoutPassword } = user;
+
+    logger.info(`[auth] User logged in successfully: ${user.email} (${user.id})`);
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        user: userWithoutPassword,
+        accessToken,
+        refreshToken
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Refresh access token
+ */
+export const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
-    
+
     if (!refreshToken) {
-      return res.status(400).json(ApiResponse.badRequest('Refresh token is required'));
+      throw new ValidationError('Refresh token required', 'refreshToken');
     }
-    
+
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, config.jwtSecret);
-    
-    if (decoded.type !== 'refresh') {
-      return res.status(401).json(ApiResponse.unauthorized('Invalid refresh token'));
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new AppError('JWT configuration error', 500);
     }
-    
+
+    const decoded = jwt.verify(refreshToken, secret);
+
     // Get user
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
         id: true,
-        name: true,
         email: true,
-        role: true,
-        isActive: true
+        username: true,
+        role: true
       }
     });
-    
-    if (!user || !user.isActive) {
-      return res.status(401).json(ApiResponse.unauthorized('User not found or inactive'));
+
+    if (!user) {
+      throw new AppError('User not found', 404);
     }
-    
+
     // Generate new tokens
-    const newToken = generateToken(user);
-    const newRefreshToken = generateRefreshToken(user);
-    
-    logger.info(`[authController] Token refreshed for user: ${user.email}`);
-    
-    return res.status(200).json(ApiResponse.success(
-      'Token refreshed successfully',
-      {
-        token: newToken,
-        refreshToken: newRefreshToken,
-        expiresIn: config.jwtExpiresIn || '7d'
+    const tokenPayload = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role
+    };
+
+    const newAccessToken = generateToken(tokenPayload);
+    const newRefreshToken = generateRefreshToken({ id: user.id });
+
+    logger.info(`[auth] Token refreshed for user: ${user.email} (${user.id})`);
+
+    res.json({
+      success: true,
+      message: 'Token refreshed successfully',
+      data: {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken
       }
-    ));
-    
+    });
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      return res.status(401).json(ApiResponse.unauthorized('Invalid or expired refresh token'));
+      return next(new AppError('Invalid refresh token', 401));
     }
-    
-    logger.error('[authController] Token refresh error:', error);
-    return res.status(500).json(ApiResponse.serverError('Token refresh failed'));
+    next(error);
   }
 };
 
 /**
- * POST /api/auth/logout
- * Logout user (client-side token removal)
- */
-export const logout = async (req, res) => {
-  try {
-    logger.info(`[authController] User logged out: ${req.user?.email || 'unknown'}`);
-    
-    return res.status(200).json(ApiResponse.success(
-      'Logout successful',
-      { message: 'Please remove token from client storage' }
-    ));
-    
-  } catch (error) {
-    logger.error('[authController] Logout error:', error);
-    return res.status(500).json(ApiResponse.serverError('Logout failed'));
-  }
-};
-
-/**
- * GET /api/auth/me
  * Get current user profile
  */
-export const getProfile = async (req, res) => {
+export const getProfile = async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: {
         id: true,
-        name: true,
         email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
         role: true,
-        isActive: true,
         createdAt: true,
-        lastLoginAt: true
+        updatedAt: true
       }
     });
-    
+
     if (!user) {
-      return res.status(404).json(ApiResponse.notFound('User not found'));
+      throw new AppError('User not found', 404);
     }
-    
-    return res.status(200).json(ApiResponse.success(
-      'Profile retrieved successfully',
-      user
-    ));
-    
+
+    res.json({
+      success: true,
+      data: { user }
+    });
   } catch (error) {
-    logger.error('[authController] Get profile error:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to retrieve profile'));
+    next(error);
   }
-}; 
+};
+
+/**
+ * Update user profile
+ */
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { firstName, lastName, username } = req.body;
+    const userId = req.user.id;
+
+    // Check if username is taken by another user
+    if (username) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          username: username.toLowerCase(),
+          NOT: { id: userId }
+        }
+      });
+
+      if (existingUser) {
+        throw new ValidationError('Username already taken', 'username', username);
+      }
+    }
+
+    // Update user
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(firstName && { firstName }),
+        ...(lastName && { lastName }),
+        ...(username && { username: username.toLowerCase() })
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        updatedAt: true
+      }
+    });
+
+    logger.info(`[auth] Profile updated for user: ${updatedUser.email} (${updatedUser.id})`);
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: { user: updatedUser }
+    });
+  } catch (error) {
+    next(error);
+  }
+};

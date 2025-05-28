@@ -1,238 +1,149 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import config from '../config/config.js';
+import { AppError } from '../errors/index.js';
 import logger from '../utils/logger.js';
-import { ApiResponse } from '../utils/apiResponse.js';
-import prisma from '../db/index.js';
 
 /**
  * JWT Authentication Middleware
- * Verifies JWT tokens and prevents token tampering
+ * Verifies JWT tokens and adds user information to request object
  */
 export const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-  if (!token) {
-    logger.warn(`[auth] Unauthorized access attempt from IP: ${req.ip} to ${req.path}`);
-    return res.status(401).json(ApiResponse.unauthorized('Access token required'));
-  }
-
   try {
-    const decoded = jwt.verify(token, config.jwtSecret);
-    
-    // Additional security checks
-    if (!decoded.id || !decoded.email) {
-      logger.warn(`[auth] Invalid token structure from IP: ${req.ip}`);
-      return res.status(401).json(ApiResponse.unauthorized('Invalid token structure'));
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+      logger.warn(`[auth] Missing token for ${req.method} ${req.path} from ${req.ip}`);
+      throw new AppError('Access token required', 401);
     }
 
-    // Check token expiration (additional layer)
-    if (decoded.exp && Date.now() >= decoded.exp * 1000) {
-      logger.warn(`[auth] Expired token used from IP: ${req.ip}`);
-      return res.status(401).json(ApiResponse.unauthorized('Token expired'));
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      logger.error('[auth] JWT_SECRET not configured');
+      throw new AppError('Authentication configuration error', 500);
     }
 
-    // Add user info to request
-    req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role || 'user',
-      permissions: decoded.permissions || []
-    };
+    jwt.verify(token, secret, (err, user) => {
+      if (err) {
+        logger.warn(`[auth] Invalid token for ${req.method} ${req.path} from ${req.ip}: ${err.message}`);
 
-    logger.info(`[auth] Authenticated user: ${req.user.email} (${req.user.role})`);
-    next();
+        if (err.name === 'TokenExpiredError') {
+          throw new AppError('Token expired', 401);
+        } else if (err.name === 'JsonWebTokenError') {
+          throw new AppError('Invalid token', 401);
+        } else {
+          throw new AppError('Token verification failed', 401);
+        }
+      }
+
+      req.user = user;
+      logger.info(`[auth] Authenticated user ${user.id} for ${req.method} ${req.path}`);
+      next();
+    });
   } catch (error) {
-    logger.error(`[auth] Token verification failed from IP: ${req.ip}:`, error.message);
-    
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json(ApiResponse.unauthorized('Token expired'));
-    } else if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json(ApiResponse.unauthorized('Invalid token'));
-    } else {
-      return res.status(401).json(ApiResponse.unauthorized('Token verification failed'));
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+        status: error.status
+      });
     }
+
+    logger.error(`[auth] Unexpected error: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      message: 'Authentication error',
+      status: 'error'
+    });
   }
 };
 
 /**
- * Role-based authorization middleware
- * Prevents privilege escalation attacks
+ * Optional Authentication Middleware
+ * Adds user information if token is present, but doesn't require it
  */
-export const requireRole = (allowedRoles) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json(ApiResponse.unauthorized('Authentication required'));
+export const optionalAuth = (req, res, next) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return next(); // No token, continue without user
     }
 
-    const userRole = req.user.role;
-    const hasPermission = Array.isArray(allowedRoles) 
-      ? allowedRoles.includes(userRole)
-      : allowedRoles === userRole;
-
-    if (!hasPermission) {
-      logger.warn(`[auth] Unauthorized role access: ${userRole} attempted to access ${req.path} (requires: ${allowedRoles})`);
-      return res.status(403).json(ApiResponse.forbidden('Insufficient permissions'));
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      logger.error('[auth] JWT_SECRET not configured');
+      return next(); // Continue without user if JWT not configured
     }
 
-    next();
-  };
+    jwt.verify(token, secret, (err, user) => {
+      if (!err && user) {
+        req.user = user;
+        logger.info(`[auth] Optional auth: authenticated user ${user.id}`);
+      }
+      next();
+    });
+  } catch (error) {
+    logger.warn(`[auth] Optional auth error: ${error.message}`);
+    next(); // Continue without user on error
+  }
 };
 
 /**
- * Resource ownership verification
- * Prevents users from accessing/modifying other players' resources
+ * Role-based Authorization Middleware
+ * Requires specific roles to access endpoints
  */
-export const requireOwnership = (resourceType) => {
-  return async (req, res, next) => {
+export const requireRole = (...roles) => {
+  return (req, res, next) => {
     try {
-      const userId = req.user.id;
-      const resourceId = req.params.id || req.params.horseId || req.params.playerId;
-
-      if (!resourceId) {
-        return res.status(400).json(ApiResponse.badRequest('Resource ID required'));
+      if (!req.user) {
+        throw new AppError('Authentication required', 401);
       }
 
-      // Skip ownership check for admins
-      if (req.user.role === 'admin') {
-        return next();
+      if (!req.user.role || !roles.includes(req.user.role)) {
+        logger.warn(`[auth] User ${req.user.id} with role '${req.user.role}' attempted to access ${req.method} ${req.path} (requires: ${roles.join(', ')})`);
+        throw new AppError('Insufficient permissions', 403);
       }
 
-      let isOwner = false;
-
-      switch (resourceType) {
-        case 'horse':
-          // Check if user owns the horse
-          const horse = await prisma.horse.findUnique({
-            where: { id: parseInt(resourceId) },
-            select: { playerId: true, ownerId: true }
-          });
-          isOwner = horse && (horse.playerId === userId || horse.ownerId === userId);
-          break;
-
-        case 'player':
-          // Check if user is accessing their own profile
-          isOwner = userId === resourceId;
-          break;
-
-        case 'stable':
-          // Check if user owns the stable
-          const stable = await prisma.stable.findUnique({
-            where: { id: parseInt(resourceId) },
-            select: { ownerId: true }
-          });
-          isOwner = stable && stable.ownerId === userId;
-          break;
-
-        default:
-          logger.error(`[auth] Unknown resource type for ownership check: ${resourceType}`);
-          return res.status(500).json(ApiResponse.serverError('Internal authorization error'));
-      }
-
-      if (!isOwner) {
-        logger.warn(`[auth] Ownership violation: User ${userId} attempted to access ${resourceType} ${resourceId}`);
-        return res.status(403).json(ApiResponse.forbidden('You do not own this resource'));
-      }
-
+      logger.info(`[auth] Authorized user ${req.user.id} with role '${req.user.role}' for ${req.method} ${req.path}`);
       next();
     } catch (error) {
-      logger.error(`[auth] Ownership check error:`, error);
-      return res.status(500).json(ApiResponse.serverError('Authorization check failed'));
-    }
-  };
-};
-
-/**
- * Anti-automation middleware
- * Prevents rapid-fire requests and bot attacks
- */
-export const antiAutomation = (maxRequests = 10, windowMs = 60000) => {
-  const requestCounts = new Map();
-
-  return (req, res, next) => {
-    const key = `${req.user?.id || req.ip}_${req.path}`;
-    const now = Date.now();
-    const windowStart = now - windowMs;
-
-    // Clean old entries
-    for (const [k, timestamps] of requestCounts.entries()) {
-      requestCounts.set(k, timestamps.filter(t => t > windowStart));
-      if (requestCounts.get(k).length === 0) {
-        requestCounts.delete(k);
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({
+          success: false,
+          message: error.message,
+          status: error.status
+        });
       }
+
+      logger.error(`[auth] Authorization error: ${error.message}`);
+      return res.status(500).json({
+        success: false,
+        message: 'Authorization error',
+        status: 'error'
+      });
     }
-
-    // Check current user's requests
-    const userRequests = requestCounts.get(key) || [];
-    const recentRequests = userRequests.filter(t => t > windowStart);
-
-    if (recentRequests.length >= maxRequests) {
-      logger.warn(`[auth] Anti-automation triggered for ${req.user?.email || req.ip} on ${req.path}`);
-      return res.status(429).json(ApiResponse.error('Too many requests. Please slow down.'));
-    }
-
-    // Add current request
-    recentRequests.push(now);
-    requestCounts.set(key, recentRequests);
-
-    next();
   };
 };
 
 /**
- * Secure password hashing
+ * Generate JWT Token
  */
-export const hashPassword = async (password) => {
-  if (!password || password.length < 8) {
-    throw new Error('Password must be at least 8 characters long');
+export const generateToken = (payload, expiresIn = '24h') => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new AppError('JWT_SECRET not configured', 500);
   }
-  
-  return await bcrypt.hash(password, config.bcryptRounds);
+
+  return jwt.sign(payload, secret, { expiresIn });
 };
 
 /**
- * Secure password verification
+ * Generate Refresh Token
  */
-export const verifyPassword = async (password, hashedPassword) => {
-  return await bcrypt.compare(password, hashedPassword);
+export const generateRefreshToken = (payload) => {
+  return generateToken(payload, '7d');
 };
 
-/**
- * Generate secure JWT token
- */
-export const generateToken = (user) => {
-  const payload = {
-    id: user.id,
-    email: user.email,
-    role: user.role || 'user',
-    permissions: user.permissions || [],
-    iat: Math.floor(Date.now() / 1000),
-    // Add anti-tampering data
-    fingerprint: generateFingerprint(user)
-  };
-
-  return jwt.sign(payload, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn,
-    issuer: 'equoria-api',
-    audience: 'equoria-client'
-  });
-};
-
-/**
- * Generate user fingerprint for anti-tampering
- */
-function generateFingerprint(user) {
-  const data = `${user.id}:${user.email}:${user.createdAt || Date.now()}`;
-  return require('crypto').createHash('sha256').update(data).digest('hex').substring(0, 16);
-}
-
-export default {
-  authenticateToken,
-  requireRole,
-  requireOwnership,
-  antiAutomation,
-  hashPassword,
-  verifyPassword,
-  generateToken
-}; 
+// Export authenticateToken as the default export for backward compatibility
+export default authenticateToken;

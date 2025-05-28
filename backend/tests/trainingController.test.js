@@ -1,4 +1,9 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock the trainingModel functions
 const mockGetHorseAge = jest.fn();
@@ -9,33 +14,41 @@ const mockGetAnyRecentTraining = jest.fn();
 // Mock the horseModel functions
 const mockIncrementDisciplineScore = jest.fn();
 const mockGetHorseById = jest.fn();
+const mockUpdateHorseStat = jest.fn();
 
 // Mock the playerModel functions
 const mockGetPlayerWithHorses = jest.fn();
+const mockAddXp = jest.fn();
+const mockLevelUpIfNeeded = jest.fn();
 
-jest.unstable_mockModule('../models/trainingModel.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/trainingModel.js'), () => ({
   getHorseAge: mockGetHorseAge,
   getLastTrainingDate: mockGetLastTrainingDate,
   logTrainingSession: mockLogTrainingSession,
   getAnyRecentTraining: mockGetAnyRecentTraining
 }));
 
-jest.unstable_mockModule('../models/horseModel.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
   incrementDisciplineScore: mockIncrementDisciplineScore,
-  getHorseById: mockGetHorseById
+  getHorseById: mockGetHorseById,
+  updateHorseStat: mockUpdateHorseStat
 }));
 
-jest.unstable_mockModule('../models/playerModel.js', () => ({
-  getPlayerWithHorses: mockGetPlayerWithHorses
+jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => ({
+  getPlayerWithHorses: mockGetPlayerWithHorses,
+  addXp: mockAddXp,
+  levelUpIfNeeded: mockLevelUpIfNeeded
 }));
 
 // Import the module after mocking
-const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses } = await import('../controllers/trainingController.js');
+const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses } = await import(join(__dirname, '../controllers/trainingController.js'));
 
 describe('trainingController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetPlayerWithHorses.mockClear();
+    mockAddXp.mockClear();
+    mockLevelUpIfNeeded.mockClear();
   });
 
   describe('canTrain', () => {
@@ -45,7 +58,7 @@ describe('trainingController', () => {
       mockGetAnyRecentTraining.mockClear();
     });
 
-    it('should return eligible true for horse that meets all requirements', async () => {
+    it('should return eligible true for horse that meets all requirements', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       mockGetAnyRecentTraining.mockResolvedValue(null);
 
@@ -59,7 +72,7 @@ describe('trainingController', () => {
       expect(mockGetAnyRecentTraining).toHaveBeenCalledWith(1);
     });
 
-    it('should return eligible false for horse under 3 years old', async () => {
+    it('should return eligible false for horse under 3 years old', async() => {
       mockGetHorseAge.mockResolvedValue(2);
 
       const result = await canTrain(1, 'Dressage');
@@ -72,7 +85,7 @@ describe('trainingController', () => {
       expect(mockGetAnyRecentTraining).not.toHaveBeenCalled();
     });
 
-    it('should return eligible false for horse with recent training in any discipline', async () => {
+    it('should return eligible false for horse with recent training in any discipline', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const recentDate = new Date();
       recentDate.setDate(recentDate.getDate() - 3); // 3 days ago
@@ -88,7 +101,7 @@ describe('trainingController', () => {
       expect(mockGetAnyRecentTraining).toHaveBeenCalledWith(1);
     });
 
-    it('should return eligible true for horse with old training (8+ days ago)', async () => {
+    it('should return eligible true for horse with old training (8+ days ago)', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const oldDate = new Date();
       oldDate.setDate(oldDate.getDate() - 8); // 8 days ago
@@ -104,7 +117,7 @@ describe('trainingController', () => {
       expect(mockGetAnyRecentTraining).toHaveBeenCalledWith(1);
     });
 
-    it('should return eligible false for non-existent horse', async () => {
+    it('should return eligible false for non-existent horse', async() => {
       mockGetHorseAge.mockResolvedValue(null);
 
       const result = await canTrain(999, 'Dressage');
@@ -117,25 +130,25 @@ describe('trainingController', () => {
       expect(mockGetAnyRecentTraining).not.toHaveBeenCalled();
     });
 
-    it('should throw error for invalid horse ID', async () => {
+    it('should throw error for invalid horse ID', async() => {
       await expect(canTrain('invalid', 'Dressage')).rejects.toThrow('Horse ID must be a positive integer');
     });
 
-    it('should throw error for missing discipline', async () => {
+    it('should throw error for missing discipline', async() => {
       await expect(canTrain(1, '')).rejects.toThrow('Discipline is required');
     });
 
-    it('should throw error for missing horse ID', async () => {
+    it('should throw error for missing horse ID', async() => {
       await expect(canTrain(null, 'Dressage')).rejects.toThrow('Horse ID is required');
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockGetHorseAge.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(canTrain(1, 'Dressage')).rejects.toThrow('Training eligibility check failed');
     });
 
-    it('should calculate cooldown correctly for edge case (exactly 7 days)', async () => {
+    it('should calculate cooldown correctly for edge case (exactly 7 days)', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const exactlySevenDaysAgo = new Date();
       exactlySevenDaysAgo.setDate(exactlySevenDaysAgo.getDate() - 7);
@@ -158,29 +171,66 @@ describe('trainingController', () => {
       mockGetAnyRecentTraining.mockClear();
       mockLogTrainingSession.mockClear();
       mockIncrementDisciplineScore.mockClear();
+      mockUpdateHorseStat.mockClear();
     });
 
-    it('should successfully train eligible horse', async () => {
+    it('should successfully train eligible horse', async() => {
       // Mock successful training scenario
       mockGetHorseAge.mockResolvedValue(4);
       mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'Test Horse',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'test-player-123'
+      });
       mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 1,
         name: 'Test Horse',
         disciplineScores: { Racing: 5 },
-        breed: { id: 1, name: 'Thoroughbred' }
+        breed: { id: 1, name: 'Thoroughbred' },
+        ownerId: 'test-player-123'
+      });
+      mockUpdateHorseStat.mockResolvedValue({
+        id: 1,
+        name: 'Test Horse',
+        speed: 15 // Updated stat
+      });
+      mockAddXp.mockResolvedValue({
+        id: 'test-player-123',
+        xp: 105,
+        level: 2,
+        leveledUp: true,
+        levelsGained: 1,
+        xpGained: 5
+      });
+
+      // Mock levelUpIfNeeded call (as requested in task)
+      mockLevelUpIfNeeded.mockResolvedValue({
+        id: 'test-player-123',
+        level: 2,
+        xp: 5,
+        leveledUp: false,
+        levelsGained: 0,
+        message: 'No level up needed'
       });
 
       const result = await trainHorse(1, 'Racing');
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('Horse trained successfully in Racing. +5 added.');
+      expect(result.message).toContain('Horse trained successfully in Racing. +5 added.');
       expect(result.updatedHorse.name).toBe('Test Horse');
       expect(result.nextEligible).toBeDefined();
+      expect(result.traitEffects).toBeDefined();
+      expect(result.traitEffects.appliedTraits).toEqual([]);
+
+      // Verify both XP functions are called (as requested in task)
+      expect(mockAddXp).toHaveBeenCalledWith('test-player-123', 5);
+      expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('test-player-123');
     });
 
-    it('should reject training for ineligible horse (under age)', async () => {
+    it('should reject training for ineligible horse (under age)', async() => {
       mockGetHorseAge.mockResolvedValue(2);
 
       const result = await trainHorse(1, 'Racing');
@@ -194,7 +244,7 @@ describe('trainingController', () => {
       });
     });
 
-    it('should reject training for horse in cooldown', async () => {
+    it('should reject training for horse in cooldown', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const recentDate = new Date();
       recentDate.setDate(recentDate.getDate() - 3); // 3 days ago
@@ -211,12 +261,118 @@ describe('trainingController', () => {
       });
     });
 
-    it('should handle training log errors gracefully', async () => {
+    it('should handle training log errors gracefully', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'Test Horse',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'test-player-123'
+      });
       mockLogTrainingSession.mockRejectedValue(new Error('Failed to log training'));
 
       await expect(trainHorse(1, 'Racing')).rejects.toThrow('Training failed: Failed to log training');
+    });
+
+    it('should award +5 XP and call levelUpIfNeeded after successful training', async() => {
+      // Mock successful training scenario with focus on XP system
+      mockGetHorseAge.mockResolvedValue(4);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'XP Test Horse',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'xp-test-player'
+      });
+      mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Dressage', trainedAt: new Date() });
+      mockIncrementDisciplineScore.mockResolvedValue({
+        id: 1,
+        name: 'XP Test Horse',
+        disciplineScores: { Dressage: 3 },
+        breed: { id: 1, name: 'Arabian' },
+        ownerId: 'xp-test-player'
+      });
+      mockUpdateHorseStat.mockResolvedValue({
+        id: 1,
+        name: 'XP Test Horse',
+        focus: 12 // Updated stat for Dressage
+      });
+
+      // Mock XP system - player has 90 XP, should level up after +5 XP
+      mockAddXp.mockResolvedValue({
+        id: 'xp-test-player',
+        xp: 95,
+        level: 1,
+        leveledUp: false,
+        levelsGained: 0,
+        xpGained: 5
+      });
+
+      // Mock levelUpIfNeeded - should trigger level up since player now has 95 XP
+      mockLevelUpIfNeeded.mockResolvedValue({
+        id: 'xp-test-player',
+        level: 1,
+        xp: 95,
+        leveledUp: false,
+        levelsGained: 0,
+        message: 'No level up needed'
+      });
+
+      const result = await trainHorse(1, 'Dressage');
+
+      // Verify training success
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Horse trained successfully in Dressage. +5 added.');
+
+      // Verify XP award system (as requested in task)
+      expect(mockAddXp).toHaveBeenCalledWith('xp-test-player', 5);
+      expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('xp-test-player');
+
+      // Verify call order: addXp should be called before levelUpIfNeeded
+      const addXpCall = mockAddXp.mock.invocationCallOrder[0];
+      const levelUpCall = mockLevelUpIfNeeded.mock.invocationCallOrder[0];
+      expect(addXpCall).toBeLessThan(levelUpCall);
+    });
+
+    it('should handle XP system errors gracefully without breaking training', async() => {
+      // Mock successful training scenario
+      mockGetHorseAge.mockResolvedValue(4);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'Error Test Horse',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'error-test-player'
+      });
+      mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
+      mockIncrementDisciplineScore.mockResolvedValue({
+        id: 1,
+        name: 'Error Test Horse',
+        disciplineScores: { Racing: 2 },
+        breed: { id: 1, name: 'Thoroughbred' },
+        ownerId: 'error-test-player'
+      });
+      mockUpdateHorseStat.mockResolvedValue({
+        id: 1,
+        name: 'Error Test Horse',
+        speed: 8 // Updated stat
+      });
+
+      // Mock XP system error
+      mockAddXp.mockRejectedValue(new Error('XP system unavailable'));
+
+      const result = await trainHorse(1, 'Racing');
+
+      // Training should still succeed despite XP error
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('Horse trained successfully in Racing. +5 added.');
+      expect(result.updatedHorse.name).toBe('Error Test Horse');
+
+      // Verify XP was attempted
+      expect(mockAddXp).toHaveBeenCalledWith('error-test-player', 5);
+      // levelUpIfNeeded should not be called if addXp fails
+      expect(mockLevelUpIfNeeded).not.toHaveBeenCalled();
     });
   });
 
@@ -227,7 +383,7 @@ describe('trainingController', () => {
       mockGetAnyRecentTraining.mockClear();
     });
 
-    it('should return complete status for eligible horse with no training history', async () => {
+    it('should return complete status for eligible horse with no training history', async() => {
       mockGetHorseAge.mockResolvedValue(5);
       mockGetLastTrainingDate.mockResolvedValue(null);
       mockGetAnyRecentTraining.mockResolvedValue(null);
@@ -243,7 +399,7 @@ describe('trainingController', () => {
       });
     });
 
-    it('should return complete status for horse in active cooldown', async () => {
+    it('should return complete status for horse in active cooldown', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
       mockGetLastTrainingDate.mockResolvedValue(null); // No training in this specific discipline
@@ -260,7 +416,7 @@ describe('trainingController', () => {
       expect(result.cooldown.lastTrainingDate).toEqual(twoDaysAgo);
     });
 
-    it('should return complete status for horse with expired cooldown', async () => {
+    it('should return complete status for horse with expired cooldown', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const eightDaysAgo = new Date(Date.now() - (8 * 24 * 60 * 60 * 1000));
       mockGetLastTrainingDate.mockResolvedValue(eightDaysAgo);
@@ -276,7 +432,7 @@ describe('trainingController', () => {
       expect(result.cooldown.remainingDays).toBe(0);
     });
 
-    it('should return status for ineligible horse (under age)', async () => {
+    it('should return status for ineligible horse (under age)', async() => {
       mockGetHorseAge.mockResolvedValue(2);
       mockGetLastTrainingDate.mockResolvedValue(null);
       mockGetAnyRecentTraining.mockResolvedValue(null);
@@ -292,7 +448,7 @@ describe('trainingController', () => {
       });
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockGetHorseAge.mockRejectedValue(new Error('Database error'));
 
       await expect(getTrainingStatus(1, 'Racing')).rejects.toThrow('Training status check failed');
@@ -306,7 +462,7 @@ describe('trainingController', () => {
       mockGetAnyRecentTraining.mockClear();
     });
 
-    it('should handle different disciplines with global cooldown', async () => {
+    it('should handle different disciplines with global cooldown', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
       mockGetAnyRecentTraining.mockResolvedValue(twoDaysAgo); // Horse trained 2 days ago in any discipline
@@ -317,12 +473,12 @@ describe('trainingController', () => {
       // Both should be blocked due to global cooldown
       expect(racingResult.eligible).toBe(false);
       expect(racingResult.reason).toBe('Training cooldown active for this horse');
-      
+
       expect(jumpingResult.eligible).toBe(false);
       expect(jumpingResult.reason).toBe('Training cooldown active for this horse');
     });
 
-    it('should handle edge case of exactly 7 days cooldown', async () => {
+    it('should handle edge case of exactly 7 days cooldown', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const exactlySevenDaysAgo = new Date(Date.now() - (7 * 24 * 60 * 60 * 1000) - 1000); // Just over 7 days
       mockGetAnyRecentTraining.mockResolvedValue(exactlySevenDaysAgo);
@@ -333,16 +489,41 @@ describe('trainingController', () => {
       expect(result.reason).toBe(null);
     });
 
-    it('should handle complete training workflow', async () => {
+    it('should handle complete training workflow', async() => {
       // Mock successful training
       mockGetHorseAge.mockResolvedValue(4);
       mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'Test Horse',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'test-player-123'
+      });
       mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 1,
         name: 'Test Horse',
         disciplineScores: { Racing: 5 },
-        breed: { id: 1, name: 'Thoroughbred' }
+        breed: { id: 1, name: 'Thoroughbred' },
+        ownerId: 'test-player-123'
+      });
+      mockAddXp.mockResolvedValue({
+        id: 'test-player-123',
+        xp: 105,
+        level: 2,
+        leveledUp: true,
+        levelsGained: 1,
+        xpGained: 5
+      });
+
+      // Mock levelUpIfNeeded for integration test
+      mockLevelUpIfNeeded.mockResolvedValue({
+        id: 'test-player-123',
+        level: 2,
+        xp: 5,
+        leveledUp: false,
+        levelsGained: 0,
+        message: 'No level up needed'
       });
 
       const trainResult = await trainHorse(1, 'Racing');
@@ -364,7 +545,7 @@ describe('trainingController', () => {
       mockGetAnyRecentTraining.mockClear();
     });
 
-    it('should return trainable horses for player with eligible horses', async () => {
+    it('should return trainable horses for player with eligible horses', async() => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
@@ -396,7 +577,7 @@ describe('trainingController', () => {
       });
     });
 
-    it('should return empty array for player with no horses', async () => {
+    it('should return empty array for player with no horses', async() => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
@@ -410,7 +591,7 @@ describe('trainingController', () => {
       expect(result).toEqual([]);
     });
 
-    it('should return empty array for non-existent player', async () => {
+    it('should return empty array for non-existent player', async() => {
       const playerId = 'non-existent-player';
       mockGetPlayerWithHorses.mockResolvedValue(null);
 
@@ -419,7 +600,7 @@ describe('trainingController', () => {
       expect(result).toEqual([]);
     });
 
-    it('should filter out horses under 3 years old', async () => {
+    it('should filter out horses under 3 years old', async() => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
@@ -439,7 +620,7 @@ describe('trainingController', () => {
       expect(result[0].age).toBe(4);
     });
 
-    it('should exclude horses with recent training (global cooldown)', async () => {
+    it('should exclude horses with recent training (global cooldown)', async() => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
@@ -457,7 +638,7 @@ describe('trainingController', () => {
       expect(result).toEqual([]);
     });
 
-    it('should handle database errors gracefully for individual horses', async () => {
+    it('should handle database errors gracefully for individual horses', async() => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,
@@ -479,12 +660,12 @@ describe('trainingController', () => {
       expect(result[0].trainableDisciplines).toEqual(['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western']);
     });
 
-    it('should throw error for missing player ID', async () => {
+    it('should throw error for missing player ID', async() => {
       await expect(getTrainableHorses('')).rejects.toThrow('Player ID is required');
       await expect(getTrainableHorses(null)).rejects.toThrow('Player ID is required');
     });
 
-    it('should handle player model errors', async () => {
+    it('should handle player model errors', async() => {
       const playerId = 'test-player-123';
       mockGetPlayerWithHorses.mockRejectedValue(new Error('Player database error'));
 
@@ -508,10 +689,16 @@ describe('trainingController', () => {
       };
     });
 
-    it('should return success response with correct format for successful training', async () => {
+    it('should return success response with correct format for successful training', async() => {
       // Mock successful training
       mockGetHorseAge.mockResolvedValue(4);
       mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'Nova',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'test-player-123'
+      });
       const mockTrainingLog = {
         id: 1,
         horse_id: 1,
@@ -522,10 +709,19 @@ describe('trainingController', () => {
         id: 1,
         name: 'Nova',
         disciplineScores: { 'Dressage': 25 },
-        breed: { id: 1, name: 'Thoroughbred' }
+        breed: { id: 1, name: 'Thoroughbred' },
+        ownerId: 'test-player-123'
       };
       mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
       mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
+      mockAddXp.mockResolvedValue({
+        id: 'test-player-123',
+        xp: 105,
+        level: 2,
+        leveledUp: true,
+        levelsGained: 1,
+        xpGained: 5
+      });
 
       const { trainRouteHandler } = await import('../controllers/trainingController.js');
       await trainRouteHandler(mockReq, mockRes);
@@ -534,12 +730,17 @@ describe('trainingController', () => {
         success: true,
         message: 'Nova trained in Dressage. +5 added.',
         updatedScore: 25,
-        nextEligibleDate: expect.any(String)
+        nextEligibleDate: expect.any(String),
+        traitEffects: expect.objectContaining({
+          appliedTraits: [],
+          scoreModifier: 0,
+          xpModifier: 0
+        })
       });
       expect(mockRes.status).not.toHaveBeenCalled(); // Should not set error status
     });
 
-    it('should return failure response for ineligible horse (under age)', async () => {
+    it('should return failure response for ineligible horse (under age)', async() => {
       mockGetHorseAge.mockResolvedValue(2);
 
       const { trainRouteHandler } = await import('../controllers/trainingController.js');
@@ -552,7 +753,7 @@ describe('trainingController', () => {
       });
     });
 
-    it('should return failure response for horse in cooldown', async () => {
+    it('should return failure response for horse in cooldown', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
       mockGetAnyRecentTraining.mockResolvedValue(twoDaysAgo);
@@ -567,9 +768,15 @@ describe('trainingController', () => {
       });
     });
 
-    it('should handle missing discipline score gracefully', async () => {
+    it('should handle missing discipline score gracefully', async() => {
       mockGetHorseAge.mockResolvedValue(4);
       mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'Nova',
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
+        ownerId: 'test-player-123'
+      });
       const mockTrainingLog = {
         id: 1,
         horse_id: 1,
@@ -580,10 +787,19 @@ describe('trainingController', () => {
         id: 1,
         name: 'Nova',
         disciplineScores: null, // No discipline scores
-        breed: { id: 1, name: 'Thoroughbred' }
+        breed: { id: 1, name: 'Thoroughbred' },
+        ownerId: 'test-player-123'
       };
       mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
       mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
+      mockAddXp.mockResolvedValue({
+        id: 'test-player-123',
+        xp: 105,
+        level: 2,
+        leveledUp: true,
+        levelsGained: 1,
+        xpGained: 5
+      });
 
       const { trainRouteHandler } = await import('../controllers/trainingController.js');
       await trainRouteHandler(mockReq, mockRes);
@@ -592,11 +808,16 @@ describe('trainingController', () => {
         success: true,
         message: 'Nova trained in Dressage. +5 added.',
         updatedScore: 0, // Should default to 0 when no scores exist
-        nextEligibleDate: expect.any(String)
+        nextEligibleDate: expect.any(String),
+        traitEffects: expect.objectContaining({
+          appliedTraits: [],
+          scoreModifier: 0,
+          xpModifier: 0
+        })
       });
     });
 
-    it('should handle server errors gracefully', async () => {
+    it('should handle server errors gracefully', async() => {
       mockGetHorseAge.mockRejectedValue(new Error('Database connection failed'));
 
       const { trainRouteHandler } = await import('../controllers/trainingController.js');
@@ -609,5 +830,50 @@ describe('trainingController', () => {
         error: expect.any(String)
       });
     });
+
+    it('should handle trait effects in training', async() => {
+      // Mock horse with positive trait
+      mockGetHorseAge.mockResolvedValue(4);
+      mockGetAnyRecentTraining.mockResolvedValue(null);
+      mockGetHorseById.mockResolvedValue({
+        id: 1,
+        name: 'Intelligent Horse',
+        epigenetic_modifiers: { positive: ['intelligent'], negative: [], hidden: [] },
+        ownerId: 'test-player-123'
+      });
+      mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Dressage', trainedAt: new Date() });
+      mockIncrementDisciplineScore.mockResolvedValue({
+        id: 1,
+        name: 'Intelligent Horse',
+        disciplineScores: { Dressage: 6 }, // +6 instead of +5 due to trait
+        breed: { id: 1, name: 'Warmblood' },
+        ownerId: 'test-player-123'
+      });
+      mockAddXp.mockResolvedValue({
+        id: 'test-player-123',
+        xp: 106,
+        level: 2,
+        leveledUp: true,
+        levelsGained: 1,
+        xpGained: 6 // +6 XP due to trait
+      });
+
+      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      mockReq.body = { horseId: 1, discipline: 'Dressage' };
+
+      await trainRouteHandler(mockReq, mockRes);
+
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Intelligent Horse trained in Dressage. +6 added.',
+        updatedScore: 6,
+        nextEligibleDate: expect.any(String),
+        traitEffects: expect.objectContaining({
+          appliedTraits: ['intelligent'],
+          scoreModifier: 1, // +1 bonus from trait
+          xpModifier: 1 // +1 XP bonus from trait
+        })
+      });
+    });
   });
-}); 
+});

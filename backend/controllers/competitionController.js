@@ -1,16 +1,141 @@
 import { getHorseById } from '../models/horseModel.js';
 import { saveResult, getResultsByShow } from '../models/resultModel.js';
+import { addXp, levelUpIfNeeded } from '../models/playerModel.js';
+import { logXpEvent } from '../models/xpLogModel.js';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
+import { calculateCompetitionScore } from '../utils/competitionScore.js';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
-import { 
-  calculatePrizeDistribution, 
-  calculateStatGains, 
-  calculateEntryFees, 
-  hasValidRider 
+import {
+  calculatePrizeDistribution,
+  calculateStatGains,
+  calculateEntryFees,
+  hasValidRider
 } from '../utils/competitionRewards.js';
 import { updateHorseRewards } from '../utils/horseUpdates.js';
 import { transferEntryFees } from '../utils/playerUpdates.js';
 import logger from '../utils/logger.js';
+
+/**
+ * Helper function to detect trait bonuses for a horse in a specific discipline
+ * @param {Object} horse - Horse object with epigenetic_modifiers
+ * @param {string} discipline - Competition discipline
+ * @returns {Object} Trait bonus information
+ */
+function detectTraitBonuses(horse, discipline) {
+  const result = {
+    hasTraitBonus: false,
+    traitBonusAmount: 0,
+    appliedTraits: [],
+    bonusDescription: ''
+  };
+
+  // Check for discipline affinity traits
+  if (horse.epigenetic_modifiers?.positive) {
+    const disciplineKey = discipline.toLowerCase().replace(/\s+/g, '_');
+    const affinityTrait = `discipline_affinity_${disciplineKey}`;
+
+    if (horse.epigenetic_modifiers.positive.includes(affinityTrait)) {
+      result.hasTraitBonus = true;
+      result.traitBonusAmount = 5;
+      result.appliedTraits.push(affinityTrait);
+      result.bonusDescription = `+5 trait match bonus applied (${affinityTrait})`;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Enhanced competition scoring using the new calculateCompetitionScore function
+ * @param {Array} horses - Array of horse objects
+ * @param {Object} show - Show object with discipline
+ * @returns {Array} Sorted array of results with detailed scoring information
+ */
+function runEnhancedCompetition(horses, show) {
+  logger.info(`[runEnhancedCompetition] Starting enhanced competition for ${horses.length} horses in ${show.discipline}`);
+
+  // Calculate scores for each horse using the new scoring system
+  const results = horses.map(horse => {
+    try {
+      // Use the new calculateCompetitionScore function
+      const finalScore = calculateCompetitionScore(horse, show.discipline);
+
+      // Detect trait bonuses for transparency
+      const traitInfo = detectTraitBonuses(horse, show.discipline);
+
+      // Create detailed result object
+      const result = {
+        horseId: horse.id,
+        name: horse.name,
+        score: finalScore,
+        placement: null, // Will be assigned after sorting
+        discipline: show.discipline,
+
+        // Enhanced scoring details for transparency
+        scoringDetails: {
+          finalScore,
+          traitBonus: traitInfo.traitBonusAmount,
+          hasTraitAdvantage: traitInfo.hasTraitBonus,
+          appliedTraits: traitInfo.appliedTraits,
+          bonusDescription: traitInfo.bonusDescription,
+
+          // Base stats used in calculation
+          baseStats: {
+            speed: horse.speed || 0,
+            stamina: horse.stamina || 0,
+            focus: horse.focus || 0,
+            precision: horse.precision || 0,
+            agility: horse.agility || 0,
+            coordination: horse.coordination || 0,
+            boldness: horse.boldness || 0,
+            balance: horse.balance || 0
+          },
+
+          // Additional factors
+          stressLevel: horse.stress_level || 0,
+          health: horse.health || 'Good',
+          tackBonuses: {
+            saddle: horse.tack?.saddleBonus || 0,
+            bridle: horse.tack?.bridleBonus || 0
+          }
+        }
+      };
+
+      logger.info(`[runEnhancedCompetition] Horse ${horse.name}: Score ${finalScore}${traitInfo.bonusDescription ? `, ${traitInfo.bonusDescription}` : ''}`);
+
+      return result;
+
+    } catch (error) {
+      logger.error(`[runEnhancedCompetition] Error calculating score for horse ${horse.id}: ${error.message}`);
+      return {
+        horseId: horse.id,
+        name: horse.name || 'Unknown',
+        score: 0,
+        placement: null,
+        discipline: show.discipline,
+        scoringDetails: {
+          finalScore: 0,
+          error: error.message
+        }
+      };
+    }
+  });
+
+  // Sort by score (highest first)
+  results.sort((a, b) => b.score - a.score);
+
+  // Assign placements to top 3
+  const placements = ['1st', '2nd', '3rd'];
+  results.forEach((result, index) => {
+    if (index < 3) {
+      result.placement = placements[index];
+    }
+  });
+
+  logger.info(`[runEnhancedCompetition] Competition completed. Winner: ${results[0]?.name} with score ${results[0]?.score}`);
+
+  return results;
+}
 
 /**
  * Enter horses into a show and run the competition with enhanced features
@@ -19,27 +144,27 @@ import logger from '../utils/logger.js';
  * @returns {Object} - Competition results with summary
  */
 async function enterAndRunShow(horseIds, show) {
-  try {
-    // Validate inputs
-    if (!horseIds) {
-      throw new Error('Horse IDs array is required');
-    }
-    if (!Array.isArray(horseIds)) {
-      throw new Error('Horse IDs must be an array');
-    }
-    if (horseIds.length === 0) {
-      throw new Error('At least one horse ID is required');
-    }
-    if (!show) {
-      throw new Error('Show object is required');
-    }
+  // Validate inputs (outside try-catch to preserve original error messages)
+  if (!horseIds) {
+    throw new Error('Horse IDs array is required');
+  }
+  if (!Array.isArray(horseIds)) {
+    throw new Error('Horse IDs must be an array');
+  }
+  if (horseIds.length === 0) {
+    throw new Error('At least one horse ID is required');
+  }
+  if (!show) {
+    throw new Error('Show object is required');
+  }
 
+  try {
     logger.info(`[competitionController.enterAndRunShow] Starting enhanced competition for show ${show.id} with ${horseIds.length} horses`);
 
     // Step 1: Fetch horse data and validate riders
     const horses = [];
     const failedFetches = [];
-    
+
     for (const horseId of horseIds) {
       try {
         const horse = await getHorseById(horseId);
@@ -120,14 +245,14 @@ async function enterAndRunShow(horseIds, show) {
       }
     }
 
-    // Step 6: Run the competition simulation
+    // Step 6: Run the enhanced competition with trait scoring
     let simulationResults;
     try {
-      simulationResults = simulateCompetition(validHorses, show);
-      logger.info(`[competitionController.enterAndRunShow] Competition simulation completed with ${simulationResults.length} results`);
+      simulationResults = runEnhancedCompetition(validHorses, show);
+      logger.info(`[competitionController.enterAndRunShow] Enhanced competition completed with ${simulationResults.length} results`);
     } catch (error) {
-      logger.error(`[competitionController.enterAndRunShow] Competition simulation failed: ${error.message}`);
-      throw new Error('Competition simulation error: ' + error.message);
+      logger.error(`[competitionController.enterAndRunShow] Enhanced competition failed: ${error.message}`);
+      throw new Error('Enhanced competition error: ' + error.message);
     }
 
     // Step 7: NEW - Calculate prize distribution and stat gains
@@ -142,13 +267,14 @@ async function enterAndRunShow(horseIds, show) {
 
     // Step 8: Save results and update horse rewards
     const savedResults = [];
+    const xpEvents = []; // Track XP awards for summary
     try {
       for (const simResult of simulationResults) {
         // Calculate prize and stat gains for winners
         const prizeWon = prizeMap[simResult.placement] || 0;
         const statGains = simResult.placement ? calculateStatGains(simResult.placement, show.discipline) : null;
 
-        // Save competition result with enhanced data
+        // Save competition result with enhanced trait scoring data
         const resultData = {
           horseId: simResult.horseId,
           showId: show.id,
@@ -158,7 +284,14 @@ async function enterAndRunShow(horseIds, show) {
           runDate: show.runDate,
           showName: show.name,
           prizeWon,
-          statGains
+          statGains,
+
+          // NEW: Enhanced scoring details for transparency
+          scoringDetails: simResult.scoringDetails || {},
+          traitBonus: simResult.scoringDetails?.traitBonus || 0,
+          hasTraitAdvantage: simResult.scoringDetails?.hasTraitAdvantage || false,
+          bonusDescription: simResult.scoringDetails?.bonusDescription || '',
+          appliedTraits: simResult.scoringDetails?.appliedTraits || []
         };
 
         const savedResult = await saveResult(resultData);
@@ -175,6 +308,61 @@ async function enterAndRunShow(horseIds, show) {
             // Continue with other horses even if one update fails
           }
         }
+
+        // NEW: Award XP to horse owner based on placement
+        if (simResult.placement) {
+          try {
+            // Get horse to find owner
+            const horse = await getHorseById(simResult.horseId);
+            if (horse && horse.ownerId) {
+              let xpAmount = 0;
+              switch (simResult.placement) {
+                case '1st':
+                  xpAmount = 20;
+                  break;
+                case '2nd':
+                  xpAmount = 15;
+                  break;
+                case '3rd':
+                  xpAmount = 10;
+                  break;
+              }
+
+              if (xpAmount > 0) {
+                // Award XP using playerModel.addXp
+                const xpResult = await addXp(horse.ownerId, xpAmount);
+
+                // Call levelUpIfNeeded after awarding XP (as requested in task)
+                const levelUpResult = await levelUpIfNeeded(horse.ownerId);
+
+                // Log XP event for auditing
+                await logXpEvent({
+                  playerId: horse.ownerId,
+                  amount: xpAmount,
+                  reason: `${simResult.placement} place with horse ${horse.name} in ${show.discipline}`
+                });
+
+                // Track XP event for summary
+                const xpEvent = {
+                  playerId: horse.ownerId,
+                  horseId: horse.id,
+                  horseName: horse.name,
+                  placement: simResult.placement,
+                  xpAwarded: xpAmount,
+                  leveledUp: xpResult.leveledUp || levelUpResult.leveledUp,
+                  newLevel: levelUpResult.level,
+                  levelsGained: xpResult.levelsGained || levelUpResult.levelsGained
+                };
+                xpEvents.push(xpEvent);
+
+                logger.info(`[competitionController.enterAndRunShow] Awarded ${xpAmount} XP to player ${horse.ownerId} for ${simResult.placement} place${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
+              }
+            }
+          } catch (error) {
+            logger.error(`[competitionController.enterAndRunShow] Failed to award XP for horse ${simResult.horseId}: ${error.message}`);
+            // Continue with other horses even if XP award fails
+          }
+        }
       }
       logger.info(`[competitionController.enterAndRunShow] Successfully saved ${savedResults.length} competition results`);
     } catch (error) {
@@ -182,7 +370,7 @@ async function enterAndRunShow(horseIds, show) {
       throw new Error('Failed to save competition results: ' + error.message);
     }
 
-    // Step 9: Extract top three for summary
+    // Step 9: Extract top three for summary with trait information
     const topThree = simulationResults
       .filter(result => result.placement !== null)
       .slice(0, 3)
@@ -191,13 +379,42 @@ async function enterAndRunShow(horseIds, show) {
         name: result.name,
         score: result.score,
         placement: result.placement,
-        prizeWon: prizeMap[result.placement] || 0
+        prizeWon: prizeMap[result.placement] || 0,
+
+        // NEW: Include trait bonus information for transparency
+        traitBonus: result.scoringDetails?.traitBonus || 0,
+        hasTraitAdvantage: result.scoringDetails?.hasTraitAdvantage || false,
+        bonusDescription: result.scoringDetails?.bonusDescription || '',
+        appliedTraits: result.scoringDetails?.appliedTraits || []
       }));
 
-    // Step 10: Return enhanced results with summary
+    // Step 10: Calculate trait statistics for summary
+    const traitStats = {
+      horsesWithTraitAdvantage: simulationResults.filter(r => r.scoringDetails?.hasTraitAdvantage).length,
+      totalTraitBonuses: simulationResults.reduce((sum, r) => sum + (r.scoringDetails?.traitBonus || 0), 0),
+      averageTraitBonus: 0,
+      mostCommonTraits: {}
+    };
+
+    // Calculate average trait bonus for horses that have traits
+    const horsesWithTraits = simulationResults.filter(r => r.scoringDetails?.hasTraitAdvantage);
+    if (horsesWithTraits.length > 0) {
+      traitStats.averageTraitBonus = traitStats.totalTraitBonuses / horsesWithTraits.length;
+    }
+
+    // Count trait occurrences
+    simulationResults.forEach(result => {
+      if (result.scoringDetails?.appliedTraits) {
+        result.scoringDetails.appliedTraits.forEach(trait => {
+          traitStats.mostCommonTraits[trait] = (traitStats.mostCommonTraits[trait] || 0) + 1;
+        });
+      }
+    });
+
+    // Step 11: Return enhanced results with comprehensive summary
     const response = {
       success: true,
-      message: 'Competition completed successfully with enhanced features',
+      message: 'Competition completed successfully with enhanced trait scoring',
       results: savedResults,
       failedFetches,
       summary: {
@@ -207,7 +424,17 @@ async function enterAndRunShow(horseIds, show) {
         topThree,
         entryFeesCollected: entryFeesTransferred,
         prizesAwarded: totalPrizesAwarded,
-        prizeDistribution
+        prizeDistribution,
+
+        // NEW: XP Events tracking (as requested in task)
+        xpEvents,
+        totalXpAwarded: xpEvents.reduce((sum, event) => sum + event.xpAwarded, 0),
+        playersLeveledUp: xpEvents.filter(event => event.leveledUp).length,
+
+        // NEW: Trait scoring statistics
+        traitStatistics: traitStats,
+        discipline: show.discipline,
+        scoringMethod: 'Enhanced trait-based scoring with calculateCompetitionScore()'
       }
     };
 
@@ -222,4 +449,4 @@ async function enterAndRunShow(horseIds, show) {
 
 export {
   enterAndRunShow
-}; 
+};

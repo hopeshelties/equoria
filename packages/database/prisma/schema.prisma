@@ -16,8 +16,11 @@ model Horse {
   breed   Breed @relation(fields: [breedId], references: [id])
   breedId Int
 
-  owner   User @relation(fields: [ownerId], references: [id])
-  ownerId Int
+  player   Player? @relation(fields: [playerId], references: [id])
+  playerId String?
+
+  owner   User? @relation(fields: [ownerId], references: [id])
+  ownerId Int?
 
   stable   Stable? @relation(fields: [stableId], references: [id])
   stableId Int?
@@ -42,7 +45,7 @@ model Horse {
   flexibility           Int?
   obedience             Int?
   focus                 Int?
-  
+
   // Legacy stats (keeping for backward compatibility)
   strength              Int?
   endurance             Int?
@@ -62,11 +65,11 @@ model Horse {
   earnings              Float?   @default(0)
   rider                 Json?    // Required for competition entry
   disciplineScores      Json?    // Stores discipline scores as {"Dressage": 10, "Show Jumping": 20, ...}
-  
+
   // New bonding and stress tracking fields
   bond_score            Int?     @default(50)  // Bonding score between horse and handler (0-100)
   stress_level          Int?     @default(0)   // Current stress level of the horse (0-100)
-  
+
   // Epigenetic traits system
   epigenetic_modifiers  Json?    @default("{\"positive\": [], \"negative\": [], \"hidden\": []}")  // Traits revealed through foal development
 
@@ -75,9 +78,25 @@ model Horse {
   foalDevelopment       FoalDevelopment?
   foalActivities        FoalActivity[]
   foalTrainingHistory   FoalTrainingHistory[]
+  groomAssignments      GroomAssignment[]
+  groomInteractions     GroomInteraction[]
 }
 
+model Player {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  money    Int
+  level    Int
+  xp       Int
+  settings Json
+  horses   Horse[]  // 1:N relation to Horse
+  grooms   Groom[]  // 1:N relation to Groom
+  groomAssignments GroomAssignment[]  // 1:N relation to GroomAssignment
+  xpEvents XpEvent[]  // 1:N relation to XpEvent
 
+  @@map("players")
+}
 
 model Breed {
   id          Int      @id @default(autoincrement())
@@ -90,23 +109,19 @@ model Breed {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  name        String
-  email       String    @unique
-  password    String
-  role        String    @default("user")
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  lastLoginAt DateTime?
-  
-  // Game data fields (moved from Player model)
-  money       Int       @default(1000)
-  level       Int       @default(1)
-  xp          Int       @default(0)
-  settings    Json      @default("{}")
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      String   @default("user") // user, admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   horses Horse[]
+
+  @@map("users")
 }
 
 model Stable {
@@ -215,4 +230,92 @@ model FoalTrainingHistory {
   @@index([day])
   @@index([timestamp])
   @@index([horse_id, day])
-} 
+}
+
+model Groom {
+  id          Int      @id @default(autoincrement())
+  name        String
+  speciality  String   // "foal_care", "general", "training", "medical"
+  experience  Int      @default(1) // Years of experience (1-20)
+  skill_level String   @default("novice") // "novice", "intermediate", "expert", "master"
+  personality String   // "gentle", "energetic", "patient", "strict"
+  hourly_rate Float    @default(15.0) // Cost per hour
+  availability Json    @default("{}") // Available days/hours
+  bio         String?  // Optional biography
+  image_url   String?  // Optional profile image
+  is_active   Boolean  @default(true)
+  hired_date  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  assignments   GroomAssignment[]
+  interactions  GroomInteraction[]
+  player        Player? @relation(fields: [playerId], references: [id])
+  playerId      String?
+
+  @@map("grooms")
+}
+
+model GroomAssignment {
+  id          Int      @id @default(autoincrement())
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false) // System-assigned default groom
+  priority    Int      @default(1) // 1 = primary, 2 = backup, etc.
+  notes       String?  // Assignment notes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  foal        Horse @relation(fields: [foalId], references: [id], onDelete: Cascade)
+  foalId      Int
+  groom       Groom @relation(fields: [groomId], references: [id], onDelete: Cascade)
+  groomId     Int
+  player      Player? @relation(fields: [playerId], references: [id])
+  playerId    String?
+  interactions GroomInteraction[]
+
+  @@unique([foalId, groomId, isActive])
+  @@map("groom_assignments")
+}
+
+model GroomInteraction {
+  id              Int      @id @default(autoincrement())
+  interactionType String   // "daily_care", "feeding", "grooming", "exercise", "medical_check"
+  duration        Int      // Duration in minutes
+  bondingChange   Int      @default(0) // Change in bonding score (-10 to +10)
+  stressChange    Int      @default(0) // Change in stress level (-10 to +10)
+  quality         String   @default("good") // "poor", "fair", "good", "excellent"
+  notes           String?  // Optional interaction notes
+  cost            Float    @default(0.0) // Cost of this interaction
+  timestamp       DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  // Relations
+  foal            Horse @relation(fields: [foalId], references: [id], onDelete: Cascade)
+  foalId          Int
+  groom           Groom @relation(fields: [groomId], references: [id], onDelete: Cascade)
+  groomId         Int
+  assignment      GroomAssignment? @relation(fields: [assignmentId], references: [id])
+  assignmentId    Int?
+
+  @@map("groom_interactions")
+}
+
+model XpEvent {
+  id        Int      @id @default(autoincrement())
+  amount    Int      // Amount of XP gained/lost (positive or negative)
+  reason    String   // Reason for XP change (e.g., "Trained horse in Dressage")
+  timestamp DateTime @default(now())
+
+  // Relations
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  playerId String
+
+  @@map("xp_events")
+  @@index([playerId])
+  @@index([timestamp])
+  @@index([playerId, timestamp])
+}

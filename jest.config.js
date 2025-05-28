@@ -1,6 +1,10 @@
-module.exports = {
+export default {
   testEnvironment: 'node',
-  roots: ['<rootDir>/tests'],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  globalTeardown: '<rootDir>/src/tests/teardown.js'
-}; 
+  transform: {},
+  extensionsToTreatAsEsm: ['.js'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
+  testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
+  verbose: true
+};

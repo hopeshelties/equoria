@@ -1,56 +1,59 @@
-// middleware/errorHandler.js
 import logger from '../utils/logger.js';
-import config from '../config/config.js';
+import { AppError } from '../errors/index.js';
 
-export default (err, req, res, next) => {
-  // Log the full error with context
-  logger.error(`Error in ${req.method} ${req.path}:`, {
+/**
+ * Global Error Handler Middleware
+ * Handles all errors in a consistent manner with proper logging
+ */
+const errorHandler = (err, req, res, next) => {
+  let error = { ...err };
+  error.message = err.message;
+
+  // Log error details
+  logger.error(`Error ${err.message}`, {
     error: err.message,
     stack: err.stack,
-    body: req.body,
-    params: req.params,
-    query: req.query,
+    url: req.originalUrl,
+    method: req.method,
     ip: req.ip,
     userAgent: req.get('User-Agent')
   });
 
-  // Determine error type and response
-  let statusCode = 500;
-  let message = 'Internal Server Error';
-  let details = null;
-
-  // Handle known error types
-  if (err.name === 'ValidationError') {
-    statusCode = 400;
-    message = 'Validation Error';
-    details = err.details || err.message;
-  } else if (err.name === 'UnauthorizedError') {
-    statusCode = 401;
-    message = 'Unauthorized';
-  } else if (err.name === 'ForbiddenError') {
-    statusCode = 403;
-    message = 'Forbidden';
-  } else if (err.name === 'NotFoundError') {
-    statusCode = 404;
-    message = 'Resource Not Found';
-  } else if (err.code === 'P2002') { // Prisma unique constraint
-    statusCode = 409;
-    message = 'Resource already exists';
-  } else if (err.code === 'P2025') { // Prisma record not found
-    statusCode = 404;
-    message = 'Resource not found';
+  // Mongoose bad ObjectId
+  if (err.name === 'CastError') {
+    const message = 'Resource not found';
+    error = new AppError(message, 404);
   }
 
-  // In development, include more error details
-  const response = {
-    success: false,
-    message,
-    ...(details && { details }),
-    ...(config.env === 'development' && { 
-      stack: err.stack,
-      originalError: err.message 
-    })
-  };
+  // Mongoose duplicate key
+  if (err.code === 11000) {
+    const message = 'Duplicate field value entered';
+    error = new AppError(message, 400);
+  }
 
-  res.status(statusCode).json(response);
-}; 
+  // Mongoose validation error
+  if (err.name === 'ValidationError') {
+    const message = Object.values(err.errors).map(val => val.message);
+    error = new AppError(message, 400);
+  }
+
+  // Prisma errors
+  if (err.code === 'P2002') {
+    const message = 'Duplicate field value entered';
+    error = new AppError(message, 400);
+  }
+
+  if (err.code === 'P2025') {
+    const message = 'Record not found';
+    error = new AppError(message, 404);
+  }
+
+  // Send error response
+  res.status(error.statusCode || 500).json({
+    success: false,
+    error: error.message || 'Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+};
+
+export default errorHandler;

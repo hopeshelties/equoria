@@ -1,7 +1,12 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock modules
-jest.unstable_mockModule('../db/index.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: {
     breed: {
       findUnique: jest.fn(),
@@ -20,7 +25,7 @@ jest.unstable_mockModule('../db/index.js', () => ({
   }
 }));
 
-jest.unstable_mockModule('../models/horseModel.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
   createHorse: jest.fn(),
 }));
 
@@ -44,11 +49,11 @@ describe('horseSeed', () => {
     console.warn = jest.fn();
 
     // Get mocked modules
-    mockPrisma = (await import('../db/index.js')).default;
-    mockCreateHorse = (await import('../models/horseModel.js')).createHorse;
-    
+    mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
+    mockCreateHorse = (await import(join(__dirname, '../models/horseModel.js'))).createHorse;
+
     // Import the functions we want to test
-    const seedModule = await import('./horseSeed.js');
+    const seedModule = await import(join(__dirname, './horseSeed.js'));
     findOrCreateBreed = seedModule.findOrCreateBreed;
     ensureReferencedRecordsExist = seedModule.ensureReferencedRecordsExist;
     checkHorseExists = seedModule.checkHorseExists;
@@ -113,7 +118,7 @@ describe('horseSeed', () => {
   describe('findOrCreateBreed', () => {
     it('should return existing breed if found', async () => {
       const existingBreed = { id: 1, name: 'Thoroughbred' };
-      
+
       mockPrisma.breed.findUnique.mockResolvedValue(existingBreed);
 
       const result = await findOrCreateBreed('Thoroughbred');
@@ -129,7 +134,7 @@ describe('horseSeed', () => {
 
     it('should create new breed if not found', async () => {
       const newBreed = { id: 2, name: 'Arabian', description: 'Seed-created Arabian' };
-      
+
       mockPrisma.breed.findUnique.mockResolvedValue(null);
       mockPrisma.breed.create.mockResolvedValue(newBreed);
 
@@ -173,14 +178,14 @@ describe('horseSeed', () => {
 
       expect(mockPrisma.user.upsert).toHaveBeenCalledTimes(2);
       expect(mockPrisma.stable.upsert).toHaveBeenCalledTimes(2);
-      
+
       // Check specific calls
       expect(mockPrisma.user.upsert).toHaveBeenCalledWith({
         where: { id: 1 },
         update: { name: 'Default Owner' },
         create: { id: 1, name: 'Default Owner' }
       });
-      
+
       expect(mockPrisma.user.upsert).toHaveBeenCalledWith({
         where: { id: 2 },
         update: { name: 'Second Owner' },
@@ -199,4 +204,4 @@ describe('horseSeed', () => {
       expect(console.warn).toHaveBeenCalledWith('[seed] Could not ensure User ID 2. Error:', error.message);
     });
   });
-}); 
+});

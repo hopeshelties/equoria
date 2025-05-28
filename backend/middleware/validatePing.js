@@ -1,16 +1,16 @@
-// middleware/validatePing.js
-import { query, validationResult } from 'express-validator';
+import { query } from 'express-validator';
+import { handleValidationErrors } from './validationErrorHandler.js';
 
+/**
+ * Ping Validation Middleware
+ * Validates query parameters for ping endpoint
+ */
 export const validatePing = [
   query('name')
     .optional()
     .isString().withMessage('Name must be a string')
-    .isLength({ min: 2, max: 30 }).withMessage('Name must be between 2 and 30 characters'),
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    next();
-  },
-]; 
+    .trim()
+    .isLength({ min: 2, max: 30 }).withMessage('Name must be between 2 and 30 characters')
+    .matches(/^[a-zA-Z0-9\s]+$/).withMessage('Name can only contain letters, numbers, and spaces'),
+  handleValidationErrors
+];

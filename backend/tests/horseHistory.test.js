@@ -1,4 +1,9 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock the dependencies
 const mockGetResultsByHorse = jest.fn();
@@ -9,16 +14,16 @@ const mockLogger = {
 };
 
 // Mock the modules
-jest.unstable_mockModule('../models/resultModel.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => ({
   getResultsByHorse: mockGetResultsByHorse
 }));
 
-jest.unstable_mockModule('../utils/logger.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
   default: mockLogger
 }));
 
 // Import the function to test after mocking
-const { getHorseHistory } = await import('../controllers/horseController.js');
+const { getHorseHistory } = await import(join(__dirname, '../controllers/horseController.js'));
 
 describe('Horse History Controller', () => {
   let req, res;
@@ -26,12 +31,12 @@ describe('Horse History Controller', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
-    
+
     // Setup request and response objects
     req = {
       params: { id: '1' }
     };
-    
+
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
@@ -231,7 +236,7 @@ describe('Horse History Controller', () => {
 
       // This should not throw but should handle the error gracefully
       await getHorseHistory(req, res);
-      
+
       expect(mockLogger.error).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -292,4 +297,4 @@ describe('Horse History Controller', () => {
       expect(responseData[1].showName).toBe('Older Show');
     });
   });
-}); 
+});

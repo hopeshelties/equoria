@@ -1,458 +1,382 @@
+/**
+ * Trait Discovery Engine
+ * Handles the revelation of hidden traits based on specific conditions
+ */
+
 import prisma from '../db/index.js';
 import logger from './logger.js';
-import { TRAIT_DEFINITIONS } from './traitEvaluation.js';
+import { getTraitDefinition } from './epigeneticTraits.js';
 
 /**
- * Trait Discovery System
- * Reveals hidden traits when specific conditions are met
+ * Discovery conditions that trigger trait revelation
  */
+const DISCOVERY_CONDITIONS = {
+  // Bonding-based discoveries
+  HIGH_BOND: {
+    condition: (horse) => horse.bond_score >= 80,
+    description: 'Strong bond formed',
+    priority: 'high'
+  },
 
-/**
- * Discovery conditions for revealing hidden traits
- */
-export const DISCOVERY_CONDITIONS = {
-  // Bonding-based revelations
-  high_bonding: {
-    name: 'High Bonding Achievement',
-    description: 'Reveals traits when bonding score exceeds 80',
-    condition: (foal, activities) => foal.bond_score >= 80,
-    revealableTraits: ['intelligent', 'calm', 'trainability_boost', 'legendary_bloodline']
+  EXCELLENT_BOND: {
+    condition: (horse) => horse.bond_score >= 95,
+    description: 'Exceptional bond achieved',
+    priority: 'legendary'
   },
-  
-  // Stress-based revelations
-  low_stress: {
-    name: 'Low Stress Achievement',
-    description: 'Reveals traits when stress level drops below 20',
-    condition: (foal, activities) => foal.stress_level <= 20,
-    revealableTraits: ['resilient', 'athletic', 'bold', 'weather_immunity']
+
+  // Stress-based discoveries
+  LOW_STRESS: {
+    condition: (horse) => horse.stress_level <= 20,
+    description: 'Stress levels minimized',
+    priority: 'medium'
   },
-  
-  // Activity-based revelations
-      social_activities: {
-      name: 'Social Development',
-      description: 'Reveals traits after completing social enrichment activities',
-      condition: (foal, activities) => {
-        const socialActivities = activities.filter(a => 
-          ['gentle_handling', 'human_interaction', 'social_play'].includes(a.activity || a.activityType)
-        );
-        return socialActivities.length >= 3;
-      },
-      revealableTraits: ['calm', 'intelligent', 'trainability_boost']
-    },
-    
-    physical_activities: {
-      name: 'Physical Development',
-      description: 'Reveals traits after completing physical enrichment activities',
-      condition: (foal, activities) => {
-        const physicalActivities = activities.filter(a => 
-          ['exercise', 'obstacle_course', 'free_play'].includes(a.activity || a.activityType)
-        );
-        return physicalActivities.length >= 3;
-      },
-      revealableTraits: ['athletic', 'bold', 'resilient']
-    },
-    
-    mental_activities: {
-      name: 'Mental Development',
-      description: 'Reveals traits after completing mental enrichment activities',
-      condition: (foal, activities) => {
-        const mentalActivities = activities.filter(a => 
-          ['puzzle_feeding', 'sensory_exposure', 'learning_games'].includes(a.activity || a.activityType)
-        );
-        return mentalActivities.length >= 3;
-      },
-      revealableTraits: ['intelligent', 'trainability_boost', 'night_vision']
-    },
-  
+
+  MINIMAL_STRESS: {
+    condition: (horse) => horse.stress_level <= 5,
+    description: 'Perfect stress management',
+    priority: 'high'
+  },
+
   // Combined conditions
-  perfect_care: {
-    name: 'Perfect Care Achievement',
-    description: 'Reveals rare traits with optimal bonding and low stress',
-    condition: (foal, activities) => foal.bond_score >= 90 && foal.stress_level <= 15,
-    revealableTraits: ['legendary_bloodline', 'weather_immunity', 'night_vision']
+  PERFECT_CARE: {
+    condition: (horse) => horse.bond_score >= 80 && horse.stress_level <= 20,
+    description: 'Perfect care conditions achieved',
+    priority: 'legendary'
   },
-  
-  // Development milestone
-  development_complete: {
-    name: 'Development Completion',
-    description: 'Reveals remaining traits when development period ends',
-    condition: (foal, activities, development) => !!(development && development.currentDay >= 6),
-    revealableTraits: ['all_hidden'] // Special case to reveal all remaining hidden traits
+
+  // Age-based discoveries
+  MATURE_BOND: {
+    condition: (horse) => horse.age >= 2 && horse.bond_score >= 70,
+    description: 'Mature relationship developed',
+    priority: 'medium'
+  },
+
+  // Training-based discoveries (requires training data)
+  CONSISTENT_TRAINING: {
+    condition: async(horse) => {
+      const recentTraining = await prisma.trainingLog.count({
+        where: {
+          horseId: horse.id,
+          trainedAt: {
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days
+          }
+        }
+      });
+      return recentTraining >= 5;
+    },
+    description: 'Consistent training regimen maintained',
+    priority: 'medium',
+    async: true
   }
 };
 
 /**
- * Check if a foal meets discovery conditions and reveal appropriate traits
- * @param {number} foalId - ID of the foal to check
- * @returns {Object} Discovery results with revealed traits and conditions met
+ * Enrichment activity-based discovery conditions
  */
-export async function revealTraits(foalId) {
-  try {
-    logger.info(`[traitDiscovery.revealTraits] Checking trait discovery for foal ${foalId}`);
-    
-    // Validate input
-    if (!foalId || !Number.isInteger(Number(foalId)) || Number(foalId) <= 0) {
-      throw new Error('Invalid foal ID provided');
-    }
+const ENRICHMENT_DISCOVERIES = {
+  SOCIALIZATION_COMPLETE: {
+    activities: ['social_interaction', 'group_play'],
+    minCount: 3,
+    description: 'Socialization activities completed',
+    priority: 'medium'
+  },
 
-    // Get foal data with current traits and development info
-    const foal = await prisma.horse.findUnique({
-      where: { id: Number(foalId) },
+  MENTAL_STIMULATION_COMPLETE: {
+    activities: ['puzzle_feeding', 'obstacle_course'],
+    minCount: 2,
+    description: 'Mental stimulation activities completed',
+    priority: 'high'
+  },
+
+  PHYSICAL_DEVELOPMENT_COMPLETE: {
+    activities: ['free_exercise', 'controlled_movement'],
+    minCount: 4,
+    description: 'Physical development activities completed',
+    priority: 'medium'
+  },
+
+  ALL_ENRICHMENT_COMPLETE: {
+    activities: ['social_interaction', 'group_play', 'puzzle_feeding', 'obstacle_course', 'free_exercise', 'controlled_movement'],
+    minCount: 6,
+    description: 'All enrichment activities completed',
+    priority: 'legendary'
+  }
+};
+
+/**
+ * Main trait revelation function
+ * @param {number} horseId - ID of the horse to check
+ * @param {Object} options - Options for discovery
+ * @param {boolean} options.checkEnrichment - Whether to check enrichment activities
+ * @param {boolean} options.forceCheck - Force check even if recently checked
+ * @returns {Object} Discovery results
+ */
+export async function revealTraits(horseId, options = {}) {
+  try {
+    logger.info(`[traitDiscovery.revealTraits] Starting trait discovery for horse ${horseId}`);
+
+    // Get horse data with current traits
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId },
       include: {
-        foalDevelopment: true,
-        breed: true
+        breed: true,
+        foalActivities: options.checkEnrichment ? {
+          orderBy: { createdAt: 'desc' },
+          take: 20
+        } : false
       }
     });
 
-    if (!foal) {
-      throw new Error(`Foal with ID ${foalId} not found`);
+    if (!horse) {
+      throw new Error(`Horse with ID ${horseId} not found`);
     }
 
-    // Verify this is actually a foal
-    if (foal.age > 1) {
-      throw new Error(`Horse ${foalId} is not a foal (age: ${foal.age})`);
+    // Parse current traits
+    const currentTraits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const hiddenTraits = currentTraits.hidden || [];
+
+    if (hiddenTraits.length === 0) {
+      logger.info(`[traitDiscovery.revealTraits] No hidden traits to reveal for horse ${horseId}`);
+      return {
+        success: true,
+        revealed: [],
+        conditions: [],
+        message: 'No hidden traits available for discovery'
+      };
     }
 
-    // Get foal's enrichment activity history
-    const activities = await prisma.foalTrainingHistory.findMany({
-      where: { horse_id: Number(foalId) },
-      orderBy: { createdAt: 'desc' }
-    });
+    // Check discovery conditions
+    const metConditions = await checkDiscoveryConditions(horse);
 
-    // Get current traits
-    const currentTraits = foal.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
-    
-    // Track discovery results
-    const discoveryResults = {
-      foalId: Number(foalId),
-      foalName: foal.name,
-      conditionsMet: [],
-      traitsRevealed: [],
-      newTraitStructure: { ...currentTraits },
-      totalHiddenBefore: currentTraits.hidden?.length || 0,
-      totalHiddenAfter: 0
+    // Check enrichment-based discoveries if requested
+    let enrichmentConditions = [];
+    if (options.checkEnrichment && horse.foalActivities) {
+      enrichmentConditions = checkEnrichmentDiscoveries(horse.foalActivities);
+    }
+
+    const allConditions = [...metConditions, ...enrichmentConditions];
+
+    if (allConditions.length === 0) {
+      logger.info(`[traitDiscovery.revealTraits] No discovery conditions met for horse ${horseId}`);
+      return {
+        success: true,
+        revealed: [],
+        conditions: [],
+        message: 'No discovery conditions currently met'
+      };
+    }
+
+    // Determine which traits to reveal based on conditions
+    const traitsToReveal = selectTraitsToReveal(hiddenTraits, allConditions);
+
+    if (traitsToReveal.length === 0) {
+      logger.info(`[traitDiscovery.revealTraits] No suitable traits selected for revelation for horse ${horseId}`);
+      return {
+        success: true,
+        revealed: [],
+        conditions: allConditions,
+        message: 'Discovery conditions met but no suitable traits found'
+      };
+    }
+
+    // Update horse traits in database
+    const updatedTraits = await updateHorseTraits(horseId, currentTraits, traitsToReveal);
+
+    logger.info(`[traitDiscovery.revealTraits] Successfully revealed ${traitsToReveal.length} traits for horse ${horseId}: ${traitsToReveal.join(', ')}`);
+
+    return {
+      success: true,
+      revealed: traitsToReveal.map(trait => ({
+        trait,
+        definition: getTraitDefinition(trait),
+        discoveryReason: getDiscoveryReason(trait, allConditions)
+      })),
+      conditions: allConditions,
+      updatedTraits,
+      message: `Discovered ${traitsToReveal.length} new trait${traitsToReveal.length > 1 ? 's' : ''}!`
     };
 
-    // Check each discovery condition
-    for (const [conditionKey, condition] of Object.entries(DISCOVERY_CONDITIONS)) {
-      try {
-        const conditionMet = condition.condition(foal, activities, foal.foalDevelopment);
-        
-        if (conditionMet) {
-          logger.info(`[traitDiscovery.revealTraits] Foal ${foalId} met condition: ${condition.name}`);
-          
-          discoveryResults.conditionsMet.push({
-            key: conditionKey,
-            name: condition.name,
-            description: condition.description
-          });
-
-          // Reveal appropriate traits
-          const revealedTraits = revealTraitsForCondition(
-            discoveryResults.newTraitStructure,
-            condition.revealableTraits,
-            conditionKey
-          );
-
-          discoveryResults.traitsRevealed.push(...revealedTraits);
-        }
-      } catch (conditionError) {
-        logger.warn(`[traitDiscovery.revealTraits] Error checking condition ${conditionKey}: ${conditionError.message}`);
-      }
-    }
-
-    // Update final hidden count
-    discoveryResults.totalHiddenAfter = discoveryResults.newTraitStructure.hidden?.length || 0;
-
-    // Update database if traits were revealed
-    if (discoveryResults.traitsRevealed.length > 0) {
-      await prisma.horse.update({
-        where: { id: Number(foalId) },
-        data: {
-          epigenetic_modifiers: discoveryResults.newTraitStructure
-        }
-      });
-
-      // Log the discovery event
-      await logTraitDiscovery(foalId, discoveryResults, foal);
-      
-      logger.info(`[traitDiscovery.revealTraits] Revealed ${discoveryResults.traitsRevealed.length} traits for foal ${foalId}`);
-    } else {
-      logger.info(`[traitDiscovery.revealTraits] No new traits revealed for foal ${foalId}`);
-    }
-
-    return discoveryResults;
-
   } catch (error) {
-    logger.error(`[traitDiscovery.revealTraits] Error: ${error.message}`);
+    logger.error(`[traitDiscovery.revealTraits] Error revealing traits for horse ${horseId}: ${error.message}`);
     throw error;
   }
 }
 
 /**
- * Reveal traits for a specific condition
- * @param {Object} traitStructure - Current trait structure to modify
- * @param {Array} revealableTraits - Traits that can be revealed by this condition
- * @param {string} conditionKey - Key of the condition being met
- * @returns {Array} Array of revealed trait objects
+ * Check which discovery conditions are currently met
+ * @param {Object} horse - Horse data
+ * @returns {Array} Array of met conditions
  */
-function revealTraitsForCondition(traitStructure, revealableTraits, conditionKey) {
-  const revealed = [];
-  
-  if (!traitStructure.hidden || traitStructure.hidden.length === 0) {
-    return revealed;
-  }
+async function checkDiscoveryConditions(horse) {
+  const metConditions = [];
 
-  // Special case: reveal all hidden traits
-  if (revealableTraits.includes('all_hidden')) {
-    const allHidden = [...traitStructure.hidden];
-    
-    allHidden.forEach(traitKey => {
-      const traitDef = getTraitDefinition(traitKey);
-      const category = getTraitCategory(traitKey);
-      
-      if (category && traitDef) {
-        // Move from hidden to appropriate category
-        traitStructure.hidden = traitStructure.hidden.filter(t => t !== traitKey);
-        traitStructure[category] = traitStructure[category] || [];
-        traitStructure[category].push(traitKey);
-        
-        revealed.push({
-          traitKey,
-          traitName: traitDef.name,
-          category,
-          revealedBy: conditionKey,
-          description: traitDef.description
+  for (const [conditionName, condition] of Object.entries(DISCOVERY_CONDITIONS)) {
+    try {
+      let isMet = false;
+
+      if (condition.async) {
+        isMet = await condition.condition(horse);
+      } else {
+        isMet = condition.condition(horse);
+      }
+
+      if (isMet) {
+        metConditions.push({
+          name: conditionName,
+          description: condition.description,
+          priority: condition.priority,
+          type: 'condition'
         });
       }
-    });
-    
-    return revealed;
+    } catch (error) {
+      logger.warn(`[traitDiscovery.checkDiscoveryConditions] Error checking condition ${conditionName}: ${error.message}`);
+    }
   }
 
-  // Normal trait revelation
-  revealableTraits.forEach(traitKey => {
-    if (traitStructure.hidden.includes(traitKey)) {
-      const traitDef = getTraitDefinition(traitKey);
-      const category = getTraitCategory(traitKey);
-      
-      if (category && traitDef) {
-        // Move from hidden to appropriate category
-        traitStructure.hidden = traitStructure.hidden.filter(t => t !== traitKey);
-        traitStructure[category] = traitStructure[category] || [];
-        traitStructure[category].push(traitKey);
-        
-        revealed.push({
-          traitKey,
-          traitName: traitDef.name,
-          category,
-          revealedBy: conditionKey,
-          description: traitDef.description
-        });
-        
-        logger.info(`[traitDiscovery.revealTraitsForCondition] Revealed trait ${traitKey} (${traitDef.name}) via ${conditionKey}`);
+  return metConditions;
+}
+
+/**
+ * Check enrichment-based discovery conditions
+ * @param {Array} activities - Foal activities
+ * @returns {Array} Array of met enrichment conditions
+ */
+function checkEnrichmentDiscoveries(activities) {
+  const metConditions = [];
+
+  // Count activities by type
+  const activityCounts = {};
+  activities.forEach(activity => {
+    activityCounts[activity.activityType] = (activityCounts[activity.activityType] || 0) + 1;
+  });
+
+  for (const [discoveryName, discovery] of Object.entries(ENRICHMENT_DISCOVERIES)) {
+    const completedCount = discovery.activities.reduce((count, activityType) => {
+      return count + (activityCounts[activityType] || 0);
+    }, 0);
+
+    if (completedCount >= discovery.minCount) {
+      metConditions.push({
+        name: discoveryName,
+        description: discovery.description,
+        priority: discovery.priority,
+        type: 'enrichment',
+        completedCount,
+        requiredCount: discovery.minCount
+      });
+    }
+  }
+
+  return metConditions;
+}
+
+/**
+ * Select which traits to reveal based on met conditions
+ * @param {Array} hiddenTraits - Array of hidden trait names
+ * @param {Array} conditions - Array of met conditions
+ * @returns {Array} Array of trait names to reveal
+ */
+function selectTraitsToReveal(hiddenTraits, conditions) {
+  const traitsToReveal = [];
+  const priorityOrder = ['legendary', 'high', 'medium', 'low'];
+
+  // Sort conditions by priority
+  const sortedConditions = conditions.sort((a, b) => {
+    return priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
+  });
+
+  // Reveal traits based on condition priority and trait rarity
+  for (const condition of sortedConditions) {
+    if (traitsToReveal.length >= 3) {break;} // Limit revelations per check
+
+    const suitableTraits = hiddenTraits.filter(trait => {
+      if (traitsToReveal.includes(trait)) {return false;}
+
+      const traitDef = getTraitDefinition(trait);
+      if (!traitDef) {return false;}
+
+      // Match trait rarity to condition priority
+      if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') {return true;}
+      if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) {return true;}
+      if (condition.priority === 'medium' && ['common', 'rare'].includes(traitDef.rarity)) {return true;}
+
+      return traitDef.rarity === 'common';
+    });
+
+    if (suitableTraits.length > 0) {
+      // Randomly select one suitable trait
+      const selectedTrait = suitableTraits[Math.floor(Math.random() * suitableTraits.length)];
+      traitsToReveal.push(selectedTrait);
+    }
+  }
+
+  return traitsToReveal;
+}
+
+/**
+ * Update horse traits in database
+ * @param {number} horseId - Horse ID
+ * @param {Object} currentTraits - Current trait structure
+ * @param {Array} traitsToReveal - Traits to move from hidden to visible
+ * @returns {Object} Updated traits structure
+ */
+async function updateHorseTraits(horseId, currentTraits, traitsToReveal) {
+  const updatedTraits = {
+    positive: [...(currentTraits.positive || [])],
+    negative: [...(currentTraits.negative || [])],
+    hidden: [...(currentTraits.hidden || [])]
+  };
+
+  // Move traits from hidden to appropriate visible category
+  traitsToReveal.forEach(trait => {
+    const traitDef = getTraitDefinition(trait);
+    if (traitDef) {
+      // Remove from hidden
+      updatedTraits.hidden = updatedTraits.hidden.filter(t => t !== trait);
+
+      // Add to appropriate visible category
+      if (traitDef.type === 'positive') {
+        updatedTraits.positive.push(trait);
+      } else {
+        updatedTraits.negative.push(trait);
       }
     }
   });
 
-  return revealed;
-}
-
-/**
- * Get trait definition from trait evaluation system
- * @param {string} traitKey - Key of the trait
- * @returns {Object|null} Trait definition or null if not found
- */
-function getTraitDefinition(traitKey) {
-  for (const category of Object.values(TRAIT_DEFINITIONS)) {
-    if (category[traitKey]) {
-      return category[traitKey];
+  // Update in database
+  await prisma.horse.update({
+    where: { id: horseId },
+    data: {
+      epigenetic_modifiers: updatedTraits
     }
-  }
-  return null;
+  });
+
+  return updatedTraits;
 }
 
 /**
- * Get the category (positive, negative, rare) of a trait
- * @param {string} traitKey - Key of the trait
- * @returns {string|null} Category name or null if not found
+ * Get discovery reason for a trait
+ * @param {string} trait - Trait name
+ * @param {Array} conditions - Met conditions
+ * @returns {string} Discovery reason
  */
-function getTraitCategory(traitKey) {
-  for (const [categoryName, traits] of Object.entries(TRAIT_DEFINITIONS)) {
-    if (traits[traitKey]) {
-      return categoryName === 'rare' ? 'positive' : categoryName; // Rare traits go to positive
-    }
-  }
-  return null;
+function getDiscoveryReason(trait, conditions) {
+  const traitDef = getTraitDefinition(trait);
+  if (!traitDef) {return 'Unknown discovery condition';}
+
+  // Find the most relevant condition
+  const relevantCondition = conditions.find(condition => {
+    if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') {return true;}
+    if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) {return true;}
+    return condition.priority === 'medium' || condition.priority === 'low';
+  });
+
+  return relevantCondition ? relevantCondition.description : 'Special discovery condition met';
 }
 
-/**
- * Log trait discovery event for audit trail
- * @param {number} foalId - ID of the foal
- * @param {Object} discoveryResults - Results of the discovery process
- * @param {Object} foal - Foal object with development data
- */
-async function logTraitDiscovery(foalId, discoveryResults, foal) {
-  try {
-    const logEntry = {
-      foalId: Number(foalId),
-      event: 'trait_discovery',
-      conditionsMet: discoveryResults.conditionsMet,
-      traitsRevealed: discoveryResults.traitsRevealed,
-      timestamp: new Date(),
-      summary: `Revealed ${discoveryResults.traitsRevealed.length} traits via ${discoveryResults.conditionsMet.length} conditions`
-    };
-
-    // Log to foal training history for now (could be separate discovery log table)
-    await prisma.foalTrainingHistory.create({
-      data: {
-        horse_id: Number(foalId),
-        day: foal.foalDevelopment?.currentDay || 0,
-        activity: 'trait_discovery',
-        outcome: `Trait Discovery Event: ${logEntry.summary}`,
-        bond_change: 0,
-        stress_change: 0
-      }
-    });
-
-    logger.info(`[traitDiscovery.logTraitDiscovery] Logged discovery event for foal ${foalId}`);
-  } catch (error) {
-    logger.error(`[traitDiscovery.logTraitDiscovery] Failed to log discovery: ${error.message}`);
-  }
-}
-
-/**
- * Check trait discovery for multiple foals (batch processing)
- * @param {Array} foalIds - Array of foal IDs to check
- * @returns {Array} Array of discovery results
- */
-export async function batchRevealTraits(foalIds) {
-  const results = [];
-  
-  for (const foalId of foalIds) {
-    try {
-      const result = await revealTraits(foalId);
-      results.push(result);
-    } catch (error) {
-      logger.error(`[traitDiscovery.batchRevealTraits] Failed for foal ${foalId}: ${error.message}`);
-      results.push({
-        foalId,
-        error: error.message,
-        success: false
-      });
-    }
-  }
-  
-  return results;
-}
-
-/**
- * Get discovery progress for a foal (what conditions they're close to meeting)
- * @param {number} foalId - ID of the foal
- * @returns {Object} Discovery progress information
- */
-export async function getDiscoveryProgress(foalId) {
-  try {
-    logger.info(`[traitDiscovery.getDiscoveryProgress] Getting discovery progress for foal ${foalId}`);
-    
-    const foal = await prisma.horse.findUnique({
-      where: { id: Number(foalId) },
-      include: {
-        foalDevelopment: true
-      }
-    });
-
-    if (!foal) {
-      throw new Error(`Foal with ID ${foalId} not found`);
-    }
-
-    const activities = await prisma.foalTrainingHistory.findMany({
-      where: { horse_id: Number(foalId) }
-    });
-
-    const progress = {
-      foalId: Number(foalId),
-      foalName: foal.name,
-      currentStats: {
-        bondScore: foal.bond_score || 0,
-        stressLevel: foal.stress_level || 0,
-        developmentDay: foal.foalDevelopment?.currentDay || 0
-      },
-      conditions: {},
-      hiddenTraitsCount: foal.epigenetic_modifiers?.hidden?.length || 0
-    };
-
-    // Check progress for each condition
-    for (const [conditionKey, condition] of Object.entries(DISCOVERY_CONDITIONS)) {
-      const conditionMet = condition.condition(foal, activities, foal.foalDevelopment);
-      
-      progress.conditions[conditionKey] = {
-        name: condition.name,
-        description: condition.description,
-        met: conditionMet,
-        revealableTraits: condition.revealableTraits,
-        progress: calculateConditionProgress(conditionKey, foal, activities)
-      };
-    }
-
-    return progress;
-
-  } catch (error) {
-    logger.error(`[traitDiscovery.getDiscoveryProgress] Error: ${error.message}`);
-    throw error;
-  }
-}
-
-/**
- * Calculate progress percentage for a specific condition
- * @param {string} conditionKey - Key of the condition
- * @param {Object} foal - Foal data
- * @param {Array} activities - Activity history
- * @returns {number} Progress percentage (0-100)
- */
-function calculateConditionProgress(conditionKey, foal, activities) {
-  switch (conditionKey) {
-    case 'high_bonding':
-      return Math.min(100, Math.round((foal.bond_score || 0) / 80 * 100));
-    
-    case 'low_stress':
-      return foal.stress_level <= 20 ? 100 : Math.round((100 - (foal.stress_level || 100)) / 80 * 100);
-    
-    case 'perfect_care':
-      const bondProgress = Math.min(100, (foal.bond_score || 0) / 90 * 100);
-      const stressProgress = foal.stress_level <= 15 ? 100 : (100 - (foal.stress_level || 100)) / 85 * 100;
-      return Math.round((bondProgress + stressProgress) / 2);
-    
-    case 'social_activities':
-      const socialCount = activities.filter(a => 
-        ['gentle_handling', 'human_interaction', 'social_play'].includes(a.activity)
-      ).length;
-      return Math.min(100, Math.round(socialCount / 3 * 100));
-    
-    case 'physical_activities':
-      const physicalCount = activities.filter(a => 
-        ['exercise', 'obstacle_course', 'free_play'].includes(a.activity)
-      ).length;
-      return Math.min(100, Math.round(physicalCount / 3 * 100));
-    
-    case 'mental_activities':
-      const mentalCount = activities.filter(a => 
-        ['puzzle_feeding', 'sensory_exposure', 'learning_games'].includes(a.activity)
-      ).length;
-      return Math.min(100, Math.round(mentalCount / 3 * 100));
-    
-    case 'development_complete':
-      const currentDay = foal.foalDevelopment?.currentDay || 0;
-      return Math.min(100, Math.round(currentDay / 6 * 100));
-    
-    default:
-      return 0;
-  }
-}
-
-export default {
-  revealTraits,
-  batchRevealTraits,
-  getDiscoveryProgress,
-  DISCOVERY_CONDITIONS
-}; 
+export {
+  DISCOVERY_CONDITIONS,
+  ENRICHMENT_DISCOVERIES,
+  checkDiscoveryConditions,
+  checkEnrichmentDiscoveries
+};

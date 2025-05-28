@@ -1,153 +1,409 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { register, login, refreshToken, logout, getProfile } from '../controllers/authController.js';
+import { handleValidationErrors } from '../middleware/validationErrorHandler.js';
 import { authenticateToken } from '../middleware/auth.js';
-import { authRateLimit } from '../middleware/security.js';
-import { auditLog } from '../middleware/auditLog.js';
+import * as authController from '../controllers/authController.js';
 
 const router = express.Router();
 
 /**
- * POST /api/auth/register
- * Register a new user account
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication and authorization endpoints
  */
-router.post('/register',
-  // Rate limiting for auth endpoints
-  authRateLimit,
-  
-  // Validation middleware
-  body('name')
-    .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage('Name must be between 2 and 50 characters')
-    .matches(/^[a-zA-Z\s]+$/)
-    .withMessage('Name can only contain letters and spaces'),
-  
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email address'),
-  
-  body('password')
-    .isLength({ min: 8, max: 128 })
-    .withMessage('Password must be between 8 and 128 characters')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-    .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
-  
-  // Security middleware
-  auditLog('user_registration', 'high'),
-  
-  // Controller
-  register
-);
 
 /**
- * POST /api/auth/login
- * Authenticate user and return JWT token
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: User ID
+ *           example: 1
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: User email address
+ *           example: "user@example.com"
+ *         username:
+ *           type: string
+ *           description: Unique username
+ *           example: "johndoe"
+ *         firstName:
+ *           type: string
+ *           description: User's first name
+ *           example: "John"
+ *         lastName:
+ *           type: string
+ *           description: User's last name
+ *           example: "Doe"
+ *         role:
+ *           type: string
+ *           enum: [user, admin]
+ *           description: User role
+ *           example: "user"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Account creation timestamp
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Last update timestamp
+ *     AuthResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "Login successful"
+ *         data:
+ *           type: object
+ *           properties:
+ *             user:
+ *               $ref: '#/components/schemas/User'
+ *             accessToken:
+ *               type: string
+ *               description: JWT access token
+ *               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *             refreshToken:
+ *               type: string
+ *               description: JWT refresh token
+ *               example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
-router.post('/login',
-  // Rate limiting for auth endpoints
-  authRateLimit,
-  
-  // Validation middleware
+
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Create a new user account with email, username, and password
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, username, password, firstName, lastName]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User email address
+ *                 example: "user@example.com"
+ *               username:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 30
+ *                 pattern: '^[a-zA-Z0-9_]+$'
+ *                 description: Unique username (alphanumeric and underscore only)
+ *                 example: "johndoe"
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *                 description: Password (minimum 8 characters)
+ *                 example: "securePassword123"
+ *               firstName:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 50
+ *                 description: User's first name
+ *                 example: "John"
+ *               lastName:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 50
+ *                 description: User's last name
+ *                 example: "Doe"
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       409:
+ *         description: Email or username already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/register', [
   body('email')
     .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email address'),
-  
+    .withMessage('Valid email is required')
+    .normalizeEmail(),
+  body('username')
+    .isLength({ min: 3, max: 30 })
+    .withMessage('Username must be between 3 and 30 characters')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username can only contain letters, numbers, and underscores'),
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+  body('firstName')
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('First name must be between 1 and 50 characters'),
+  body('lastName')
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Last name must be between 1 and 50 characters'),
+  handleValidationErrors
+], authController.register);
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login user
+ *     description: Authenticate user with email and password
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User email address
+ *                 example: "user@example.com"
+ *               password:
+ *                 type: string
+ *                 description: User password
+ *                 example: "securePassword123"
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/login', [
+  body('email')
+    .isEmail()
+    .withMessage('Valid email is required')
+    .normalizeEmail(),
   body('password')
     .notEmpty()
     .withMessage('Password is required'),
-  
-  // Security middleware
-  auditLog('user_login', 'medium'),
-  
-  // Controller
-  login
-);
+  handleValidationErrors
+], authController.login);
 
 /**
- * POST /api/auth/refresh
- * Refresh JWT token using refresh token
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh access token
+ *     description: Get a new access token using a refresh token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Valid refresh token
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Token refreshed successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                     refreshToken:
+ *                       type: string
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         description: Invalid refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
  */
-router.post('/refresh',
-  // Rate limiting
-  authRateLimit,
-  
-  // Validation middleware
+router.post('/refresh', [
   body('refreshToken')
     .notEmpty()
     .withMessage('Refresh token is required'),
-  
-  // Security middleware
-  auditLog('token_refresh', 'low'),
-  
-  // Controller
-  refreshToken
-);
+  handleValidationErrors
+], authController.refreshToken);
 
 /**
- * POST /api/auth/logout
- * Logout user (invalidate token on client side)
+ * @swagger
+ * /api/auth/profile:
+ *   get:
+ *     summary: Get user profile
+ *     description: Get the current authenticated user's profile information
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
  */
-router.post('/logout',
-  // Authentication required
-  authenticateToken,
-  
-  // Security middleware
-  auditLog('user_logout', 'low'),
-  
-  // Controller
-  logout
-);
+router.get('/profile', authenticateToken, authController.getProfile);
 
 /**
- * GET /api/auth/me
- * Get current user profile
+ * @swagger
+ * /api/auth/profile:
+ *   put:
+ *     summary: Update user profile
+ *     description: Update the current authenticated user's profile information
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 50
+ *                 description: User's first name
+ *                 example: "John"
+ *               lastName:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 50
+ *                 description: User's last name
+ *                 example: "Doe"
+ *               username:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 30
+ *                 pattern: '^[a-zA-Z0-9_]+$'
+ *                 description: Unique username
+ *                 example: "johndoe"
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Profile updated successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       409:
+ *         description: Username already taken
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
  */
-router.get('/me',
-  // Authentication required
+router.put('/profile', [
   authenticateToken,
-  
-  // Security middleware
-  auditLog('profile_access', 'low'),
-  
-  // Controller
-  getProfile
-);
+  body('firstName')
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('First name must be between 1 and 50 characters'),
+  body('lastName')
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Last name must be between 1 and 50 characters'),
+  body('username')
+    .optional()
+    .isLength({ min: 3, max: 30 })
+    .withMessage('Username must be between 3 and 30 characters')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username can only contain letters, numbers, and underscores'),
+  handleValidationErrors
+], authController.updateProfile);
 
-/**
- * POST /api/auth/change-password
- * Change user password (authenticated users only)
- */
-router.post('/change-password',
-  // Authentication required
-  authenticateToken,
-  
-  // Rate limiting
-  authRateLimit,
-  
-  // Validation middleware
-  body('currentPassword')
-    .notEmpty()
-    .withMessage('Current password is required'),
-  
-  body('newPassword')
-    .isLength({ min: 8, max: 128 })
-    .withMessage('New password must be between 8 and 128 characters')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-    .withMessage('New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
-  
-  // Security middleware
-  auditLog('password_change', 'high'),
-  
-  // Controller (to be implemented)
-  async (req, res) => {
-    res.status(501).json({
-      success: false,
-      message: 'Password change functionality not yet implemented'
-    });
-  }
-);
-
-export default router; 
+export default router;

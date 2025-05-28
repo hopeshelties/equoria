@@ -1,314 +1,184 @@
 import express from 'express';
-import { body, param, validationResult } from 'express-validator';
-import { authenticateToken, requireRole } from '../middleware/auth.js';
-import { auditAdmin } from '../middleware/auditLog.js';
-import logger from '../utils/logger.js';
-import { ApiResponse } from '../utils/apiResponse.js';
+import { body, validationResult } from 'express-validator';
+import cronJobService from '../services/cronJobs.js';
 import prisma from '../db/index.js';
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 
-// All admin routes require authentication and admin role
-router.use(authenticateToken);
-router.use(requireRole('admin'));
-router.use(auditAdmin);
-
 /**
  * GET /api/admin/cron/status
- * Get current status of cron job service
+ * Get status of all cron jobs
  */
 router.get('/cron/status', async (req, res) => {
   try {
-    logger.info(`[adminRoutes] Admin ${req.user.email} checking cron job status`);
-    
-    // Mock cron job status - replace with actual implementation
-    const cronStatus = {
-      serviceRunning: true,
-      lastRun: new Date().toISOString(),
-      nextRun: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      jobsActive: 3,
-      totalJobsRun: 1586,
-      errors: 0
-    };
-    
-    return res.status(200).json(ApiResponse.success(
-      'Cron job status retrieved successfully',
-      cronStatus
-    ));
-    
+    logger.info('[adminRoutes] GET /api/admin/cron/status');
+
+    const status = cronJobService.getStatus();
+
+    res.json({
+      success: true,
+      data: status
+    });
+
   } catch (error) {
-    logger.error('[adminRoutes] Error getting cron status:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to retrieve cron status'));
+    logger.error(`[adminRoutes] GET /api/admin/cron/status error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
 });
 
 /**
  * POST /api/admin/cron/start
- * Start the cron job service
+ * Start cron job service
  */
 router.post('/cron/start', async (req, res) => {
   try {
-    logger.info(`[adminRoutes] Admin ${req.user.email} starting cron job service`);
-    
-    // Mock cron job start - replace with actual implementation
-    const result = {
+    logger.info('[adminRoutes] POST /api/admin/cron/start');
+
+    cronJobService.start();
+
+    res.json({
       success: true,
-      message: 'Cron job service started successfully',
-      startedAt: new Date().toISOString()
-    };
-    
-    return res.status(200).json(ApiResponse.success(
-      'Cron job service started successfully',
-      result
-    ));
-    
+      message: 'Cron job service started successfully'
+    });
+
   } catch (error) {
-    logger.error('[adminRoutes] Error starting cron service:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to start cron service'));
+    logger.error(`[adminRoutes] POST /api/admin/cron/start error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to start cron job service'
+    });
   }
 });
 
 /**
  * POST /api/admin/cron/stop
- * Stop the cron job service
+ * Stop cron job service
  */
 router.post('/cron/stop', async (req, res) => {
   try {
-    logger.info(`[adminRoutes] Admin ${req.user.email} stopping cron job service`);
-    
-    // Mock cron job stop - replace with actual implementation
-    const result = {
+    logger.info('[adminRoutes] POST /api/admin/cron/stop');
+
+    cronJobService.stop();
+
+    res.json({
       success: true,
-      message: 'Cron job service stopped successfully',
-      stoppedAt: new Date().toISOString()
-    };
-    
-    return res.status(200).json(ApiResponse.success(
-      'Cron job service stopped successfully',
-      result
-    ));
-    
+      message: 'Cron job service stopped successfully'
+    });
+
   } catch (error) {
-    logger.error('[adminRoutes] Error stopping cron service:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to stop cron service'));
+    logger.error(`[adminRoutes] POST /api/admin/cron/stop error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to stop cron job service'
+    });
   }
 });
 
 /**
  * POST /api/admin/traits/evaluate
- * Manually trigger trait evaluation for all foals
+ * Manually trigger daily trait evaluation
  */
 router.post('/traits/evaluate', async (req, res) => {
   try {
-    logger.info(`[adminRoutes] Admin ${req.user.email} manually triggering trait evaluation`);
-    
-    // Mock trait evaluation - replace with actual implementation
-    const startTime = Date.now();
-    
-    // Simulate processing
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    const result = {
+    logger.info('[adminRoutes] POST /api/admin/traits/evaluate - Manual trait evaluation triggered');
+
+    const result = await cronJobService.manualTraitEvaluation();
+
+    res.json({
       success: true,
-      message: 'Trait evaluation completed successfully',
-      statistics: {
-        foalsProcessed: 1586,
-        foalsUpdated: 12,
-        errors: 0,
-        duration: Date.now() - startTime
-      },
-      completedAt: new Date().toISOString()
-    };
-    
-    return res.status(200).json(ApiResponse.success(
-      'Trait evaluation completed successfully',
-      result
-    ));
-    
+      message: 'Manual trait evaluation completed successfully',
+      data: result
+    });
+
   } catch (error) {
-    logger.error('[adminRoutes] Error running trait evaluation:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to run trait evaluation'));
+    logger.error(`[adminRoutes] POST /api/admin/traits/evaluate error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to complete trait evaluation',
+      error: error.message
+    });
   }
 });
 
 /**
  * GET /api/admin/foals/development
- * Get all foals currently in development
+ * Get all foals in development period for monitoring
  */
 router.get('/foals/development', async (req, res) => {
   try {
-    logger.info(`[adminRoutes] Admin ${req.user.email} getting foals in development`);
-    
-    // Get foals in development (age <= 1 year)
-    const foalsInDevelopment = await prisma.horse.findMany({
+    logger.info('[adminRoutes] GET /api/admin/foals/development');
+
+    const foals = await prisma.horse.findMany({
       where: {
         age: {
-          lte: 1
+          in: [0, 1]
         }
       },
-      include: {
-        breed: true,
-        player: {
+      select: {
+        id: true,
+        name: true,
+        age: true,
+        bond_score: true,
+        stress_level: true,
+        epigenetic_modifiers: true,
+        breed: {
           select: {
-            id: true,
-            name: true,
-            email: true
+            name: true
+          }
+        },
+        foalDevelopment: {
+          select: {
+            currentDay: true,
+            bondingLevel: true,
+            stressLevel: true
           }
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
       }
     });
-    
-    const developmentStats = {
-      totalFoals: foalsInDevelopment.length,
-      byAge: {
-        newborn: foalsInDevelopment.filter(f => f.age === 0).length,
-        yearling: foalsInDevelopment.filter(f => f.age === 1).length
+
+    res.json({
+      success: true,
+      data: {
+        foals: foals,
+        count: foals.length
       }
-    };
-    
-    return res.status(200).json(ApiResponse.success(
-      'Foals in development retrieved successfully',
-      {
-        foals: foalsInDevelopment,
-        statistics: developmentStats
-      }
-    ));
-    
+    });
+
   } catch (error) {
-    logger.error('[adminRoutes] Error getting foals in development:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to retrieve foals in development'));
+    logger.error(`[adminRoutes] GET /api/admin/foals/development error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve foal development data'
+    });
   }
 });
 
 /**
  * GET /api/admin/traits/definitions
- * Get all trait definitions for admin management
+ * Get all trait definitions for reference
  */
 router.get('/traits/definitions', async (req, res) => {
   try {
-    logger.info(`[adminRoutes] Admin ${req.user.email} getting trait definitions`);
-    
-    // Mock trait definitions - replace with actual implementation
-    const traitDefinitions = {
-      positive: [
-        { key: 'intelligent', name: 'Intelligent', description: 'Quick learner with high problem-solving ability' },
-        { key: 'calm', name: 'Calm', description: 'Maintains composure under pressure' },
-        { key: 'athletic', name: 'Athletic', description: 'Naturally gifted physical abilities' },
-        { key: 'resilient', name: 'Resilient', description: 'Recovers quickly from setbacks' }
-      ],
-      negative: [
-        { key: 'nervous', name: 'Nervous', description: 'Easily startled and anxious' },
-        { key: 'stubborn', name: 'Stubborn', description: 'Resistant to training and commands' },
-        { key: 'aggressive', name: 'Aggressive', description: 'Tendency toward hostile behavior' }
-      ],
-      hidden: [
-        { key: 'mysterious_trait_1', name: 'Hidden Trait 1', description: 'A trait yet to be discovered' },
-        { key: 'mysterious_trait_2', name: 'Hidden Trait 2', description: 'Another undiscovered trait' }
-      ]
-    };
-    
-    return res.status(200).json(ApiResponse.success(
-      'Trait definitions retrieved successfully',
-      traitDefinitions
-    ));
-    
-  } catch (error) {
-    logger.error('[adminRoutes] Error getting trait definitions:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to retrieve trait definitions'));
-  }
-});
+    logger.info('[adminRoutes] GET /api/admin/traits/definitions');
 
-/**
- * GET /api/admin/system/health
- * Get system health status for monitoring
- */
-router.get('/system/health', async (req, res) => {
-  try {
-    logger.info(`[adminRoutes] Admin ${req.user.email} checking system health`);
-    
-    // Check database connection
-    const dbHealthy = await prisma.$queryRaw`SELECT 1 as healthy`
-      .then(() => true)
-      .catch(() => false);
-    
-    const systemHealth = {
-      database: {
-        status: dbHealthy ? 'healthy' : 'unhealthy',
-        lastChecked: new Date().toISOString()
-      },
-      server: {
-        status: 'healthy',
-        uptime: process.uptime(),
-        memory: process.memoryUsage(),
-        version: process.version
-      },
-      security: {
-        rateLimitActive: true,
-        auditLoggingActive: true,
-        securityHeadersActive: true
-      }
-    };
-    
-    const overallStatus = dbHealthy ? 'healthy' : 'degraded';
-    
-    return res.status(200).json(ApiResponse.success(
-      `System health check completed - ${overallStatus}`,
-      systemHealth
-    ));
-    
-  } catch (error) {
-    logger.error('[adminRoutes] Error checking system health:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to check system health'));
-  }
-});
+    const { getAllTraitDefinitions } = await import('../utils/traitEvaluation.js');
+    const definitions = getAllTraitDefinitions();
 
-/**
- * GET /api/admin/security/alerts
- * Get recent security alerts and suspicious activity
- */
-router.get('/security/alerts', async (req, res) => {
-  try {
-    logger.info(`[adminRoutes] Admin ${req.user.email} checking security alerts`);
-    
-    // Mock security alerts - replace with actual implementation
-    const securityAlerts = {
-      recentAlerts: [
-        {
-          id: 1,
-          type: 'multiple_ip_addresses',
-          severity: 'high',
-          userId: 'user123',
-          description: 'User accessed from 3 different IP addresses',
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: 2,
-          type: 'rapid_fire_requests',
-          severity: 'medium',
-          userId: 'user456',
-          description: 'User made 25 requests in 30 seconds',
-          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
-        }
-      ],
-      statistics: {
-        totalAlertsToday: 5,
-        highSeverityAlerts: 2,
-        mediumSeverityAlerts: 3,
-        lowSeverityAlerts: 0
-      }
-    };
-    
-    return res.status(200).json(ApiResponse.success(
-      'Security alerts retrieved successfully',
-      securityAlerts
-    ));
-    
+    res.json({
+      success: true,
+      data: definitions
+    });
+
   } catch (error) {
-    logger.error('[adminRoutes] Error getting security alerts:', error);
-    return res.status(500).json(ApiResponse.serverError('Failed to retrieve security alerts'));
+    logger.error(`[adminRoutes] GET /api/admin/traits/definitions error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve trait definitions'
+    });
   }
 });
 

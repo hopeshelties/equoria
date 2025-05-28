@@ -221,9 +221,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
 
     // Evaluate positive traits
     for (const [traitKey, traitDef] of Object.entries(TRAIT_DEFINITIONS.positive)) {
-      if (existingTraits.has(traitKey)) continue;
+      if (existingTraits.has(traitKey)) {continue;}
 
-      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge, 'positive')) {
+      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge)) {
         if (Math.random() < traitDef.baseChance) {
           // Check for conflicts
           if (!hasTraitConflict(traitKey, existingTraits)) {
@@ -243,9 +243,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
 
     // Evaluate negative traits
     for (const [traitKey, traitDef] of Object.entries(TRAIT_DEFINITIONS.negative)) {
-      if (existingTraits.has(traitKey)) continue;
+      if (existingTraits.has(traitKey)) {continue;}
 
-      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge, 'negative')) {
+      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge)) {
         if (Math.random() < traitDef.baseChance) {
           // Check for conflicts
           if (!hasTraitConflict(traitKey, existingTraits)) {
@@ -265,9 +265,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
 
     // Evaluate rare traits
     for (const [traitKey, traitDef] of Object.entries(TRAIT_DEFINITIONS.rare)) {
-      if (existingTraits.has(traitKey)) continue;
+      if (existingTraits.has(traitKey)) {continue;}
 
-      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge, 'rare')) {
+      if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge)) {
         if (Math.random() < traitDef.baseChance) {
           // Check for conflicts
           if (!hasTraitConflict(traitKey, existingTraits)) {
@@ -300,10 +300,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
  * @param {number} bondScore - Current bond score
  * @param {number} stressLevel - Current stress level
  * @param {number} developmentAge - Development age in days
- * @param {string} traitType - Type of trait (positive, negative, rare)
  * @returns {boolean} - Whether trait should be revealed
  */
-function shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge, traitType) {
+function shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge) {
   const conditions = traitDef.revealConditions;
 
   // Check age requirement
@@ -402,4 +401,4 @@ export {
   getAllTraitDefinitions,
   TRAIT_DEFINITIONS,
   TRAIT_CONFLICTS
-}; 
+};

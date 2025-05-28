@@ -1,36 +1,73 @@
-import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import config from '../config/config.js';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import logger from '../utils/logger.js';
+
+/**
+ * Security Middleware Configuration
+ * Implements comprehensive security measures for the API
+ */
+
+// CORS configuration
+export const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001'
+    ];
+    
+    // Add production origins from environment
+    if (process.env.ALLOWED_ORIGINS) {
+      allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(','));
+    }
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      logger.warn(`CORS blocked request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
 
 // Rate limiting configuration
-export const createRateLimit = (windowMs = 15 * 60 * 1000, max = 100) => {
+export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
   return rateLimit({
     windowMs, // 15 minutes default
     max, // limit each IP to 100 requests per windowMs
     message: {
       success: false,
-      message: 'Too many requests from this IP, please try again later.',
+      error: 'Too many requests from this IP, please try again later.',
+      retryAfter: Math.ceil(windowMs / 1000)
     },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    skip: (req) => {
-      // Skip rate limiting for health checks and in test environment
-      return req.path.startsWith('/health') || 
-             config.env === 'test' || 
-             process.env.NODE_ENV === 'test' ||
-             process.env.JEST_WORKER_ID !== undefined; // Jest test environment
+    handler: (req, res) => {
+      logger.warn(`Rate limit exceeded for IP: ${req.ip}`, {
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        url: req.originalUrl
+      });
+      
+      res.status(429).json({
+        success: false,
+        error: 'Too many requests from this IP, please try again later.',
+        retryAfter: Math.ceil(windowMs / 1000)
+      });
     }
   });
 };
 
-// Stricter rate limiting for auth endpoints
-export const authRateLimit = createRateLimit(15 * 60 * 1000, 5); // 5 attempts per 15 minutes
-
-// General API rate limiting
-export const apiRateLimit = createRateLimit(15 * 60 * 1000, 100); // 100 requests per 15 minutes
-
-// Security headers middleware
-export const securityHeaders = helmet({
+// Helmet configuration for security headers
+export const helmetConfig = {
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
@@ -44,57 +81,24 @@ export const securityHeaders = helmet({
       frameSrc: ["'none'"],
     },
   },
-  crossOriginEmbedderPolicy: false, // Disable for API
-});
-
-// CORS configuration
-export const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] // Replace with your actual domain
-    : ['http://localhost:3000', 'http://localhost:3001'],
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  crossOriginEmbedderPolicy: false, // Disable for API compatibility
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
 };
 
-// Request sanitization
-export const sanitizeInput = (req, res, next) => {
-  // Remove any potential XSS attempts from request body
-  if (req.body) {
-    req.body = sanitizeObject(req.body);
-  }
-  
-  if (req.query) {
-    req.query = sanitizeObject(req.query);
-  }
-  
-  if (req.params) {
-    req.params = sanitizeObject(req.params);
-  }
-  
-  next();
-};
+// API-specific rate limiters
+export const apiLimiter = createRateLimiter(15 * 60 * 1000, 100); // 100 requests per 15 minutes
+export const strictLimiter = createRateLimiter(15 * 60 * 1000, 20); // 20 requests per 15 minutes
+export const authLimiter = createRateLimiter(15 * 60 * 1000, 5); // 5 requests per 15 minutes
 
-function sanitizeObject(obj) {
-  if (typeof obj !== 'object' || obj === null) {
-    return obj;
-  }
-  
-  const sanitized = {};
-  for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'string') {
-      // Basic XSS prevention - remove script tags and javascript: protocols
-      sanitized[key] = value
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/javascript:/gi, '')
-        .replace(/on\w+\s*=/gi, '');
-    } else if (typeof value === 'object') {
-      sanitized[key] = sanitizeObject(value);
-    } else {
-      sanitized[key] = value;
-    }
-  }
-  
-  return sanitized;
-} 
+// Security middleware factory
+export const createSecurityMiddleware = () => {
+  return [
+    helmet(helmetConfig),
+    cors(corsOptions),
+    apiLimiter
+  ];
+};

@@ -2,7 +2,6 @@ import cron from 'node-cron';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
 import { evaluateTraitRevelation } from '../utils/traitEvaluation.js';
-import { revealTraits } from '../utils/traitDiscovery.js';
 
 /**
  * Daily trait evaluation cron job that runs at midnight
@@ -185,16 +184,6 @@ class CronJobService {
 
       // Log the action for auditing
       await this.logTraitRevelation(foal.id, foal.name, newTraits, currentDay);
-
-      // Also check for trait discovery conditions after trait evaluation
-      try {
-        const discoveryResults = await revealTraits(foal.id);
-        if (discoveryResults.traitsRevealed.length > 0) {
-          logger.info(`[CronJobService.evaluateFoalTraits] Trait discovery revealed ${discoveryResults.traitsRevealed.length} additional traits for foal ${foal.id}`);
-        }
-      } catch (discoveryError) {
-        logger.warn(`[CronJobService.evaluateFoalTraits] Trait discovery failed for foal ${foal.id}: ${discoveryError.message}`);
-      }
 
       logger.info(`[CronJobService.evaluateFoalTraits] Updated foal ${foal.id} with ${totalNewTraits} new traits`);
 

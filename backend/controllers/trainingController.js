@@ -1,7 +1,9 @@
+import { getLastTrainingDate, getHorseAge, logTrainingSession, getAnyRecentTraining } from '../models/trainingModel.js';
+import { incrementDisciplineScore, getHorseById, updateHorseStat } from '../models/horseModel.js';
+import { getPlayerWithHorses, addXp, levelUpIfNeeded } from '../models/playerModel.js';
+import { logXpEvent } from '../models/xpLogModel.js';
+import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import logger from '../utils/logger.js';
-import { getPlayerWithHorses } from '../models/playerModel.js';
-import { getHorseAge, logTrainingSession, getLastTrainingDate, getAnyRecentTraining } from '../models/trainingModel.js';
-import { incrementDisciplineScore } from '../models/horseModel.js';
 
 /**
  * Check if a horse is eligible to train in a specific discipline
@@ -31,7 +33,7 @@ async function canTrain(horseId, discipline) {
 
     // Check horse age requirement (must be 3+ years old)
     const age = await getHorseAge(parsedHorseId);
-    
+
     if (age === null) {
       logger.warn(`[trainingController.canTrain] Horse ${parsedHorseId} not found`);
       return {
@@ -50,16 +52,16 @@ async function canTrain(horseId, discipline) {
 
     // Check cooldown period (7 days since last training in ANY discipline)
     const lastTrainingDate = await getAnyRecentTraining(parsedHorseId);
-    
+
     if (lastTrainingDate) {
       const now = new Date();
       const diff = now - new Date(lastTrainingDate);
       const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 days in milliseconds
-      
+
       if (diff < sevenDays) {
         const remainingTime = sevenDays - diff;
         const remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
-        
+
         logger.info(`[trainingController.canTrain] Horse ${parsedHorseId} still in cooldown for any training (${remainingDays} days remaining)`);
         return {
           eligible: false,
@@ -82,7 +84,7 @@ async function canTrain(horseId, discipline) {
 }
 
 /**
- * Train a horse in a specific discipline (with eligibility validation)
+ * Train a horse in a specific discipline (with eligibility validation and trait effects)
  * @param {number} horseId - ID of the horse to train
  * @param {string} discipline - Discipline to train in
  * @returns {Object} - Training result with success status, updated horse, and next eligible date
@@ -94,7 +96,7 @@ async function trainHorse(horseId, discipline) {
 
     // Check if horse is eligible to train
     const eligibilityCheck = await canTrain(horseId, discipline);
-    
+
     if (!eligibilityCheck.eligible) {
       logger.warn(`[trainingController.trainHorse] Training rejected: ${eligibilityCheck.reason}`);
       return {
@@ -106,23 +108,164 @@ async function trainHorse(horseId, discipline) {
       };
     }
 
+    // Get horse data with traits for effect calculations
+    const horse = await getHorseById(horseId);
+    if (!horse) {
+      throw new Error('Horse not found');
+    }
+
+    // Get horse traits and calculate combined effects
+    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const allTraits = [...(traits.positive || []), ...(traits.negative || [])];
+    const traitEffects = getCombinedTraitEffects(allTraits);
+
+    logger.info(`[trainingController.trainHorse] Horse ${horseId} has traits: ${allTraits.join(', ')}`);
+
+    // Check for training-blocking traits
+    if (traitEffects.statGainBlocked) {
+      logger.warn('[trainingController.trainHorse] Training blocked by trait effects (burnout)');
+      return {
+        success: false,
+        reason: 'Horse is experiencing burnout and cannot gain from training',
+        updatedHorse: null,
+        message: 'Training not effective: Horse is experiencing burnout',
+        nextEligible: null
+      };
+    }
+
     // Log the training session
     const trainingLog = await logTrainingSession({ horseId, discipline });
-    
-    // Update the horse's discipline score by +5
-    const updatedHorse = await incrementDisciplineScore(horseId, discipline);
-    
-    // Calculate next eligible training date (7 days from now)
+
+    // Calculate base discipline score increase (default +5)
+    let disciplineScoreIncrease = 5;
+
+    // Apply trait effects to training
+    if (traitEffects.trainingXpModifier) {
+      disciplineScoreIncrease = Math.round(disciplineScoreIncrease * (1 + traitEffects.trainingXpModifier));
+      logger.info(`[trainingController.trainHorse] Trait XP modifier applied: ${(traitEffects.trainingXpModifier * 100).toFixed(1)}%`);
+    }
+
+    // Ensure minimum gain of 1 point
+    disciplineScoreIncrease = Math.max(1, disciplineScoreIncrease);
+
+    // Check for stat gain chance with trait effects
+    let statGainOccurred = false;
+    let statGainDetails = null;
+
+    // Base stat gain chance is 15% for training
+    let statGainChance = 0.15;
+
+    // Apply trait effects to stat gain chance
+    if (traitEffects.statGainChanceModifier) {
+      statGainChance = Math.max(0, Math.min(1, statGainChance + traitEffects.statGainChanceModifier));
+      logger.info(`[trainingController.trainHorse] Stat gain chance modified by traits: ${(statGainChance * 100).toFixed(1)}%`);
+    }
+
+    // Roll for stat gain
+    if (Math.random() < statGainChance) {
+      statGainOccurred = true;
+
+      // Determine which stat to improve based on discipline
+      const disciplineStatMap = {
+        'Racing': ['speed', 'stamina', 'focus'],
+        'Dressage': ['balance', 'obedience', 'flexibility'],
+        'Show Jumping': ['boldness', 'balance', 'focus'],
+        'Cross Country': ['stamina', 'boldness', 'balance'],
+        'Endurance': ['stamina', 'focus', 'balance'],
+        'Reining': ['obedience', 'balance', 'focus'],
+        'Driving': ['obedience', 'focus', 'stamina'],
+        'Trail': ['focus', 'balance', 'stamina'],
+        'Eventing': ['stamina', 'boldness', 'balance']
+      };
+
+      const relevantStats = disciplineStatMap[discipline] || ['speed', 'stamina', 'focus'];
+      const statToImprove = relevantStats[Math.floor(Math.random() * relevantStats.length)];
+
+      // Calculate stat gain amount (base 1-3 points)
+      let statGainAmount = Math.floor(Math.random() * 3) + 1;
+
+      // Apply trait effects to stat gain amount
+      if (traitEffects.baseStatBoost) {
+        statGainAmount += traitEffects.baseStatBoost;
+        logger.info(`[trainingController.trainHorse] Stat gain boosted by traits: +${traitEffects.baseStatBoost}`);
+      }
+
+      statGainDetails = {
+        stat: statToImprove,
+        amount: statGainAmount,
+        traitModified: !!(traitEffects.statGainChanceModifier || traitEffects.baseStatBoost)
+      };
+
+      // Update the horse's stat (this would need to be implemented in horseModel)
+      try {
+        await updateHorseStat(horseId, statToImprove, statGainAmount);
+        logger.info(`[trainingController.trainHorse] Stat gain: ${statToImprove} +${statGainAmount}`);
+      } catch (error) {
+        logger.error(`[trainingController.trainHorse] Failed to update stat: ${error.message}`);
+        statGainOccurred = false;
+        statGainDetails = null;
+      }
+    }
+
+    // Update the horse's discipline score with trait-modified amount
+    const updatedHorse = await incrementDisciplineScore(horseId, discipline, disciplineScoreIncrease);
+
+    // Calculate XP award with trait effects
+    let baseXp = 5;
+    if (traitEffects.trainingXpModifier) {
+      baseXp = Math.round(baseXp * (1 + traitEffects.trainingXpModifier));
+    }
+
+    // Award XP to horse owner for training
+    try {
+      if (updatedHorse && updatedHorse.ownerId) {
+        // Award XP using playerModel.addXp
+        const xpResult = await addXp(updatedHorse.ownerId, baseXp);
+
+        // Call levelUpIfNeeded after awarding XP (as requested in task)
+        const levelUpResult = await levelUpIfNeeded(updatedHorse.ownerId);
+
+        // Log XP event for auditing
+        await logXpEvent({
+          playerId: updatedHorse.ownerId,
+          amount: baseXp,
+          reason: `Trained horse ${updatedHorse.name} in ${discipline}`
+        });
+
+        logger.info(`[trainingController.trainHorse] Awarded ${baseXp} XP to player ${updatedHorse.ownerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
+      }
+    } catch (error) {
+      logger.error(`[trainingController.trainHorse] Failed to award training XP: ${error.message}`);
+      // Continue with training completion even if XP award fails
+    }
+
+    // Calculate next eligible training date (7 days from now, potentially modified by traits)
     const nextEligible = new Date();
-    nextEligible.setDate(nextEligible.getDate() + 7);
-    
-    logger.info(`[trainingController.trainHorse] Successfully trained horse ${horseId} in ${discipline} (Log ID: ${trainingLog.id})`);
-    
+    let cooldownDays = 7;
+
+    // Some traits might affect training frequency in the future
+    if (traitEffects.trainingTimeReduction) {
+      cooldownDays = Math.max(5, Math.round(cooldownDays * (1 - traitEffects.trainingTimeReduction)));
+      logger.info(`[trainingController.trainHorse] Training cooldown reduced by trait effects to ${cooldownDays} days`);
+    }
+
+    nextEligible.setDate(nextEligible.getDate() + cooldownDays);
+
+    logger.info(`[trainingController.trainHorse] Successfully trained horse ${horseId} in ${discipline} (Log ID: ${trainingLog.id}, Score +${disciplineScoreIncrease})`);
+
     return {
       success: true,
-      updatedHorse: updatedHorse,
-      message: `Horse trained successfully in ${discipline}. +5 added.`,
-      nextEligible: nextEligible.toISOString()
+      updatedHorse,
+      message: `Horse trained successfully in ${discipline}. +${disciplineScoreIncrease} added.${statGainOccurred ? ` Stat gain: ${statGainDetails.stat} +${statGainDetails.amount}` : ''}`,
+      nextEligible: nextEligible.toISOString(),
+      statGain: statGainOccurred ? statGainDetails : null,
+      traitEffects: {
+        appliedTraits: allTraits,
+        scoreModifier: disciplineScoreIncrease - 5, // Show the trait bonus/penalty
+        xpModifier: baseXp - 5, // Show the XP trait bonus/penalty
+        statGainChanceModifier: traitEffects.statGainChanceModifier || 0,
+        baseStatBoost: traitEffects.baseStatBoost || 0
+      }
     };
 
   } catch (error) {
@@ -144,27 +287,27 @@ async function getTrainingStatus(horseId, discipline) {
 
     // Get eligibility check (now uses global cooldown)
     const eligibilityCheck = await canTrain(horseId, discipline);
-    
+
     // Get additional status information
     const age = await getHorseAge(horseId);
     const lastTrainingDateInDiscipline = await getLastTrainingDate(horseId, discipline);
     const lastTrainingDateAny = await getAnyRecentTraining(horseId);
-    
+
     let cooldownInfo = null;
     if (lastTrainingDateAny) {
       const now = new Date();
       const diff = now - new Date(lastTrainingDateAny);
       const sevenDays = 1000 * 60 * 60 * 24 * 7;
-      
+
       if (diff < sevenDays) {
         const remainingTime = sevenDays - diff;
         const remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
         const remainingHours = Math.ceil(remainingTime / (1000 * 60 * 60));
-        
+
         cooldownInfo = {
           active: true,
-          remainingDays: remainingDays,
-          remainingHours: remainingHours,
+          remainingDays,
+          remainingHours,
           lastTrainingDate: lastTrainingDateAny
         };
       } else {
@@ -186,7 +329,7 @@ async function getTrainingStatus(horseId, discipline) {
     };
 
     logger.info(`[trainingController.getTrainingStatus] Training status retrieved for horse ${horseId}: eligible=${status.eligible}`);
-    
+
     return status;
 
   } catch (error) {
@@ -197,7 +340,7 @@ async function getTrainingStatus(horseId, discipline) {
 
 /**
  * Get all horses owned by a player that are eligible for training in at least one discipline
- * @param {string} playerId - ID of the player
+ * @param {string} playerId - UUID of the player
  * @returns {Array} - Array of horses with their trainable disciplines
  * @throws {Error} - If validation fails or database error occurs
  */
@@ -212,7 +355,7 @@ async function getTrainableHorses(playerId) {
 
     // Get player with their horses
     const player = await getPlayerWithHorses(playerId);
-    
+
     if (!player) {
       logger.warn(`[trainingController.getTrainableHorses] Player ${playerId} not found`);
       return [];
@@ -225,7 +368,7 @@ async function getTrainableHorses(playerId) {
 
     // Define all available disciplines
     const allDisciplines = ['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western'];
-    
+
     const trainableHorses = [];
 
     // Check each horse for training eligibility
@@ -239,9 +382,9 @@ async function getTrainableHorses(playerId) {
       try {
         // Check if horse has trained in ANY discipline within the last 7 days
         const lastTrainingDate = await getAnyRecentTraining(horse.id);
-        
+
         let isTrainable = false;
-        
+
         if (!lastTrainingDate) {
           // Horse has never trained, so it's trainable in all disciplines
           isTrainable = true;
@@ -250,7 +393,7 @@ async function getTrainableHorses(playerId) {
           const now = new Date();
           const diff = now - new Date(lastTrainingDate);
           const sevenDays = 1000 * 60 * 60 * 24 * 7; // 7 days in milliseconds
-          
+
           if (diff >= sevenDays) {
             isTrainable = true;
           }
@@ -265,7 +408,7 @@ async function getTrainableHorses(playerId) {
             trainableDisciplines: allDisciplines // All disciplines available since cooldown is global
           });
         }
-        
+
       } catch (error) {
         logger.warn(`[trainingController.getTrainableHorses] Error checking training eligibility for horse ${horse.id}: ${error.message}`);
         // Continue checking other horses even if one fails
@@ -289,23 +432,28 @@ async function getTrainableHorses(playerId) {
 async function trainRouteHandler(req, res) {
   try {
     const { horseId, discipline } = req.body;
-    
+
     logger.info(`[trainingController.trainRouteHandler] Training request for horse ${horseId} in ${discipline}`);
-    
+
     // Call the existing trainHorse function
     const result = await trainHorse(horseId, discipline);
-    
+
     if (result.success) {
       // Extract the updated score for the specific discipline
       const disciplineScores = result.updatedHorse?.disciplineScores || {};
       const updatedScore = disciplineScores[discipline] || 0;
-      
-      // Format response according to Task 2.6 specifications
+
+      // Calculate actual score increase from trait effects
+      const baseIncrease = 5;
+      const actualIncrease = baseIncrease + (result.traitEffects?.scoreModifier || 0);
+
+      // Format response with trait effects information
       res.json({
         success: true,
-        message: `${result.updatedHorse.name} trained in ${discipline}. +5 added.`,
-        updatedScore: updatedScore,
-        nextEligibleDate: result.nextEligible
+        message: `${result.updatedHorse.name} trained in ${discipline}. +${actualIncrease} added.`,
+        updatedScore,
+        nextEligibleDate: result.nextEligible,
+        traitEffects: result.traitEffects
       });
     } else {
       // Return failure response for ineligible training
@@ -314,7 +462,7 @@ async function trainRouteHandler(req, res) {
         message: result.message
       });
     }
-    
+
   } catch (error) {
     logger.error(`[trainingController.trainRouteHandler] Error: ${error.message}`);
     res.status(500).json({
@@ -331,4 +479,4 @@ export {
   getTrainingStatus,
   getTrainableHorses,
   trainRouteHandler
-}; 
+};

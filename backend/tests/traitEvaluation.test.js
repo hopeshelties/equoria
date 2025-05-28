@@ -1,4 +1,9 @@
 import { jest } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock logger
 const mockLogger = {
@@ -8,18 +13,18 @@ const mockLogger = {
 };
 
 // Mock the logger import
-jest.unstable_mockModule('../utils/logger.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
   default: mockLogger
 }));
 
 // Import the functions after mocking
-const { 
-  evaluateTraitRevelation, 
-  getTraitDefinition, 
+const {
+  evaluateTraitRevelation,
+  getTraitDefinition,
   getAllTraitDefinitions,
   TRAIT_DEFINITIONS,
-  TRAIT_CONFLICTS 
-} = await import('../utils/traitEvaluation.js');
+  TRAIT_CONFLICTS
+} = await import(join(__dirname, '../utils/traitEvaluation.js'));
 
 describe('Trait Evaluation System', () => {
   beforeEach(() => {
@@ -69,7 +74,7 @@ describe('Trait Evaluation System', () => {
 
       // Traits requiring age > 0 should not be revealed
       const allRevealedTraits = [...result.positive, ...result.negative, ...result.hidden];
-      
+
       // Check that no traits requiring higher age are revealed
       allRevealedTraits.forEach(traitKey => {
         const traitDef = getTraitDefinition(traitKey);
@@ -139,7 +144,7 @@ describe('Trait Evaluation System', () => {
       // Should not reveal traits that conflict with 'calm'
       const allNewTraits = [...result.positive, ...result.negative, ...result.hidden];
       const conflictsWithCalm = TRAIT_CONFLICTS.calm || [];
-      
+
       conflictsWithCalm.forEach(conflictTrait => {
         expect(allNewTraits).not.toContain(conflictTrait);
       });
@@ -189,7 +194,7 @@ describe('Trait Evaluation System', () => {
   describe('getTraitDefinition', () => {
     it('should return trait definition for valid trait key', () => {
       const definition = getTraitDefinition('resilient');
-      
+
       expect(definition).toBeDefined();
       expect(definition.name).toBe('Resilient');
       expect(definition.description).toBeDefined();
@@ -204,10 +209,10 @@ describe('Trait Evaluation System', () => {
     it('should find traits in all categories', () => {
       // Test positive trait
       expect(getTraitDefinition('resilient')).toBeDefined();
-      
+
       // Test negative trait
       expect(getTraitDefinition('nervous')).toBeDefined();
-      
+
       // Test rare trait
       expect(getTraitDefinition('legendary_bloodline')).toBeDefined();
     });
@@ -216,11 +221,11 @@ describe('Trait Evaluation System', () => {
   describe('getAllTraitDefinitions', () => {
     it('should return all trait definitions', () => {
       const definitions = getAllTraitDefinitions();
-      
+
       expect(definitions).toHaveProperty('positive');
       expect(definitions).toHaveProperty('negative');
       expect(definitions).toHaveProperty('rare');
-      
+
       expect(Object.keys(definitions.positive).length).toBeGreaterThan(0);
       expect(Object.keys(definitions.negative).length).toBeGreaterThan(0);
       expect(Object.keys(definitions.rare).length).toBeGreaterThan(0);
@@ -228,7 +233,7 @@ describe('Trait Evaluation System', () => {
 
     it('should have consistent structure for all traits', () => {
       const definitions = getAllTraitDefinitions();
-      
+
       Object.values(definitions).forEach(category => {
         Object.values(category).forEach(trait => {
           expect(trait).toHaveProperty('name');
@@ -236,7 +241,7 @@ describe('Trait Evaluation System', () => {
           expect(trait).toHaveProperty('revealConditions');
           expect(trait).toHaveProperty('rarity');
           expect(trait).toHaveProperty('baseChance');
-          
+
           expect(typeof trait.name).toBe('string');
           expect(typeof trait.description).toBe('string');
           expect(typeof trait.revealConditions).toBe('object');
@@ -252,11 +257,11 @@ describe('Trait Evaluation System', () => {
       Object.values(TRAIT_DEFINITIONS).forEach(category => {
         Object.entries(category).forEach(([key, trait]) => {
           const conditions = trait.revealConditions;
-          
+
           // Age should be valid
           expect(conditions.minAge).toBeGreaterThanOrEqual(0);
           expect(conditions.minAge).toBeLessThanOrEqual(6);
-          
+
           // Bond score conditions should be valid if present
           if (conditions.minBondScore) {
             expect(conditions.minBondScore).toBeGreaterThanOrEqual(0);
@@ -266,7 +271,7 @@ describe('Trait Evaluation System', () => {
             expect(conditions.maxBondScore).toBeGreaterThanOrEqual(0);
             expect(conditions.maxBondScore).toBeLessThanOrEqual(100);
           }
-          
+
           // Stress level conditions should be valid if present
           if (conditions.minStressLevel) {
             expect(conditions.minStressLevel).toBeGreaterThanOrEqual(0);
@@ -276,7 +281,7 @@ describe('Trait Evaluation System', () => {
             expect(conditions.maxStressLevel).toBeGreaterThanOrEqual(0);
             expect(conditions.maxStressLevel).toBeLessThanOrEqual(100);
           }
-          
+
           // Base chance should be valid probability
           expect(trait.baseChance).toBeGreaterThan(0);
           expect(trait.baseChance).toBeLessThanOrEqual(1);
@@ -314,23 +319,23 @@ describe('Trait Evaluation System', () => {
     it('should handle errors gracefully', () => {
       const invalidFoal = null;
       const mockCurrentTraits = { positive: [], negative: [], hidden: [] };
-      
+
       expect(() => {
         evaluateTraitRevelation(invalidFoal, mockCurrentTraits, 3);
       }).toThrow();
-      
+
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
     it('should handle missing foal properties', () => {
       const incompleteFoal = { id: 1 }; // Missing name, age, bond_score, stress_level
       const mockCurrentTraits = { positive: [], negative: [], hidden: [] };
-      
+
       const result = evaluateTraitRevelation(incompleteFoal, mockCurrentTraits, 3);
-      
+
       expect(result).toHaveProperty('positive');
       expect(result).toHaveProperty('negative');
       expect(result).toHaveProperty('hidden');
     });
   });
-}); 
+});
