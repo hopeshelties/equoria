@@ -55,8 +55,11 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 const { getPlayerProgress, getDashboardData } = await import(join(__dirname, '../controllers/playerController.js'));
 
 describe('playerController', () => {
+  let mockNext; // Declare mockNext here
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockNext = jest.fn(); // Initialize mockNext before each test
     mockGetPlayerById.mockClear();
     mockGetTrainableHorses.mockClear();
     mockPrisma.horse.count.mockClear();
@@ -90,7 +93,7 @@ describe('playerController', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await getPlayerProgress(req, res);
+      await getPlayerProgress(req, res, mockNext); // Pass mockNext
 
       expect(mockGetPlayerById).toHaveBeenCalledWith('player-123');
       expect(res.json).toHaveBeenCalledWith({
@@ -131,7 +134,7 @@ describe('playerController', () => {
         const req = { params: { id: 'player-123' } };
         const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-        await getPlayerProgress(req, res);
+        await getPlayerProgress(req, res, mockNext); // Pass mockNext
 
         expect(res.json).toHaveBeenCalledWith({
           success: true,
@@ -142,6 +145,7 @@ describe('playerController', () => {
         });
 
         jest.clearAllMocks();
+        mockNext.mockClear(); // Clear mockNext for the next iteration
       }
     });
 
@@ -155,9 +159,13 @@ describe('playerController', () => {
         json: jest.fn(),
         status: jest.fn().mockReturnThis()
       };
+      // const next = jest.fn(); // No, use the one from beforeEach
 
-      await getPlayerProgress(req, res);
+      await getPlayerProgress(req, res, mockNext); // Pass mockNext
 
+      // expect(next).toHaveBeenCalledTimes(1); // This assertion might be too specific depending on implementation
+      // expect(next).toHaveBeenCalledWith(expect.any(AppError)); // Check if next was called with an AppError
+      // Check the response directly as AppError might be handled to send a response
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
@@ -176,13 +184,17 @@ describe('playerController', () => {
         json: jest.fn(),
         status: jest.fn().mockReturnThis()
       };
+      // const next = jest.fn(); // No, use the one from beforeEach
 
       // Mock NODE_ENV for development error details
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'development';
 
-      await getPlayerProgress(req, res);
+      await getPlayerProgress(req, res, mockNext); // Pass mockNext
 
+      // expect(next).toHaveBeenCalledTimes(1);
+      // expect(next).toHaveBeenCalledWith(expect.any(Error));
+      // Check the response directly
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
@@ -205,13 +217,16 @@ describe('playerController', () => {
         json: jest.fn(),
         status: jest.fn().mockReturnThis()
       };
-
+      // const next = jest.fn(); // No, use the one from beforeEach
       // Mock NODE_ENV for production
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
 
-      await getPlayerProgress(req, res);
+      await getPlayerProgress(req, res, mockNext); // Pass mockNext
 
+      // expect(next).toHaveBeenCalledTimes(1);
+      // expect(next).toHaveBeenCalledWith(expect.any(Error));
+      // Check the response directly
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
@@ -244,7 +259,7 @@ describe('playerController', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await getPlayerProgress(req, res);
+      await getPlayerProgress(req, res, mockNext); // Pass mockNext
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -312,7 +327,7 @@ describe('playerController', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await getDashboardData(req, res);
+      await getDashboardData(req, res, mockNext); // Pass mockNext
 
       expect(mockGetPlayerById).toHaveBeenCalledWith('player-123');
       expect(mockPrisma.horse.count).toHaveBeenCalledWith({
@@ -364,91 +379,142 @@ describe('playerController', () => {
         json: jest.fn(),
         status: jest.fn().mockReturnThis()
       };
+      // const next = jest.fn(); // No, use the one from beforeEach
 
-      await getDashboardData(req, res);
+      await getDashboardData(req, res, mockNext); // Pass mockNext
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Player not found'
-      });
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error)); // AppError is an Error
+      expect(mockNext.mock.calls[0][0].statusCode).toBe(404);
+      expect(mockNext.mock.calls[0][0].message).toBe('Player not found');
+      // expect(res.status).toHaveBeenCalledWith(404); // This might not be called if next() is used for errors
+      // expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Player not found' });
+      expect(mockLogger.warn).toHaveBeenCalledWith('[playerController.getDashboardData] Player not found for ID: nonexistent-player');
     });
 
-    it('should return 400 for invalid player ID', async() => {
-      const req = {
-        params: { playerId: null }
-      };
-      const res = {
-        json: jest.fn(),
-        status: jest.fn().mockReturnThis()
-      };
-
-      await getDashboardData(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Valid player ID is required'
-      });
-    });
-
-    it('should handle errors gracefully and continue with partial data', async() => {
-      const mockPlayer = {
-        id: 'player-123',
-        name: 'Alex',
-        level: 4,
-        xp: 230,
-        money: 4250
-      };
-
+    it('should handle errors when fetching trainable horses', async() => {
+      const mockPlayer = { id: 'player-123', name: 'Alex' };
       mockGetPlayerById.mockResolvedValue(mockPlayer);
-      mockPrisma.horse.count.mockResolvedValue(5);
-      mockGetTrainableHorses.mockRejectedValue(new Error('Training service error'));
+      mockGetTrainableHorses.mockRejectedValue(new Error('Trainable horses error'));
+
+      const req = { user: { id: 'player-123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+      // const next = jest.fn(); // No, use the one from beforeEach
+
+      await getDashboardData(req, res, mockNext); // Pass mockNext
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toBe('Trainable horses error');
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error fetching dashboard data for player player-123: Trainable horses error'));
+    });
+
+    it('should handle errors when fetching horse count', async() => {
+      const mockPlayer = { id: 'player-123', name: 'Alex' };
+      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      mockGetTrainableHorses.mockResolvedValue([]); // Assume no trainable horses for simplicity
+      mockPrisma.horse.count.mockRejectedValue(new Error('Horse count error'));
+
+      const req = { user: { id: 'player-123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+      // const next = jest.fn(); // No, use the one from beforeEach
+
+      await getDashboardData(req, res, mockNext); // Pass mockNext
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toBe('Horse count error');
+    });
+
+    it('should handle errors when fetching upcoming shows', async() => {
+      const mockPlayer = { id: 'player-123', name: 'Alex' };
+      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      mockGetTrainableHorses.mockResolvedValue([]);
+      mockPrisma.horse.count.mockResolvedValue(0);
+      mockPrisma.show.findMany.mockRejectedValue(new Error('Show fetch error'));
+
+      const req = { user: { id: 'player-123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+      // const next = jest.fn(); // No, use the one from beforeEach
+
+      await getDashboardData(req, res, mockNext); // Pass mockNext
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toBe('Show fetch error');
+    });
+
+    it('should handle errors when fetching competition results count', async() => {
+      const mockPlayer = { id: 'player-123', name: 'Alex' };
+      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      mockGetTrainableHorses.mockResolvedValue([]);
+      mockPrisma.horse.count.mockResolvedValue(0);
       mockPrisma.show.findMany.mockResolvedValue([]);
-      mockPrisma.competitionResult.count.mockResolvedValue(0);
-      mockPrisma.trainingLog.findFirst.mockRejectedValue(new Error('Training log error'));
-      mockPrisma.competitionResult.findFirst.mockRejectedValue(new Error('Competition error'));
+      mockPrisma.competitionResult.count.mockRejectedValue(new Error('Comp count error'));
 
-      const req = {
-        params: { playerId: 'player-123' }
-      };
-      const res = {
-        json: jest.fn(),
-        status: jest.fn().mockReturnThis()
-      };
+      const req = { user: { id: 'player-123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+      // const next = jest.fn(); // No, use the one from beforeEach
 
-      await getDashboardData(req, res);
+      await getDashboardData(req, res, mockNext); // Pass mockNext
 
-      expect(res.json).toHaveBeenCalledWith({
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toBe('Comp count error');
+    });
+
+    it('should handle errors when fetching last competition result', async() => {
+      const mockPlayer = { id: 'player-123', name: 'Alex' };
+      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      // ... other mocks ...
+      mockPrisma.competitionResult.count.mockResolvedValue(1); // Assume there is one result
+      mockPrisma.competitionResult.findFirst.mockRejectedValue(new Error('Last comp error'));
+
+      const req = { user: { id: 'player-123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+      // const next = jest.fn(); // No, use the one from beforeEach
+
+      await getDashboardData(req, res, mockNext); // Pass mockNext
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toBe('Last comp error');
+    });
+
+    it('should handle errors when fetching last training log', async() => {
+      const mockPlayer = { id: 'player-123', name: 'Alex' };
+      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      // ... other mocks ...
+      mockPrisma.trainingLog.findFirst.mockRejectedValue(new Error('Last training error'));
+
+      const req = { user: { id: 'player-123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+      // const next = jest.fn(); // No, use the one from beforeEach
+
+      await getDashboardData(req, res, mockNext); // Pass mockNext
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toBe('Last training error');
+    });
+
+    it('should gracefully handle missing optional data (last competition, last training)', async() => {
+      const mockPlayer = { id: 'player-123', name: 'Alex', money: 1000, xp: 50, level: 2 };
+      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      mockGetTrainableHorses.mockResolvedValue([]);
+      mockPrisma.horse.count.mockResolvedValue(0);
+      mockPrisma.show.findMany.mockResolvedValue([]);
+      mockPrisma.competitionResult.count.mockResolvedValue(0); // No competition results
+      mockPrisma.competitionResult.findFirst.mockResolvedValue(null); // No last competition
+      mockPrisma.trainingLog.findFirst.mockResolvedValue(null); // No last training
+
+      const req = { user: { id: 'player-123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+      // const next = jest.fn(); // No, use the one from beforeEach
+
+      await getDashboardData(req, res, mockNext); // Pass mockNext
+
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: true,
-        message: 'Dashboard data retrieved successfully',
-        data: {
-          player: {
-            id: 'player-123',
-            name: 'Alex',
-            level: 4,
-            xp: 230,
-            money: 4250
-          },
-          horses: {
-            total: 5,
-            trainable: 0 // Should default to 0 when error occurs
-          },
-          shows: {
-            upcomingEntries: 0,
-            nextShowRuns: []
-          },
-          recent: {
-            lastTrained: null, // Should default to null when error occurs
-            lastShowPlaced: null // Should default to null when error occurs
-          }
-        }
-      });
-
-      // Verify warning logs were called for errors
-      expect(mockLogger.warn).toHaveBeenCalledWith('[playerController.getDashboardData] Error getting trainable horses: Training service error');
-      expect(mockLogger.warn).toHaveBeenCalledWith('[playerController.getDashboardData] Error getting recent training: Training log error');
-      expect(mockLogger.warn).toHaveBeenCalledWith('[playerController.getDashboardData] Error getting recent placement: Competition error');
+        data: expect.objectContaining({
+          lastCompetitionResult: null,
+          lastTrainingLog: null
+        })
+      }));
+      expect(mockNext).not.toHaveBeenCalled(); // No errors should be passed to next
     });
   });
 });

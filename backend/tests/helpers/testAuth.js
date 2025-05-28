@@ -1,11 +1,11 @@
-import { generateTestToken, authHeader } from './authHelper.js';
+import { generateTestToken } from './authHelper.js';
 
 /**
- * Add authentication headers to a request for existing tests
+ * Add authentication headers to a supertest request object
  */
-export const withAuth = (request, userData = {}) => {
+export const withAuth = (supertestRequest, userData = {}) => {
   const token = generateTestToken(userData);
-  return request.set('Authorization', `Bearer ${token}`);
+  return supertestRequest.set('Authorization', `Bearer ${token}`);
 };
 
 /**
@@ -20,9 +20,9 @@ export const getSeededPlayerToken = () => {
 };
 
 /**
- * Add auth headers for the seeded test player
+ * Add auth headers for the seeded test player to a supertest request object
  */
-export const withSeededPlayerAuth = (request) => {
+export const withSeededPlayerAuth = (supertestRequest) => {
   const token = getSeededPlayerToken();
-  return request.set('Authorization', `Bearer ${token}`);
-}; 
+  return supertestRequest.set('Authorization', `Bearer ${token}`);
+};

@@ -7,10 +7,19 @@ export default {
     'node_modules/(?!(.*\\.mjs$|@prisma/client))' // Allow Prisma client to be processed
   ],
   moduleNameMapper: {
+    // Ensure logger.js is resolved correctly from jest.setup.js and other locations
+    '^../../utils/logger.js$': '<rootDir>/utils/logger.js',
+    '^../utils/logger.js$': '<rootDir>/utils/logger.js',
+    '^utils/logger.js$': '<rootDir>/utils/logger.js',
+
     '^../utils/appError.js$': '<rootDir>/errors/AppError.js', // Specific map for AppError
-    '^../utils/(.*)$': '<rootDir>/utils/$1', // Keep for other utils if any
+    '^../../utils/appError.js$': '<rootDir>/errors/AppError.js', // Specific map for AppError from deeper paths
+    '^../errors/AppError.js$': '<rootDir>/errors/AppError.js', // If referenced from one level up
+    '^../../errors/AppError.js$': '<rootDir>/errors/AppError.js', // If referenced from two levels up
+
+    '^../utils/(.*)$': '<rootDir>/utils/$1',
     '^db/(.*)$': '<rootDir>/db/$1',
-    '^../../db/(.*)$': '<rootDir>/db/$1', // Added for deeper paths like in integration tests
+    '^../../db/(.*)$': '<rootDir>/db/$1',
     // Add a more general alias for controllers, models, utils, errors, etc.
     '^#controllers/(.*)$': '<rootDir>/controllers/$1',
     '^#models/(.*)$': '<rootDir>/models/$1',
