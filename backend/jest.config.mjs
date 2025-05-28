@@ -1,12 +1,14 @@
 // backend/jest.config.mjs
 export default {
   testEnvironment: 'node',
-  preset: null,
-  transform: {},
+  extensionsToTreatAsEsm: ['.js'], // Explicitly treat .js as ESM
+  transform: {}, // Disable transforms for ESM
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@prisma/client))'
+    'node_modules/(?!(.*\\.mjs$|@prisma/client))' // Allow Prisma client to be processed
   ],
-
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1' // Handle ESM imports without .js extension
+  },
   testMatch: [
     '**/__tests__/**/*.js',
     '**/?(*.)+(spec|test).js',
@@ -26,12 +28,10 @@ export default {
     '!**/*.test.js',
     '!**/*.spec.js'
   ],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'], // Load setup file
   verbose: true,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
-  maxWorkers: 1,
-  forceExit: true,  // Temporarily re-enabled due to module resolution issues
   testTimeout: 30000
 };

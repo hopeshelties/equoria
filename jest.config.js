@@ -1,10 +1,11 @@
 export default {
   testEnvironment: 'node',
-  transform: {},
   extensionsToTreatAsEsm: ['.js'],
+  transform: {}, // Disable transforms for ESM
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
+    '^(\\.{1,2}/.*)\\.js$': '$1', // Handle ESM imports
   },
   testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
-  verbose: true
+  verbose: true,
+  setupFilesAfterEnv: ['./jest.setup.js'], // Explicitly include setup file
 };

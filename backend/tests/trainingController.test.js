@@ -182,7 +182,7 @@ describe('trainingController', () => {
         id: 1,
         name: 'Test Horse',
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
       mockIncrementDisciplineScore.mockResolvedValue({
@@ -190,7 +190,7 @@ describe('trainingController', () => {
         name: 'Test Horse',
         disciplineScores: { Racing: 5 },
         breed: { id: 1, name: 'Thoroughbred' },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       mockUpdateHorseStat.mockResolvedValue({
         id: 1,
@@ -268,7 +268,7 @@ describe('trainingController', () => {
         id: 1,
         name: 'Test Horse',
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       mockLogTrainingSession.mockRejectedValue(new Error('Failed to log training'));
 
@@ -283,7 +283,7 @@ describe('trainingController', () => {
         id: 1,
         name: 'XP Test Horse',
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
-        ownerId: 'xp-test-player'
+        playerId: 'xp-test-player'
       });
       mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Dressage', trainedAt: new Date() });
       mockIncrementDisciplineScore.mockResolvedValue({
@@ -291,7 +291,7 @@ describe('trainingController', () => {
         name: 'XP Test Horse',
         disciplineScores: { Dressage: 3 },
         breed: { id: 1, name: 'Arabian' },
-        ownerId: 'xp-test-player'
+        playerId: 'xp-test-player'
       });
       mockUpdateHorseStat.mockResolvedValue({
         id: 1,
@@ -343,7 +343,7 @@ describe('trainingController', () => {
         id: 1,
         name: 'Error Test Horse',
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
-        ownerId: 'error-test-player'
+        playerId: 'error-test-player'
       });
       mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
       mockIncrementDisciplineScore.mockResolvedValue({
@@ -351,7 +351,7 @@ describe('trainingController', () => {
         name: 'Error Test Horse',
         disciplineScores: { Racing: 2 },
         breed: { id: 1, name: 'Thoroughbred' },
-        ownerId: 'error-test-player'
+        playerId: 'error-test-player'
       });
       mockUpdateHorseStat.mockResolvedValue({
         id: 1,
@@ -497,7 +497,7 @@ describe('trainingController', () => {
         id: 1,
         name: 'Test Horse',
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Racing', trainedAt: new Date() });
       mockIncrementDisciplineScore.mockResolvedValue({
@@ -505,7 +505,7 @@ describe('trainingController', () => {
         name: 'Test Horse',
         disciplineScores: { Racing: 5 },
         breed: { id: 1, name: 'Thoroughbred' },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       mockAddXp.mockResolvedValue({
         id: 'test-player-123',
@@ -697,7 +697,7 @@ describe('trainingController', () => {
         id: 1,
         name: 'Nova',
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       const mockTrainingLog = {
         id: 1,
@@ -710,7 +710,7 @@ describe('trainingController', () => {
         name: 'Nova',
         disciplineScores: { 'Dressage': 25 },
         breed: { id: 1, name: 'Thoroughbred' },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       };
       mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
       mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
@@ -775,7 +775,7 @@ describe('trainingController', () => {
         id: 1,
         name: 'Nova',
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       const mockTrainingLog = {
         id: 1,
@@ -788,7 +788,7 @@ describe('trainingController', () => {
         name: 'Nova',
         disciplineScores: null, // No discipline scores
         breed: { id: 1, name: 'Thoroughbred' },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       };
       mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
       mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
@@ -839,7 +839,7 @@ describe('trainingController', () => {
         id: 1,
         name: 'Intelligent Horse',
         epigenetic_modifiers: { positive: ['intelligent'], negative: [], hidden: [] },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       mockLogTrainingSession.mockResolvedValue({ id: 1, horseId: 1, discipline: 'Dressage', trainedAt: new Date() });
       mockIncrementDisciplineScore.mockResolvedValue({
@@ -847,7 +847,7 @@ describe('trainingController', () => {
         name: 'Intelligent Horse',
         disciplineScores: { Dressage: 6 }, // +6 instead of +5 due to trait
         breed: { id: 1, name: 'Warmblood' },
-        ownerId: 'test-player-123'
+        playerId: 'test-player-123'
       });
       mockAddXp.mockResolvedValue({
         id: 'test-player-123',

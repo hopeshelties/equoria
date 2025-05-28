@@ -1,5 +1,6 @@
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
+import { DatabaseError } from '../errors/index.js';
 
 /**
  * Retrieves a user with their horses
@@ -18,17 +19,21 @@ export async function getUserWithHorses(id) {
     const user = await prisma.user.findUnique({
       where: { id: numericId },
       include: {
-        horses: {
+        player: {
           include: {
-            breed: true,
-            stable: true
+            horses: {
+              include: {
+                breed: true,
+                stable: true
+              }
+            }
           }
         }
       }
     });
 
     if (user) {
-      const horseCount = user.horses ? user.horses.length : 0;
+      const horseCount = user.player && user.player.horses ? user.player.horses.length : 0;
       logger.info(`[userModel.getUserWithHorses] Successfully found user with horses: ${user.name} (ID: ${id}, Horses: ${horseCount})`);
     }
 
@@ -39,7 +44,7 @@ export async function getUserWithHorses(id) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[userModel.getUserWithHorses] Database error: %o', error);
     throw new Error(`Database error in getUserWithHorses: ${error.message}`);
@@ -75,7 +80,7 @@ export async function getUserById(id) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[userModel.getUserById] Database error: %o', error);
     throw new Error(`Database error in getUserById: ${error.message}`);
@@ -110,9 +115,62 @@ export async function getUserByEmail(email) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[userModel.getUserByEmail] Database error: %o', error);
     throw new Error(`Database error in getUserByEmail: ${error.message}`);
   }
-} 
+}
+
+/**
+ * Retrieves statistics for a user
+ * @param {number} userId - User ID (integer)
+ * @returns {Object|null} - User statistics object if found, null otherwise
+ * @throws {Error} - Validation or database errors
+ */
+const getUserStats = async(userId) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        player: {
+          include: {
+            horses: true
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    // Calculate stats based on the user and their player's horses
+    const horseCount = user.player && user.player.horses ? user.player.horses.length : 0;
+    const averageHorseAge = horseCount > 0
+      ? user.player.horses.reduce((sum, horse) => sum + horse.age, 0) / horseCount
+      : 0;
+
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+      horseCount,
+      averageHorseAge
+      // Add any other relevant stats
+    };
+  } catch (error) {
+    logger.error(`Error fetching user stats for user ${userId}: ${error.message}`);
+    throw new DatabaseError(`Could not fetch user stats: ${error.message}`);
+  }
+};
+
+export default {
+  getUserWithHorses,
+  getUserById,
+  getUserByEmail,
+  getUserStats
+  // ... any other functions you might have
+};

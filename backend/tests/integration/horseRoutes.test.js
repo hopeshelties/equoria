@@ -32,13 +32,13 @@ describe('Horse Routes Integration Tests', () => {
         id: 1,
         name: 'Adult Horse 1',
         age: 4,
-        ownerId: 'test-player-uuid-123'
+        playerId: 'test-player-uuid-123' // Changed from ownerId
       },
       {
         id: 2,
         name: 'Adult Horse 2',
         age: 5,
-        ownerId: 'test-player-uuid-123'
+        playerId: 'test-player-uuid-123' // Changed from ownerId
       }
     ]
   };
@@ -48,9 +48,10 @@ describe('Horse Routes Integration Tests', () => {
     jest.clearAllMocks();
 
     // Setup database mocks
-    mockPrisma.user.findUnique.mockImplementation(({ where }) => {
+    // Mock for player.findUnique, which is used by horseController for /trainable/:playerId
+    mockPrisma.player.findUnique.mockImplementation(({ where }) => {
       if (where.id === 'test-player-uuid-123') {
-        return Promise.resolve(mockPlayer);
+        return Promise.resolve(mockPlayer); // mockPlayer includes the horses array
       } else if (where.id === 'nonexistent-player-uuid-456') {
         return Promise.resolve(null);
       }
@@ -58,7 +59,7 @@ describe('Horse Routes Integration Tests', () => {
     });
 
     mockPrisma.horse.findMany.mockImplementation(({ where }) => {
-      if (where?.ownerId === 'test-player-uuid-123') {
+      if (where?.playerId === 'test-player-uuid-123') { // Changed from ownerId to playerId
         return Promise.resolve(mockPlayer.horses);
       }
       return Promise.resolve([]);

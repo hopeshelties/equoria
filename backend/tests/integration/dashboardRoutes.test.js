@@ -14,11 +14,15 @@ const __dirname = dirname(__filename);
 // Mock the database module BEFORE importing the app
 jest.unstable_mockModule(join(__dirname, '../../db/index.js'), () => ({
   default: {
-    user: {
+    user: { // This mock might still be needed by other parts of the app or other tests
       findUnique: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
       deleteMany: jest.fn()
+    },
+    player: { // Added player mock
+      findUnique: jest.fn()
+      // Add other player methods if they are called by the tested code
     },
     horse: {
       count: jest.fn(),
@@ -141,7 +145,7 @@ describe('Dashboard Routes Integration Tests', () => {
     jest.clearAllMocks();
 
     // Setup default mock responses for dashboard data
-    mockPrisma.user.findUnique.mockImplementation(({ where }) => {
+    mockPrisma.player.findUnique.mockImplementation(({ where }) => {
       if (where.id === testPlayer.id) {
         return Promise.resolve(testPlayer);
       }
@@ -251,7 +255,7 @@ describe('Dashboard Routes Integration Tests', () => {
       };
 
       // Override mocks for this test
-      mockPrisma.user.findUnique.mockImplementation(({ where }) => {
+      mockPrisma.player.findUnique.mockImplementation(({ where }) => {
         if (where.id === emptyPlayer.id) {
           return Promise.resolve(emptyPlayer);
         }
@@ -291,7 +295,7 @@ describe('Dashboard Routes Integration Tests', () => {
       };
 
       // Override mocks for this test
-      mockPrisma.user.findUnique.mockImplementation(({ where }) => {
+      mockPrisma.player.findUnique.mockImplementation(({ where }) => {
         if (where.id === inactivePlayer.id) {
           return Promise.resolve(inactivePlayer);
         }

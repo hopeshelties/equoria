@@ -1,9 +1,9 @@
 /**
  * Training System Business Logic Tests
- * 
+ *
  * These tests validate business requirements rather than implementation details.
  * They test actual outcomes, stat changes, database updates, and game state.
- * 
+ *
  * Business Requirements Being Tested:
  * 1. Horses must be 3+ years old to train
  * 2. Training increases discipline scores by +5 (+ trait effects)
@@ -38,7 +38,7 @@ describe('Training System Business Logic Tests', () => {
   let youngHorse; // Under 3 years old, not eligible
   let trainedHorse; // Horse that has been trained recently
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     // Clean up any existing test data
     await prisma.trainingLog.deleteMany({
       where: {
@@ -174,7 +174,7 @@ describe('Training System Business Logic Tests', () => {
     });
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     // Clean up test data
     await prisma.trainingLog.deleteMany({
       where: {
@@ -210,7 +210,7 @@ describe('Training System Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: Age Requirements (3+ years old)', () => {
-    it('BLOCKS training for horses under 3 years old', async () => {
+    it('BLOCKS training for horses under 3 years old', async() => {
       const response = await request(app)
         .post('/api/training/train')
         .send({
@@ -235,7 +235,7 @@ describe('Training System Business Logic Tests', () => {
       expect(trainingLogs).toHaveLength(0);
     });
 
-    it('ALLOWS training for horses 3+ years old', async () => {
+    it('ALLOWS training for horses 3+ years old', async() => {
       const response = await request(app)
         .post('/api/training/train')
         .send({
@@ -255,7 +255,7 @@ describe('Training System Business Logic Tests', () => {
 
       // VERIFY: Training log created
       const trainingLogs = await prisma.trainingLog.findMany({
-        where: { 
+        where: {
           horseId: adultHorse.id,
           discipline: 'Dressage'
         }
@@ -265,7 +265,7 @@ describe('Training System Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: Discipline Score Progression (+5 base)', () => {
-    it('INCREASES discipline scores by +5 for first-time training', async () => {
+    it('INCREASES discipline scores by +5 for first-time training', async() => {
       // Create a fresh horse specifically for score testing
       const scoreTestHorse = await prisma.horse.create({
         data: {
@@ -322,10 +322,10 @@ describe('Training System Business Logic Tests', () => {
       });
     });
 
-    it('ACCUMULATES discipline scores across multiple training sessions (different horses)', async () => {
+    it('ACCUMULATES discipline scores across multiple training sessions (different horses)', async() => {
       // BUSINESS RULE: Since we have one-discipline-per-week cooldown, we test accumulation
       // by checking that different horses can build up scores independently
-      
+
       // Create two fresh horses for accumulation testing
       const horse1 = await prisma.horse.create({
         data: {
@@ -398,7 +398,7 @@ describe('Training System Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: Global Cooldown (One Discipline Per Week)', () => {
-    it('BLOCKS training when horse has trained ANY discipline within 7 days', async () => {
+    it('BLOCKS training when horse has trained ANY discipline within 7 days', async() => {
       const response = await request(app)
         .post('/api/training/train')
         .send({
@@ -418,7 +418,7 @@ describe('Training System Business Logic Tests', () => {
 
       // VERIFY: No new training log
       const dressageLogs = await prisma.trainingLog.findMany({
-        where: { 
+        where: {
           horseId: trainedHorse.id,
           discipline: 'Dressage'
         }
@@ -426,7 +426,7 @@ describe('Training System Business Logic Tests', () => {
       expect(dressageLogs).toHaveLength(0);
     });
 
-    it('ALLOWS training after 7-day cooldown expires', async () => {
+    it('ALLOWS training after 7-day cooldown expires', async() => {
       // Create a horse with old training (more than 7 days ago)
       const oldTrainedHorse = await prisma.horse.create({
         data: {
@@ -486,7 +486,7 @@ describe('Training System Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: XP Award for Training', () => {
-    it('AWARDS XP to horse owner (Player) when training succeeds', async () => {
+    it('AWARDS XP to horse owner (Player) when training succeeds', async() => {
       // Get initial player XP
       const initialPlayer = await prisma.player.findUnique({
         where: { id: testPlayer.id }
@@ -534,7 +534,7 @@ describe('Training System Business Logic Tests', () => {
       const finalPlayer = await prisma.player.findUnique({
         where: { id: testPlayer.id }
       });
-      
+
       const xpGained = finalPlayer.xp - initialXP;
       expect(xpGained).toBeGreaterThanOrEqual(5); // Base XP award for training
 
@@ -554,7 +554,7 @@ describe('Training System Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: Training Log Creation', () => {
-    it('CREATES training log entry for successful training', async () => {
+    it('CREATES training log entry for successful training', async() => {
       // Create fresh horse for log testing
       const logTestHorse = await prisma.horse.create({
         data: {
@@ -588,7 +588,7 @@ describe('Training System Business Logic Tests', () => {
 
       // VERIFY: Training log exists with correct data
       const trainingLogs = await prisma.trainingLog.findMany({
-        where: { 
+        where: {
           horseId: logTestHorse.id,
           discipline: 'Reining'
         }
@@ -612,7 +612,7 @@ describe('Training System Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: Error Handling and Data Integrity', () => {
-    it('MAINTAINS database integrity when training non-existent horse', async () => {
+    it('MAINTAINS database integrity when training non-existent horse', async() => {
       const nonExistentHorseId = 99999;
 
       const response = await request(app)
@@ -633,7 +633,7 @@ describe('Training System Business Logic Tests', () => {
       expect(trainingLogs).toHaveLength(0);
     });
 
-    it('VALIDATES input parameters and rejects invalid requests', async () => {
+    it('VALIDATES input parameters and rejects invalid requests', async() => {
       const response = await request(app)
         .post('/api/training/train')
         .send({
@@ -649,7 +649,7 @@ describe('Training System Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: Next Training Date Calculation', () => {
-    it('PROVIDES accurate next training date (7 days from training)', async () => {
+    it('PROVIDES accurate next training date (7 days from training)', async() => {
       // Create fresh horse for date testing
       const dateTestHorse = await prisma.horse.create({
         data: {
@@ -699,4 +699,4 @@ describe('Training System Business Logic Tests', () => {
       });
     });
   });
-}); 
+});

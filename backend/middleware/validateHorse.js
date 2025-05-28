@@ -1,5 +1,5 @@
-const { body, param } = require('express-validator');
-const { handleValidationErrors } = require('./validationErrorHandler'); // Assuming a generic error handler
+import { body, param } from 'express-validator';
+import { handleValidationErrors } from './validationErrorHandler.js'; // Assuming a generic error handler, ensure .js extension
 
 // Validation rules for creating a new horse
 const validateCreateHorse = [
@@ -98,8 +98,8 @@ const validateGetHorseById = [
   handleValidationErrors
 ];
 
-module.exports = {
+export {
   validateCreateHorse,
   validateUpdateHorse,
   validateGetHorseById
-}; 
+};

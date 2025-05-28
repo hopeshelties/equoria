@@ -13,8 +13,8 @@ const mockGetHorseById = jest.fn();
 const mockIncrementDisciplineScore = jest.fn();
 const mockLogTrainingSession = jest.fn();
 const mockGetHorseAge = jest.fn();
+// const mockGetLastTrainingDate = jest.fn(); // Commented out as it's unused
 const mockGetAnyRecentTraining = jest.fn();
-const mockGetLastTrainingDate = jest.fn();
 const mockGetCombinedTraitEffects = jest.fn();
 const mockUpdateHorseStat = jest.fn();
 
@@ -58,7 +58,7 @@ jest.unstable_mockModule(join(__dirname, '../../utils/logger.js'), () => ({
 
 // Import the controllers after mocking
 const { trainHorse } = await import('../../controllers/trainingController.js');
-const { enterAndRunShow } = await import('../../controllers/competitionController.js');
+// const { enterAndRunShow } = await import('../../controllers/competitionController.js'); // Commented out as it's unused
 
 describe('XP Logging Integration Tests', () => {
   beforeEach(() => {
@@ -88,7 +88,7 @@ describe('XP Logging Integration Tests', () => {
       mockGetHorseById.mockResolvedValue({
         id: 1,
         name: 'Thunder',
-        ownerId: 'player-123',
+        playerId: 'player-123', // Corrected: ownerId to playerId
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
       });
       mockGetCombinedTraitEffects.mockReturnValue({});
@@ -96,7 +96,7 @@ describe('XP Logging Integration Tests', () => {
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 1,
         name: 'Thunder',
-        ownerId: 'player-123',
+        playerId: 'player-123', // Corrected: ownerId to playerId
         disciplineScores: { Dressage: 15 }
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 2, xpGained: 5 });
@@ -128,7 +128,7 @@ describe('XP Logging Integration Tests', () => {
       mockGetHorseById.mockResolvedValue({
         id: 2,
         name: 'Lightning',
-        ownerId: 'player-456',
+        playerId: 'player-456', // Corrected: ownerId to playerId
         epigenetic_modifiers: { positive: ['intelligent'], negative: [], hidden: [] }
       });
       mockGetCombinedTraitEffects.mockReturnValue({
@@ -138,7 +138,7 @@ describe('XP Logging Integration Tests', () => {
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 2,
         name: 'Lightning',
-        ownerId: 'player-456',
+        playerId: 'player-456', // Corrected: ownerId to playerId
         disciplineScores: { Racing: 20 }
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 3, xpGained: 6 });
@@ -169,7 +169,7 @@ describe('XP Logging Integration Tests', () => {
       mockGetHorseById.mockResolvedValue({
         id: 3,
         name: 'Storm',
-        ownerId: 'player-789',
+        playerId: 'player-789', // Corrected: ownerId to playerId
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
       });
       mockGetCombinedTraitEffects.mockReturnValue({});
@@ -177,7 +177,7 @@ describe('XP Logging Integration Tests', () => {
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 3,
         name: 'Storm',
-        ownerId: 'player-789',
+        playerId: 'player-789', // Corrected: ownerId to playerId
         disciplineScores: { 'Show Jumping': 10 }
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 1, xpGained: 5 });

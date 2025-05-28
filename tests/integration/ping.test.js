@@ -1,8 +1,5 @@
-// Create a test file at tests/integration/ping.test.js
-// Use supertest to test the GET /ping route
-
-const request = require('supertest');
-const app = require('../../backend/app'); // Adjusted path to backend/app.js
+import request from 'supertest';
+import app from '../../backend/app.js'; // Adjusted path to backend/app.js and .js extension
 
 describe('GET /ping', () => {
   it('should return { message: "pong" }', async () => {
@@ -10,4 +7,4 @@ describe('GET /ping', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ message: 'pong' });
   });
-}); 
+});

@@ -38,6 +38,7 @@ describe('Player Integration Tests', () => {
     test('should create a player successfully', async () => {
       const playerData = {
         id: 'test-uuid-123',
+        userId: 1, // Added userId
         name: 'Test Player',
         email: 'test@example.com',
         money: 500,
@@ -65,6 +66,7 @@ describe('Player Integration Tests', () => {
     test('should handle player creation errors', async () => {
       const playerData = {
         id: 'test-uuid-123',
+        userId: 1, // Added userId
         name: 'Test Player',
         email: 'test@example.com',
         money: 500,
@@ -84,6 +86,7 @@ describe('Player Integration Tests', () => {
       const playerId = 'test-uuid-123';
       const mockPlayer = {
         id: playerId,
+        userId: 1, // Added userId
         name: 'Test Player',
         email: 'test@example.com',
         money: 500,
@@ -120,6 +123,7 @@ describe('Player Integration Tests', () => {
       const playerId = 'test-uuid-123';
       const mockPlayerWithHorses = {
         id: playerId,
+        userId: 1, // Added userId
         name: 'Test Player',
         email: 'test@example.com',
         money: 500,
@@ -171,6 +175,7 @@ describe('Player Integration Tests', () => {
       const playerId = 'test-uuid-123';
       const mockPlayerWithHorses = {
         id: playerId,
+        userId: 1, // Added userId
         name: 'Test Player',
         email: 'test@example.com',
         money: 500,
@@ -197,6 +202,7 @@ describe('Player Integration Tests', () => {
       const playerId = 'test-uuid-123';
       const mockPlayer = {
         id: playerId,
+        userId: 1, // Added userId
         name: 'Test Player',
         email: 'test@example.com',
         money: 500,
@@ -227,6 +233,7 @@ describe('Player Integration Tests', () => {
     test('should handle complex JSON settings structure', async () => {
       const playerData = {
         id: 'test-uuid-456',
+        userId: 2, // Added userId
         name: 'Advanced Player',
         email: 'advanced@example.com',
         money: 1000,
@@ -273,6 +280,7 @@ describe('Player Integration Tests', () => {
       const playerId = 'test-uuid-123';
       const mockDeletedPlayer = {
         id: playerId,
+        userId: 1, // Added userId
         name: 'Test Player',
         email: 'test@example.com',
         money: 500,
@@ -298,6 +306,7 @@ describe('Player Integration Tests', () => {
       
       const mockPlayerWithHorses = {
         id: playerId,
+        userId: 1, // Added userId
         horses: [
           { id: 1, name: 'Starlight', playerId: playerId },
           { id: 2, name: 'Comet', playerId: playerId },
@@ -356,4 +365,4 @@ describe('Player Integration Tests', () => {
       expect(result2.name).toBe('Comet');
     });
   });
-}); 
+});

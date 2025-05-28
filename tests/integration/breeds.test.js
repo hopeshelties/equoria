@@ -1,7 +1,7 @@
 import request from 'supertest'; // Changed to ESM
 import app from '../../backend/app.js'; // Path to your Express app, assuming .js extension
 import prisma from '../../backend/db/index.js'; // Path to your Prisma client
-// const logger = require('../../backend/utils/logger'); // Logger might not be needed directly if Prisma handles errors
+// import logger from '../../backend/utils/logger.js'; // Logger might not be needed directly if Prisma handles errors, ensure .js extension if used
 
 // Helper function to reset the database using Prisma
 const resetDatabase = async () => {
@@ -143,4 +143,4 @@ describe('Breeds API - /api/breeds', () => {
       expect(response.statusCode).toBe(400);
     });
   });
-}); 
+});

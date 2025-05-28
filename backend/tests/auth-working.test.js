@@ -199,7 +199,7 @@ describe('Authentication System (Working)', () => {
       const registerResponse = await request(app)
         .post('/api/auth/register')
         .send(userData);
-      
+
       if (registerResponse.body && registerResponse.body.data) {
         refreshTokenValue = registerResponse.body.data.refreshToken;
       } else {

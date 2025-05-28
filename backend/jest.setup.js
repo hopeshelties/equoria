@@ -3,8 +3,9 @@
  * Handles global test setup and teardown for proper resource cleanup
  */
 
-import './config/config.js'; // Ensure environment variables are loaded first
-import { jest, beforeAll, afterAll } from '@jest/globals'; // Added beforeAll and afterAll
+import dotenv from 'dotenv';
+dotenv.config({ path: './env.test' });
+import { jest, beforeAll, afterAll } from '@jest/globals';
 
 // Global test timeout
 jest.setTimeout(30000);
@@ -18,17 +19,14 @@ const originalConsoleWarn = console.warn; // eslint-disable-line no-console
 
 beforeAll(() => {
   // Optionally suppress console noise during tests
-  // Uncomment if you want quieter test output
-  // console.error = jest.fn(); // eslint-disable-line no-console
-  // console.warn = jest.fn(); // eslint-disable-line no-console
+  // console.error = jest.fn();
+  // console.warn = jest.fn();
 });
 
 afterAll(async() => {
   // Restore console methods
-  // eslint-disable-next-line no-console
-  console.error = originalConsoleError;
-  // eslint-disable-next-line no-console
-  console.warn = originalConsoleWarn;
+  console.error = originalConsoleError; // eslint-disable-line no-console
+  console.warn = originalConsoleWarn; // eslint-disable-line no-console
 
   // Clean up all Prisma instances
   for (const prisma of prismaInstances) {
@@ -38,23 +36,19 @@ afterAll(async() => {
       // Ignore errors during cleanup
     }
   }
-
-  // Clear the set
   prismaInstances.clear();
 });
 
 // Global error handler for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  // eslint-disable-next-line no-console
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
+}); // eslint-disable-line no-console
 
-// Export a function to register Prisma instances for cleanup
+// Export functions for Prisma cleanup
 export function registerPrismaForCleanup(prisma) {
   prismaInstances.add(prisma);
 }
 
-// Export a function to manually disconnect a Prisma instance
 export async function disconnectPrisma(prisma) {
   try {
     await prisma.$disconnect();

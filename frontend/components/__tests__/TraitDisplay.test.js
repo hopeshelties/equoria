@@ -10,6 +10,26 @@ jest.mock('expo-linear-gradient', () => ({
   }
 }));
 
+// Mock react-native components
+jest.mock('react-native', () => {
+  const RN = jest.requireActual('react-native');
+  RN.StyleSheet.create = () => ({}); // Simplified mock for StyleSheet.create
+  return {
+    ...RN,
+    View: 'View', // Mock View as a string or a simple component
+    Text: 'Text',
+    StyleSheet: {
+      create: jest.fn(() => ({})),
+      compose: jest.fn(() => ({})), // Mock compose if used
+      flatten: jest.fn(() => ({})) // Mock flatten if used
+    },
+    Platform: {
+      OS: 'ios',
+      select: jest.fn(selector => selector.ios) // Mock Platform.select
+    }
+  };
+});
+
 describe('TraitDisplay Component', () => {
   const mockTraits = {
     positive: ['resilient', 'bold'],
@@ -318,4 +338,4 @@ describe('TraitDisplay Component', () => {
       expect(getByText('Very Long Trait Name That Might Cause Layout Issues')).toBeTruthy();
     });
   });
-}); 
+});
