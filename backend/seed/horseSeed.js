@@ -290,7 +290,7 @@ async function seedHorses() {
 async function checkPlayerExists(email) {
   const { default: prisma } = await import('../db/index.js');
   try {
-    const existingPlayer = await prisma.player.findUnique({
+    const existingPlayer = await prisma.user.findUnique({
       where: { email },
     });
     return existingPlayer !== null;

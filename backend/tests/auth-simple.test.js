@@ -8,7 +8,7 @@ import prisma from '../db/index.js';
 const createTestApp = () => {
   const app = express();
   app.use(express.json());
-  
+
   // Simple registration route
   app.post('/register',
     body('name').notEmpty(),
@@ -16,25 +16,25 @@ const createTestApp = () => {
     body('password').isLength({ min: 8 }),
     register
   );
-  
+
   // Simple login route
   app.post('/login',
     body('email').isEmail(),
     body('password').notEmpty(),
     login
   );
-  
+
   return app;
 };
 
 describe('Authentication Controller (Simple)', () => {
   let app;
-  
+
   beforeAll(() => {
     app = createTestApp();
   });
 
-  beforeEach(async () => {
+  beforeEach(async() => {
     // Delete in order to avoid foreign key constraint violations
     // 1. Delete training logs first
     await prisma.trainingLog.deleteMany({
@@ -48,7 +48,7 @@ describe('Authentication Controller (Simple)', () => {
         }
       }
     });
-    
+
     // 2. Delete horses
     await prisma.horse.deleteMany({
       where: {
@@ -59,7 +59,7 @@ describe('Authentication Controller (Simple)', () => {
         }
       }
     });
-    
+
     // 3. Then delete users
     await prisma.user.deleteMany({
       where: {
@@ -70,7 +70,7 @@ describe('Authentication Controller (Simple)', () => {
     });
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     // Delete in order to avoid foreign key constraint violations
     // 1. Delete training logs first
     await prisma.trainingLog.deleteMany({
@@ -84,7 +84,7 @@ describe('Authentication Controller (Simple)', () => {
         }
       }
     });
-    
+
     // 2. Delete horses
     await prisma.horse.deleteMany({
       where: {
@@ -95,7 +95,7 @@ describe('Authentication Controller (Simple)', () => {
         }
       }
     });
-    
+
     // 3. Then delete users
     await prisma.user.deleteMany({
       where: {
@@ -107,7 +107,7 @@ describe('Authentication Controller (Simple)', () => {
     await prisma.$disconnect();
   });
 
-  it('should register a new user', async () => {
+  it('should register a new user', async() => {
     const userData = {
       name: 'Test User',
       email: 'test@example.com',
@@ -124,7 +124,7 @@ describe('Authentication Controller (Simple)', () => {
     expect(response.body.data.token).toBeDefined();
   }, 10000);
 
-  it('should login with valid credentials', async () => {
+  it('should login with valid credentials', async() => {
     // First register a user
     const userData = {
       name: 'Test User',
@@ -151,4 +151,4 @@ describe('Authentication Controller (Simple)', () => {
     expect(response.body.data.user.email).toBe(loginData.email);
     expect(response.body.data.token).toBeDefined();
   }, 10000);
-}); 
+});

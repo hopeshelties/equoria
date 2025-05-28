@@ -11,9 +11,9 @@ describe('Database Data Check', () => {
     expect(Array.isArray(users)).toBe(true);
   });
 
-  it('should check what players exist', async () => {
-    const players = await prisma.player.findMany();
-    console.log('Players in database:', JSON.stringify(players, null, 2));
+  it('should check what players exist (using user table)', async () => {
+    const players = await prisma.user.findMany();
+    console.log('Players in database (from user table):', JSON.stringify(players, null, 2));
     expect(Array.isArray(players)).toBe(true);
   });
 

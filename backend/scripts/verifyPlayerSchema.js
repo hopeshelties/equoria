@@ -24,7 +24,7 @@ async function verifyPlayerSchema() {
     };
 
     console.log('1. Testing player creation with all required fields...');
-    const testPlayer = await prisma.player.create({
+    const testPlayer = await prisma.user.create({
       data: testPlayerData
     });
 
@@ -39,7 +39,7 @@ async function verifyPlayerSchema() {
 
     // Test updating level and XP
     console.log('2. Testing level and XP updates...');
-    const updatedPlayer = await prisma.player.update({
+    const updatedPlayer = await prisma.user.update({
       where: { id: testPlayer.id },
       data: {
         level: 5,
@@ -53,7 +53,7 @@ async function verifyPlayerSchema() {
 
     // Clean up test player
     console.log('3. Cleaning up test player...');
-    await prisma.player.delete({
+    await prisma.user.delete({
       where: { id: testPlayer.id }
     });
     console.log('✅ Test player deleted\n');

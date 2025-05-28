@@ -17,7 +17,7 @@ async function updatePlayerMoney(playerId, amount) {
       throw new Error('Valid amount is required');
     }
 
-    const updatedPlayer = await prisma.player.update({
+    const updatedPlayer = await prisma.user.update({
       where: { id: playerId },
       data: {
         money: {
