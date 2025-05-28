@@ -19,7 +19,7 @@ function isValidUserId(id) {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -51,40 +51,40 @@ export async function createPlayer(playerData) {
     if (!playerData.name) {
       throw new Error('Player name is required');
     }
-    
+
     if (!playerData.email) {
       throw new Error('Player email is required');
     }
-    
+
     if (!isValidEmail(playerData.email)) {
       throw new Error('Invalid email format');
     }
-    
+
     if (playerData.money === undefined || playerData.money === null) {
       throw new Error('Player money is required');
     }
-    
+
     if (playerData.level === undefined || playerData.level === null) {
       throw new Error('Player level is required');
     }
-    
+
     if (playerData.xp === undefined || playerData.xp === null) {
       throw new Error('Player xp is required');
     }
-    
+
     if (!playerData.settings) {
       throw new Error('Player settings is required');
     }
-    
+
     // Validate field constraints
     if (playerData.money < 0) {
       throw new Error('Player money must be non-negative');
     }
-    
+
     if (playerData.level < 1) {
       throw new Error('Player level must be at least 1');
     }
-    
+
     if (playerData.xp < 0) {
       throw new Error('Player xp must be non-negative');
     }
@@ -102,7 +102,7 @@ export async function createPlayer(playerData) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[playerModel.createPlayer] Database error: %o', error);
     throw new Error(`Database error in createPlayer: ${error.message}`);
@@ -140,7 +140,7 @@ export async function getPlayerById(id) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[playerModel.getPlayerById] Database error: %o', error);
     throw new Error(`Database error in getPlayerById: ${error.message}`);
@@ -175,7 +175,7 @@ export async function getPlayerByEmail(email) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[playerModel.getPlayerByEmail] Database error: %o', error);
     throw new Error(`Database error in getPlayerByEmail: ${error.message}`);
@@ -222,7 +222,7 @@ export async function getPlayerWithHorses(id) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[playerModel.getPlayerWithHorses] Database error: %o', error);
     throw new Error(`Database error in getPlayerWithHorses: ${error.message}`);
@@ -264,10 +264,246 @@ export async function updatePlayer(id, updateData) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[playerModel.updatePlayer] Database error: %o', error);
     throw new Error(`Database error in updatePlayer: ${error.message}`);
+  }
+}
+
+/**
+ * Adds XP to a player and handles automatic leveling
+ * @param {string} playerId - Player UUID
+ * @param {number} amount - Amount of XP to add
+ * @returns {Object} - Updated player object with level up info
+ * @throws {Error} - Validation or database errors
+ */
+export async function addXp(playerId, amount) {
+  try {
+    // Validate inputs
+    if (!playerId || typeof playerId !== 'string') {
+      return {
+        success: false,
+        error: 'Player ID is required'
+      };
+    }
+
+    if (!isValidUUID(playerId)) {
+      return {
+        success: false,
+        error: 'Invalid player ID format'
+      };
+    }
+
+    if (typeof amount !== 'number' || amount <= 0) {
+      return {
+        success: false,
+        error: 'XP amount must be positive'
+      };
+    }
+
+    logger.info(`[playerModel.addXp] Adding ${amount} XP to player ${playerId}`);
+
+    // Get current player data
+    const currentPlayer = await prisma.player.findUnique({
+      where: { id: playerId }
+    });
+
+    if (!currentPlayer) {
+      return {
+        success: false,
+        error: 'Player not found'
+      };
+    }
+
+    // Calculate new XP and level
+    let newXp = currentPlayer.xp + amount;
+    let newLevel = currentPlayer.level;
+    let leveledUp = false;
+    let levelsGained = 0;
+
+    // Check for level ups (each level requires 100 XP)
+    // If xp >= 100, subtract 100 and increase level by 1
+    while (newXp >= 100) {
+      newXp -= 100;
+      newLevel++;
+      levelsGained++;
+      leveledUp = true;
+    }
+
+    // Update player in database
+    const updateData = { xp: newXp };
+    if (leveledUp) {
+      updateData.level = newLevel;
+    }
+
+    const updatedPlayer = await prisma.player.update({
+      where: { id: playerId },
+      data: updateData
+    });
+
+    if (leveledUp) {
+      logger.info(`[playerModel.addXp] Player ${playerId} leveled up! New level: ${newLevel} (gained ${levelsGained} levels)`);
+    } else {
+      logger.info(`[playerModel.addXp] Added ${amount} XP to player ${playerId}. Total XP: ${newXp}`);
+    }
+
+    return {
+      success: true,
+      newXp,
+      newLevel,
+      leveledUp,
+      levelsGained,
+      xpGained: amount
+    };
+
+  } catch (error) {
+    logger.error('[playerModel.addXp] Database error: %o', error);
+    return {
+      success: false,
+      error: `Database error in addXp: ${error.message}`
+    };
+  }
+}
+
+/**
+ * Checks if a player should level up and handles the level up process
+ * @param {string} playerId - Player UUID
+ * @returns {Object} - Level up result with player data and level up info
+ * @throws {Error} - Validation or database errors
+ */
+export async function levelUpIfNeeded(playerId) {
+  try {
+    // Validate input
+    if (!isValidUUID(playerId)) {
+      throw new Error('Invalid player ID format');
+    }
+
+    logger.info(`[playerModel.levelUpIfNeeded] Checking level up for player ${playerId}`);
+
+    // Get current player data
+    const currentPlayer = await prisma.player.findUnique({
+      where: { id: playerId }
+    });
+
+    if (!currentPlayer) {
+      throw new Error('Player not found');
+    }
+
+    let newXp = currentPlayer.xp;
+    let newLevel = currentPlayer.level;
+    let leveledUp = false;
+    let levelsGained = 0;
+
+    // Check for level ups (each level requires 100 XP)
+    // If xp >= 100, subtract 100 and increase level by 1
+    while (newXp >= 100) {
+      newXp -= 100;
+      newLevel++;
+      levelsGained++;
+      leveledUp = true;
+    }
+
+    if (leveledUp) {
+      // Update player level and XP
+      const updatedPlayer = await prisma.player.update({
+        where: { id: playerId },
+        data: {
+          level: newLevel,
+          xp: newXp
+        }
+      });
+
+      logger.info(`[playerModel.levelUpIfNeeded] Player ${playerId} leveled up to level ${newLevel}!`);
+
+      return {
+        ...updatedPlayer,
+        leveledUp: true,
+        levelsGained,
+        message: `Congratulations! You've reached Level ${newLevel}!`
+      };
+    }
+
+    return {
+      ...currentPlayer,
+      leveledUp: false,
+      levelsGained: 0,
+      message: null
+    };
+
+  } catch (error) {
+    if (error.message.startsWith('Invalid') || error.message.startsWith('Player not found')) {
+      throw error;
+    }
+
+    logger.error('[playerModel.levelUpIfNeeded] Database error: %o', error);
+    throw new Error(`Database error in levelUpIfNeeded: ${error.message}`);
+  }
+}
+
+/**
+ * Gets player progress information (level, XP, XP to next level)
+ * @param {string} playerId - Player UUID
+ * @returns {Object} - Progress information object
+ * @throws {Error} - Validation or database errors
+ */
+export async function getPlayerProgress(playerId) {
+  try {
+    // Validate input
+    if (!playerId || typeof playerId !== 'string') {
+      return {
+        success: false,
+        error: 'Player ID is required'
+      };
+    }
+
+    if (!isValidUUID(playerId)) {
+      return {
+        success: false,
+        error: 'Invalid player ID format'
+      };
+    }
+
+    logger.info(`[playerModel.getPlayerProgress] Getting progress for player ${playerId}`);
+
+    // Get current player data
+    const player = await prisma.player.findUnique({
+      where: { id: playerId }
+    });
+
+    if (!player) {
+      return {
+        success: false,
+        error: 'Player not found'
+      };
+    }
+
+    // Calculate XP needed to reach next level
+    const xpToNextLevel = 100 - (player.xp % 100);
+    const xpForCurrentLevel = 100;
+
+    const progressData = {
+      playerId: player.id,
+      name: player.name,
+      level: player.level,
+      xp: player.xp,
+      xpToNextLevel,
+      xpForCurrentLevel
+    };
+
+    logger.info(`[playerModel.getPlayerProgress] Successfully retrieved progress for player ${player.name} (Level ${player.level}, XP: ${player.xp})`);
+
+    return {
+      success: true,
+      progress: progressData
+    };
+
+  } catch (error) {
+    logger.error('[playerModel.getPlayerProgress] Database error: %o', error);
+    return {
+      success: false,
+      error: `Database error in getPlayerProgress: ${error.message}`
+    };
   }
 }
 
@@ -299,7 +535,7 @@ export async function deletePlayer(id) {
       // Re-throw validation errors as-is
       throw error;
     }
-    
+
     // Log and re-throw database errors
     logger.error('[playerModel.deletePlayer] Database error: %o', error);
     throw new Error(`Database error in deletePlayer: ${error.message}`);
