@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
 import { generateTestToken } from './helpers/authHelper.js';
@@ -46,7 +45,7 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
 
-      console.log(`Found ${response.body.data.length} trainable horses for user ${testUserId}`);
+      // console.log(`Found ${response.body.data.length} trainable horses for user ${testUserId}`);
     });
 
     it('should block training for horse under 3 years old', async() => {
@@ -59,7 +58,7 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
 
       // If there are no trainable horses, we can't test this properly
       if (trainableResponse.body.data.length === 0) {
-        console.log('No trainable horses found, skipping age requirement test');
+        // console.log('No trainable horses found, skipping age requirement test');
         return;
       }
 
@@ -78,11 +77,11 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
       expect(response.status).toBeOneOf([200, 400]);
       expect(response.body.success).toBeDefined();
 
-      if (response.body.success) {
-        console.log('Training succeeded:', response.body.message);
-      } else {
-        console.log('Training blocked:', response.body.message);
-      }
+      // if (response.body.success) {
+      //   console.log('Training succeeded:', response.body.message);
+      // } else {
+      //   console.log('Training blocked:', response.body.message);
+      // }
     });
 
     it('should allow training for horse 3+ years old', async() => {
@@ -94,14 +93,14 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
       expect(trainableResponse.status).toBe(200);
 
       if (trainableResponse.body.data.length === 0) {
-        console.log('No trainable horses found, skipping training test');
+        // console.log('No trainable horses found, skipping training test');
         return;
       }
 
       const adultHorse = trainableResponse.body.data.find(horse => horse.age >= 3);
 
       if (!adultHorse) {
-        console.log('No adult horses found, skipping training test');
+        // console.log('No adult horses found, skipping training test');
         return;
       }
 

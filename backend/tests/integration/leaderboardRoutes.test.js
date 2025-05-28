@@ -8,7 +8,7 @@ import request from 'supertest';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 // We need to mock dependencies before importing the controller
-jest.mock('../../packages/database/prismaClient.js', () => ({
+jest.mock('../../db/index.js', () => ({
   __esModule: true,
   default: mockPrisma
 }));

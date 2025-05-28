@@ -14,11 +14,11 @@ const prisma = new PrismaClient();
 
 async function setupTestDb() {
   try {
-    console.log('Starting test database setup...');
-    
+    // console.log('Starting test database setup...');
+
     // Add User table directly with SQL (if it doesn't exist)
     await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "User" (
+      CREATE TABLE IF NOT EXISTS "users" (
         "id" SERIAL PRIMARY KEY,
         "name" TEXT,
         "email" TEXT NOT NULL UNIQUE,
@@ -37,7 +37,7 @@ async function setupTestDb() {
         "settings" JSONB NOT NULL DEFAULT '{}'
       );
     `;
-    
+
     // Create Breed table (needed for Horse table references)
     await prisma.$executeRaw`
       CREATE TABLE IF NOT EXISTS "Breed" (
@@ -48,7 +48,7 @@ async function setupTestDb() {
         "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
     `;
-    
+
     // Create Stable table (needed for Horse table references)
     await prisma.$executeRaw`
       CREATE TABLE IF NOT EXISTS "Stable" (
@@ -56,10 +56,10 @@ async function setupTestDb() {
         "name" TEXT
       );
     `;
-    
+
     // Create Horse table
     await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "Horse" (
+      CREATE TABLE IF NOT EXISTS "horses" (
         "id" SERIAL PRIMARY KEY,
         "name" TEXT NOT NULL,
         "age" INTEGER NOT NULL,
@@ -92,22 +92,22 @@ async function setupTestDb() {
         "stress_level" INTEGER DEFAULT 0,
         "epigenetic_modifiers" JSONB DEFAULT '{"positive": [], "negative": [], "hidden": []}',
         FOREIGN KEY ("breedId") REFERENCES "Breed"("id"),
-        FOREIGN KEY ("ownerId") REFERENCES "User"("id"),
+        FOREIGN KEY ("ownerId") REFERENCES "users"("id"),
         FOREIGN KEY ("stableId") REFERENCES "Stable"("id")
       );
     `;
-    
+
     // Create TrainingLog table
     await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "TrainingLog" (
+      CREATE TABLE IF NOT EXISTS "training_logs" (
         "id" SERIAL PRIMARY KEY,
         "discipline" TEXT NOT NULL,
         "trainedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "horseId" INTEGER NOT NULL,
-        FOREIGN KEY ("horseId") REFERENCES "Horse"("id")
+        FOREIGN KEY ("horseId") REFERENCES "horses"("id")
       );
     `;
-    
+
     // Add some basic data for testing
     // Add a breed
     await prisma.$executeRaw`
@@ -115,10 +115,10 @@ async function setupTestDb() {
       VALUES ('Thoroughbred', 'A horse breed known for its agility, speed and spirit.', CURRENT_TIMESTAMP)
       ON CONFLICT ("name") DO NOTHING;
     `;
-    
-    console.log('Test database setup complete!');
+
+    // console.log('Test database setup complete!');
   } catch (error) {
-    console.error('Error setting up test database:', error);
+    throw new Error(`Error setting up test database: ${error}`);
   } finally {
     await prisma.$disconnect();
   }

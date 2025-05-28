@@ -81,7 +81,7 @@ describe('XP Logging Integration Tests', () => {
   });
 
   describe('Training XP Logging', () => {
-    it('should log XP event when training is successful', async () => {
+    it('should log XP event when training is successful', async() => {
       // Setup mocks for successful training
       mockGetHorseAge.mockResolvedValue(5); // Horse is old enough
       mockGetAnyRecentTraining.mockResolvedValue(null); // No recent training
@@ -121,7 +121,7 @@ describe('XP Logging Integration Tests', () => {
       });
     });
 
-    it('should log XP event with trait-modified amount', async () => {
+    it('should log XP event with trait-modified amount', async() => {
       // Setup mocks for training with trait effects
       mockGetHorseAge.mockResolvedValue(4);
       mockGetAnyRecentTraining.mockResolvedValue(null);
@@ -162,7 +162,7 @@ describe('XP Logging Integration Tests', () => {
       });
     });
 
-    it('should continue training even if XP logging fails', async () => {
+    it('should continue training even if XP logging fails', async() => {
       // Setup mocks for successful training but failed XP logging
       mockGetHorseAge.mockResolvedValue(5);
       mockGetAnyRecentTraining.mockResolvedValue(null);
@@ -196,7 +196,7 @@ describe('XP Logging Integration Tests', () => {
       expect(mockLogger.error).toHaveBeenCalledWith('[trainingController.trainHorse] Failed to award training XP: Database connection failed');
     });
 
-    it('should not log XP event if training fails', async () => {
+    it('should not log XP event if training fails', async() => {
       // Setup mocks for failed training (horse too young)
       mockGetHorseAge.mockResolvedValue(2); // Horse is too young
 
@@ -210,7 +210,7 @@ describe('XP Logging Integration Tests', () => {
   });
 
   describe('Competition XP Logging', () => {
-    it('should log XP events for competition placements', async () => {
+    it('should log XP events for competition placements', async() => {
       // This is a simplified test since enterAndRunShow is complex
       // We'll focus on the XP logging part
       const mockHorse = {
@@ -268,7 +268,7 @@ describe('XP Logging Integration Tests', () => {
       });
     });
 
-    it('should log different XP amounts for different placements', async () => {
+    it('should log different XP amounts for different placements', async() => {
       const testCases = [
         { placement: '1st', expectedXp: 20 },
         { placement: '2nd', expectedXp: 15 },

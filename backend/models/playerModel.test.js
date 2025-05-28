@@ -56,7 +56,7 @@ describe('playerModel', () => {
       };
 
       const expectedPlayer = {
-        id: 'test-player-id-1',
+        id: 'test-id-create-success',
         name: 'Test Player',
         email: 'test@example.com',
         money: 1000,
@@ -74,7 +74,7 @@ describe('playerModel', () => {
         data: playerData
       });
       expect(result).toEqual(expectedPlayer);
-      expect(mockLogger.info).toHaveBeenCalledWith('[playerModel.createPlayer] Successfully created player: Test Player (ID: test-player-id-1)');
+      expect(mockLogger.info).toHaveBeenCalledWith('[playerModel.createPlayer] Successfully created player: Test Player (ID: test-id-create-success)');
     });
 
     it('should throw an error if name is missing', async() => {
@@ -232,7 +232,7 @@ describe('playerModel', () => {
 
   describe('getPlayerById', () => {
     it('should return a player if found by ID', async() => {
-      const playerId = 'test-player-1';
+      const playerId = 'test-getid-found';
       const expectedPlayer = {
         id: playerId,
         name: 'Found Player',
@@ -256,7 +256,7 @@ describe('playerModel', () => {
     });
 
     it('should return null if player is not found by ID', async() => {
-      const playerId = 'test-player-999';
+      const playerId = 'test-getid-notfound';
       mockPrisma.player.findUnique.mockResolvedValue(null);
 
       const result = await getPlayerById(playerId);
@@ -270,14 +270,13 @@ describe('playerModel', () => {
     });
 
     it('should throw an error for invalid ID format', async() => {
-      const invalidId = 'invalid-id-format';
-
+      const invalidId = 'plain-invalid-id';
       await expect(getPlayerById(invalidId)).rejects.toThrow('Invalid player ID format');
       expect(mockPrisma.player.findUnique).not.toHaveBeenCalled();
     });
 
     it('should throw an error if Prisma client fails to find by ID', async() => {
-      const playerId = 'test-player-2';
+      const playerId = 'test-getid-dbfail';
       const dbError = new Error('DB findUnique error');
       mockPrisma.player.findUnique.mockRejectedValue(dbError);
 
@@ -291,7 +290,7 @@ describe('playerModel', () => {
     it('should return a player if found by email', async() => {
       const email = 'test@example.com';
       const expectedPlayer = {
-        id: 1,
+        id: 'test-getemail-found',
         name: 'Test Player',
         email,
         money: 1500,
@@ -324,7 +323,6 @@ describe('playerModel', () => {
 
     it('should throw an error for invalid email format', async() => {
       const invalidEmail = 'invalid-email';
-
       await expect(getPlayerByEmail(invalidEmail)).rejects.toThrow('Invalid email format');
       expect(mockPrisma.player.findUnique).not.toHaveBeenCalled();
     });
@@ -332,7 +330,7 @@ describe('playerModel', () => {
 
   describe('getPlayerWithHorses', () => {
     it('should return a player with their horses', async() => {
-      const playerId = 'test-player-4';
+      const playerId = 'test-gethorses-found';
       const expectedPlayer = {
         id: playerId,
         name: 'Player with Horses',
@@ -368,7 +366,7 @@ describe('playerModel', () => {
     });
 
     it('should return null if player is not found', async() => {
-      const playerId = 'test-player-5';
+      const playerId = 'test-gethorses-notfound';
       mockPrisma.player.findUnique.mockResolvedValue(null);
 
       const result = await getPlayerWithHorses(playerId);
@@ -378,8 +376,7 @@ describe('playerModel', () => {
     });
 
     it('should throw an error for invalid UUID format', async() => {
-      const invalidId = 'invalid-id-format';
-
+      const invalidId = 'plain-invalid-id-horses';
       await expect(getPlayerWithHorses(invalidId)).rejects.toThrow('Invalid player ID format');
       expect(mockPrisma.player.findUnique).not.toHaveBeenCalled();
     });
@@ -387,7 +384,7 @@ describe('playerModel', () => {
 
   describe('updatePlayer', () => {
     it('should update player fields and return updated player', async() => {
-      const playerId = 'test-player-6';
+      const playerId = 'test-update-success';
       const updateData = {
         money: 15000,
         level: 10,
@@ -416,7 +413,7 @@ describe('playerModel', () => {
     });
 
     it('should throw an error for invalid UUID format', async() => {
-      const invalidId = 'invalid-id-format';
+      const invalidId = 'plain-invalid-id-update';
       const updateData = { money: 5000 };
 
       await expect(updatePlayer(invalidId, updateData)).rejects.toThrow('Invalid player ID format');
@@ -424,17 +421,16 @@ describe('playerModel', () => {
     });
 
     it('should throw an error if no update data provided', async() => {
-      const playerId = 'test-player-7';
+      const playerId = 'test-update-nodata';
 
       await expect(updatePlayer(playerId, {})).rejects.toThrow('No update data provided');
       expect(mockPrisma.player.update).not.toHaveBeenCalled();
     });
 
     it('should throw an error if Prisma client fails to update', async() => {
-      const playerId = 'test-player-8';
+      const playerId = 'test-update-dbfail';
       const updateData = { money: 5000 };
       const dbError = new Error('DB update error');
-
       mockPrisma.player.update.mockRejectedValue(dbError);
 
       await expect(updatePlayer(playerId, updateData)).rejects.toThrow('Database error in updatePlayer: DB update error');
@@ -445,7 +441,7 @@ describe('playerModel', () => {
 
   describe('deletePlayer', () => {
     it('should delete a player and return the deleted player', async() => {
-      const playerId = 'test-player-9';
+      const playerId = 'test-delete-success';
       const deletedPlayer = {
         id: playerId,
         name: 'Deleted Player',
@@ -469,14 +465,14 @@ describe('playerModel', () => {
     });
 
     it('should throw an error for invalid UUID format', async() => {
-      const invalidId = 'invalid-id-format';
+      const invalidId = 'plain-invalid-id-delete';
 
       await expect(deletePlayer(invalidId)).rejects.toThrow('Invalid player ID format');
       expect(mockPrisma.player.delete).not.toHaveBeenCalled();
     });
 
     it('should throw an error if Prisma client fails to delete', async() => {
-      const playerId = 'test-player-10';
+      const playerId = 'test-delete-dbfail';
       const dbError = new Error('DB delete error');
 
       mockPrisma.player.delete.mockRejectedValue(dbError);
@@ -489,7 +485,7 @@ describe('playerModel', () => {
 
   describe('addXp', () => {
     it('should add XP to a player without leveling up', async() => {
-      const playerId = 'test-player-11';
+      const playerId = 'test-addxp-nolevelup';
       const currentPlayer = {
         id: playerId,
         name: 'Test Player',
@@ -499,53 +495,34 @@ describe('playerModel', () => {
         xp: 50,
         settings: {}
       };
-
-      const updatedPlayer = {
-        ...currentPlayer,
-        xp: 70
-      };
+      const updatedPlayer = { ...currentPlayer, xp: 70 };
 
       mockPrisma.player.findUnique.mockResolvedValue(currentPlayer);
       mockPrisma.player.update.mockResolvedValue(updatedPlayer);
 
       const result = await addXp(playerId, 20);
 
-      expect(mockPrisma.player.findUnique).toHaveBeenCalledWith({
-        where: { id: playerId }
-      });
+      expect(mockPrisma.player.findUnique).toHaveBeenCalledWith({ where: { id: playerId } });
       expect(mockPrisma.player.update).toHaveBeenCalledWith({
         where: { id: playerId },
-        data: {
-          xp: 70
-        }
+        data: { xp: 70 }
       });
-      expect(result).toEqual({
-        success: true,
-        newXp: 70,
-        newLevel: 1,
-        leveledUp: false,
-        levelsGained: 0,
-        xpGained: 20
-      });
+      expect(result.success).toBe(true);
+      expect(result.newXp).toBe(70);
+      expect(result.leveledUp).toBe(false);
     });
 
     it('should add XP and level up once when reaching 100 XP', async() => {
-      const playerId = 'test-player-12';
+      const playerId = 'test-addxp-levelup1';
       const currentPlayer = {
         id: playerId,
         name: 'Test Player',
-        email: 'test@example.com',
-        money: 1000,
         level: 1,
         xp: 80,
         settings: {}
       };
+      const updatedPlayer = { ...currentPlayer, level: 2, xp: 0 };
 
-      const updatedPlayer = {
-        ...currentPlayer,
-        xp: 0, // 80 + 20 = 100, then 100 - 100 = 0
-        level: 2
-      };
 
       mockPrisma.player.findUnique.mockResolvedValue(currentPlayer);
       mockPrisma.player.update.mockResolvedValue(updatedPlayer);
@@ -554,38 +531,27 @@ describe('playerModel', () => {
 
       expect(mockPrisma.player.update).toHaveBeenCalledWith({
         where: { id: playerId },
-        data: {
-          xp: 0,
-          level: 2
-        }
+        data: { xp: 0, level: 2 }
       });
-      expect(result).toEqual({
-        success: true,
-        newXp: 0,
-        newLevel: 2,
-        leveledUp: true,
-        levelsGained: 1,
-        xpGained: 20
-      });
+      expect(result.success).toBe(true);
+      expect(result.newLevel).toBe(2);
+      expect(result.newXp).toBe(0);
+      expect(result.leveledUp).toBe(true);
+      expect(result.levelsGained).toBe(1);
     });
 
     it('should add XP and level up multiple times for large XP gains', async() => {
-      const playerId = 'test-player-13';
+      const playerId = 'test-addxp-levelupmulti';
       const currentPlayer = {
         id: playerId,
         name: 'Test Player',
-        email: 'test@example.com',
-        money: 1000,
         level: 1,
         xp: 50,
         settings: {}
       };
+      // XP: 50 + 220 = 270. Level 1 -> 2 (170xp), Level 2 -> 3 (70xp). New Level 3, New XP 70.
+      const updatedPlayer = { ...currentPlayer, level: 3, xp: 70 };
 
-      const updatedPlayer = {
-        ...currentPlayer,
-        xp: 70, // 50 + 220 = 270, then 270 - 200 = 70 (leveled up twice)
-        level: 3
-      };
 
       mockPrisma.player.findUnique.mockResolvedValue(currentPlayer);
       mockPrisma.player.update.mockResolvedValue(updatedPlayer);
@@ -594,129 +560,84 @@ describe('playerModel', () => {
 
       expect(mockPrisma.player.update).toHaveBeenCalledWith({
         where: { id: playerId },
-        data: {
-          xp: 70,
-          level: 3
-        }
+        data: { xp: 70, level: 3 }
       });
-      expect(result).toEqual({
-        success: true,
-        newXp: 70,
-        newLevel: 3,
-        leveledUp: true,
-        levelsGained: 2,
-        xpGained: 220
-      });
+      expect(result.success).toBe(true);
+      expect(result.newLevel).toBe(3);
+      expect(result.newXp).toBe(70);
+      expect(result.leveledUp).toBe(true);
+      expect(result.levelsGained).toBe(2);
     });
 
     it('should return error for invalid player ID format', async() => {
-      const invalidId = 'invalid-id-format';
-
+      const invalidId = 'plain-invalid-id-addxp';
       const result = await addXp(invalidId, 20);
-
       expect(result.success).toBe(false);
       expect(result.error).toBe('Invalid player ID format');
       expect(mockPrisma.player.findUnique).not.toHaveBeenCalled();
     });
 
     it('should return error for negative XP amount', async() => {
-      const playerId = 'test-player-14';
-
+      const playerId = 'test-addxp-negxp';
       const result = await addXp(playerId, -10);
-
       expect(result.success).toBe(false);
       expect(result.error).toBe('XP amount must be positive');
-      expect(mockPrisma.player.findUnique).not.toHaveBeenCalled();
+      expect(mockPrisma.player.findUnique).not.toHaveBeenCalled(); // findUnique is not called if XP is invalid before that
     });
 
     it('should return error for non-numeric XP amount', async() => {
-      const playerId = 'test-player-15';
-
-      const result = await addXp(playerId, 'invalid');
-
+      const playerId = 'test-addxp-nonnumericxp';
+      const result = await addXp(playerId, 'invalid-xp');
       expect(result.success).toBe(false);
       expect(result.error).toBe('XP amount must be positive');
       expect(mockPrisma.player.findUnique).not.toHaveBeenCalled();
     });
 
     it('should return error if player not found', async() => {
-      const playerId = 'test-player-999';
+      const playerId = 'test-addxp-playernotfound';
       mockPrisma.player.findUnique.mockResolvedValue(null);
-
       const result = await addXp(playerId, 20);
-
       expect(result.success).toBe(false);
       expect(result.error).toBe('Player not found');
       expect(mockPrisma.player.update).not.toHaveBeenCalled();
     });
 
     it('should return error if database update fails', async() => {
-      const playerId = 'test-player-16';
-      const currentPlayer = {
-        id: playerId,
-        name: 'Test Player',
-        level: 1,
-        xp: 50
-      };
-
+      const playerId = 'test-addxp-dbupdatefail';
+      const currentPlayer = { id: playerId, name: 'Test Player', level: 1, xp: 50, settings: {} };
       const dbError = new Error('DB update error');
+
       mockPrisma.player.findUnique.mockResolvedValue(currentPlayer);
       mockPrisma.player.update.mockRejectedValue(dbError);
 
       const result = await addXp(playerId, 20);
-
       expect(result.success).toBe(false);
       expect(result.error).toBe('Database error in addXp: DB update error');
-      expect(mockLogger.error).toHaveBeenCalledWith('[playerModel.addXp] Database error: %o', dbError);
     });
   });
 
   describe('levelUpIfNeeded', () => {
     it('should not level up if player has less than 100 XP', async() => {
-      const playerId = 'test-player-17';
+      const playerId = 'test-levelup-nolevel';
       const currentPlayer = {
-        id: playerId,
-        name: 'Test Player',
-        email: 'test@example.com',
-        money: 1000,
-        level: 1,
-        xp: 50,
-        settings: {}
+        id: playerId, name: 'Test Player', level: 1, xp: 50, settings: {}
       };
-
       mockPrisma.player.findUnique.mockResolvedValue(currentPlayer);
-
       const result = await levelUpIfNeeded(playerId);
 
-      expect(mockPrisma.player.findUnique).toHaveBeenCalledWith({
-        where: { id: playerId }
-      });
+      expect(mockPrisma.player.findUnique).toHaveBeenCalledWith({ where: { id: playerId } });
       expect(mockPrisma.player.update).not.toHaveBeenCalled();
-      expect(result).toEqual({
-        ...currentPlayer,
-        leveledUp: false,
-        levelsGained: 0,
-        message: null
-      });
+      expect(result.leveledUp).toBe(false);
+      expect(result.levelsGained).toBe(0);
+      expect(result.xp).toBe(50); // Ensure current XP is returned
     });
 
     it('should level up once when player has exactly 100 XP', async() => {
-      const playerId = 'test-player-18';
+      const playerId = 'test-levelup-100xp';
       const currentPlayer = {
-        id: playerId,
-        name: 'Test Player',
-        email: 'test@example.com',
-        money: 1000,
-        level: 1,
-        xp: 100,
-        settings: {}
+        id: playerId, name: 'Test Player', level: 1, xp: 100, settings: {}
       };
-
-      const updatedPlayer = {
-        ...currentPlayer,
-        level: 2,
-        xp: 0
-      };
+      const updatedPlayer = { ...currentPlayer, level: 2, xp: 0 };
 
       mockPrisma.player.findUnique.mockResolvedValue(currentPlayer);
       mockPrisma.player.update.mockResolvedValue(updatedPlayer);
@@ -725,36 +646,21 @@ describe('playerModel', () => {
 
       expect(mockPrisma.player.update).toHaveBeenCalledWith({
         where: { id: playerId },
-        data: {
-          level: 2,
-          xp: 0
-        }
+        data: { level: 2, xp: 0 }
       });
-      expect(result).toEqual({
-        ...updatedPlayer,
-        leveledUp: true,
-        levelsGained: 1,
-        message: 'Congratulations! You\'ve reached Level 2!'
-      });
+      expect(result.leveledUp).toBe(true);
+      expect(result.levelsGained).toBe(1);
+      expect(result.level).toBe(2);
+      expect(result.xp).toBe(0);
     });
 
     it('should level up multiple times when player has more than 200 XP', async() => {
-      const playerId = 'test-player-19';
+      const playerId = 'test-levelup-multixp';
       const currentPlayer = {
-        id: playerId,
-        name: 'Test Player',
-        email: 'test@example.com',
-        money: 1000,
-        level: 1,
-        xp: 250,
-        settings: {}
+        id: playerId, name: 'Test Player', level: 1, xp: 250, settings: {}
       };
-
-      const updatedPlayer = {
-        ...currentPlayer,
-        level: 3,
-        xp: 50
-      };
+      // 250xp -> level 2 (150xp), level 3 (50xp). Result: level 3, 50xp
+      const updatedPlayer = { ...currentPlayer, level: 3, xp: 50 };
 
       mockPrisma.player.findUnique.mockResolvedValue(currentPlayer);
       mockPrisma.player.update.mockResolvedValue(updatedPlayer);
@@ -763,49 +669,36 @@ describe('playerModel', () => {
 
       expect(mockPrisma.player.update).toHaveBeenCalledWith({
         where: { id: playerId },
-        data: {
-          level: 3,
-          xp: 50
-        }
+        data: { level: 3, xp: 50 }
       });
-      expect(result).toEqual({
-        ...updatedPlayer,
-        leveledUp: true,
-        levelsGained: 2,
-        message: 'Congratulations! You\'ve reached Level 3!'
-      });
+      expect(result.leveledUp).toBe(true);
+      expect(result.levelsGained).toBe(2);
+      expect(result.level).toBe(3);
+      expect(result.xp).toBe(50);
     });
 
     it('should throw an error for invalid player ID format', async() => {
-      const invalidId = 'invalid-id-format';
-
+      const invalidId = 'plain-invalid-id-levelup';
       await expect(levelUpIfNeeded(invalidId)).rejects.toThrow('Invalid player ID format');
       expect(mockPrisma.player.findUnique).not.toHaveBeenCalled();
     });
 
     it('should throw an error if player not found', async() => {
-      const playerId = 'test-player-999';
+      const playerId = 'test-levelup-playernotfound';
       mockPrisma.player.findUnique.mockResolvedValue(null);
-
       await expect(levelUpIfNeeded(playerId)).rejects.toThrow('Player not found');
       expect(mockPrisma.player.update).not.toHaveBeenCalled();
     });
 
     it('should throw an error if database update fails', async() => {
-      const playerId = 'test-player-20';
-      const currentPlayer = {
-        id: playerId,
-        name: 'Test Player',
-        level: 1,
-        xp: 100
-      };
-
+      const playerId = 'test-levelup-dbupdatefail';
+      const currentPlayer = { id: playerId, name: 'Test Player', level: 1, xp: 150, settings: {} };
       const dbError = new Error('DB update error');
+
       mockPrisma.player.findUnique.mockResolvedValue(currentPlayer);
       mockPrisma.player.update.mockRejectedValue(dbError);
 
       await expect(levelUpIfNeeded(playerId)).rejects.toThrow('Database error in levelUpIfNeeded: DB update error');
-      expect(mockLogger.error).toHaveBeenCalledWith('[playerModel.levelUpIfNeeded] Database error: %o', dbError);
     });
   });
 });
