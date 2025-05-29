@@ -1,4 +1,19 @@
 /* eslint-disable no-console */
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Ensure __dirname resolution works in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Explicitly load the test .env
+dotenv.config({ path: path.resolve(__dirname, '../.env.test') });
+
+console.log('[DEBUG] Loaded NODE_ENV:', process.env.NODE_ENV);
+console.log('[DEBUG] Loaded JWT_REFRESH_SECRET:', process.env.JWT_REFRESH_SECRET);
+
+/* eslint-disable no-console */
 /**
  * Manual Test Script for XP and Level System
  *
