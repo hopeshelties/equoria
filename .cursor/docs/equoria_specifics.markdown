@@ -13,7 +13,7 @@
 ### Backend Implementation (Production-Ready)
 - **Node.js/Express.js**: RESTful API with layered architecture
 - **PostgreSQL + Prisma**: Type-safe ORM with JSONB for flexible game data
-- **Authentication**: JWT-based with role-based access control (Player, Moderator, Admin)
+- **Authentication**: JWT-based with role-based access control (User, Moderator, Admin)
 - **Testing**: 468+ comprehensive tests with 100% function coverage
 - **Security**: bcrypt password hashing, input validation, SQL injection prevention
 - **Performance**: Connection pooling, strategic indexing, optimized queries
@@ -28,8 +28,8 @@
 - **Reference**: `@docs/frontend-architecture.md`
 
 ### Database Design (Advanced)
-- **Core Tables**: Players (UUID), Horses, Foals, Shows, Competition Results, Training Logs
-- **JSONB Usage**: Genetics, traits, discipline scores, player settings
+- **Core Tables**: Users (UUID), Horses, Foals, Shows, Competition Results, Training Logs
+- **JSONB Usage**: Genetics, traits, discipline scores, user settings
 - **Relationships**: Complex breeding, training, and competition associations
 - **Performance**: GIN indexes for JSONB, optimized query patterns
 - **Migrations**: Prisma-managed schema evolution
@@ -64,13 +64,13 @@
 - **Parent Tracking**: Sire/dam relationships with lineage preservation
 - **Reference**: Breeding mechanics in `@docs/utils-layer.md`
 
-### 4. Player Progression System (Implemented)
-- **UUID-Based Accounts**: Secure player identification with settings
+### 4. User Progression System (Implemented)
+- **UUID-Based Accounts**: Secure user identification with settings
 - **Progression Tracking**: Money, level, experience points
-- **Horse Collection**: Multiple horses per player with relationship tracking
+- **Horse Collection**: Multiple horses per user with relationship tracking
 - **Achievement System**: Milestone tracking and rewards (foundation implemented)
-- **Settings Management**: JSONB-based flexible player preferences
-- **Reference**: Player system in `@docs/models-layer.md`
+- **Settings Management**: JSONB-based flexible user preferences
+- **Reference**: User system in `@docs/models-layer.md`
 
 ## Advanced Game Features
 
@@ -89,7 +89,7 @@
 - **Historical Analysis**: Performance tracking across multiple competitions
 
 ### 3. Economic System Foundation
-- **Player Economy**: Money management, earnings tracking
+- **User Economy**: Money management, earnings tracking
 - **Competition Rewards**: Prize distribution based on performance
 - **Entry Fees**: Risk/reward mechanics for competition participation
 - **Future Monetization**: Premium features, cosmetics, seasonal events
@@ -146,7 +146,7 @@
 - **Backend Architecture**: Complete layered architecture with controllers, models, routes
 - **Training System**: Global cooldown, age restrictions, discipline progression
 - **Competition System**: Show management, eligibility validation, result tracking
-- **Player Management**: UUID accounts, progression tracking, horse relationships
+- **User Management**: UUID accounts, progression tracking, horse relationships
 - **Database Schema**: Comprehensive tables with JSONB flexibility
 - **Testing Infrastructure**: 468+ tests with comprehensive coverage
 - **Authentication**: JWT-based security with role-based access
@@ -158,7 +158,7 @@
 - **Real-time Features**: Live updates and notifications
 
 ### 📋 Planned Features
-- **Social System**: Player interactions, leaderboards, achievements
+- **Social System**: User interactions, leaderboards, achievements
 - **Advanced Breeding**: Enhanced genetics simulation and visualization
 - **Seasonal Events**: Temporary content and challenges
 - **Monetization Integration**: IAP implementation and premium features
@@ -207,7 +207,7 @@
 
 ### Authentication & Authorization
 - **JWT Tokens**: Secure access and refresh token system
-- **Role-Based Access**: Player, Moderator, Admin permission levels
+- **Role-Based Access**: User, Moderator, Admin permission levels
 - **Password Security**: bcrypt hashing with configurable salt rounds
 - **Session Management**: Secure token validation and refresh
 

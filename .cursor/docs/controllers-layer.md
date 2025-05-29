@@ -84,7 +84,7 @@ The controllers layer implements the core business logic for the Equoria game. C
 - Horse status and statistics queries
 
 **Features:**
-- **Relationship loading** (breed, owner, stable, player)
+- **Relationship loading** (breed, owner, stable, user)
 - **Validation** for horse data integrity
 - **Error handling** for missing or invalid horses
 

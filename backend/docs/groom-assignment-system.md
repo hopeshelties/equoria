@@ -35,7 +35,7 @@ model Groom {
   // Relations
   assignments   GroomAssignment[]
   interactions  GroomInteraction[]
-  player        Player? @relation(fields: [playerId], references: [id])
+  player        User? @relation(fields: [playerId], references: [id])
   playerId      String?
 
   @@map("grooms")
@@ -60,7 +60,7 @@ model GroomAssignment {
   foalId      Int
   groom       Groom @relation(fields: [groomId], references: [id], onDelete: Cascade)
   groomId     Int
-  player      Player? @relation(fields: [playerId], references: [id])
+  player      User? @relation(fields: [playerId], references: [id])
   playerId    String?
   interactions GroomInteraction[]
 

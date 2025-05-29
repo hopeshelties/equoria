@@ -14,7 +14,7 @@ alwaysApply: false
 - **Prize Distribution:** 1st = 50%, 2nd = 30%, 3rd = 20% of show.prize
 - **Stat Gain on Win:** 10%/5%/3% chance to increase one of 3 relevant discipline stats for 1st/2nd/3rd place
 - **Earnings Tracking:** Update `horse.earnings += prizePortion` for winners
-- **Entry Fee Transfer:** Add entry fee to `show.hostPlayer.money += entryFee * numEntries`
+- **Entry Fee Transfer:** Add entry fee to `show.hostUser.money += entryFee * numEntries`
 - **Auto-Run Shows:** Use `runDate = creationDate + 7 days`; batch job handles execution
 - **Result History:** Log showName, runDate, placement, and stat gains on horse profile
 

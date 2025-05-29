@@ -309,7 +309,7 @@ Traits are revealed based on condition priority and trait rarity:
 
 - **WebSocket Integration**: Real-time discovery notifications
 - **Discovery Analytics**: Track discovery patterns and success rates
-- **Custom Conditions**: Player-defined discovery conditions
+- **Custom Conditions**: User-defined discovery conditions
 - **Achievement System**: Rewards for discovery milestones
 - **Discovery History**: Detailed logs of all discoveries
 

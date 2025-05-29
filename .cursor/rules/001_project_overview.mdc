@@ -4,7 +4,7 @@ globs: ["**/*"]
 alwaysApply: true
 ---
 ## 🎯 Project Scope
-Equoria is a mobile-first horse simulation game that emphasizes strategic breeding, training, competition, and legacy-based progression. It integrates real-world-inspired color genetics, job-based professions, premium customization options, and a dynamic player economy.
+Equoria is a mobile-first horse simulation game that emphasizes strategic breeding, training, competition, and legacy-based progression. It integrates real-world-inspired color genetics, job-based professions, premium customization options, and a dynamic user economy.
 
 ## 📱 Platform
 - iOS and Android only (no desktop version)

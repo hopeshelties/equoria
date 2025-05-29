@@ -1,6 +1,6 @@
 /**
  * Leaderboard Controller
- * Provides ranked lists of top-performing horses and players based on various metrics
+ * Provides ranked lists of top-performing horses and users based on various metrics
  */
 
 import prisma from '../db/index.js';
@@ -18,17 +18,17 @@ const calculateTotalXpForLevel = (level) => { // This calculates the XP needed t
 };
 
 /**
- * Get top players by level and XP
+ * Get top users by level and XP
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-export const getTopPlayersByLevel = async(req, res) => {
+export const getTopUsersByLevel = async(req, res) => {
   const { limit = 10, offset = 0 } = req.query;
   const numericLimit = parseInt(limit, 10);
   const numericOffset = parseInt(offset, 10);
 
   try {
-    const users = await prisma.user.findMany({ // Changed from prisma.player
+    const users = await prisma.user.findMany({ // Changed from prisma.user
       take: numericLimit,
       skip: numericOffset,
       orderBy: [
@@ -44,16 +44,15 @@ export const getTopPlayersByLevel = async(req, res) => {
       }
     });
 
-    const totalUsers = await prisma.user.count(); // Changed from prisma.player
+    const totalUsers = await prisma.user.count(); // Changed from prisma.user
 
-    const rankedUsers = users.map((user, index) => { // Changed from player
+    const rankedUsers = users.map((user, index) => { // Changed from user
       const rank = numericOffset + index + 1;
-      // const xpToNext = calculateXpToNextLevel(user.level) - user.xp; // Original logic was incorrect
       const xpToNext = calculateXpToNextLevel(user.xp); // Corrected: pass user.xp
       const totalXp = calculateTotalXpForLevel(user.level) + user.xp; // Corrected: pass user.level
       return {
         rank,
-        userId: user.id, // Changed from playerId
+        userId: user.id, // Changed from userId
         name: user.name,
         level: user.level,
         xp: user.xp,
@@ -65,9 +64,9 @@ export const getTopPlayersByLevel = async(req, res) => {
 
     res.json({
       success: true,
-      message: 'Top players by level retrieved successfully',
+      message: 'Top users by level retrieved successfully',
       data: {
-        players: rankedUsers, // Consider changing "players" to "users" for consistency, though this is a breaking API change
+        users: rankedUsers, // Consider changing "users" to "users" for consistency, though this is a breaking API change
         pagination: {
           limit: numericLimit,
           offset: numericOffset,
@@ -77,21 +76,21 @@ export const getTopPlayersByLevel = async(req, res) => {
       }
     });
   } catch (error) {
-    logger.error(`[leaderboardController.getTopPlayersByLevel] Error: ${error.message}`);
+    logger.error(`[leaderboardController.getTopUsersByLevel] Error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve player level leaderboard',
+      message: 'Failed to retrieve user level leaderboard',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 };
 
 /**
- * Get top players by total XP earned
+ * Get top users by total XP earned
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-export const getTopPlayersByXP = async(req, res) => {
+export const getTopUsersByXP = async(req, res) => {
   const { period = 'all', limit = 10, offset = 0 } = req.query;
   const numericLimit = parseInt(limit, 10);
   const numericOffset = parseInt(offset, 10);
@@ -115,38 +114,50 @@ export const getTopPlayersByXP = async(req, res) => {
     }
 
     const xpData = await prisma.xpEvent.groupBy({
-      by: ['userId'], // Changed from playerId
+      by: ['userId'], // Changed from userId
       _sum: { amount: true },
       where: whereClause,
       orderBy: {
         _sum: { amount: 'desc' }
       },
       take: numericLimit,
-      skip: numericOffset,
-      include: {
-        user: { // Changed from player
-          select: { name: true }
-        }
-      }
+      skip: numericOffset
+      // include was removed as it's not compatible with groupBy. User data fetched separately.
     });
 
     const totalRecords = await prisma.xpEvent.groupBy({
-      by: ['userId'], // Changed from playerId
+      by: ['userId'], // Changed from userId
       where: whereClause
     });
 
-    const rankedPlayers = xpData.map((item, index) => ({
+    // Fetch user names separately as include doesn't work with groupBy
+    const userIds = xpData.map(item => item.userId);
+    const users = await prisma.user.findMany({
+      where: {
+        id: { in: userIds }
+      },
+      select: {
+        id: true,
+        name: true
+      }
+    });
+    const userMap = users.reduce((acc, user) => {
+      acc[user.id] = user.name;
+      return acc;
+    }, {});
+
+    const rankedUsers = xpData.map((item, index) => ({
       rank: numericOffset + index + 1,
-      userId: item.userId, // Changed from playerId
-      name: item.user.name, // Changed from item.player.name
+      userId: item.userId, // Changed from userId
+      name: userMap[item.userId] || 'Unknown User', // Use mapped user name
       totalXp: item._sum.amount
     }));
 
     res.json({
       success: true,
-      message: `Top players by XP (${period}) retrieved successfully`,
+      message: `Top users by XP (${period}) retrieved successfully`,
       data: {
-        players: rankedPlayers, // Consider changing "players" to "users"
+        users: rankedUsers, // Consider changing "users" to "users"
         pagination: {
           limit: numericLimit,
           offset: numericOffset,
@@ -156,10 +167,10 @@ export const getTopPlayersByXP = async(req, res) => {
       }
     });
   } catch (error) {
-    logger.error(`[leaderboardController.getTopPlayersByXP] Error: ${error.message}`);
+    logger.error(`[leaderboardController.getTopUsersByXP] Error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve player XP leaderboard',
+      message: 'Failed to retrieve user XP leaderboard',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
@@ -171,18 +182,29 @@ export const getTopPlayersByXP = async(req, res) => {
  * @param {Object} res - Express response object
  */
 export const getTopHorsesByEarnings = async(req, res) => {
-  const { limit = 10, offset = 0 } = req.query;
+  const { limit = 10, offset = 0, breed } = req.query;
   const numericLimit = parseInt(limit, 10);
   const numericOffset = parseInt(offset, 10);
 
   try {
+    const whereClause = {};
+    if (breed) {
+      whereClause.breed = { name: breed }; // Use the breed query parameter
+    }
+
     const horses = await prisma.horse.findMany({
+      where: whereClause, // Apply the whereClause
+      take: numericLimit,
+      skip: numericOffset,
+      orderBy: {
+        total_earnings: 'desc'
+      },
       select: {
         id: true,
         name: true,
         total_earnings: true,
-        userId: true, // Changed from playerId
-        user: { // Changed from player
+        userId: true, // Changed from userId
+        user: { // Changed from user
           select: { name: true }
         },
         breed: {
@@ -192,7 +214,8 @@ export const getTopHorsesByEarnings = async(req, res) => {
     });
 
     const totalHorses = await prisma.horse.count({
-      where: {
+      where: { // Consider applying the breed filter here too for accurate total
+        ...whereClause,
         total_earnings: {
           gt: 0 // Only horses with earnings
         }
@@ -241,66 +264,57 @@ export const getTopHorsesByEarnings = async(req, res) => {
  * @param {Object} res - Express response object
  */
 export const getTopHorsesByPerformance = async(req, res) => {
-  const { type = 'wins', limit = 10, offset = 0 } = req.query;
+  const { type = 'wins', limit = 10, offset = 0, discipline } = req.query;
   const numericLimit = parseInt(limit, 10);
   const numericOffset = parseInt(offset, 10);
 
   try {
-    let performanceField;
-    let orderDirection = 'desc';
+    let orderDirection; // Not strictly needed for count-based ordering with Prisma
+    const queryWhereClause = {};
+
+    if (discipline) {
+      queryWhereClause.discipline = discipline;
+    }
 
     switch (type) {
     case 'wins':
-      performanceField = 'placement';
-      orderDirection = 'asc'; // Wins should be ranked 1st, 2nd, 3rd, etc.
+      queryWhereClause.placement = 1;
+      // orderDirection for Prisma's _count is implicitly 'desc' for highest count
       break;
     case 'placements':
-      performanceField = 'placement';
-      orderDirection = 'asc'; // Placements should be ranked 1st, 2nd, 3rd, etc.
+      queryWhereClause.placement = { lte: 3 };
+      // orderDirection for Prisma's _count is implicitly 'desc'
       break;
     case 'averageScore':
-      performanceField = 'score';
-      orderDirection = 'desc'; // Higher scores are better
+      orderDirection = 'desc'; // For _avg.score
       break;
     default:
-      throw new Error('Invalid metric type. Must be wins, placements, or averageScore');
+      return res.status(400).json({ success: false, message: 'Invalid metric type. Must be wins, placements, or averageScore' });
     }
 
     const performanceData = await prisma.competitionResult.groupBy({
       by: ['horseId'],
-      where: {
-        [performanceField]: {
-          not: null
-        }
-      },
-      _count: performanceField === 'placement' ? true : undefined,
-      _avg: performanceField === 'score' ? { score: true } : undefined,
-      orderBy: {
-        [performanceField]: orderDirection
-      },
+      _count: { id: true }, // Counts competition results for the horse
+      _avg: { score: type === 'averageScore' ? true : undefined },
+      where: queryWhereClause,
+      orderBy: type === 'averageScore' ? { _avg: { score: orderDirection } } : { _count: { id: 'desc' } },
       take: numericLimit,
-      skip: numericOffset,
-      include: {
-        horse: {
-          select: {
-            name: true,
-            user: { select: { name: true } }, // Changed from player
-            breed: { select: { name: true } }
-          }
-        }
-      }
+      skip: numericOffset
     });
 
-    const totalRecords = await prisma.competitionResult.count({
-      where: {
-        [performanceField]: {
-          not: null
-        }
-      }
+    // Count total records matching the criteria for pagination
+    const totalGroupedRecords = await prisma.competitionResult.groupBy({
+      by: ['horseId'],
+      where: queryWhereClause
     });
+    const totalRecords = totalGroupedRecords.length;
 
-    const rankings = performanceData.map((entry, index) => {
-      const horse = entry.horse;
+    const rankings = await Promise.all(performanceData.map(async(entry, index) => {
+      const horse = await prisma.horse.findUnique({
+        where: { id: entry.horseId },
+        select: { name: true, breed: { select: { name: true } }, user: { select: { name: true } }, total_earnings: true, userId: true }
+      });
+
       const ranking = {
         rank: numericOffset + index + 1,
         horseId: entry.horseId,
@@ -311,27 +325,28 @@ export const getTopHorsesByPerformance = async(req, res) => {
           id: horse?.userId,
           name: horse?.user?.name || 'Unknown Owner'
         },
-        metric: type
+        metric: type,
+        value: 0
       };
 
-      // Add metric-specific data
       switch (type) {
       case 'wins':
-        ranking.wins = entry._count;
-        ranking.value = entry._count;
-        break;
       case 'placements':
-        ranking.placements = entry._count;
-        ranking.value = entry._count;
+        ranking.value = entry._count.id;
+        if (type === 'wins') {
+          ranking.wins = entry._count.id;
+        }
+        if (type === 'placements') {
+          ranking.placements = entry._count.id;
+        }
         break;
       case 'averageScore':
-        ranking.averageScore = Math.round((entry._avg.score || 0) * 10) / 10;
+        ranking.averageScore = entry._avg.score ? Math.round(entry._avg.score * 10) / 10 : 0;
         ranking.value = ranking.averageScore;
         break;
       }
-
       return ranking;
-    });
+    }));
 
     res.json({
       success: true,
@@ -359,18 +374,18 @@ export const getTopHorsesByPerformance = async(req, res) => {
 };
 
 /**
- * Get top players by horse earnings (sum of all owned horses' earnings)
+ * Get top users by horse earnings (sum of all owned horses' earnings)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-export const getTopPlayersByHorseEarnings = async(req, res) => {
+export const getTopUsersByHorseEarnings = async(req, res) => {
   const { limit = 10, offset = 0 } = req.query;
   const numericLimit = parseInt(limit, 10);
   const numericOffset = parseInt(offset, 10);
 
   try {
-    const playerEarnings = await prisma.horse.groupBy({
-      by: ['userId'], // Changed from playerId
+    const userEarnings = await prisma.horse.groupBy({
+      by: ['userId'], // Changed from userId
       _sum: { total_earnings: true },
       _count: { id: true }, // Count of horses
       where: {
@@ -380,34 +395,41 @@ export const getTopPlayersByHorseEarnings = async(req, res) => {
         _sum: { total_earnings: 'desc' }
       },
       take: numericLimit,
-      skip: numericOffset,
-      include: {
-        user: { // Changed from player
-          select: { name: true }
-        }
-      }
+      skip: numericOffset
+      // include was removed as it's not compatible with groupBy. User data fetched separately.
     });
 
+    // Fetch user data separately
+    const userIds = userEarnings.map(item => item.userId);
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true }
+    });
+    const userMap = users.reduce((acc, user) => {
+      acc[user.id] = user.name;
+      return acc;
+    }, {});
+
     const totalRecords = await prisma.horse.groupBy({
-      by: ['userId'], // Changed from playerId
+      by: ['userId'], // Changed from userId
       where: {
         total_earnings: { gt: 0 }
       }
     });
 
-    const rankedPlayers = playerEarnings.map((item, index) => ({
+    const rankedUsers = userEarnings.map((item, index) => ({
       rank: numericOffset + index + 1,
-      userId: item.userId, // Changed from playerId
-      name: item.user.name, // Changed from item.player.name
+      userId: item.userId, // Changed from userId
+      name: userMap[item.userId] || 'Unknown User', // Changed from item.user.name
       totalHorseEarnings: item._sum.total_earnings,
       horseCount: item._count.id
     }));
 
     res.json({
       success: true,
-      message: 'Top players by combined horse earnings retrieved successfully',
+      message: 'Top users by combined horse earnings retrieved successfully',
       data: {
-        players: rankedPlayers, // Consider changing "players" to "users"
+        users: rankedUsers, // Consider changing "users" to "users"
         pagination: {
           limit: numericLimit,
           offset: numericOffset,
@@ -417,10 +439,10 @@ export const getTopPlayersByHorseEarnings = async(req, res) => {
       }
     });
   } catch (error) {
-    logger.error(`[leaderboardController.getTopPlayersByHorseEarnings] Error: ${error.message}`);
+    logger.error(`[leaderboardController.getTopUsersByHorseEarnings] Error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve player horse earnings leaderboard',
+      message: 'Failed to retrieve user horse earnings leaderboard',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
@@ -431,19 +453,24 @@ export const getTopPlayersByHorseEarnings = async(req, res) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-export const getRecentWinners = async (req, res) => {
-  const { limit = 10, offset = 0, discipline = 'all' } = req.query; // Added discipline default
+export const getRecentWinners = async(req, res) => {
+  const { limit = 10, offset = 0, discipline = 'all' } = req.query;
   const numericLimit = parseInt(limit, 10);
   const numericOffset = parseInt(offset, 10);
 
   try {
-    let whereClause = {
+    const whereClause = {
       placement: 1
     };
 
     if (discipline !== 'all') {
       whereClause.discipline = discipline;
     }
+
+    // Count total records for pagination
+    const totalWinners = await prisma.competitionEntry.count({
+      where: whereClause
+    });
 
     const recentWinners = await prisma.competitionEntry.findMany({
       where: whereClause,
@@ -452,14 +479,14 @@ export const getRecentWinners = async (req, res) => {
         horse: {
           select: {
             name: true,
-            user: { // Changed from player
+            user: { // Changed from user
               select: { name: true }
             }
           }
         },
         showName: true,
         runDate: true,
-        score: true,
+        discipline: true,
         prizeWon: true
       },
       orderBy: {
@@ -470,15 +497,15 @@ export const getRecentWinners = async (req, res) => {
     });
 
     const formattedWinners = recentWinners.map(entry => {
-      const horse = entry.horse; // Simplified access
+      const { horse } = entry;
       return {
         id: entry.id,
         horseName: horse?.name || 'Unknown Horse',
-        ownerName: horse?.user?.name || 'Unknown Owner', // Changed from player
+        ownerName: horse?.user?.name || 'Unknown Owner', // Changed from horse?.user?.name
         showName: entry.showName,
-        discipline: entry.discipline, // Ensure this is part of the select if used
-        date: entry.showDate, // Assuming showDate is the relevant date
-        prize: entry.prizeMoney || 0
+        discipline: entry.discipline,
+        date: entry.runDate,
+        prize: entry.prizeWon || 0
       };
     });
 
@@ -488,7 +515,12 @@ export const getRecentWinners = async (req, res) => {
       data: {
         winners: formattedWinners,
         discipline: discipline === 'all' ? 'All Disciplines' : discipline,
-        count: formattedWinners.length
+        pagination: { // Added pagination
+          limit: numericLimit,
+          offset: numericOffset,
+          total: totalWinners,
+          hasMore: (numericOffset + numericLimit) < totalWinners
+        }
       }
     });
 
@@ -507,82 +539,46 @@ export const getRecentWinners = async (req, res) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-export const getLeaderboardStats = async (req, res) => {
+export const getLeaderboardStats = async(req, res) => {
   try {
     logger.info('[leaderboardController.getLeaderboardStats] Fetching leaderboard statistics');
 
-    // Top player by level
-    const topUserByLevel = await prisma.user.findFirst({ // Changed from player
-      prisma.user.count(),
+    // Top user by level
+    const topUserByLevel = await prisma.user.findFirst({ // Changed from user
+      orderBy: [{ level: 'desc' }, { xp: 'desc' }],
+      select: { name: true, level: true, xp: true }
+    });
 
-      // Total horses with earnings
-      prisma.horse.count({ where: { total_earnings: { gt: 0 } } }),
-
-      // Total competitions held
-      prisma.competitionResult.count(),
-
-      // Total prize money distributed
-      prisma.competitionResult.aggregate({ _sum: { prizeWon: true } }),
-
-      // Average player level
-      prisma.user.aggregate({ _avg: { level: true } }),
-
-      // Top player by level
-      prisma.user.findFirst({
-        select: { name: true, level: true, xp: true },
-        orderBy: [{ level: 'desc' }, { xp: 'desc' }]
-      }),
-
-      // Top earning horse
-      prisma.horse.findFirst({
-        select: {
-          name: true,
-          total_earnings: true,
-          user: { select: { name: true } }
-        },
-        where: { total_earnings: { gt: 0 } },
-        orderBy: { total_earnings: 'desc' }
-      }),
-
-      // Recent activity (last 7 days)
-      prisma.competitionResult.count({
-        where: {
-          runDate: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          }
-        }
-      })
-    ]);
+    // Top horse by earnings
+    const topHorse = await prisma.horse.findFirst({
+      select: {
+        name: true,
+        total_earnings: true,
+        user: { select: { name: true } } // Changed from user
+      },
+      where: { total_earnings: { gt: 0 } },
+      orderBy: { total_earnings: 'desc' }
+    });
 
     // Get discipline breakdown
-    const disciplineStats = await prisma.competitionResult.groupBy({
+    const disciplineStats = await prisma.competitionEntry.groupBy({
       by: ['discipline'],
       _count: { discipline: true },
-      orderBy: { _count: { discipline: 'desc' } }
+      orderBy: { _count: { discipline: 'desc' } },
+      take: 5
     });
 
     const stats = {
-      overview: {
-        totalPlayers,
-        totalHorses,
-        totalCompetitions,
-        totalPrizeMoney: totalPrizeMoney._sum.prizeWon || 0,
-        averagePlayerLevel: Math.round((averagePlayerLevel._avg.level || 1) * 10) / 10,
-        recentActivity
-      },
-      topPerformers: {
-        topPlayer: topPlayer ? {
-          name: topPlayer.name,
-          level: topPlayer.level,
-          xp: topPlayer.xp,
-          totalXp: (topPlayer.level - 1) * 100 + topPlayer.xp
-        } : null,
-        topHorse: topHorse ? {
-          name: topHorse.name,
-          earnings: topHorse.total_earnings,
-          owner: topHorse.user?.name || 'Unknown'
-        } : null
-      },
+      topUser: topUserByLevel ? { // Changed from topUser
+        name: topUserByLevel.name,
+        level: topUserByLevel.level,
+        totalXp: calculateTotalXpForLevel(topUserByLevel.level) + topUserByLevel.xp // Using helper
+      } : null,
+      topHorse: topHorse ? {
+        name: topHorse.name,
+        earnings: topHorse.total_earnings,
+        owner: topHorse.user?.name || 'Unknown' // Changed from topHorse.user?.name
+      } : null,
       disciplines: disciplineStats.map(stat => ({
         discipline: stat.discipline,
         competitions: stat._count.discipline
@@ -608,11 +604,11 @@ export const getLeaderboardStats = async (req, res) => {
 
 // Default export with all controller functions
 export default {
-  getTopPlayersByLevel,
-  getTopPlayersByXP,
+  getTopUsersByLevel,
+  getTopUsersByXP,
   getTopHorsesByEarnings,
   getTopHorsesByPerformance,
-  getTopPlayersByHorseEarnings,
+  getTopUsersByHorseEarnings,
   getRecentWinners,
   getLeaderboardStats
 };

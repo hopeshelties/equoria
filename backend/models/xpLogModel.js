@@ -17,11 +17,11 @@ import logger from '../utils/logger.js';
  */
 export const logXpEvent = async({ userId, amount, reason }) => { // Changed playerId to userId
   try {
-    logger.info(`[xpLogModel.logXpEvent] Logging XP event: User ${userId}, Amount: ${amount}, Reason: ${reason}`); // Changed Player to User
+    logger.info(`[xpLogModel.logXpEvent] Logging XP event: User ${userId}, Amount: ${amount}, Reason: ${reason}`); // Changed User to User
 
     // Validate input parameters
     if (!userId) { // Changed playerId to userId
-      throw new Error('User ID is required'); // Changed Player ID to User ID
+      throw new Error('User ID is required'); // Changed User ID to User ID
     }
 
     if (typeof amount !== 'number') {
@@ -41,7 +41,7 @@ export const logXpEvent = async({ userId, amount, reason }) => { // Changed play
       }
     });
 
-    logger.info(`[xpLogModel.logXpEvent] Successfully logged XP event: ID ${xpEvent.id}, User ${xpEvent.userId}, Amount: ${xpEvent.amount}`); // Changed Player to User, playerId to userId
+    logger.info(`[xpLogModel.logXpEvent] Successfully logged XP event: ID ${xpEvent.id}, User ${xpEvent.userId}, Amount: ${xpEvent.amount}`); // Changed User to User, playerId to userId
 
     return {
       id: xpEvent.id,

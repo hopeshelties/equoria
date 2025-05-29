@@ -14,7 +14,7 @@ backend/tests/
 │   ├── utils/              # Utility function testing
 │   └── helpers/            # Test helper utilities
 ├── integration/            # Multi-component testing
-│   ├── player.test.js      # Player system integration
+│   ├── user.test.js      # User system integration
 │   └── horseRoutes.test.js # API endpoint integration
 ├── setup.js               # Test environment setup
 └── data-check.test.js     # Database connectivity validation
@@ -28,7 +28,7 @@ backend/tests/
 
 **Key Test Files:**
 - `horseModel.test.js` - 32 tests covering CRUD operations and validation
-- `playerModel.test.js` - 27 tests covering player account management
+- `userModel.test.js` - 27 tests covering user account management
 - `trainingController.test.js` - 38 tests covering training business logic
 - `resultModel.test.js` - 23 tests covering competition result management
 - `trainingModel.test.js` - Tests for training history and cooldown logic
@@ -140,7 +140,7 @@ afterEach(async () => {
 
 **Mock Data Generators:**
 - **Realistic horse data** with proper relationships
-- **Player accounts** with varying configurations
+- **User accounts** with varying configurations
 - **Competition shows** with different requirements
 - **Training sessions** with cooldown states
 

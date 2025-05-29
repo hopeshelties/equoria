@@ -135,113 +135,113 @@ Each section should include:
 - CLI integration: Includes npm scripts for easy execution (`npm run seed`, `npm run seed:dev`)
 - Documentation: Complete README.md with usage examples and troubleshooting guide
 
-# Player Model Functions
+# User Model Functions
 
-### `backend/models/playerModel.js` - `createPlayer(playerData: Object)`
-- Creates a new player in the database with comprehensive validation.
-- Purpose: Handles player creation with required fields validation and business rules enforcement.
-- Parameters: `playerData` (object containing name, email, money, level, xp, settings - all required)
+### `backend/models/userModel.js` - `createUser(userData: Object)`
+- Creates a new user in the database with comprehensive validation.
+- Purpose: Handles user creation with required fields validation and business rules enforcement.
+- Parameters: `userData` (object containing name, email, money, level, xp, settings - all required)
 - Validation: 
   - Required fields: name, email, money, level, xp, settings
   - Email format validation
   - Money >= 0, level >= 1, xp >= 0
-- Returns: Created player object with generated UUID
+- Returns: Created user object with generated UUID
 - Throws: Error with descriptive message for validation failures or database errors
-- Used in: Player registration, game initialization
-- Tests: `backend/models/playerModel.test.js` - 12 test cases covering all validation scenarios
+- Used in: User registration, game initialization
+- Tests: `backend/models/userModel.test.js` - 12 test cases covering all validation scenarios
 
-### `backend/models/playerModel.js` - `getPlayerById(id: string)`
-- Retrieves a player by UUID with validation.
-- Purpose: Fetches a specific player by their unique identifier.
-- Parameters: `id` (string - player UUID, validated for proper format)
+### `backend/models/userModel.js` - `getUserById(id: string)`
+- Retrieves a user by UUID with validation.
+- Purpose: Fetches a specific user by their unique identifier.
+- Parameters: `id` (string - user UUID, validated for proper format)
 - Validation: UUID format validation (supports both production UUIDs and test mock IDs)
-- Returns: Player object if found, null if not found
+- Returns: User object if found, null if not found
 - Throws: Error for invalid UUID format or database errors
-- Used in: Player profile views, authentication verification, game state loading
-- Tests: `backend/models/playerModel.test.js` - 4 test cases covering success, not found, and validation scenarios
+- Used in: User profile views, authentication verification, game state loading
+- Tests: `backend/models/userModel.test.js` - 4 test cases covering success, not found, and validation scenarios
 
-### `backend/models/playerModel.js` - `getPlayerByEmail(email: string)`
-- Retrieves a player by email address with validation.
-- Purpose: Enables player lookup by email for authentication and account management.
-- Parameters: `email` (string - player email, validated for proper format)
+### `backend/models/userModel.js` - `getUserByEmail(email: string)`
+- Retrieves a user by email address with validation.
+- Purpose: Enables user lookup by email for authentication and account management.
+- Parameters: `email` (string - user email, validated for proper format)
 - Validation: Email format validation using regex
-- Returns: Player object if found, null if not found
+- Returns: User object if found, null if not found
 - Throws: Error for invalid email format or database errors
 - Used in: Login systems, password reset, account verification
-- Tests: `backend/models/playerModel.test.js` - 3 test cases covering success, not found, and validation scenarios
+- Tests: `backend/models/userModel.test.js` - 3 test cases covering success, not found, and validation scenarios
 
-### `backend/models/playerModel.js` - `getPlayerWithHorses(id: string)`
-- Retrieves a player with all related horse data included.
-- Purpose: Provides complete player profile including their horse collection for game views.
-- Parameters: `id` (string - player UUID, validated for proper format)
+### `backend/models/userModel.js` - `getUserWithHorses(id: string)`
+- Retrieves a user with all related horse data included.
+- Purpose: Provides complete user profile including their horse collection for game views.
+- Parameters: `id` (string - user UUID, validated for proper format)
 - Validation: UUID format validation
-- Returns: Player object with horses array (including breed and stable relations), null if not found
+- Returns: User object with horses array (including breed and stable relations), null if not found
 - Relations included: horses.breed, horses.stable
 - Throws: Error for invalid UUID format or database errors
-- Used in: Player dashboard, stable management, horse collection views
-- Tests: `backend/models/playerModel.test.js` - 3 test cases covering success, not found, and validation scenarios
+- Used in: User dashboard, stable management, horse collection views
+- Tests: `backend/models/userModel.test.js` - 3 test cases covering success, not found, and validation scenarios
 
-### `backend/models/playerModel.js` - `updatePlayer(id: string, updateData: Object)`
-- Updates a player's information with validation.
-- Purpose: Modifies player data such as money, level, xp, or settings for game progression.
-- Parameters: `id` (string - player UUID), `updateData` (object - fields to update)
+### `backend/models/userModel.js` - `updateUser(id: string, updateData: Object)`
+- Updates a user's information with validation.
+- Purpose: Modifies user data such as money, level, xp, or settings for game progression.
+- Parameters: `id` (string - user UUID), `updateData` (object - fields to update)
 - Validation: UUID format validation, ensures update data is provided
-- Returns: Updated player object
+- Returns: Updated user object
 - Throws: Error for invalid UUID format, empty update data, or database errors
 - Used in: Game progression, settings changes, in-game purchases, leveling system
-- Tests: `backend/models/playerModel.test.js` - 4 test cases covering success and validation scenarios
+- Tests: `backend/models/userModel.test.js` - 4 test cases covering success and validation scenarios
 
-### `backend/models/playerModel.js` - `deletePlayer(id: string)`
-- Deletes a player from the database.
-- Purpose: Removes player accounts for account deletion requests or administrative actions.
-- Parameters: `id` (string - player UUID, validated for proper format)
+### `backend/models/userModel.js` - `deleteUser(id: string)`
+- Deletes a user from the database.
+- Purpose: Removes user accounts for account deletion requests or administrative actions.
+- Parameters: `id` (string - user UUID, validated for proper format)
 - Validation: UUID format validation
-- Returns: Deleted player object
+- Returns: Deleted user object
 - Throws: Error for invalid UUID format or database errors
 - Used in: Account deletion, administrative moderation
-- Tests: `backend/models/playerModel.test.js` - 3 test cases covering success and validation scenarios
+- Tests: `backend/models/userModel.test.js` - 3 test cases covering success and validation scenarios
 
-### Player Model Schema Design
+### User Model Schema Design
 - Uses UUID for primary keys (String @id @default(uuid()))
 - Enforces unique email constraint
 - Required fields: name, email, money, level, xp, settings
 - Settings stored as JSON for flexible configuration
-- Maps to "players" table using @@map("players")
+- Maps to "users" table using @@map("users")
 - Maintains 1:N relationship with Horse model via horses field
-- Backward compatible with existing User model through optional playerId on Horse
+- Backward compatible with existing User model through optional userId on Horse
 
-# Player Seeding Functions
+# User Seeding Functions
 
-### `backend/seed/horseSeed.js` - `checkPlayerExists(email: string)`
-- Checks if a player with the given email already exists in the database.
-- Purpose: Prevents duplicate player creation during seeding operations.
-- Parameters: `email` (string - player email to check)
-- Returns: Boolean - true if player exists, false otherwise
+### `backend/seed/horseSeed.js` - `checkUserExists(email: string)`
+- Checks if a user with the given email already exists in the database.
+- Purpose: Prevents duplicate user creation during seeding operations.
+- Parameters: `email` (string - user email to check)
+- Returns: Boolean - true if user exists, false otherwise
 - Error handling: Returns false and logs warning on database errors
-- Database operations: Uses `prisma.player.findUnique()`
-- Used in: Duplicate prevention during player seeding
+- Database operations: Uses `prisma.user.findUnique()`
+- Used in: Duplicate prevention during user seeding
 - Tests: Covered through integration testing scenarios
 
-### `backend/seed/horseSeed.js` - `seedPlayerWithHorses()`
-- Creates a test player with 2 linked horses for development and testing purposes.
-- Purpose: Provides sample player data with proper Horse-Player relationships for testing.
+### `backend/seed/horseSeed.js` - `seedUserWithHorses()`
+- Creates a test user with 2 linked horses for development and testing purposes.
+- Purpose: Provides sample user data with proper Horse-User relationships for testing.
 - Parameters: None
 - Returns: Boolean - true if successful, false if there were issues
 - Features: 
-  - Creates player with UUID "test-player-uuid-123"
-  - Links 2 horses (Starlight and Comet) to the player
+  - Creates user with UUID "test-user-uuid-123"
+  - Links 2 horses (Starlight and Comet) to the user
   - Includes comprehensive horse data with all schema fields
   - Proper breed relationship handling
-- Player data: Test Player (test@example.com) with money: 500, level: 3, xp: 1000
+- User data: Test User (test@example.com) with money: 500, level: 3, xp: 1000
 - Horse data: Starlight (4yo Mare) and Comet (6yo Stallion), both Thoroughbreds
 - Error handling: Comprehensive logging and graceful failure handling
-- Integration: Uses `createPlayer()` and `createHorse()` for consistent validation
+- Integration: Uses `createUser()` and `createHorse()` for consistent validation
 - Used in: Development database seeding, integration testing setup
-- Tests: Validated through integration tests in `tests/integration/player.test.js`
+- Tests: Validated through integration tests in `tests/integration/user.test.js`
 
 ### `backend/seed/horseSeed.js` - Enhanced Main Function
-- Updated main seeding orchestration to include both horse and player seeding
-- Executes `seedHorses()` followed by `seedPlayerWithHorses()`
+- Updated main seeding orchestration to include both horse and user seeding
+- Executes `seedHorses()` followed by `seedUserWithHorses()`
 - Provides comprehensive success/failure reporting for both operations
 - Maintains backward compatibility with existing horse-only seeding
 - Proper cleanup and Prisma client disconnection
@@ -274,7 +274,7 @@ Each section should include:
 - Purpose: Applies training cooldown after horse completes training session.
 - Parameters: `horseId` (number or string - horse ID, validated and parsed to integer)
 - Validation: Validates horseId is provided and is a positive integer
-- Returns: Updated horse object with relations (breed, owner, stable, player)
+- Returns: Updated horse object with relations (breed, owner, stable, user)
 - Database: Updates trainingCooldown field using Prisma horse.update()
 - Error handling: Specific error for non-existent horse (P2025), generic for other DB errors
 - Used in: Training completion handlers, game progression logic
@@ -671,10 +671,10 @@ Each section should include:
 - **Cooldown Details:** Uses `getAnyRecentTraining()` for accurate global cooldown calculation
 - **UI Support:** Provides all data needed for training status displays and countdown timers
 
-### `backend/controllers/trainingController.js` - `getTrainableHorses(playerId)` (UPDATED - Global Cooldown)
+### `backend/controllers/trainingController.js` - `getTrainableHorses(userId)` (UPDATED - Global Cooldown)
 - **Enhanced Horse Filtering:** Returns horses eligible for training with global cooldown consideration
 - **Purpose:** Provides list of horses that can currently train for UI selection
-- **Parameters:** `playerId` (string) - UUID of player to get horses for
+- **Parameters:** `userId` (string) - UUID of user to get horses for
 - **Filtering Logic:**
   1. **Age Filter:** Excludes horses under 3 years old
   2. **Global Cooldown Filter:** Uses `getAnyRecentTraining()` to exclude horses with recent training
@@ -730,9 +730,9 @@ Each section should include:
 ## Game Balance & Design
 
 ### One-Discipline-Per-Week Training Limit (IMPLEMENTED)
-- **Game Balance Fix:** Prevents players from training multiple disciplines in the same week to avoid stat stacking
+- **Game Balance Fix:** Prevents users from training multiple disciplines in the same week to avoid stat stacking
 - **Implementation:** Global 7-day cooldown applies to ALL disciplines after any training session
-- **Player Impact:** Forces strategic decisions about which discipline to focus on each week
+- **User Impact:** Forces strategic decisions about which discipline to focus on each week
 - **Database Efficiency:** Single query per horse instead of multiple discipline-specific queries
 - **UI Consistency:** Clear messaging about global cooldown status across all interfaces
 
@@ -747,10 +747,10 @@ Each section should include:
 - **Minimum Age:** Horses must be 3+ years old to participate in training
 - **Realistic Simulation:** Reflects real-world horse training practices
 - **Game Progression:** Creates natural progression from young horses to trained competitors
-- **Clear Messaging:** Age-based restrictions clearly communicated to players
+- **Clear Messaging:** Age-based restrictions clearly communicated to users
 
 ### Training History & Logging
 - **Complete Audit Trail:** All training sessions logged with timestamps and discipline information
 - **Cooldown Calculation:** Training logs used to calculate and enforce cooldown periods
-- **Player Statistics:** Historical data available for player progress tracking
+- **User Statistics:** Historical data available for user progress tracking
 - **Database Integrity:** Permanent records ensure consistent cooldown enforcement

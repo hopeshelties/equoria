@@ -352,4 +352,4 @@ The epigenetic traits system provides a sophisticated, realistic breeding mechan
 - Integrates seamlessly with existing game systems
 - Provides engaging long-term progression
 
-Players must balance environmental factors during foal development to maximize positive trait inheritance while minimizing negative traits, creating a deep and rewarding breeding experience. 
+Users must balance environmental factors during foal development to maximize positive trait inheritance while minimizing negative traits, creating a deep and rewarding breeding experience. 

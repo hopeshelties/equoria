@@ -59,7 +59,7 @@ backend/
 - **Horse breeding mechanics** with genetics
 - **Training system** with cooldowns and progression
 - **Competition simulation** with realistic scoring
-- **Player management** with progression tracking
+- **User management** with progression tracking
 - **Administrative tools** for game management
 
 ## Database Design
@@ -74,7 +74,7 @@ The application uses PostgreSQL with Prisma ORM, featuring:
 ## API Design
 
 RESTful API endpoints organized by domain:
-- **Authentication**: `/api/auth/*` - Player authentication and authorization
+- **Authentication**: `/api/auth/*` - User authentication and authorization
 - **Horses**: `/api/horses/*` - Horse management and operations
 - **Training**: `/api/training/*` - Training system endpoints
 - **Competition**: `/api/competition/*` - Competition entry and results

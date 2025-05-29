@@ -12,7 +12,7 @@ export const register = async(req, res, next) => {
   // eslint-disable-next-line no-console
   console.log('REGISTER BODY:', req.body); // TEMPORARY FOR DEBUGGING
   try {
-    const { username, email, password, firstName, lastName, name, role, money, level, xp, settings } = req.body;
+    const { username, email, password, firstName, lastName, role, money, level, xp, settings } = req.body; // Removed 'name' from destructuring, will use username or construct if needed
 
     // Validate input
     if (!username || !email || !password) {
@@ -36,15 +36,27 @@ export const register = async(req, res, next) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Construct the name field. Use firstName and lastName if available, otherwise default to username.
+    let constructedName = username;
+    if (firstName && lastName) {
+      constructedName = `${firstName} ${lastName}`;
+    } else if (firstName) {
+      constructedName = firstName;
+    } else if (lastName) {
+      // This case is less common, but handle it if only lastName is provided
+      constructedName = lastName;
+    }
+
+
     // Create user
     const user = await prisma.user.create({
       data: {
         username,
         email,
         password: hashedPassword,
-        firstName,
-        lastName,
-        name: name || username, // Use provided name or default to username
+        firstName: firstName || null, // Set to null if not provided
+        lastName: lastName || null,   // Set to null if not provided
+        name: constructedName, // Use the constructed name
         role: role || 'user', // Default role
         money: money === undefined ? 1000 : money, // Default starting money if not provided
         level: level === undefined ? 1 : level,    // Default starting level if not provided

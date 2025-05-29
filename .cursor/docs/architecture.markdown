@@ -25,7 +25,7 @@ Equoria/
 │   │   └── authController.js
 │   ├── models/           # Data access layer
 │   │   ├── horseModel.js
-│   │   ├── playerModel.js
+│   │   ├── userModel.js
 │   │   ├── trainingModel.js
 │   │   └── resultModel.js
 │   ├── routes/           # API endpoint definitions
@@ -83,7 +83,7 @@ Equoria/
 - **dotenv**: Environment variable management
 
 ### Database (PostgreSQL)
-- **Core Tables**: Players, Horses, Foals, Shows, Competition Results, Training Logs
+- **Core Tables**: Users, Horses, Foals, Shows, Competition Results, Training Logs
 - **JSONB Fields**: Flexible storage for genetics, traits, discipline scores, settings
 - **Relationships**: Complex foreign key relationships supporting game mechanics
 - **Indexing**: Optimized for game-specific query patterns
@@ -137,8 +137,8 @@ Equoria/
 - **Epigenetic Factors**: Environmental influences on trait expression
 - **Lineage Tracking**: Parent relationships and breeding history
 
-### 4. Player Progression
-- **Account System**: UUID-based player accounts with settings
+### 4. User Progression
+- **Account System**: UUID-based user accounts with settings
 - **Experience Tracking**: Level, XP, and money progression
 - **Achievement System**: Milestone tracking and rewards (planned)
 - **Social Features**: Leaderboards and competition rankings
@@ -147,7 +147,7 @@ Equoria/
 
 ### 1. Authentication & Authorization
 - **JWT Implementation**: Access tokens with refresh token rotation
-- **Role-Based Access**: Player, Moderator, Admin roles with permissions
+- **Role-Based Access**: User, Moderator, Admin roles with permissions
 - **Password Security**: bcrypt hashing with configurable salt rounds
 - **Session Management**: Secure token storage and validation
 

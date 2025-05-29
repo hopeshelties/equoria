@@ -8,10 +8,10 @@
 
 ## Core Tables
 
-### 1. players
-Primary player account management with UUID-based identifiers
+### 1. users
+Primary user account management with UUID-based identifiers
 ```sql
-CREATE TABLE players (
+CREATE TABLE users (
   id VARCHAR PRIMARY KEY DEFAULT uuid(),
   name VARCHAR NOT NULL,
   email VARCHAR UNIQUE NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE players (
 **Key Features:**
 - UUID primary keys for security and scalability
 - Unique email constraint for account management
-- JSONB settings for flexible player preferences
+- JSONB settings for flexible user preferences
 - Progression tracking with money, level, and XP
 
 **Sample Settings JSONB:**
@@ -57,7 +57,7 @@ CREATE TABLE horses (
   breed_id INTEGER REFERENCES breeds(id),
   owner_id INTEGER REFERENCES users(id),
   stable_id INTEGER REFERENCES stables(id),
-  player_id VARCHAR REFERENCES players(id),
+  user_id VARCHAR REFERENCES users(id),
   discipline_scores JSONB DEFAULT '{}',
   epigenetic_modifiers JSONB DEFAULT '{}',
   training_cooldown TIMESTAMP NULL,
@@ -80,7 +80,7 @@ CREATE TABLE horses (
 ```
 
 **Key Features:**
-- Flexible relationship support (both legacy user and new player systems)
+- Flexible relationship support (both legacy user and new user systems)
 - JSONB discipline scores for training progression
 - JSONB epigenetic modifiers for complex trait storage
 - Training cooldown system integration
@@ -119,7 +119,7 @@ CREATE TABLE foals (
   bond_score INTEGER DEFAULT 50,
   stress_level INTEGER DEFAULT 30,
   development_stage VARCHAR DEFAULT 'newborn',
-  player_id VARCHAR REFERENCES players(id),
+  user_id VARCHAR REFERENCES users(id),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -233,7 +233,7 @@ CREATE TABLE users (
   name VARCHAR NOT NULL,
   email VARCHAR UNIQUE,
   password_hash VARCHAR,
-  role VARCHAR DEFAULT 'Player',
+  role VARCHAR DEFAULT 'User',
   created_at TIMESTAMP DEFAULT NOW()
 );
 ```
@@ -291,7 +291,7 @@ CREATE TABLE foal_training_history (
 
 ### Primary Relationships
 ```
-players (1) ←→ (N) horses
+users (1) ←→ (N) horses
 horses (N) ←→ (1) breeds
 horses (1) ←→ (N) competition_results
 horses (1) ←→ (N) training_logs
@@ -324,16 +324,16 @@ CREATE INDEX idx_competition_results_horse_id ON competition_results(horse_id);
 CREATE INDEX idx_competition_results_show_id ON competition_results(show_id);
 CREATE INDEX idx_competition_results_run_date ON competition_results(run_date);
 
--- Player and relationship optimization
-CREATE INDEX idx_horses_player_id ON horses(player_id);
+-- User and relationship optimization
+CREATE INDEX idx_horses_user_id ON horses(user_id);
 CREATE INDEX idx_horses_owner_id ON horses(owner_id);
 CREATE INDEX idx_horses_breed_id ON horses(breed_id);
-CREATE INDEX idx_players_email ON players(email);
+CREATE INDEX idx_users_email ON users(email);
 
 -- Foal and breeding optimization
 CREATE INDEX idx_foals_sire_id ON foals(sire_id);
 CREATE INDEX idx_foals_dam_id ON foals(dam_id);
-CREATE INDEX idx_foals_player_id ON foals(player_id);
+CREATE INDEX idx_foals_user_id ON foals(user_id);
 ```
 
 ### JSONB Indexes
@@ -346,8 +346,8 @@ CREATE INDEX idx_horses_epigenetic_modifiers ON horses USING GIN (epigenetic_mod
 CREATE INDEX idx_foals_genetics ON foals USING GIN (genetics);
 CREATE INDEX idx_foals_traits ON foals USING GIN (traits);
 
--- Player settings queries
-CREATE INDEX idx_players_settings ON players USING GIN (settings);
+-- User settings queries
+CREATE INDEX idx_users_settings ON users USING GIN (settings);
 ```
 
 ## Data Validation and Constraints
@@ -370,10 +370,10 @@ CHECK (score >= 0 AND score <= 1000);
 ALTER TABLE horses ADD CONSTRAINT check_age 
 CHECK (age >= 0 AND age <= 30);
 
--- Player progression validation
-ALTER TABLE players ADD CONSTRAINT check_money CHECK (money >= 0);
-ALTER TABLE players ADD CONSTRAINT check_level CHECK (level >= 1);
-ALTER TABLE players ADD CONSTRAINT check_xp CHECK (xp >= 0);
+-- User progression validation
+ALTER TABLE users ADD CONSTRAINT check_money CHECK (money >= 0);
+ALTER TABLE users ADD CONSTRAINT check_level CHECK (level >= 1);
+ALTER TABLE users ADD CONSTRAINT check_xp CHECK (xp >= 0);
 ```
 
 ### Business Rule Constraints
@@ -386,7 +386,7 @@ ALTER TABLE players ADD CONSTRAINT check_xp CHECK (xp >= 0);
 
 ### Key Migrations
 1. **20241201000000_initial**: Basic tables and relationships
-2. **20241215000000_add_players**: UUID-based player accounts
+2. **20241215000000_add_users**: UUID-based user accounts
 3. **20241220000000_training_cooldown**: Training restriction system
 4. **20241225000000_competition_results**: Competition tracking system
 5. **20241228000000_foal_development**: Breeding and development system
@@ -412,17 +412,17 @@ npx prisma generate
 
 ### Common Game Queries
 ```sql
--- Get player with all horses
+-- Get user with all horses
 SELECT p.*, h.name as horse_name, h.age, b.name as breed_name
-FROM players p
-LEFT JOIN horses h ON p.id = h.player_id
+FROM users p
+LEFT JOIN horses h ON p.id = h.user_id
 LEFT JOIN breeds b ON h.breed_id = b.id
 WHERE p.id = $1;
 
 -- Get trainable horses (age 3+, no recent training)
-SELECT h.*, p.name as player_name
+SELECT h.*, p.name as user_name
 FROM horses h
-JOIN players p ON h.player_id = p.id
+JOIN users p ON h.user_id = p.id
 WHERE h.age >= 3 
 AND (h.training_cooldown IS NULL OR h.training_cooldown <= NOW());
 
@@ -454,7 +454,7 @@ SELECT f.*,
 FROM foals f
 JOIN horses s ON f.sire_id = s.id
 JOIN horses d ON f.dam_id = d.id
-WHERE f.player_id = $1;
+WHERE f.user_id = $1;
 ```
 
 ## Backup and Recovery

@@ -26,7 +26,7 @@ frontend/
 │   ├── TrainingScreen.js   # Training system interface
 │   ├── CompetitionScreen.js # Competition management
 │   ├── BreedingScreen.js   # Breeding interface
-│   └── ProfileScreen.js    # Player profile and stats
+│   └── ProfileScreen.js    # User profile and stats
 ├── navigation/             # Navigation structure (planned)
 │   ├── AppNavigator.js     # Main navigation container
 │   ├── TabNavigator.js     # Bottom tab navigation
@@ -98,7 +98,7 @@ frontend/
 - **Training Tab:** Training system interface
 - **Competition Tab:** Competition entry and results
 - **Breeding Tab:** Breeding management and foal development
-- **Profile Tab:** Player stats, achievements, and settings
+- **Profile Tab:** User stats, achievements, and settings
 
 ### 2. Screen Specifications
 
@@ -139,10 +139,10 @@ frontend/
 - Breeding history and lineage
 
 #### E. ProfileScreen.js (Planned)
-**Purpose:** Player profile and progression
+**Purpose:** User profile and progression
 
 **Features:**
-- Player statistics and achievements
+- User statistics and achievements
 - Game progression overview
 - Settings and preferences
 - Account management
@@ -171,7 +171,7 @@ frontend/
 
 **Redux Toolkit or Zustand:**
 - Centralized state management
-- Player data and game state
+- User data and game state
 - Horse collection management
 - Training and competition status
 
@@ -374,8 +374,8 @@ frontend/
 
 **Real-time Features:**
 - Live competition updates
-- Real-time multiplayer features
-- Push notifications for game events
+- Real-time multiuser features
+- Push notifications for game eventss
 - Live chat and social features
 
 **Gamification:**

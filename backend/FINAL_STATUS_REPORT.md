@@ -30,7 +30,7 @@
 
 ### Issue 1: Original Test Suite Hanging
 **Problem**: The original test suite (`tests/training.test.js`) hangs because:
-1. It expects a Player with UUID `test-player-uuid-123` but uses User authentication
+1. It expects a User with UUID `test-player-uuid-123` but uses User authentication
 2. Horses in the database have `playerId: null` (not linked to any player)
 3. The training controller looks for horses by playerId, finds none, returns empty array
 
@@ -38,11 +38,11 @@
 - Either update the original tests to create proper user-horse relationships
 - Or use the new working test (`tests/training-complete.test.js`) as the template
 
-### Issue 2: User vs Player Model Confusion
-**Problem**: The codebase has both User and Player models:
+### Issue 2: User vs User Model Confusion
+**Problem**: The codebase has both User and User models:
 - **User**: Used for authentication (integer ID)
-- **Player**: Used for game data (UUID)
-- **Horses**: Have both `ownerId` (integer, links to User) and `playerId` (UUID, links to Player)
+- **User**: Used for game data (UUID)
+- **Horses**: Have both `ownerId` (integer, links to User) and `playerId` (UUID, links to User)
 
 **Solution**: Standardize on one model or create proper relationships between them.
 
@@ -53,20 +53,20 @@ Choose one approach:
 
 **Option A: Use User Model Only**
 ```sql
--- Remove Player model, use User for everything
+-- Remove User model, use User for everything
 -- Update horses to only use ownerId (integer)
 ```
 
-**Option B: Link User and Player Models**
+**Option B: Link User and User Models**
 ```javascript
-// Create relationship: User hasOne Player, Player belongsTo User
-// Update authentication to create both User and Player records
+// Create relationship: User hasOne User, User belongsTo User
+// Update authentication to create both User and User records
 ```
 
-**Option C: Use Player Model Only**
+**Option C: Use User Model Only**
 ```javascript
-// Update authentication to use Player model with UUID
-// Update all references from User to Player
+// Update authentication to use User model with UUID
+// Update all references from User to User
 ```
 
 ### Step 2: Update Test Suite (1-2 hours)
@@ -133,7 +133,7 @@ Choose one approach:
 ## 💡 **RECOMMENDATIONS**
 
 ### Immediate Priority (Today)
-1. **Fix the User/Player relationship** - Choose one model or properly link them
+1. **Fix the User/User relationship** - Choose one model or properly link them
 2. **Update the original test suite** - Add authentication to all protected routes
 3. **Run full test suite** - Ensure everything passes
 

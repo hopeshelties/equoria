@@ -88,7 +88,7 @@ The routes layer defines all REST API endpoints for the Equoria application. Eac
 
 **Features:**
 - **Comprehensive CRUD** operations
-- **Relationship loading** (breed, owner, stable, player)
+- **Relationship loading** (breed, owner, stable, user)
 - **Search and filtering** capabilities
 - **History tracking** for training and competitions
 - **Validation** for horse data integrity

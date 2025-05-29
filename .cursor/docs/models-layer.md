@@ -19,20 +19,20 @@ The models layer provides a comprehensive data access abstraction for the Equori
 - **Breed relationship handling** with multiple input formats
 - **JSONB discipline scores** for flexible training data
 - **Comprehensive validation** for all required fields
-- **Full relation loading** (breed, owner, stable, player)
+- **Full relation loading** (breed, owner, stable, user)
 - **Error handling** with descriptive messages
 
 **Test Coverage:** 32 tests covering CRUD operations, validation, and edge cases
 
-### 2. `playerModel.js` - Player Account Management
+### 2. `userModel.js` - User Account Management
 
 **Core Functions:**
-- `createPlayer(playerData)` - Creates new player accounts
-- `getPlayerById(id)` - Retrieves player by UUID
-- `getPlayerByEmail(email)` - Email-based player lookup
-- `getPlayerWithHorses(id)` - Player with horse collection
-- `updatePlayer(id, updateData)` - Player progression updates
-- `deletePlayer(id)` - Account deletion
+- `createUser(userData)` - Creates new user accounts
+- `getUserById(id)` - Retrieves user by UUID
+- `getUserByEmail(email)` - Email-based user lookup
+- `getUserWithHorses(id)` - User with horse collection
+- `updateUser(id, updateData)` - User progression updates
+- `deleteUser(id)` - Account deletion
 
 **Key Features:**
 - **UUID primary keys** for security and scalability
@@ -96,9 +96,9 @@ The models layer provides a comprehensive data access abstraction for the Equori
 
 ### 6. `userModel.js` - Legacy User System
 
-**Purpose:** Maintains backward compatibility with existing user system while transitioning to player-based architecture.
+**Purpose:** Maintains backward compatibility with existing user system while transitioning to user-based architecture.
 
-**Status:** Being phased out in favor of `playerModel.js`
+**Status:** Being phased out in favor of `userModel.js`
 
 ## Common Patterns
 
@@ -128,7 +128,7 @@ include: {
   breed: true,
   owner: true,
   stable: true,
-  player: true
+  user: true
 }
 ```
 
@@ -143,7 +143,7 @@ disciplineScores: updatedScores || {}
 
 The models layer abstracts the following database tables:
 - **horses** - Core horse data with relationships
-- **players** - Player accounts and progression
+- **users** - User accounts and progression
 - **foals** - Breeding outcomes and genetics
 - **training_logs** - Training history and cooldowns
 - **competition_results** - Competition outcomes and rankings

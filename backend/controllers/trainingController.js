@@ -1,6 +1,6 @@
 import { getLastTrainingDate, getHorseAge, logTrainingSession, getAnyRecentTraining } from '../models/trainingModel.js';
 import { incrementDisciplineScore, getHorseById, updateHorseStat } from '../models/horseModel.js';
-import { getPlayerWithHorses, addXp, levelUpIfNeeded } from '../models/playerModel.js';
+import { getUserWithHorses, addXp, levelUpIfNeeded } from '../models/userModel.js';
 import { logXpEvent } from '../models/xpLogModel.js';
 import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import logger from '../utils/logger.js';
@@ -219,7 +219,7 @@ async function trainHorse(horseId, discipline) {
     // Award XP to horse owner for training
     try {
       if (updatedHorse && updatedHorse.playerId) {
-        // Award XP using playerModel.addXp (use playerId for Player model, not ownerId for User model)
+        // Award XP using playerModel.addXp (use playerId for User model, not ownerId for User model)
         const xpResult = await addXp(updatedHorse.playerId, baseXp);
 
         // Call levelUpIfNeeded after awarding XP (as requested in task)
@@ -350,21 +350,21 @@ async function getTrainableHorses(playerId) {
   try {
     // Validate input parameters
     if (!playerId) {
-      throw new Error('Player ID is required');
+      throw new Error('User ID is required');
     }
 
     logger.info(`[trainingController.getTrainableHorses] Getting trainable horses for player ${playerId}`);
 
     // Get player with their horses
-    const player = await getPlayerWithHorses(playerId);
+    const player = await getUserWithHorses(playerId);
 
     if (!player) {
-      logger.warn(`[trainingController.getTrainableHorses] Player ${playerId} not found`);
+      logger.warn(`[trainingController.getTrainableHorses] User ${playerId} not found`);
       return [];
     }
 
     if (!player.horses || player.horses.length === 0) {
-      logger.info(`[trainingController.getTrainableHorses] Player ${playerId} has no horses`);
+      logger.info(`[trainingController.getTrainableHorses] User ${playerId} has no horses`);
       return [];
     }
 

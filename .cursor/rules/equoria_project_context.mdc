@@ -14,7 +14,7 @@ You are working on **Equoria**, a sophisticated horse breeding and training game
 - **Complex Genetics System**: Multi-allele inheritance with dominant/recessive patterns
 - **Training System**: Age-restricted (3+ years), weekly cooldowns, discipline progression
 - **Competition System**: Stat-based scoring with eligibility validation
-- **Player Progress**: XP, money, achievements, social features
+- **User Progress**: XP, money, achievements, social features
 
 ### Technical Architecture
 - **Frontend**: React Native + Expo with JavaScript ES6+ and Tailwind CSS (NativeWind)
@@ -39,7 +39,7 @@ You are working on **Equoria**, a sophisticated horse breeding and training game
 //   disciplines: JsonValue, // JSONB - training scores per discipline
 //   parentStallionId?: string, // Breeding relationships
 //   parentMareId?: string,
-//   playerId: string     // Owner relationship
+//   userId: string     // Owner relationship
 // }
 ```
 
@@ -72,7 +72,7 @@ CREATE TABLE horses (
   genetics JSONB NOT NULL,     -- Genetic alleles and expressions
   traits JSONB DEFAULT '{}',   -- Discovered traits over time
   disciplines JSONB DEFAULT '{}', -- Training scores per discipline
-  settings JSONB DEFAULT '{}'  -- Player-specific settings
+  settings JSONB DEFAULT '{}'  -- User-specific settings
 );
 
 -- Index JSONB fields for query performance:
@@ -86,13 +86,13 @@ CREATE INDEX idx_horses_disciplines_gin ON horses USING GIN (disciplines);
 CREATE TABLE horses (
   parent_stallion_id UUID REFERENCES horses(id),
   parent_mare_id UUID REFERENCES horses(id),
-  player_id UUID REFERENCES players(id) NOT NULL
+  user_id UUID REFERENCES users(id) NOT NULL
 );
 
 -- Training logs with proper foreign keys:
 CREATE TABLE training_logs (
   horse_id UUID REFERENCES horses(id) NOT NULL,
-  player_id UUID REFERENCES players(id) NOT NULL,
+  user_id UUID REFERENCES users(id) NOT NULL,
   discipline VARCHAR(50) NOT NULL,
   points_gained INTEGER DEFAULT 5
 );
@@ -265,7 +265,7 @@ describe('Horse Breeding System', () => {
 - Training system with cooldowns and progression
 - Competition system with realistic scoring
 - Breeding system with genetic inheritance
-- Player progression and achievements
+- User progression and achievements
 
 ### 2. User Experience (Medium Priority)
 - Intuitive mobile interface
@@ -276,7 +276,7 @@ describe('Horse Breeding System', () => {
 ### 3. Advanced Features (Future)
 - AI-powered breeding recommendations
 - Advanced analytics and statistics
-- Multiplayer competitions and guilds
+- Multiuser competitions and guilds
 - Economic simulation features
 
 ## Context-Aware Development
@@ -285,11 +285,11 @@ describe('Horse Breeding System', () => {
 - Always consider the game's target audience (horse enthusiasts)
 - Ensure realism in horse breeding and training mechanics
 - Maintain consistency with established game rules
-- Consider long-term player engagement and progression
+- Consider long-term user engagement and progression
 
 ### When Working on Technical Features:
 - Prioritize data integrity for game state
-- Ensure scalability for growing player base
+- Ensure scalability for growing user base
 - Optimize for mobile device constraints
 - Maintain comprehensive test coverage
 

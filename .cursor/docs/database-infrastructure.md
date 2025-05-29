@@ -8,9 +8,9 @@ The Equoria project uses PostgreSQL as the primary database with Prisma ORM for 
 
 ### Core Tables
 
-#### 1. Players Table
+#### 1. Users Table
 ```sql
-CREATE TABLE players (
+CREATE TABLE users (
   id VARCHAR PRIMARY KEY DEFAULT uuid(),
   name VARCHAR NOT NULL,
   email VARCHAR UNIQUE NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE players (
 **Key Features:**
 - **UUID Primary Keys** for security and scalability
 - **Unique email constraint** for account management
-- **JSONB settings** for flexible player preferences
+- **JSONB settings** for flexible user preferences
 - **Progression tracking** with money, level, and XP
 
 #### 2. Horses Table
@@ -39,7 +39,7 @@ CREATE TABLE horses (
   breed_id INTEGER REFERENCES breeds(id),
   owner_id INTEGER REFERENCES users(id),
   stable_id INTEGER REFERENCES stables(id),
-  player_id VARCHAR REFERENCES players(id),
+  user_id VARCHAR REFERENCES users(id),
   discipline_scores JSONB DEFAULT '{}',
   epigenetic_modifiers JSONB DEFAULT '{}',
   training_cooldown TIMESTAMP NULL,
@@ -49,7 +49,7 @@ CREATE TABLE horses (
 ```
 
 **Key Features:**
-- **Flexible relationship support** (both user and player systems)
+- **Flexible relationship support** (both user and user systems)
 - **JSONB discipline scores** for training progression
 - **JSONB epigenetic modifiers** for complex trait storage
 - **Training cooldown** system integration
@@ -227,7 +227,7 @@ CREATE TABLE foal_training_history (
 - **Genetic diversity** preservation
 - **Breeding prediction** capabilities
 
-### 4. Player Settings
+### 4. User Settings
 ```json
 {
   "darkMode": true,
@@ -266,7 +266,7 @@ npx prisma migrate reset
 
 ### Key Migrations
 1. **Initial Schema** - Basic tables and relationships
-2. **Player System** - UUID-based player accounts
+2. **User System** - UUID-based user accounts
 3. **Training Cooldown** - Training restriction system
 4. **Competition Results** - Competition tracking system
 5. **Foal Development** - Breeding and development system
@@ -291,9 +291,9 @@ CREATE INDEX idx_training_logs_horse_discipline ON training_logs(horse_id, disci
 CREATE INDEX idx_competition_results_horse_id ON competition_results(horse_id);
 CREATE INDEX idx_competition_results_show_id ON competition_results(show_id);
 
--- Player queries
-CREATE INDEX idx_horses_player_id ON horses(player_id);
-CREATE INDEX idx_players_email ON players(email);
+-- User queries
+CREATE INDEX idx_horses_user_id ON horses(user_id);
+CREATE INDEX idx_users_email ON users(email);
 ```
 
 **JSONB Indexes:**
@@ -314,7 +314,7 @@ const horse = await prisma.horse.findUnique({
   where: { id: horseId },
   include: {
     breed: true,
-    player: {
+    user: {
       select: { id: true, name: true, email: true }
     },
     competitionResults: {
@@ -372,7 +372,7 @@ const prisma = new PrismaClient({
 
 **Comprehensive Data Seeding:**
 - **Horse data** with realistic breeds and characteristics
-- **Player accounts** with progression scenarios
+- **User accounts** with progression scenarios
 - **Competition shows** with varied requirements
 - **Relationship data** ensuring referential integrity
 
@@ -472,7 +472,7 @@ LOG_LEVEL="warn"
 - **Response time** monitoring for database operations
 - **Error rate** tracking for database failures
 - **Resource utilization** monitoring (CPU, memory, I/O)
-- **Business metrics** (active players, competition participation)
+- **Business metrics** (active users, competition participation)
 
 ### 2. Maintenance Procedures
 
@@ -488,4 +488,4 @@ LOG_LEVEL="warn"
 - **Monthly security audits**
 - **Quarterly capacity planning**
 
-The database infrastructure provides a robust, scalable foundation for the Equoria game with excellent performance, security, and maintainability characteristics that support complex game mechanics and player progression systems. 
+The database infrastructure provides a robust, scalable foundation for the Equoria game with excellent performance, security, and maintainability characteristics that support complex game mechanics and user progression systems. 

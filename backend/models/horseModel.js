@@ -78,7 +78,7 @@ async function createHorse(horseData) {
       }
     }
 
-    // Note: Player relationship removed - using User (owner) relationship instead
+    // Note: User relationship removed - using User (owner) relationship instead
 
     // Prepare stable relationship if provided
     let stableRelation = {};

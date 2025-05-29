@@ -22,7 +22,7 @@ alwaysApply: false
 
 ## State Management
 - Use `useState`, `useEffect`, `useContext` for local state and side effects.
-- Use Redux Toolkit for complex state (e.g., player inventory, event state).
+- Use Redux Toolkit for complex state (e.g., user inventory, event state).
 - Avoid prop drilling; use Context API for shared data (e.g., user session).
 
 ## Styling (Tailwind)

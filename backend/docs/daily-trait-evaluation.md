@@ -284,7 +284,7 @@ Search application logs for:
 
 - **New Trait Categories**: Environmental, seasonal, or breed-specific traits
 - **Dynamic Conditions**: Weather or event-based revelation modifiers
-- **Player Influence**: Allow player actions to influence trait revelation
+- **User Influence**: Allow player actions to influence trait revelation
 - **Trait Evolution**: Traits that change over time based on care quality
 
 ## Security Considerations
