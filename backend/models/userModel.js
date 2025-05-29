@@ -422,3 +422,12 @@ export default {
   createUser,
   getUserWithHorses,
   getUserById,
+  getUserByEmail,
+  updateUser,
+  deleteUser,
+  getUserProgress,
+  getUserStats,
+  addXpToUser,
+  addUserXp, // Deprecated
+  checkAndLevelUpUser // Deprecated
+};
