@@ -4,20 +4,38 @@ import { DatabaseError } from '../errors/index.js';
 
 const DEFAULT_XP_PER_LEVEL = 100;
 
-// XP logic helper
+/** XP threshold formula — scalable for future level curves */
 function xpThreshold(level) {
-  return DEFAULT_XP_PER_LEVEL; // Can be expanded later
+  return DEFAULT_XP_PER_LEVEL * level;
 }
 
-// Core: Create a new user
+/** Create a new user */
 export async function createUser(userData) {
   try {
-    const { username, email, password } = userData;
+    const { username, email, password, ...rest } = userData;
     if (!username || !email || !password) {
       throw new Error('Username, email, and password are required.');
     }
 
-    const newUser = await prisma.user.create({ data: userData });
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        email: email.toLowerCase(),
+        password,
+        ...rest
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        level: true,
+        xp: true,
+        money: true,
+        createdAt: true
+      }
+    });
+
     logger.info(`[createUser] User created: ${newUser.username}`);
     return newUser;
   } catch (error) {
@@ -30,7 +48,7 @@ export async function createUser(userData) {
   }
 }
 
-// Core: Get user by ID (no relations)
+/** Find a user by ID */
 export async function getUserById(id) {
   try {
     if (!id) {throw new Error('User ID is required.');}
@@ -41,7 +59,7 @@ export async function getUserById(id) {
   }
 }
 
-// Core: Get user with horses
+/** Get user with related horses */
 export async function getUserWithHorses(id) {
   try {
     if (!id) {throw new Error('User ID is required.');}
@@ -57,7 +75,7 @@ export async function getUserWithHorses(id) {
   }
 }
 
-// Core: Get user by email
+/** Find a user by email */
 export async function getUserByEmail(email) {
   try {
     if (!email) {throw new Error('Email required.');}
@@ -70,7 +88,7 @@ export async function getUserByEmail(email) {
   }
 }
 
-// Core: Update user
+/** Update an existing user */
 export async function updateUser(id, updateData) {
   try {
     if (!id) {throw new Error('User ID is required.');}
@@ -87,7 +105,7 @@ export async function updateUser(id, updateData) {
   }
 }
 
-// Core: Delete user
+/** Delete a user by ID */
 export async function deleteUser(id) {
   try {
     if (!id) {throw new Error('User ID is required.');}
@@ -98,7 +116,7 @@ export async function deleteUser(id) {
   }
 }
 
-// XP/Level: Add XP and level up if needed
+/** Add XP to a user and level them up if needed */
 export async function addXpToUser(userId, amount) {
   try {
     if (!userId) {throw new Error('User ID is required.');}
@@ -110,13 +128,12 @@ export async function addXpToUser(userId, amount) {
     if (!user) {throw new Error('User not found.');}
 
     let { xp, level } = user;
-    let levelsGained = 0;
     let leveledUp = false;
+    let levelsGained = 0;
 
     xp += amount;
 
-    while (xp >= xpThreshold(level)) {
-      xp -= xpThreshold(level);
+    while (xp >= xpThreshold(level + 1)) {
       level++;
       levelsGained++;
       leveledUp = true;
@@ -148,26 +165,26 @@ export async function addXpToUser(userId, amount) {
   }
 }
 
-// Get XP progress
+/** Get current XP and progress for next level */
 export async function getUserProgress(userId) {
   try {
     const user = await getUserById(userId);
     if (!user) {throw new Error('User not found.');}
 
-    const threshold = xpThreshold(user.level);
+    const threshold = xpThreshold(user.level + 1);
     return {
       userId: user.id,
       level: user.level,
       xp: user.xp,
       xpToNextLevel: threshold - user.xp,
-      xpForCurrentLevel: threshold
+      xpForNextLevel: threshold
     };
   } catch (error) {
     throw new DatabaseError(`Progress fetch failed: ${error.message}`);
   }
 }
 
-// Get full stats
+/** Get full stats summary for dashboard/profile */
 export async function getUserStats(userId) {
   try {
     const user = await prisma.user.findUnique({
@@ -177,7 +194,7 @@ export async function getUserStats(userId) {
     if (!user) {return null;}
 
     const horseCount = user.horses.length;
-    const averageHorseAge = horseCount
+    const avgHorseAge = horseCount
       ? parseFloat((user.horses.reduce((acc, h) => acc + h.age, 0) / horseCount).toFixed(2))
       : 0;
 
@@ -192,14 +209,14 @@ export async function getUserStats(userId) {
       level: user.level,
       xp: user.xp,
       horseCount,
-      averageHorseAge
+      averageHorseAge: avgHorseAge
     };
   } catch (error) {
     throw new DatabaseError(`Stats fetch failed: ${error.message}`);
   }
 }
 
-// Deprecated — use addXpToUser
+// Deprecated (backward compatibility only)
 export async function addUserXp(userId, amount) {
   logger.warn('[addUserXp] DEPRECATED: Use addXpToUser instead.');
   return addXpToUser(userId, amount);
