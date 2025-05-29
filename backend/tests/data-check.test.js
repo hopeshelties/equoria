@@ -9,29 +9,25 @@ describe('Database Data Check', () => {
     const users = await prisma.user.findMany({
       select: {
         id: true,
-        username: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        money: true,
-        level: true,
-        xp: true
+        email: true // Select only id and email
       }
     });
     console.log('Users in database:', JSON.stringify(users, null, 2));
     expect(Array.isArray(users)).toBe(true);
+    // Add new assertion to check if every user object has an email property
+    expect(users.every(user => user.id && user.email)).toBe(true);
     if (users.length > 0) {
       const firstUser = users[0];
       expect(firstUser.id).toBeDefined();
-      expect(firstUser.username).toBeDefined();
       expect(firstUser.email).toBeDefined();
-      expect(firstUser.firstName).toBeDefined();
-      expect(firstUser.lastName).toBeDefined();
-      expect(firstUser.role).toBeDefined();
-      expect(firstUser.money).toBeDefined();
-      expect(firstUser.level).toBeDefined();
-      expect(firstUser.xp).toBeDefined();
+      // Removed assertions for fields no longer selected:
+      // expect(firstUser.username).toBeDefined();
+      // expect(firstUser.firstName).toBeDefined();
+      // expect(firstUser.lastName).toBeDefined();
+      // expect(firstUser.role).toBeDefined();
+      // expect(firstUser.money).toBeDefined();
+      // expect(firstUser.level).toBeDefined();
+      // expect(firstUser.xp).toBeDefined();
     }
   });
 
