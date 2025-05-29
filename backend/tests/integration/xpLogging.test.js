@@ -88,7 +88,7 @@ describe('XP Logging Integration Tests', () => {
       mockGetHorseById.mockResolvedValue({
         id: 1,
         name: 'Thunder',
-        playerId: 'player-123', // Corrected: ownerId to playerId
+        userId: 'user-123', // Corrected: ownerId/playerId to userId
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
       });
       mockGetCombinedTraitEffects.mockReturnValue({});
@@ -96,14 +96,14 @@ describe('XP Logging Integration Tests', () => {
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 1,
         name: 'Thunder',
-        playerId: 'player-123', // Corrected: ownerId to playerId
+        userId: 'user-123', // Corrected: ownerId/playerId to userId
         disciplineScores: { Dressage: 15 }
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 2, xpGained: 5 });
       mockLevelUpIfNeeded.mockResolvedValue({ leveledUp: false, level: 2 });
       mockLogXpEvent.mockResolvedValue({
         id: 1,
-        playerId: 'player-123',
+        userId: 'user-123', // Changed from playerId
         amount: 5,
         reason: 'Trained horse Thunder in Dressage',
         timestamp: new Date()
@@ -112,10 +112,10 @@ describe('XP Logging Integration Tests', () => {
       const result = await trainHorse(1, 'Dressage');
 
       expect(result.success).toBe(true);
-      expect(mockAddXp).toHaveBeenCalledWith('player-123', 5);
-      expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('player-123');
+      expect(mockAddXp).toHaveBeenCalledWith('user-123', 5);
+      expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('user-123');
       expect(mockLogXpEvent).toHaveBeenCalledWith({
-        playerId: 'player-123',
+        userId: 'user-123', // Changed from playerId
         amount: 5,
         reason: 'Trained horse Thunder in Dressage'
       });
@@ -128,7 +128,7 @@ describe('XP Logging Integration Tests', () => {
       mockGetHorseById.mockResolvedValue({
         id: 2,
         name: 'Lightning',
-        playerId: 'player-456', // Corrected: ownerId to playerId
+        userId: 'user-456', // Corrected: ownerId/playerId to userId
         epigenetic_modifiers: { positive: ['intelligent'], negative: [], hidden: [] }
       });
       mockGetCombinedTraitEffects.mockReturnValue({
@@ -138,14 +138,14 @@ describe('XP Logging Integration Tests', () => {
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 2,
         name: 'Lightning',
-        playerId: 'player-456', // Corrected: ownerId to playerId
+        userId: 'user-456', // Corrected: ownerId/playerId to userId
         disciplineScores: { Racing: 20 }
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 3, xpGained: 6 });
       mockLevelUpIfNeeded.mockResolvedValue({ leveledUp: false, level: 3 });
       mockLogXpEvent.mockResolvedValue({
         id: 2,
-        playerId: 'player-456',
+        userId: 'user-456', // Changed from playerId
         amount: 6,
         reason: 'Trained horse Lightning in Racing',
         timestamp: new Date()
@@ -154,9 +154,9 @@ describe('XP Logging Integration Tests', () => {
       const result = await trainHorse(2, 'Racing');
 
       expect(result.success).toBe(true);
-      expect(mockAddXp).toHaveBeenCalledWith('player-456', 6); // 5 * 1.25 = 6.25 → 6
+      expect(mockAddXp).toHaveBeenCalledWith('user-456', 6); // 5 * 1.25 = 6.25 → 6
       expect(mockLogXpEvent).toHaveBeenCalledWith({
-        playerId: 'player-456',
+        userId: 'user-456', // Changed from playerId
         amount: 6,
         reason: 'Trained horse Lightning in Racing'
       });
@@ -169,7 +169,7 @@ describe('XP Logging Integration Tests', () => {
       mockGetHorseById.mockResolvedValue({
         id: 3,
         name: 'Storm',
-        playerId: 'player-789', // Corrected: ownerId to playerId
+        userId: 'user-789', // Corrected: ownerId/playerId to userId
         epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
       });
       mockGetCombinedTraitEffects.mockReturnValue({});
@@ -177,7 +177,7 @@ describe('XP Logging Integration Tests', () => {
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 3,
         name: 'Storm',
-        playerId: 'player-789', // Corrected: ownerId to playerId
+        userId: 'user-789', // Corrected: ownerId/playerId to userId
         disciplineScores: { 'Show Jumping': 10 }
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 1, xpGained: 5 });
@@ -187,9 +187,9 @@ describe('XP Logging Integration Tests', () => {
       const result = await trainHorse(3, 'Show Jumping');
 
       expect(result.success).toBe(true);
-      expect(mockAddXp).toHaveBeenCalledWith('player-789', 5);
+      expect(mockAddXp).toHaveBeenCalledWith('user-789', 5);
       expect(mockLogXpEvent).toHaveBeenCalledWith({
-        playerId: 'player-789',
+        userId: 'user-789', // Changed from playerId
         amount: 5,
         reason: 'Trained horse Storm in Show Jumping'
       });
@@ -216,7 +216,7 @@ describe('XP Logging Integration Tests', () => {
       const mockHorse = {
         id: 1,
         name: 'Champion',
-        ownerId: 'player-123',
+        userId: 'user-123', // Changed from ownerId/playerId
         rider: { name: 'Test Rider', skill: 5 }
       };
 
@@ -239,7 +239,7 @@ describe('XP Logging Integration Tests', () => {
       mockLevelUpIfNeeded.mockResolvedValue({ leveledUp: false, level: 5 });
       mockLogXpEvent.mockResolvedValue({
         id: 3,
-        playerId: 'player-123',
+        userId: 'user-123', // Changed from playerId
         amount: 20,
         reason: '1st place with horse Champion in Racing',
         timestamp: new Date()
@@ -249,20 +249,20 @@ describe('XP Logging Integration Tests', () => {
       const placement = '1st';
       const xpAmount = 20;
 
-      if (mockHorse && mockHorse.ownerId) {
-        await mockAddXp(mockHorse.ownerId, xpAmount);
-        await mockLevelUpIfNeeded(mockHorse.ownerId);
+      if (mockHorse && mockHorse.userId) { // Changed from ownerId
+        await mockAddXp(mockHorse.userId, xpAmount); // Changed from ownerId
+        await mockLevelUpIfNeeded(mockHorse.userId); // Changed from ownerId
         await mockLogXpEvent({
-          playerId: mockHorse.ownerId,
+          userId: mockHorse.userId, // Changed from playerId & ownerId
           amount: xpAmount,
           reason: `${placement} place with horse ${mockHorse.name} in ${mockShow.discipline}`
         });
       }
 
-      expect(mockAddXp).toHaveBeenCalledWith('player-123', 20);
-      expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('player-123');
+      expect(mockAddXp).toHaveBeenCalledWith('user-123', 20);
+      expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('user-123');
       expect(mockLogXpEvent).toHaveBeenCalledWith({
-        playerId: 'player-123',
+        userId: 'user-123', // Changed from playerId
         amount: 20,
         reason: '1st place with horse Champion in Racing'
       });
@@ -281,30 +281,30 @@ describe('XP Logging Integration Tests', () => {
         const mockHorse = {
           id: 1,
           name: 'TestHorse',
-          ownerId: 'player-123'
+          userId: 'user-123' // Changed from ownerId/playerId
         };
 
         mockAddXp.mockResolvedValue({ leveledUp: false, level: 3 });
         mockLevelUpIfNeeded.mockResolvedValue({ leveledUp: false, level: 3 });
         mockLogXpEvent.mockResolvedValue({
           id: 1,
-          playerId: 'player-123',
+          userId: 'user-123', // Changed from playerId
           amount: testCase.expectedXp,
           reason: `${testCase.placement} place with horse TestHorse in Dressage`,
           timestamp: new Date()
         });
 
         // Simulate XP award for placement
-        await mockAddXp(mockHorse.ownerId, testCase.expectedXp);
-        await mockLevelUpIfNeeded(mockHorse.ownerId);
+        await mockAddXp(mockHorse.userId, testCase.expectedXp); // Changed from ownerId
+        await mockLevelUpIfNeeded(mockHorse.userId); // Changed from ownerId
         await mockLogXpEvent({
-          playerId: mockHorse.ownerId,
+          userId: mockHorse.userId, // Changed from playerId & ownerId
           amount: testCase.expectedXp,
           reason: `${testCase.placement} place with horse ${mockHorse.name} in Dressage`
         });
 
         expect(mockLogXpEvent).toHaveBeenCalledWith({
-          playerId: 'player-123',
+          userId: 'user-123', // Changed from playerId
           amount: testCase.expectedXp,
           reason: `${testCase.placement} place with horse TestHorse in Dressage`
         });

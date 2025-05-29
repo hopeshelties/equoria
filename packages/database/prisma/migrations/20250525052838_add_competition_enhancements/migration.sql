@@ -14,4 +14,7 @@ ADD COLUMN     "showName" TEXT NOT NULL,
 ADD COLUMN     "statGains" JSONB;
 
 -- AlterTable
-ALTER TABLE "shows" ADD COLUMN     "hostPlayer" TEXT;
+ALTER TABLE "shows" ADD COLUMN     "hostUserId" TEXT; -- Changed from hostPlayer
+
+-- Remove original hostPlayer column if it exists and is no longer needed --
+-- ALTER TABLE "shows" DROP COLUMN IF EXISTS "hostPlayer"; --

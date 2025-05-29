@@ -15,8 +15,11 @@ async function testXpSystem() {
 
     // Create a test player
     const testPlayer = {
-      name: 'XP Test Player',
+      username: 'XPTestUser',
+      firstName: 'XP',
+      lastName: 'Test',
       email: `xp-test-${Date.now()}@example.com`,
+      password: 'password123',
       money: 1000,
       level: 1,
       xp: 0,
