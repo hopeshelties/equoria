@@ -34,7 +34,7 @@ jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
   updateHorseStat: mockUpdateHorseStat
 }));
 
-jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../models/userModel.js'), () => ({
   getPlayerWithHorses: mockGetPlayerWithHorses,
   addXp: mockAddXp,
   levelUpIfNeeded: mockLevelUpIfNeeded
@@ -545,7 +545,7 @@ describe('trainingController', () => {
       mockGetAnyRecentTraining.mockClear();
     });
 
-    it('should return trainable horses for player with eligible horses', async() => {
+    it('should return trainable horses for user with eligible horses', async() => {
       const playerId = 'test-player-123';
       const mockPlayer = {
         id: playerId,

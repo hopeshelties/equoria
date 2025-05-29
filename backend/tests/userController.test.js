@@ -36,8 +36,8 @@ const mockLogger = {
   error: jest.fn()
 };
 
-// Remove mock for playerModel.js as it's no longer directly used by userController
-// jest.unstable_mockModule(join(__dirname, '../models/playerModel.js'), () => ({
+// Remove mock for userModel.js as it's no longer directly used by userController
+// jest.unstable_mockModule(join(__dirname, '../models/userModel.js'), () => ({
 //   getPlayerById: mockGetPlayerById // This was mockGetPlayerById
 // }));
 

@@ -10,18 +10,23 @@ comment on table public.breeds is 'Stores information about different horse bree
 DROP TABLE IF EXISTS public.users CASCADE;
 -- Create users table
 create table public.users (
-  id bigint generated always as identity primary key,
+  id varchar(255) primary key default gen_random_uuid()::text, -- MODIFIED: id type to varchar UUID
   email varchar(255) not null unique,
   username varchar(255) not null unique,
+  name varchar(255) not null, -- ADDED: Display name, formerly in users table
   password varchar(255) not null,
   firstName varchar(255) not null,
   lastName varchar(255) not null,
   role varchar(50) not null default 'user',
+  money integer not null default 0,          -- ADDED: Formerly in users table
+  level integer not null default 1,          -- ADDED: Formerly in users table
+  xp integer not null default 0,             -- ADDED: Formerly in users table
+  settings jsonb not null default '{}'::jsonb, -- ADDED: Formerly in users table
   createdAt timestamp with time zone not null default now(),
   updatedAt timestamp with time zone not null default now()
 );
 
-comment on table public.users is 'Stores information about registered users with authentication and profile data.';
+comment on table public.users is 'Stores information about registered users, including authentication, profile data, and game progression.'; -- MODIFIED comment
 
 DROP TABLE IF EXISTS public.stables CASCADE;
 -- Create stables table
@@ -43,7 +48,7 @@ create table public.horses (
   sex varchar(50) not null check (sex in ('Stallion', 'Mare', 'Colt', 'Filly')),
   date_of_birth date not null,
   breed_id bigint references public.breeds(id),
-  owner_id bigint references public.users(id) on delete set null,
+  owner_id varchar(255) references public.users(id) on delete set null, -- MODIFIED: type to varchar, references users(id)
   stable_id bigint references public.stables(id) on delete set null,
 
   genotype jsonb,
@@ -80,7 +85,7 @@ create table public.horses (
   -- Additional fields for game mechanics
   age integer,
   createdAt timestamp with time zone default now(),
-  playerId varchar(255) references public.players(id) on delete set null,
+  userId varchar(255) references public.users(id) on delete set null, -- MODIFIED: Was userId, now userId, references users(id)
   trainingCooldown timestamp with time zone,
   earnings decimal(10,2) default 0,
   rider jsonb,
@@ -104,20 +109,6 @@ create table public.horses (
 
 comment on table public.horses is 'Stores information about individual horses in the game, including their genetics, stats, lineage, and status.';
 
--- Add players table for game player profiles
-DROP TABLE IF EXISTS public.players CASCADE;
-create table public.players (
-  id varchar(255) primary key default gen_random_uuid()::text,
-  name varchar(255) not null,
-  email varchar(255) not null unique,
-  money integer not null default 0,
-  level integer not null default 1,
-  xp integer not null default 0,
-  settings jsonb not null default '{}'::jsonb
-);
-
-comment on table public.players is 'Stores game player profiles and progression data.';
-
 -- Add grooms table for foal caretakers
 DROP TABLE IF EXISTS public.grooms CASCADE;
 create table public.grooms (
@@ -135,10 +126,10 @@ create table public.grooms (
   hired_date timestamp with time zone not null default now(),
   createdAt timestamp with time zone not null default now(),
   updatedAt timestamp with time zone not null default now(),
-  playerId varchar(255) references public.players(id) on delete set null
+  userId varchar(255) references public.users(id) on delete set null -- MODIFIED: Was userId, references public.users
 );
 
-comment on table public.grooms is 'Stores groom profiles for foal care and management.';
+comment on table public.grooms is 'Stores groom profiles for foal care and management, associated with users.'; -- MODIFIED comment
 
 -- Add groom assignments table
 DROP TABLE IF EXISTS public.groom_assignments CASCADE;
@@ -154,11 +145,11 @@ create table public.groom_assignments (
   updatedAt timestamp with time zone not null default now(),
   foalId bigint not null references public.horses(id) on delete cascade,
   groomId bigint not null references public.grooms(id) on delete cascade,
-  playerId varchar(255) references public.players(id) on delete set null,
+  userId varchar(255) references public.users(id) on delete set null, -- MODIFIED: Was userId, references public.users
   unique(foalId, groomId, isActive)
 );
 
-comment on table public.groom_assignments is 'Stores assignments of grooms to specific foals.';
+comment on table public.groom_assignments is 'Stores assignments of grooms to specific foals, associated with users.'; -- MODIFIED comment
 
 -- Add groom interactions table
 DROP TABLE IF EXISTS public.groom_interactions CASCADE;
@@ -193,10 +184,10 @@ create table public.shows (
   runDate timestamp with time zone not null,
   createdAt timestamp with time zone not null default now(),
   updatedAt timestamp with time zone not null default now(),
-  hostPlayer varchar(255)
+  hostUserId varchar(255) references public.users(id) -- MODIFIED: Was hostUser, references public.users(id)
 );
 
-comment on table public.shows is 'Stores competition shows and events.';
+comment on table public.shows is 'Stores competition shows and events, hosted by a user.'; -- MODIFIED comment
 
 -- Add competition results table
 DROP TABLE IF EXISTS public.competition_results CASCADE;
@@ -279,8 +270,8 @@ comment on table public.foal_training_history is 'Stores detailed foal training 
 create index idx_horses_owner_id on public.horses(owner_id);
 create index idx_horses_breed_id on public.horses(breed_id);
 create index idx_horses_stable_id on public.horses(stable_id);
-create index idx_horses_player_id on public.horses(playerId);
-create index idx_grooms_player_id on public.grooms(playerId);
+create index idx_horses_user_id on public.horses(userId); -- MODIFIED: Was idx_horses_user_id on public.horses(userId)
+create index idx_grooms_user_id on public.grooms(userId); -- MODIFIED: Was idx_grooms_user_id on public.grooms(userId)
 create index idx_groom_assignments_foal_id on public.groom_assignments(foalId);
 create index idx_groom_assignments_groom_id on public.groom_assignments(groomId);
 create index idx_groom_interactions_foal_id on public.groom_interactions(foalId);
@@ -294,15 +285,15 @@ create index idx_foal_training_history_horse_day on public.foal_training_history
 DROP TABLE IF EXISTS public.xp_events CASCADE;
 CREATE TABLE public.xp_events (
   id SERIAL PRIMARY KEY,
-  player_id VARCHAR(255) NOT NULL REFERENCES public.players(id) ON DELETE CASCADE,
+  user_id VARCHAR(255) NOT NULL REFERENCES public.users(id) ON DELETE CASCADE, -- MODIFIED: Was user_id, references public.users
   amount INTEGER NOT NULL,
   reason TEXT NOT NULL,
   timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-COMMENT ON TABLE public.xp_events IS 'Stores all XP events for auditing and analytics purposes.';
+COMMENT ON TABLE public.xp_events IS 'Stores all XP events for users for auditing and analytics purposes.'; -- MODIFIED comment
 
 -- Create indexes for performance
-CREATE INDEX idx_xp_events_player_id ON public.xp_events(player_id);
+CREATE INDEX idx_xp_events_user_id ON public.xp_events(user_id); -- MODIFIED: Was idx_xp_events_user_id
 CREATE INDEX idx_xp_events_timestamp ON public.xp_events(timestamp);
-CREATE INDEX idx_xp_events_player_timestamp ON public.xp_events(player_id, timestamp);
+CREATE INDEX idx_xp_events_user_timestamp ON public.xp_events(user_id, timestamp); -- MODIFIED: Was idx_xp_events_user_timestamp

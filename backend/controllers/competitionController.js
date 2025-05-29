@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 import { getHorseById } from '../models/horseModel.js';
 import { saveResult, getResultsByShow } from '../models/resultModel.js';
-import { addXp, levelUpIfNeeded } from '../models/playerModel.js';
+import { addXpToUser } from '../models/userModel.js';
 import { logXpEvent } from '../models/xpLogModel.js';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 import { calculateCompetitionScore } from '../utils/competitionScore.js';
@@ -231,14 +232,14 @@ async function enterAndRunShow(horseIds, show) {
       };
     }
 
-    // Step 5: NEW - Transfer entry fees to host player
+    // Step 5: NEW - Transfer entry fees to host user
     let entryFeesTransferred = 0;
-    if (show.hostPlayer && show.entryFee > 0) {
+    if (show.hostUserId && show.entryFee > 0) { // Renamed hostuser to hostUserId
       try {
         const totalFees = calculateEntryFees(show.entryFee, validHorses.length);
-        await transferEntryFees(show.hostPlayer, show.entryFee, validHorses.length);
+        await transferEntryFees(show.hostUserId, show.entryFee, validHorses.length); // Renamed hostuser to hostUserId
         entryFeesTransferred = totalFees;
-        logger.info(`[competitionController.enterAndRunShow] Transferred $${totalFees} in entry fees to host player ${show.hostPlayer}`);
+        logger.info(`[competitionController.enterAndRunShow] Transferred $${totalFees} in entry fees to host user ${show.hostUserId}`); // Renamed hostuser to hostUserId
       } catch (error) {
         logger.error(`[competitionController.enterAndRunShow] Failed to transfer entry fees: ${error.message}`);
         // Continue with competition even if fee transfer fails
@@ -329,33 +330,32 @@ async function enterAndRunShow(horseIds, show) {
               }
 
               if (xpAmount > 0) {
-                // Award XP using playerModel.addXp
-                const xpResult = await addXp(horse.ownerId, xpAmount);
-
-                // Call levelUpIfNeeded after awarding XP (as requested in task)
-                const levelUpResult = await levelUpIfNeeded(horse.ownerId);
+                // Award XP using userModel.addXpToUser
+                const xpResult = await addXpToUser(horse.ownerId, xpAmount);
 
                 // Log XP event for auditing
                 await logXpEvent({
-                  playerId: horse.ownerId,
+                  userId: horse.ownerId, // MODIFIED: Changed UserId to userId
                   amount: xpAmount,
                   reason: `${simResult.placement} place with horse ${horse.name} in ${show.discipline}`
                 });
 
                 // Track XP event for summary
-                const xpEvent = {
-                  playerId: horse.ownerId,
+                const xpEventData = { // Renamed to avoid conflict if xpEvent is defined elsewhere
+                  userId: horse.ownerId,
                   horseId: horse.id,
                   horseName: horse.name,
                   placement: simResult.placement,
                   xpAwarded: xpAmount,
-                  leveledUp: xpResult.leveledUp || levelUpResult.leveledUp,
-                  newLevel: levelUpResult.level,
-                  levelsGained: xpResult.levelsGained || levelUpResult.levelsGained
+                  // MODIFIED: Use results from xpResult
+                  leveledUp: xpResult.leveledUp,
+                  newLevel: xpResult.currentLevel,
+                  levelsGained: xpResult.levelsGained || 0
                 };
-                xpEvents.push(xpEvent);
+                xpEvents.push(xpEventData);
 
-                logger.info(`[competitionController.enterAndRunShow] Awarded ${xpAmount} XP to player ${horse.ownerId} for ${simResult.placement} place${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.level}!` : ''}`);
+                // MODIFIED: Use results from xpResult for log message
+                logger.info(`[competitionController.enterAndRunShow] Awarded ${xpAmount} XP to user ${horse.ownerId} for ${simResult.placement} place${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.currentLevel}!` : ''}`);
               }
             }
           } catch (error) {
@@ -429,7 +429,7 @@ async function enterAndRunShow(horseIds, show) {
         // NEW: XP Events tracking (as requested in task)
         xpEvents,
         totalXpAwarded: xpEvents.reduce((sum, event) => sum + event.xpAwarded, 0),
-        playersLeveledUp: xpEvents.filter(event => event.leveledUp).length,
+        usersLeveledUp: xpEvents.filter(event => event.leveledUp).length, // Renamed UsersLeveledUp to usersLeveledUp
 
         // NEW: Trait scoring statistics
         traitStatistics: traitStats,

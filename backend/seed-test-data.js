@@ -10,12 +10,12 @@ dotenv.config({ path: join(__dirname, '.env.test') });
 
 // Import required modules
 const { default: prisma } = await import('./db/index.js');
-const { createPlayer } = await import('./models/playerModel.js');
+const { createUser } = await import('./models/userModel.js');
 const { createHorse } = await import('./models/horseModel.js');
 
 async function seedTestData() {
+  // eslint-disable-next-line no-console
   console.log('🧪 Seeding test database...');
-  
   try {
     // Create breeds first
     const thoroughbredBreed = await prisma.breed.upsert({
@@ -23,6 +23,7 @@ async function seedTestData() {
       update: {},
       create: { name: 'Thoroughbred', description: 'Test Thoroughbred breed' }
     });
+    // eslint-disable-next-line no-console
     console.log(`✅ Breed: ${thoroughbredBreed.name} (ID: ${thoroughbredBreed.id})`);
 
     // Create test player
@@ -30,6 +31,7 @@ async function seedTestData() {
     
     let testPlayer;
     if (existingPlayer) {
+      // eslint-disable-next-line no-console
       console.log(`✅ Player already exists: ${existingPlayer.name} (ID: ${existingPlayer.id})`);
       testPlayer = existingPlayer;
     } else {
@@ -44,7 +46,8 @@ async function seedTestData() {
         settings: { darkMode: true, notifications: true }
       };
 
-      testPlayer = await createPlayer(playerData);
+      testPlayer = await createUser(playerData);
+      // eslint-disable-next-line no-console
       console.log(`✅ Created Player: ${testPlayer.name} (ID: ${testPlayer.id})`);
     }
 
@@ -110,40 +113,42 @@ async function seedTestData() {
     let horse1, horse2;
     
     if (existingHorse1) {
+      // eslint-disable-next-line no-console
       console.log(`✅ Horse ID 6 already exists: ${existingHorse1.name}`);
       horse1 = existingHorse1;
     } else {
       horse1 = await createHorse(horse1Data);
+      // eslint-disable-next-line no-console
       console.log(`✅ Created Horse: ${horse1.name} (ID: ${horse1.id})`);
     }
 
     if (existingHorse2) {
+      // eslint-disable-next-line no-console
       console.log(`✅ Horse ID 7 already exists: ${existingHorse2.name}`);
       horse2 = existingHorse2;
     } else {
       horse2 = await createHorse(horse2Data);
+      // eslint-disable-next-line no-console
       console.log(`✅ Created Horse: ${horse2.name} (ID: ${horse2.id})`);
     }
 
-    console.log('\n🎉 Test database seeding completed successfully!');
+    // eslint-disable-next-line no-console
+    console.log('\\n🎉 Test database seeding completed successfully!');
+    // eslint-disable-next-line no-console
     console.log(`📊 Player ID: ${testPlayer.id}`);
+    // eslint-disable-next-line no-console
     console.log(`🐎 Horse IDs: ${horse1.id}, ${horse2.id}`);
-    
-    return true;
 
+    return { testPlayer, horse1, horse2 };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('❌ Error seeding test data:', error.message);
-    console.error(error.stack);
-    return false;
-  } finally {
-    await prisma.$disconnect();
+    if (error.stack) {
+      // eslint-disable-next-line no-console
+      console.error(error.stack);
+    }
+    throw error;
   }
-}
-
-// Run if called directly
-if (process.argv[1]?.endsWith('seed-test-data.js')) {
-  const success = await seedTestData();
-  process.exit(success ? 0 : 1);
 }
 
 export { seedTestData };

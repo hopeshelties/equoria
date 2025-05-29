@@ -5,7 +5,7 @@
  * Run with: node scripts/testXpSystem.js
  */
 
-import { addXp, levelUpIfNeeded, getPlayerById, createPlayer } from '../models/playerModel.js';
+import { addXpToUser, levelUpIfNeeded, getUserById, createUser } from '../models/userModel.js';
 import logger from '../utils/logger.js';
 
 async function testXpSystem() {
@@ -24,31 +24,31 @@ async function testXpSystem() {
     };
 
     console.log('1. Creating test player...');
-    const player = await createPlayer(testPlayer);
+    const player = await createUser(testPlayer);
     console.log(`✅ Created player: ${player.name} (ID: ${player.id})`);
     console.log(`   Initial Level: ${player.level}, XP: ${player.xp}\n`);
 
     // Test 1: Add XP without leveling up
     console.log('2. Adding 20 XP (should not level up)...');
-    let result = await addXp(player.id, 20);
+    let result = await addXpToUser(player.id, 20);
     console.log(`✅ Result: Level ${result.level}, XP: ${result.xp}`);
     console.log(`   Leveled up: ${result.leveledUp}, Levels gained: ${result.levelsGained}\n`);
 
     // Test 2: Add XP to reach exactly 100 XP (should level up once)
     console.log('3. Adding 80 XP (should level up once: 20+80=100)...');
-    result = await addXp(player.id, 80);
+    result = await addXpToUser(player.id, 80);
     console.log(`✅ Result: Level ${result.level}, XP: ${result.xp}`);
     console.log(`   Leveled up: ${result.leveledUp}, Levels gained: ${result.levelsGained}\n`);
 
     // Test 3: Add large XP amount (should level up multiple times)
     console.log('4. Adding 250 XP (should level up 2 times: 0+250=250, then 250-200=50)...');
-    result = await addXp(player.id, 250);
+    result = await addXpToUser(player.id, 250);
     console.log(`✅ Result: Level ${result.level}, XP: ${result.xp}`);
     console.log(`   Leveled up: ${result.leveledUp}, Levels gained: ${result.levelsGained}\n`);
 
     // Test 4: Test levelUpIfNeeded function
     console.log('5. Adding 150 XP more (should level up 1 time: 50+150=200, then 200-100=100, then 100-100=0)...');
-    result = await addXp(player.id, 150);
+    result = await addXpToUser(player.id, 150);
     console.log(`✅ Result: Level ${result.level}, XP: ${result.xp}`);
     console.log(`   Leveled up: ${result.leveledUp}, Levels gained: ${result.levelsGained}\n`);
 
@@ -60,7 +60,7 @@ async function testXpSystem() {
 
     // Test 6: Manually set XP to test levelUpIfNeeded
     console.log('7. Adding 200 XP to test levelUpIfNeeded function...');
-    await addXp(player.id, 200);
+    await addXpToUser(player.id, 200);
     
     console.log('8. Testing levelUpIfNeeded when level up is needed...');
     result = await levelUpIfNeeded(player.id);
@@ -69,7 +69,7 @@ async function testXpSystem() {
 
     // Final player state
     console.log('9. Final player state...');
-    const finalPlayer = await getPlayerById(player.id);
+    const finalPlayer = await getUserById(player.id);
     console.log(`✅ Final state: Level ${finalPlayer.level}, XP: ${finalPlayer.xp}\n`);
 
     console.log('🎉 All XP system tests completed successfully!');

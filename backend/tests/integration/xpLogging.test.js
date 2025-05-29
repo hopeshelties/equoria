@@ -29,7 +29,7 @@ jest.unstable_mockModule(join(__dirname, '../../models/xpLogModel.js'), () => ({
   logXpEvent: mockLogXpEvent
 }));
 
-jest.unstable_mockModule(join(__dirname, '../../models/playerModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
   addXp: mockAddXp,
   levelUpIfNeeded: mockLevelUpIfNeeded,
   getPlayerWithHorses: jest.fn()
@@ -227,7 +227,7 @@ describe('XP Logging Integration Tests', () => {
         entryFee: 50,
         prize: 1000,
         runDate: new Date(),
-        hostPlayer: 'host-player'
+        hostUserId: 'host-player'
       };
 
       // Mock the complex dependencies for enterAndRunShow
