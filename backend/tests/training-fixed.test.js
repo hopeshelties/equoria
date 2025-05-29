@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
 import { withSeededPlayerAuth } from './helpers/testAuth.js';
@@ -23,12 +22,11 @@ expect.extend({
 
 describe('Training System Integration Tests (Fixed)', () => {
   // Use existing seeded data from horseSeed.js
-  const existingPlayerId = 'test-player-uuid-123'; // From seeded data
+  const existingUserId = 1; // Updated to use a numeric ID, assuming the first seeded user
 
   describe('Age Requirement Tests', () => {
     it('should get trainable horses for authenticated user', async() => {
-      const trainableResponse = await withSeededPlayerAuth(request(app))
-        .get(`/api/horses/trainable/${existingPlayerId}`);
+      const trainableResponse = await withSeededPlayerAuth('get', `/api/horses/trainable/${existingUserId}`);
 
       expect(trainableResponse.status).toBe(200);
       expect(trainableResponse.body.success).toBe(true);
@@ -42,8 +40,7 @@ describe('Training System Integration Tests (Fixed)', () => {
 
     it('should handle training request with authentication', async() => {
       // First get trainable horses
-      const trainableResponse = await withSeededPlayerAuth(request(app))
-        .get(`/api/horses/trainable/${existingPlayerId}`);
+      const trainableResponse = await withSeededPlayerAuth('get', `/api/horses/trainable/${existingUserId}`);
 
       expect(trainableResponse.status).toBe(200);
 
@@ -54,10 +51,9 @@ describe('Training System Integration Tests (Fixed)', () => {
 
       const firstHorse = trainableResponse.body.data[0];
 
-      const response = await withSeededPlayerAuth(request(app))
-        .post('/api/training/train')
+      const response = await withSeededPlayerAuth('post', '/api/training/train')
         .send({
-          horseId: firstHorse.horseId,
+          horseId: firstHorse.horseId, // Ensure this horseId is valid and exists
           discipline: 'Racing'
         });
 
@@ -72,7 +68,7 @@ describe('Training System Integration Tests (Fixed)', () => {
   describe('Authentication Tests', () => {
     it('should reject unauthenticated requests', async() => {
       const response = await request(app)
-        .get(`/api/horses/trainable/${existingPlayerId}`);
+        .get(`/api/horses/trainable/${existingUserId}`);
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -96,8 +92,7 @@ describe('Training System Integration Tests (Fixed)', () => {
   describe('Training Status Tests', () => {
     it('should get training status with authentication', async() => {
       // First get trainable horses
-      const trainableResponse = await withSeededPlayerAuth(request(app))
-        .get(`/api/horses/trainable/${existingPlayerId}`);
+      const trainableResponse = await withSeededPlayerAuth('get', `/api/horses/trainable/${existingUserId}`);
 
       expect(trainableResponse.status).toBe(200);
 
@@ -108,8 +103,7 @@ describe('Training System Integration Tests (Fixed)', () => {
 
       const firstHorse = trainableResponse.body.data[0];
 
-      const response = await withSeededPlayerAuth(request(app))
-        .get(`/api/training/status/${firstHorse.horseId}/Racing`);
+      const response = await withSeededPlayerAuth('get', `/api/training/status/${firstHorse.horseId}/Racing`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
