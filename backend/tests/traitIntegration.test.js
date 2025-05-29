@@ -3,7 +3,6 @@
  * Tests for trait effects during training, competition, and gameplay
  */
 
-import { jest } from '@jest/globals';
 import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import { calculateBondingChange } from '../utils/bondingModifiers.js';
 import { calculateTemperamentDrift } from '../utils/temperamentDrift.js';

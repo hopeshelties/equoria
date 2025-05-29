@@ -3,7 +3,6 @@
  * Tests XP gains, level-ups, rollover, and progress reporting
  */
 
-import { jest } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

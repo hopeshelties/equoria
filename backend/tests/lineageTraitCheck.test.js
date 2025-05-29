@@ -3,7 +3,6 @@
  * Tests for the standalone lineage discipline affinity checking utility
  */
 
-import { jest } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

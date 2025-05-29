@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

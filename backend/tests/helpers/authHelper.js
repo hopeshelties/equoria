@@ -43,18 +43,13 @@ export const authHeader = (token) => {
 export const createTestUser = (overrides = {}) => {
   return {
     name: 'Test User',
-    username: 'testuser',
     email: 'test@example.com',
-    password: 'TestPassword123!',
-    firstName: 'Test',
-    lastName: 'User',
+    password: 'securepassword',
+    money: 1000, // Added default money
     ...overrides
   };
 };
 
-/**
- * Create test login data
- */
 export const createLoginData = (overrides = {}) => {
   return {
     email: 'test@example.com',

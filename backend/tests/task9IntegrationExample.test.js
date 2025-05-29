@@ -7,7 +7,6 @@
  * - Test both horses with and without the trait
  */
 
-import { jest } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
 describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => {

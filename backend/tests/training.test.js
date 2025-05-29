@@ -15,7 +15,6 @@
  * 8. Stat gains occur randomly during training (15% base chance)
  */
 
-import { jest } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import request from 'supertest';
