@@ -13,7 +13,6 @@ import foalRoutes from './routes/foalRoutes.js';
 import traitRoutes from './routes/traitRoutes.js';
 import groomRoutes from './routes/groomRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import playerRoutes from './routes/playerRoutes.js';
 import leaderboardRoutes from './routes/leaderboardRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import { createSecurityMiddleware } from './middleware/security.js';
@@ -72,7 +71,6 @@ app.use('/api/foals', foalRoutes);
 app.use('/api/traits', traitRoutes);
 app.use('/api/grooms', groomRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/player', playerRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 
 // Initialize cron job service

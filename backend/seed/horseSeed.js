@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import logger from '../utils/logger.js';
 
 // Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -198,219 +199,97 @@ async function ensureReferencedRecordsExist() {
 }
 
 // Seed horses function
-async function seedHorses() {
-  const { createHorse } = await import('../models/horseModel.js');
-  console.log('[seed] Starting to seed horses with Prisma...');
-  await ensureReferencedRecordsExist();
+const seedHorses = async (prisma, users) => {
+  if (!users || users.length === 0) {
+    logger.warn('No users provided for horse seeding. Skipping horse creation.');
+    return [];
+  }
 
-  let successfulInserts = 0;
-  let skippedDuplicates = 0;
-  let failedInserts = 0;
+  // Assuming the first user in the array is the one to own the horses for simplicity
+  // In a real scenario, you might have more complex logic to assign horses.
+  const owner = users[0]; 
 
-  for (const horseData of sampleHorses) {
+  const breedsData = [
+    { name: 'Thoroughbred', baseSpeed: 80, baseStamina: 70, baseStrength: 60, rarity: 'Common' },
+    { name: 'Arabian', baseSpeed: 75, baseStamina: 80, baseStrength: 50, rarity: 'Rare' },
+    { name: 'Quarter Horse', baseSpeed: 70, baseStamina: 60, baseStrength: 80, rarity: 'Common' },
+    { name: 'Akhal-Teke', baseSpeed: 85, baseStamina: 75, baseStrength: 65, rarity: 'Epic' },
+  ];
+
+  const createdBreeds = [];
+  for (const breedData of breedsData) {
     try {
-      const exists = await checkHorseExists(horseData.name);
-      if (exists) {
-        console.log(`[seed] Horse "${horseData.name}" already exists, skipping...`);
-        skippedDuplicates++;
-        continue;
-      }
-
-      const breed = await findOrCreateBreed(horseData.breedName);
-      
-      if (!breed) {
-        console.error(`[seed] Failed to create/find breed for horse: ${horseData.name}`);
-        failedInserts++;
-        continue;
-      }
-
-      const horseCreateData = {
-        name: horseData.name,
-        age: horseData.age,
-        breedId: breed.id,
-        ownerId: horseData.ownerId,
-        stableId: horseData.stableId,
-        sex: horseData.sex,
-        date_of_birth: horseData.date_of_birth,
-        genotype: horseData.genotype,
-        phenotypic_markings: horseData.phenotypic_markings,
-        final_display_color: horseData.final_display_color,
-        shade: horseData.shade,
-        image_url: horseData.image_url,
-        trait: horseData.trait,
-        temperament: horseData.temperament,
-        precision: horseData.precision,
-        strength: horseData.strength,
-        speed: horseData.speed,
-        agility: horseData.agility,
-        endurance: horseData.endurance,
-        intelligence: horseData.intelligence,
-        personality: horseData.personality,
-        total_earnings: horseData.total_earnings,
-        stud_status: horseData.stud_status,
-        stud_fee: horseData.stud_fee,
-        last_bred_date: horseData.last_bred_date,
-        for_sale: horseData.for_sale,
-        sale_price: horseData.sale_price,
-        health_status: horseData.health_status,
-        last_vetted_date: horseData.last_vetted_date,
-        tack: horseData.tack
-      };
-
-      const horse = await createHorse(horseCreateData);
-      console.log(`[seed] Successfully inserted horse: ${horse.name} (ID: ${horse.id})`);
-      successfulInserts++;
+      const breed = await prisma.breed.upsert({
+        where: { name: breedData.name },
+        update: breedData,
+        create: breedData,
+      });
+      logger.info(`Upserted breed: ${breed.name}`);
+      createdBreeds.push(breed);
     } catch (error) {
-      console.error(`[seed] Failed to insert horse ${horseData.name}: ${error.message}`);
-      console.error(`[seed] Error details for ${horseData.name}:`, error.stack);
-      failedInserts++;
+      logger.error(`Error seeding breed ${breedData.name}: ${error.message}`);
+      // Decide if you want to throw or continue
     }
   }
 
-  console.log('[seed] --- Horse Seeding Summary ---');
-  console.log(`[seed] Successfully inserted: ${successfulInserts} horses`);
-  console.log(`[seed] Skipped duplicates: ${skippedDuplicates} horses`);
-  console.log(`[seed] Failed to insert: ${failedInserts} horses`);
-  
-  if (failedInserts > 0) {
-    console.error('[seed] Some horses failed to seed. Check logs above for details.');
-    return false;
-  }
-  
-  if (successfulInserts === 0 && skippedDuplicates === 0) {
-    console.warn('[seed] No horses were processed. This might indicate a configuration issue.');
-    return false;
-  }
-  
-  console.log('[seed] Horse seeding completed successfully.');
-  return true;
-}
-
-// Helper to check if player already exists
-async function checkPlayerExists(email) {
-  const { default: prisma } = await import('../db/index.js');
-  try {
-    const existingPlayer = await prisma.user.findUnique({
-      where: { email },
-    });
-    return existingPlayer !== null;
-  } catch (error) {
-    console.warn(`[seed] Failed to check if player "${email}" exists: ${error.message}`);
-    return false;
-  }
-}
-
-// Helper to seed a Player with 2 Horses
-async function seedPlayerWithHorses() {
-  const { createHorse } = await import('../models/horseModel.js');
-  const { createPlayer } = await import('../models/playerModel.js');
-  
-  console.log('[seed] Starting to seed Player with Horses...');
-  
-  const playerEmail = 'test@example.com';
-  
-  try {
-    const playerExists = await checkPlayerExists(playerEmail);
-    if (playerExists) {
-      console.log(`[seed] Player "${playerEmail}" already exists, skipping player creation...`);
-      return true;
-    }
-
-    const thoroughbredBreed = await findOrCreateBreed('Thoroughbred');
-    const arabianBreed = await findOrCreateBreed('Arabian');
-    
-    if (!thoroughbredBreed || !arabianBreed) {
-      console.error('[seed] Failed to create/find required breeds for player horses');
-      return false;
-    }
-
-    const playerData = {
-      id: 'test-player-uuid-123',
-      name: 'Test Player',
-      email: playerEmail,
-      money: 500,
-      level: 3,
-      xp: 1000,
-      settings: { 
-        darkMode: true, 
-        notifications: true,
-        soundEnabled: false,
-        autoSave: true
-      }
-    };
-
-    const createdPlayer = await createPlayer(playerData);
-    console.log(`[seed] Successfully created player: ${createdPlayer.name} (ID: ${createdPlayer.id})`);
-
-    const horseData1 = {
-      name: 'Starlight',
-      age: 4,
-      breedId: thoroughbredBreed.id,
-      playerId: createdPlayer.id,
-      sex: 'Mare',
-      date_of_birth: new Date('2020-08-15'),
-      genotype: { coat: 'EE/AA', dilution: 'nCr', markings: ['Star'] },
-      phenotypic_markings: { face: 'Star', legs: ['Sock'] },
-      final_display_color: 'Bay',
-      shade: 'Dark',
-      trait: 'Elegant',
-      temperament: 'Gentle',
-      precision: 85,
-      strength: 75,
-      speed: 80,
-      agility: 88,
-      endurance: 82,
-      intelligence: 90,
-      personality: 'Gentle',
-      total_earnings: 8500,
-      for_sale: false,
-      health_status: 'Excellent',
-      last_vetted_date: new Date('2024-06-01')
-    };
-
-    const horseData2 = {
-      name: 'Comet',
-      age: 6,
-      breedId: thoroughbredBreed.id,
-      playerId: createdPlayer.id,
+  const horsesData = [
+    {
+      name: 'Lightning Bolt',
+      age: 3,
       sex: 'Stallion',
-      date_of_birth: new Date('2018-04-22'),
-      genotype: { coat: 'ee/AA', dilution: 'ChCh', markings: ['Blaze'] },
-      phenotypic_markings: { face: 'Blaze', legs: ['Stocking', 'Sock'] },
-      final_display_color: 'Champagne',
-      shade: 'Golden',
-      trait: 'Swift',
+      color: 'Bay',
+      breedId: createdBreeds.find(b => b.name === 'Thoroughbred')?.id,
+      ownerId: owner.id, // Link to the owner
+      speed: 82,
+      stamina: 72,
+      strength: 62,
+      agility: 70,
+      endurance: 75,
+      intelligence: 60,
       temperament: 'Spirited',
-      precision: 78,
-      strength: 85,
-      speed: 92,
-      agility: 80,
-      endurance: 88,
-      intelligence: 85,
-      personality: 'Spirited',
-      total_earnings: 15200,
-      stud_status: 'Private Stud',
-      stud_fee: 750,
-      for_sale: false,
-      health_status: 'Very Good',
-      last_vetted_date: new Date('2024-05-20')
-    };
+      health: 100,
+      forSale: false,
+    },
+    {
+      name: 'Desert Rose',
+      age: 5,
+      sex: 'Mare',
+      color: 'Chestnut',
+      breedId: createdBreeds.find(b => b.name === 'Arabian')?.id,
+      ownerId: owner.id, // Link to the owner
+      speed: 78,
+      stamina: 83,
+      strength: 52,
+      agility: 75,
+      endurance: 80,
+      intelligence: 65,
+      temperament: 'Gentle',
+      health: 100,
+      forSale: true,
+      price: 15000,
+    },
+    // Add more horses as needed
+  ];
 
-    const horse1 = await createHorse(horseData1);
-    console.log(`[seed] Successfully created horse: ${horse1.name} (ID: ${horse1.id}) for player ${createdPlayer.name}`);
-    
-    const horse2 = await createHorse(horseData2);
-    console.log(`[seed] Successfully created horse: ${horse2.name} (ID: ${horse2.id}) for player ${createdPlayer.name}`);
-
-    console.log('[seed] Successfully seeded Player with 2 Horses');
-    return true;
-
-  } catch (error) {
-    console.error(`[seed] Failed to seed Player with Horses: ${error.message}`);
-    console.error(`[seed] Error details:`, error.stack);
-    return false;
+  const createdHorses = [];
+  for (const horseData of horsesData) {
+    if (!horseData.breedId) {
+      logger.warn(`Skipping horse ${horseData.name} due to missing breedId.`);
+      continue;
+    }
+    try {
+      const horse = await prisma.horse.create({
+        data: horseData,
+      });
+      logger.info(`Created horse: ${horse.name} for user ID: ${owner.id}`);
+      createdHorses.push(horse);
+    } catch (error) {
+      logger.error(`Error seeding horse ${horseData.name}: ${error.message}`);
+      // Decide if you want to throw or continue
+    }
   }
-}
+  return createdHorses;
+};
 
 // Main seeding function
 async function main() {
@@ -419,7 +298,10 @@ async function main() {
     
     console.log('[seed] Starting comprehensive seeding process...');
     
-    const horseSuccess = await seedHorses();
+    const horseSuccess = await seedHorses(prisma, [ 
+      { id: 1, name: 'Default Owner' }, 
+      { id: 2, name: 'Second Owner' } 
+    ]);
     const playerSuccess = await seedPlayerWithHorses();
     
     if (!horseSuccess || !playerSuccess) {

@@ -345,7 +345,7 @@ describe('userController', () => { // Changed from playerController
               new Date('2025-06-06T14:30:00.000Z')
             ]
           },
-          recent: {
+          activity: { // Changed from recent to activity
             lastTrained: new Date('2025-06-03T17:00:00.000Z'), // From trainingLog.findFirst
             lastShowPlaced: { // From competitionResult.findFirst
               horseName: 'Nova',
@@ -501,7 +501,7 @@ describe('userController', () => { // Changed from playerController
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         data: expect.objectContaining({
-          recent: {
+          activity: { // Changed from recent to activity
             lastTrained: null,
             lastShowPlaced: null
           }
