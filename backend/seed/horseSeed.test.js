@@ -37,13 +37,12 @@ const originalConsoleWarn = console.warn;
 
 describe('horseSeed', () => {
   let mockPrisma;
-  let mockCreateHorse;
   let findOrCreateBreed;
   let ensureReferencedRecordsExist;
   let checkHorseExists;
   let seedHorses; // Added seedHorses
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     // Mock console methods
     console.log = jest.fn();
     console.error = jest.fn();
@@ -51,7 +50,6 @@ describe('horseSeed', () => {
 
     // Get mocked modules
     mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
-    mockCreateHorse = (await import(join(__dirname, '../models/horseModel.js'))).createHorse;
 
     // Import the functions we want to test
     const seedModule = await import(join(__dirname, './horseSeed.js'));
@@ -71,7 +69,7 @@ describe('horseSeed', () => {
   });
 
   describe('checkHorseExists', () => {
-    it('should return true if horse exists', async () => {
+    it('should return true if horse exists', async() => {
       const existingHorse = { id: 1, name: 'Test Horse' };
       mockPrisma.horse.findFirst.mockResolvedValue(existingHorse);
 
@@ -83,7 +81,7 @@ describe('horseSeed', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false if horse does not exist', async () => {
+    it('should return false if horse does not exist', async() => {
       mockPrisma.horse.findFirst.mockResolvedValue(null);
 
       const result = await checkHorseExists('Nonexistent Horse');
@@ -94,7 +92,7 @@ describe('horseSeed', () => {
       expect(result).toBe(false);
     });
 
-    it('should return false and log warning on database error', async () => {
+    it('should return false and log warning on database error', async() => {
       const error = new Error('Database error');
       mockPrisma.horse.findFirst.mockRejectedValue(error);
 
@@ -106,7 +104,7 @@ describe('horseSeed', () => {
   });
 
   describe('findOrCreateBreed', () => {
-    it('should return existing breed if found', async () => {
+    it('should return existing breed if found', async() => {
       const existingBreed = { id: 1, name: 'Thoroughbred' };
 
       mockPrisma.breed.findUnique.mockResolvedValue(existingBreed);
@@ -122,7 +120,7 @@ describe('horseSeed', () => {
       expect(console.log).toHaveBeenCalledWith('[seed] Found existing breed: Thoroughbred (ID: 1)');
     });
 
-    it('should create new breed if not found', async () => {
+    it('should create new breed if not found', async() => {
       const newBreed = { id: 2, name: 'Arabian', description: 'Seed-created Arabian' };
 
       mockPrisma.breed.findUnique.mockResolvedValue(null);
@@ -141,7 +139,7 @@ describe('horseSeed', () => {
       expect(result).toEqual(newBreed);
     });
 
-    it('should return null for undefined breed name', async () => {
+    it('should return null for undefined breed name', async() => {
       const result = await findOrCreateBreed(undefined);
 
       expect(result).toBeNull();
@@ -150,7 +148,7 @@ describe('horseSeed', () => {
       expect(mockPrisma.breed.create).not.toHaveBeenCalled();
     });
 
-    it('should throw error if database operation fails', async () => {
+    it('should throw error if database operation fails', async() => {
       const error = new Error('Database connection failed');
       mockPrisma.breed.findUnique.mockRejectedValue(error);
 
@@ -160,7 +158,7 @@ describe('horseSeed', () => {
   });
 
   describe('ensureReferencedRecordsExist', () => {
-    it('should create users and stables if they do not exist', async () => {
+    it('should create users and stables if they do not exist', async() => {
       mockPrisma.user.upsert.mockResolvedValueOnce({ id: 1, username: 'Default Owner', email: 'owner1@example.com' });
       mockPrisma.user.upsert.mockResolvedValueOnce({ id: 2, username: 'Second Owner', email: 'owner2@example.com' });
       mockPrisma.stable.upsert.mockResolvedValue({ id: 1, name: 'Main Stable' }); // Assuming stable upsert is fine
@@ -183,7 +181,7 @@ describe('horseSeed', () => {
       });
     });
 
-    it('should handle errors gracefully when user creation fails', async () => {
+    it('should handle errors gracefully when user creation fails', async() => {
       const error = new Error('Database connection failed');
       mockPrisma.user.upsert.mockRejectedValue(error);
       // We still expect stable upsert to be called, so mock it
@@ -198,13 +196,19 @@ describe('horseSeed', () => {
   });
 
   describe('seedHorses', () => {
-    it('should log a warning and return an empty array if no users are provided', async () => {
+    beforeEach(() => {
+      // Clear specific mocks for each test if needed
+      mockPrisma.breed.upsert.mockClear();
+      mockPrisma.horse.create.mockClear();
+    });
+
+    it('should log a warning and return an empty array if no users are provided', async() => {
       const result = await seedHorses(mockPrisma, []);
       expect(console.warn).toHaveBeenCalledWith('No users provided for horse seeding. Skipping horse creation.');
       expect(result).toEqual([]);
     });
 
-    it('should create breeds and horses for the provided user', async () => {
+    it('should create breeds and horses for the provided user', async() => {
       const mockUser = { id: 1, username: 'TestUser' };
       const mockThoroughbredBreed = { id: 1, name: 'Thoroughbred', baseSpeed: 80, baseStamina: 70, baseStrength: 60, rarity: 'Common' };
       const mockArabianBreed = { id: 2, name: 'Arabian', baseSpeed: 75, baseStamina: 80, baseStrength: 50, rarity: 'Rare' };
@@ -217,17 +221,17 @@ describe('horseSeed', () => {
       const mockHorseDesertRose = { id: 2, name: 'Desert Rose', breedId: mockArabianBreed.id, ownerId: mockUser.id, userId: mockUser.id };
 
 
-      mockPrisma.breed.upsert.mockImplementation(async ({ where, create }) => {
-        if (where.name === 'Thoroughbred') return mockThoroughbredBreed;
-        if (where.name === 'Arabian') return mockArabianBreed;
-        if (where.name === 'Quarter Horse') return mockQuarterHorseBreed;
-        if (where.name === 'Akhal-Teke') return mockAkhalTekeBreed;
+      mockPrisma.breed.upsert.mockImplementation(async({ where, create }) => {
+        if (where.name === 'Thoroughbred') {return mockThoroughbredBreed;}
+        if (where.name === 'Arabian') {return mockArabianBreed;}
+        if (where.name === 'Quarter Horse') {return mockQuarterHorseBreed;}
+        if (where.name === 'Akhal-Teke') {return mockAkhalTekeBreed;}
         return { ...create, id: Math.floor(Math.random() * 1000) }; // Fallback for other breeds
       });
 
-      mockPrisma.horse.create.mockImplementation(async (data) => {
-        if (data.data.name === 'Lightning Bolt') return mockHorseLightning;
-        if (data.data.name === 'Desert Rose') return mockHorseDesertRose;
+      mockPrisma.horse.create.mockImplementation(async(data) => {
+        if (data.data.name === 'Lightning Bolt') {return mockHorseLightning;}
+        if (data.data.name === 'Desert Rose') {return mockHorseDesertRose;}
         return { ...data.data, id: Math.floor(Math.random() * 1000) }; // Fallback
       });
 
@@ -242,13 +246,13 @@ describe('horseSeed', () => {
       expect(console.log).toHaveBeenCalledWith(`Created horse: ${mockHorseDesertRose.name} for user ID: ${mockUser.id}`);
     });
 
-    it('should log a warning if a horse is skipped due to missing breedId', async () => {
+    it('should log a warning if a horse is skipped due to missing breedId', async() => {
       const mockUser = { id: 1, username: 'TestUser' };
       // Simulate 'Thoroughbred' breed not being found/created, leading to its horses being skipped.
-      mockPrisma.breed.upsert.mockImplementation(async ({ where }) => {
-        if (where.name === 'Arabian') return { id: 2, name: 'Arabian' };
-        if (where.name === 'Quarter Horse') return { id: 3, name: 'Quarter Horse' };
-        if (where.name === 'Akhal-Teke') return { id: 4, name: 'Akhal-Teke' };
+      mockPrisma.breed.upsert.mockImplementation(async({ where }) => {
+        if (where.name === 'Arabian') {return { id: 2, name: 'Arabian' };}
+        if (where.name === 'Quarter Horse') {return { id: 3, name: 'Quarter Horse' };}
+        if (where.name === 'Akhal-Teke') {return { id: 4, name: 'Akhal-Teke' };}
         // Thoroughbred is intentionally not returned
         return undefined;
       });
@@ -266,7 +270,7 @@ describe('horseSeed', () => {
     });
 
 
-    it('should log an error if horse creation fails', async () => {
+    it('should log an error if horse creation fails', async() => {
       const mockUser = { id: 1, username: 'TestUser' };
       const mockBreed = { id: 1, name: 'Thoroughbred' };
       const error = new Error('Failed to create horse');

@@ -123,7 +123,7 @@ describe('Authentication Controller (Simple)', () => {
       .send(userData)
       .expect(201);
 
-    expect(response.body.success).toBe(true);
+    expect(response.body.success).toBe(true); // Changed from response.body.status
     expect(response.body.data.user.email).toBe(userData.email);
     expect(response.body.data.token).toBeDefined();
   }, 10000);
@@ -153,7 +153,7 @@ describe('Authentication Controller (Simple)', () => {
       .send(loginData)
       .expect(200);
 
-    expect(response.body.success).toBe(true);
+    expect(response.body.success).toBe(true); // Changed from response.body.status
     expect(response.body.data.user.email).toBe(loginData.email);
     expect(response.body.data.token).toBeDefined();
   }, 10000);
