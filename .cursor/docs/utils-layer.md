@@ -106,12 +106,12 @@ const statMap = {
 
 ### 6. `competitionRewards.js` - Prize Distribution
 
-**Purpose:** Manages competition prizes and player rewards
+**Purpose:** Manages competition prizes and user rewards
 
 **Reward Types:**
 - **Money Prizes:** Based on placement and show tier
-- **Experience Points:** For horse and player progression
-- **Reputation:** Long-term player standing
+- **Experience Points:** For horse and user progression
+- **Reputation:** Long-term user standing
 - **Special Items:** Rare rewards for exceptional performance
 
 ### 7. `isHorseEligible.js` - Competition Eligibility
@@ -221,11 +221,11 @@ const statMap = {
 - **Rate Limiting:** API abuse prevention
 - **Authentication Helpers:** JWT and session validation
 
-## Player & Game Management
+## User & Game Management
 
-### 15. `playerUpdates.js` - Player Progression
+### 15. `userUpdates.js` - User Progession
 
-**Purpose:** Manages player advancement and rewards
+**Purpose:** Manages user advancement and rewards
 
 **Update Types:**
 - **Experience Points:** Training and competition XP

@@ -134,8 +134,8 @@ equoria/
 - `POST /api/grooms/ensure-default/:foalId` - Ensure foal has default groom assignment
 - `GET /api/grooms/assignments/:foalId` - Get all assignments for a foal
 - `POST /api/grooms/interact` - Record a groom interaction with a foal
-- `GET /api/grooms/player/:playerId` - Get all grooms for a player
-- `POST /api/grooms/hire` - Hire a new groom for a player
+- `GET /api/grooms/user/:userid` - Get all grooms for a user
+- `POST /api/grooms/hire` - Hire a new groom for a user
 - `GET /api/grooms/definitions` - Get groom system definitions
 
 ### Documentation
@@ -198,7 +198,7 @@ The project follows strict coding standards:
 
 - **Horse**: Complete horse data with stats and genetics
 - **Breed**: Horse breed definitions
-- **Player**: User accounts and progression
+- **User**: User accounts and progression
 - **Show**: Competition events
 - **CompetitionResult**: Competition history and results
 

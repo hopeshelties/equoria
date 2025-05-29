@@ -62,7 +62,7 @@ const protectedStats = [
 
 #### **Comprehensive Data Validation**
 - **Horse Data**: Name, age, sex, stats, financial data validation
-- **Player Data**: Name, email, money, level, XP validation
+- **user Data**: Name, email, money, level, XP validation
 - **Breeding Data**: Sire/dam validation, fee limits
 - **Training Data**: Horse ID, discipline, ownership validation
 - **Transaction Data**: Amount, type, description validation

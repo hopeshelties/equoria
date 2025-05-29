@@ -80,7 +80,7 @@ describe('Leaderboard Controller', () => {
     // Setup mock request and response objects
     mockReq = {
       query: {},
-      user: { id: 'test-player-1' }
+      user: { id: 'test-user-1' } // Changed from 'test-player-1' for consistency
     };
 
     mockRes = {
@@ -90,24 +90,24 @@ describe('Leaderboard Controller', () => {
   });
 
   describe('getTopPlayersByLevel', () => {
-    const mockPlayers = [
+    const mockUsers = [ // Renamed from mockPlayers
       {
-        id: 'player-1',
-        name: 'TopPlayer1',
+        id: 'user-1', // Changed from 'player-1'
+        name: 'TopUser1', // Changed from 'TopPlayer1'
         level: 10,
         xp: 50,
         money: 5000
       },
       {
-        id: 'player-2',
-        name: 'TopPlayer2',
+        id: 'user-2', // Changed from 'player-2'
+        name: 'TopUser2', // Changed from 'TopPlayer2'
         level: 9,
         xp: 80,
         money: 4500
       },
       {
-        id: 'player-3',
-        name: 'TopPlayer3',
+        id: 'user-3', // Changed from 'player-3'
+        name: 'TopUser3', // Changed from 'TopPlayer3'
         level: 9,
         xp: 60,
         money: 4000
@@ -115,7 +115,7 @@ describe('Leaderboard Controller', () => {
     ];
 
     it('should return top players ranked by level and XP', async() => {
-      mockPrisma.user.findMany.mockResolvedValue(mockPlayers);
+      mockPrisma.user.findMany.mockResolvedValue(mockUsers); // Changed from mockPlayers
 
       await getTopPlayersByLevel(mockReq, mockRes);
 
@@ -139,11 +139,11 @@ describe('Leaderboard Controller', () => {
         success: true,
         message: 'Top players by level retrieved successfully',
         data: {
-          players: [
+          players: [ // "players" key in response might be kept for API contract, or changed to "users" if controller changes it
             {
               rank: 1,
-              playerId: 'player-1',
-              name: 'TopPlayer1',
+              userId: 'user-1', // Changed from playerId
+              name: 'TopUser1', // Changed from TopPlayer1
               level: 10,
               xp: 50,
               xpToNext: 50,
@@ -152,8 +152,8 @@ describe('Leaderboard Controller', () => {
             },
             {
               rank: 2,
-              playerId: 'player-2',
-              name: 'TopPlayer2',
+              userId: 'user-2', // Changed from playerId
+              name: 'TopUser2', // Changed from TopPlayer2
               level: 9,
               xp: 80,
               xpToNext: 20,
@@ -162,8 +162,8 @@ describe('Leaderboard Controller', () => {
             },
             {
               rank: 3,
-              playerId: 'player-3',
-              name: 'TopPlayer3',
+              userId: 'user-3', // Changed from playerId
+              name: 'TopUser3', // Changed from TopPlayer3
               level: 9,
               xp: 60,
               xpToNext: 40,
@@ -211,13 +211,13 @@ describe('Leaderboard Controller', () => {
   describe('getTopPlayersByXP', () => {
     const mockXpData = [
       {
-        playerId: 'player-1',
-        player: { name: 'XPPlayer1' },
+        userId: 'user-1', // Changed from playerId
+        user: { name: 'XPUser1' }, // Changed from player and XPPlayer1
         _sum: { amount: 500 }
       },
       {
-        playerId: 'player-2',
-        player: { name: 'XPPlayer2' },
+        userId: 'user-2', // Changed from playerId
+        user: { name: 'XPUser2' }, // Changed from player and XPPlayer2
         _sum: { amount: 400 }
       }
     ];
@@ -229,10 +229,10 @@ describe('Leaderboard Controller', () => {
       await getTopPlayersByXP(mockReq, mockRes);
 
       expect(mockPrisma.xpEvent.groupBy).toHaveBeenCalledWith({
-        by: ['playerId'],
+        by: ['userId'], // Changed from playerId
         _sum: { amount: true },
         include: {
-          player: {
+          user: { // Changed from player
             select: { name: true }
           }
         },
@@ -268,16 +268,16 @@ describe('Leaderboard Controller', () => {
         id: 1,
         name: 'EarningHorse1',
         total_earnings: 10000,
-        playerId: 'player-1',
-        player: { name: 'Owner1' },
+        userId: 'user-1', // Changed from playerId
+        user: { name: 'Owner1' }, // Changed from player
         breed: { name: 'Thoroughbred' }
       },
       {
         id: 2,
         name: 'EarningHorse2',
         total_earnings: 8000,
-        playerId: 'player-2',
-        player: { name: 'Owner2' },
+        userId: 'user-2', // Changed from playerId
+        user: { name: 'Owner2' }, // Changed from player
         breed: { name: 'Arabian' }
       }
     ];
@@ -292,8 +292,8 @@ describe('Leaderboard Controller', () => {
           id: true,
           name: true,
           total_earnings: true,
-          playerId: true,
-          player: {
+          userId: true, // Changed from playerId
+          user: { // Changed from player
             select: { name: true }
           },
           breed: {
@@ -332,7 +332,7 @@ describe('Leaderboard Controller', () => {
         horseId: 1,
         horse: {
           name: 'PerformHorse1',
-          player: { name: 'Owner1' },
+          user: { name: 'Owner1' }, // Changed from player
           breed: { name: 'Thoroughbred' }
         },
         _count: { id: 5 }
@@ -353,7 +353,7 @@ describe('Leaderboard Controller', () => {
           horse: {
             select: {
               name: true,
-              player: { select: { name: true } },
+              user: { select: { name: true } }, // Changed from player
               breed: { select: { name: true } }
             }
           }
@@ -384,8 +384,8 @@ describe('Leaderboard Controller', () => {
   describe('getTopPlayersByHorseEarnings', () => {
     const mockPlayerEarnings = [
       {
-        playerId: 'player-1',
-        player: { name: 'EarningPlayer1' },
+        userId: 'user-1', // Changed from playerId
+        user: { name: 'EarningUser1' }, // Changed from player and EarningPlayer1
         _sum: { total_earnings: 25000 },
         _count: { id: 3 }
       }
@@ -397,11 +397,11 @@ describe('Leaderboard Controller', () => {
       await getTopPlayersByHorseEarnings(mockReq, mockRes);
 
       expect(mockPrisma.horse.groupBy).toHaveBeenCalledWith({
-        by: ['playerId'],
+        by: ['userId'], // Changed from playerId
         _sum: { total_earnings: true },
         _count: { id: true },
         include: {
-          player: {
+          user: { // Changed from player
             select: { name: true }
           }
         },
@@ -423,7 +423,7 @@ describe('Leaderboard Controller', () => {
         id: 1,
         horse: {
           name: 'WinnerHorse1',
-          player: { name: 'WinnerOwner1' }
+          user: { name: 'WinnerOwner1' } // Changed from player
         },
         showName: 'Test Show 1',
         discipline: 'Dressage',
@@ -444,7 +444,7 @@ describe('Leaderboard Controller', () => {
           horse: {
             select: {
               name: true,
-              player: {
+              user: { // Changed from player
                 select: { name: true }
               }
             }

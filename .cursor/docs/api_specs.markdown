@@ -24,31 +24,31 @@ All API responses follow a consistent format:
 
 ### Horse Management
 - **GET /api/horses/:id**: Retrieve horse by ID with relationships
-  - Response: Horse object with breed, owner, stable, player relations
+  - Response: Horse object with breed, owner, stable, user relations
   - Status: 200 (success), 404 (not found), 500 (server error)
 
 - **POST /api/horses**: Create new horse
-  - Body: `{ name, age, breedId, ownerId, stableId, playerId? }`
+  - Body: `{ name, age, breedId, ownerId, stableId, userId? }`
   - Response: Created horse with full relations
   - Status: 201 (created), 400 (validation error), 500 (server error)
 
-### Player Management
-- **GET /api/players/:id**: Retrieve player by UUID
-  - Response: Player object with basic information
+### User Management
+- **GET /api/users/:id**: Retrieve user by UUID
+  - Response: User object with basic information
   - Status: 200 (success), 404 (not found), 500 (server error)
 
-- **GET /api/players/:id/horses**: Get player with all horses
-  - Response: Player object with horses array including relations
+- **GET /api/users/:id/horses**: Get user with all horses
+  - Response: User object with horses array including relations
   - Status: 200 (success), 404 (not found), 500 (server error)
 
-- **POST /api/players**: Create new player
+- **POST /api/users**: Create new user
   - Body: `{ name, email, money, level, xp, settings }`
-  - Response: Created player object with UUID
+  - Response: Created user object with UUID
   - Status: 201 (created), 400 (validation error), 500 (server error)
 
-- **PUT /api/players/:id**: Update player information
-  - Body: Partial player object with fields to update
-  - Response: Updated player object
+- **PUT /api/users/:id**: Update user information
+  - Body: Partial user object with fields to update
+  - Response: Updated user object
   - Status: 200 (success), 400 (validation error), 404 (not found)
 
 ### Training System
@@ -70,9 +70,9 @@ All API responses follow a consistent format:
   - Response: Training status for all disciplines
   - Status: 200 (success), 404 (horse not found)
 
-- **GET /api/training/trainable-horses/:playerId**: Get trainable horses
+- **GET /api/training/trainable-horses/:userId**: Get trainable horses
   - Response: Array of horses eligible for training
-  - Status: 200 (success), 404 (player not found)
+  - Status: 200 (success), 404 (user not found)
 
 ### Competition System
 - **POST /api/competition/enter-show**: Enter horses in competition
@@ -111,7 +111,7 @@ All API responses follow a consistent format:
 
 ### Breeding System
 - **POST /api/breeding/breed**: Create foal from breeding pair
-  - Body: `{ sireId, damId, playerId }`
+  - Body: `{ sireId, damId, userId }`
   - Response: Created foal with genetics and traits
   - Status: 201 (created), 400 (validation error), 500 (server error)
 
@@ -128,7 +128,7 @@ All API responses follow a consistent format:
 
 ### Input Validation
 - **Horse Age:** Must be positive integer
-- **Player Email:** Valid email format, unique constraint
+- **User Email:** Valid email format, unique constraint
 - **Horse Names:** 2-50 characters, alphanumeric with spaces
 - **Discipline:** Must be valid discipline from statMap
 - **Money/Scores:** Non-negative integers

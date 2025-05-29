@@ -107,5 +107,5 @@ alwaysApply: false
   - **Create Long-term Engagement:** Hidden traits and rare trait breeding provide progression goals
   - **Balance Realism and Fun:** Scientifically-inspired mechanics with engaging gameplay
 - **Technical Achievement:** All 22 tests passing with 100% coverage, demonstrating robust and reliable breeding calculation system ready for production deployment.
-- **Key Learning:** Complex genetic simulation systems require careful balance between realism, randomness, and player agency to create engaging breeding mechanics that reward both strategy and patience.
+- **Key Learning:** Complex genetic simulation systems require careful balance between realism, randomness, and user agency to create engaging breeding mechanics that reward both strategy and patience.
 
