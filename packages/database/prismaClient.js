@@ -1,4 +1,7 @@
 // backend/prismaClient.js
+import dotenv from 'dotenv';
+dotenv.config({ path: process.env.NODE_ENV === 'test' ? '../../backend/env.test' : '../../backend/.env' }); // Adjusted path
+
 import { PrismaClient } from '@prisma/client';
 
 let prisma;
