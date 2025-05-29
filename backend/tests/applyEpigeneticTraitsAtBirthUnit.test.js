@@ -1,12 +1,4 @@
-/**
- * Unit Tests for Trait Assignment Logic
- * Tests the applyEpigeneticTraitsAtBirth function with specific focus on:
- * - Low-stress mare with premium feed → positive traits
- * - Inbreeding (repeated ancestor IDs) → negative traits
- * - 3+ ancestors with same most_competed_discipline → affinity + legacy_talent
- */
-
-
+import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

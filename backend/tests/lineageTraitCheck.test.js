@@ -1,3 +1,5 @@
+import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
+
 /**
  * Lineage Trait Check Utility Tests
  * Tests for the standalone lineage discipline affinity checking utility

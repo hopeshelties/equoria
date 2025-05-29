@@ -1,6 +1,6 @@
 // filepath: c:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\models\\userModel.test.js
 
-// filepath: c:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\models\\userModel.test.js
+import { jest, describe, beforeEach, afterEach, expect, it, beforeAll, afterAll } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

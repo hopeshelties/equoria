@@ -1,3 +1,4 @@
+import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
 /**
  * User Progression Tests
  * Tests XP gains, level-ups, rollover, and progress reporting

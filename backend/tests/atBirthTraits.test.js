@@ -1,3 +1,4 @@
+import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
 /**
  * At-Birth Traits System Tests
  * Tests for trait application during horse creation based on breeding conditions

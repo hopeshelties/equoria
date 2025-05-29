@@ -1,9 +1,4 @@
-/**
- * Tests for Horse Model Trait Helper Functions
- * Tests the new trait management functions added to horseModel.js
- */
-
-
+import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

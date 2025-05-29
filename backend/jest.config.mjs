@@ -1,10 +1,30 @@
-// backend/jest.config.mjs
 export default {
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: [], // Ensure .js is not explicitly listed
-  transform: {}, // Disable transforms for ESM
+  transform: {},
+
+  // Ensures Jest treats both JS and MJS files correctly
+  moduleFileExtensions: ['js', 'mjs'],
+
+  // Setup file path must match your actual filename
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'],
+
+  // Recommended test file globs
+  testMatch: [
+    '**/__tests__/**/*.js',
+    '**/?(*.)+(spec|test).js',
+    '**/tests/**/*.test.js',
+    '**/models/**/*.test.js'
+  ],
+
+  verbose: true,
+  clearMocks: true,
+  resetMocks: true,
+  restoreMocks: true,
+  testTimeout: 30000,
+
+  // Makes sure Prisma-generated clients don't break things
   transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$|@prisma/client))' // Allow Prisma client to be processed
+    'node_modules/(?!(.*\\.mjs$|@prisma/client))'
   ],
   moduleNameMapper: {
     // Ensure logger.js is resolved correctly from jest.setup.js and other locations
@@ -28,12 +48,6 @@ export default {
     '^#config/(.*)$': '<rootDir>/config/$1',
     '^#db/(.*)$': '<rootDir>/db/$1'
   },
-  testMatch: [
-    '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).js',
-    '**/tests/**/*.test.js',
-    '**/models/**/*.test.js'
-  ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/build/',
@@ -46,11 +60,5 @@ export default {
     '!jest.config.mjs',
     '!**/*.test.js',
     '!**/*.spec.js'
-  ],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'], // Load setup file
-  verbose: true,
-  clearMocks: true,
-  resetMocks: true,
-  restoreMocks: true,
-  testTimeout: 30000
+  ]
 };
