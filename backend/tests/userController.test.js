@@ -11,7 +11,7 @@ const mockGetTrainableHorses = jest.fn();
 // Mock prisma
 const mockPrisma = {
   user: { // Changed from player to user
-    findUnique: jest.fn(), // For getPlayerProgress (now getUserProgress)
+    findUnique: jest.fn() // For getUserProgress (formerly getPlayerProgress)
     // Add other user model operations if needed by getDashboardData
   },
   horse: {
@@ -81,7 +81,7 @@ describe('userController', () => { // Changed from playerController
         id: 123, // Changed to number
         name: 'Alex',
         level: 4,
-        xp: 30,
+        xp: 30, // This is total XP. Controller calculates current level XP.
         email: 'alex@example.com',
         money: 1500
       };
@@ -106,8 +106,8 @@ describe('userController', () => { // Changed from playerController
           userId: 123, // Changed from playerId
           name: 'Alex',
           level: 4,
-          xp: 30,
-          xpToNextLevel: 70
+          xp: 30, // Controller calculates current level XP as user.xp % 100, so this should be 30
+          xpToNextLevel: 70 // 100 - (30 % 100) = 70
         }
       });
       expect(mockLogger.info).toHaveBeenCalledWith('[userController.getUserProgress] Getting progress for user 123'); // Changed log message
@@ -115,36 +115,25 @@ describe('userController', () => { // Changed from playerController
 
     it('should calculate xpToNextLevel correctly for different XP values', async() => {
       const testCases = [
-        { xp: 0, expectedXpToNext: 100 },
-        { xp: 50, expectedXpToNext: 50 },
-        { xp: 99, expectedXpToNext: 1 },
-        { xp: 100, expectedXpToNext: 100 },
-        { xp: 150, expectedXpToNext: 50 },
-        { xp: 230, expectedXpToNext: 70 }
+        { xp: 0, currentLevelXp: 0, expectedXpToNext: 100 },
+        { xp: 50, currentLevelXp: 50, expectedXpToNext: 50 },
+        { xp: 99, currentLevelXp: 99, expectedXpToNext: 1 },
+        { xp: 100, currentLevelXp: 0, expectedXpToNext: 100 },
+        { xp: 150, currentLevelXp: 50, expectedXpToNext: 50 },
+        { xp: 230, currentLevelXp: 30, expectedXpToNext: 70 }
       ];
 
       for (const testCase of testCases) {
-        const mockUser = { // Changed from mockPlayer
+        const mockUserForDb = { // Changed from mockPlayer
           id: 123, // Changed to number
           name: 'Test User', // Changed
-          level: Math.floor(testCase.xp / 100) + 1,
-          xp: testCase.xp % 100, // This should be the remainder for current level XP
+          // Level calculation in controller: Math.floor(user.xp / 100) + 1
+          // XP for current level in controller: user.xp % 100
+          level: Math.floor(testCase.xp / 100) + 1, // Level based on total XP
+          xp: testCase.xp, // Store total XP in the mock DB object
           email: 'test@example.com'
         };
         
-        // If actual XP is 150, level is 2, current XP for level 2 is 50.
-        // The controller calculates current level's XP as user.xp % 100.
-        // So, if user.xp in DB is total XP (e.g. 230), then controller gets 30.
-        // The mockUser.xp should reflect the XP *for the current level* if the controller expects that,
-        // or total XP if the controller calculates it.
-        // The controller logic is: const currentLevelXp = user.xp % 100;
-        // So, the mockUser.xp should be the *total* XP.
-        const mockUserForDb = {
-            ...mockUser,
-            xp: testCase.xp // Total XP
-        };
-
-
         mockPrisma.user.findUnique.mockResolvedValue(mockUserForDb); // Changed from mockGetPlayerById
 
         const req = { params: { userId: '123' } }; // Changed from id to userId
@@ -156,12 +145,13 @@ describe('userController', () => { // Changed from playerController
           success: true,
           message: 'User progress retrieved successfully', // Changed message
           data: expect.objectContaining({
+            xp: testCase.currentLevelXp, // Assert current level XP
             xpToNextLevel: testCase.expectedXpToNext
           })
         });
 
-        jest.clearAllMocks();
-        mockNext.mockClear();
+        jest.clearAllMocks(); // Clear mocks for the next iteration
+        mockNext.mockClear(); // Clear mockNext for the next iteration
       }
     });
 
@@ -267,8 +257,8 @@ describe('userController', () => { // Changed from playerController
           userId: 456, // Changed
           name: 'Sarah',
           level: 7,
-          xp: 85, // This should be the current level's XP, so 85
-          xpToNextLevel: 15
+          xp: 85, // Controller calculates current level XP as user.xp % 100
+          xpToNextLevel: 15 // 100 - (85 % 100) = 15
         }
       });
 
@@ -284,7 +274,7 @@ describe('userController', () => { // Changed from playerController
       const mockUser = { // Changed
         id: 123, // Changed
         name: 'Alex',
-        level: 4,
+        level: 4, // Calculated by controller based on total XP
         xp: 230, // Total XP
         money: 4250
       };
@@ -311,11 +301,11 @@ describe('userController', () => { // Changed from playerController
 
       mockPrisma.user.findUnique.mockResolvedValue(mockUser); // Changed
       mockPrisma.horse.count.mockResolvedValue(12);
-      mockGetTrainableHorses.mockResolvedValue(mockTrainableHorses);
+      mockGetTrainableHorses.mockResolvedValue(mockTrainableHorses); // This is called with userId (number)
       mockPrisma.show.findMany.mockResolvedValue(mockUpcomingShows);
-      mockPrisma.competitionResult.count.mockResolvedValue(3);
+      mockPrisma.competitionResult.count.mockResolvedValue(3); // For upcomingEntries
       mockPrisma.trainingLog.findFirst.mockResolvedValue(mockRecentTraining);
-      mockPrisma.competitionResult.findFirst.mockResolvedValue(mockRecentPlacement);
+      mockPrisma.competitionResult.findFirst.mockResolvedValue(mockRecentPlacement); // For lastShowPlaced
 
       const req = {
         params: { userId: '123' } // Changed from playerId
@@ -329,7 +319,7 @@ describe('userController', () => { // Changed from playerController
 
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 123 } }); // Changed
       expect(mockPrisma.horse.count).toHaveBeenCalledWith({
-        where: { userId: 123 } // Changed from playerId
+        where: { userId: 123 } // Changed from playerId, ensure it's number
       });
       expect(mockGetTrainableHorses).toHaveBeenCalledWith(123); // Changed, ensure it's number
 
@@ -340,24 +330,24 @@ describe('userController', () => { // Changed from playerController
           user: { // Changed from player
             id: 123, // Changed
             name: 'Alex',
-            level: 4,
-            xp: 30, // xp for current level (230 % 100)
+            level: 3, // Math.floor(230 / 100) + 1 = 2 + 1 = 3
+            xp: 30,   // 230 % 100 = 30
             money: 4250
           },
           horses: {
             total: 12,
-            trainable: 2
+            trainable: 2 // Length of mockTrainableHorses
           },
           shows: {
-            upcomingEntries: 3,
-            nextShowRuns: [
+            upcomingEntries: 3, // From competitionResult.count
+            nextShowRuns: [ // From show.findMany
               new Date('2025-06-05T10:00:00.000Z'),
               new Date('2025-06-06T14:30:00.000Z')
             ]
           },
           recent: {
-            lastTrained: new Date('2025-06-03T17:00:00.000Z'),
-            lastShowPlaced: {
+            lastTrained: new Date('2025-06-03T17:00:00.000Z'), // From trainingLog.findFirst
+            lastShowPlaced: { // From competitionResult.findFirst
               horseName: 'Nova',
               placement: '2nd',
               show: 'Spring Gala - Dressage'
@@ -390,131 +380,134 @@ describe('userController', () => { // Changed from playerController
     });
 
     it('should handle errors when fetching trainable horses', async() => {
-      const mockUser = { id: 123, name: 'Alex' }; // Changed
+      const mockUser = { id: 123, name: 'Alex', xp: 100, money: 100 }; // Added xp, money
       mockPrisma.user.findUnique.mockResolvedValue(mockUser); // Changed
       mockGetTrainableHorses.mockRejectedValue(new Error('Trainable horses error'));
 
       const req = { params: { userId: '123' } }; // Changed, and ensure it's params.userId
       const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-      // const next = jest.fn(); // No, use the one from beforeEach
 
-      await getDashboardData(req, res, mockNext); // Pass mockNext
+      await getDashboardData(req, res, mockNext); 
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Trainable horses error');
-      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error fetching dashboard data for user 123: Trainable horses error'));
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('[userController.getDashboardData] Error fetching dashboard data for user 123: Trainable horses error'));
     });
 
     it('should handle errors when fetching horse count', async() => {
-      const mockUser = { id: 123, name: 'Alex' }; // Changed
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser); // Changed
-      mockGetTrainableHorses.mockResolvedValue([]); // Assume no trainable horses for simplicity
+      const mockUser = { id: 123, name: 'Alex', xp: 100, money: 100 };
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockGetTrainableHorses.mockResolvedValue([]); 
       mockPrisma.horse.count.mockRejectedValue(new Error('Horse count error'));
 
-      const req = { params: { userId: '123' } }; // Changed, and ensure it's params.userId
+      const req = { params: { userId: '123' } };
       const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-      // const next = jest.fn(); // No, use the one from beforeEach
 
-      await getDashboardData(req, res, mockNext); // Pass mockNext
+      await getDashboardData(req, res, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Horse count error');
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error fetching dashboard data for user 123: Horse count error'));
     });
 
     it('should handle errors when fetching upcoming shows', async() => {
-      const mockUser = { id: 123, name: 'Alex' }; // Changed
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser); // Changed
+      const mockUser = { id: 123, name: 'Alex', xp: 100, money: 100 };
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockGetTrainableHorses.mockResolvedValue([]);
       mockPrisma.horse.count.mockResolvedValue(0);
       mockPrisma.show.findMany.mockRejectedValue(new Error('Show fetch error'));
 
-      const req = { params: { userId: '123' } }; // Changed, and ensure it's params.userId
+      const req = { params: { userId: '123' } };
       const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-      // const next = jest.fn(); // No, use the one from beforeEach
 
-      await getDashboardData(req, res, mockNext); // Pass mockNext
+      await getDashboardData(req, res, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Show fetch error');
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error fetching dashboard data for user 123: Show fetch error'));
     });
 
     it('should handle errors when fetching competition results count', async() => {
-      const mockUser = { id: 123, name: 'Alex' }; // Changed
-      mockPrisma.user.findUnique.mockResolvedValue(mockUser); // Changed
+      const mockUser = { id: 123, name: 'Alex', xp: 100, money: 100 };
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockGetTrainableHorses.mockResolvedValue([]);
       mockPrisma.horse.count.mockResolvedValue(0);
       mockPrisma.show.findMany.mockResolvedValue([]);
       mockPrisma.competitionResult.count.mockRejectedValue(new Error('Comp count error'));
 
-      const req = { params: { userId: '123' } }; // Changed, and ensure it's params.userId
+      const req = { params: { userId: '123' } };
       const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-      // const next = jest.fn(); // No, use the one from beforeEach
-      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-      // const next = jest.fn(); // No, use the one from beforeEach
 
-      await getDashboardData(req, res, mockNext); // Pass mockNext
+      await getDashboardData(req, res, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Comp count error');
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error fetching dashboard data for user 123: Comp count error'));
     });
 
     it('should handle errors when fetching last competition result', async() => {
-      const mockPlayer = { id: 'player-123', name: 'Alex' };
-      mockGetPlayerById.mockResolvedValue(mockPlayer);
-      // ... other mocks ...
-      mockPrisma.competitionResult.count.mockResolvedValue(1); // Assume there is one result
-      mockPrisma.competitionResult.findFirst.mockRejectedValue(new Error('Last comp error'));
-
-      const req = { user: { id: 'player-123' } };
-      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-      // const next = jest.fn(); // No, use the one from beforeEach
-
-      await getDashboardData(req, res, mockNext); // Pass mockNext
-
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-      expect(mockNext.mock.calls[0][0].message).toBe('Last comp error');
-    });
-
-    it('should handle errors when fetching last training log', async() => {
-      const mockPlayer = { id: 'player-123', name: 'Alex' };
-      mockGetPlayerById.mockResolvedValue(mockPlayer);
-      // ... other mocks ...
-      mockPrisma.trainingLog.findFirst.mockRejectedValue(new Error('Last training error'));
-
-      const req = { user: { id: 'player-123' } };
-      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-      // const next = jest.fn(); // No, use the one from beforeEach
-
-      await getDashboardData(req, res, mockNext); // Pass mockNext
-
-      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
-      expect(mockNext.mock.calls[0][0].message).toBe('Last training error');
-    });
-
-    it('should gracefully handle missing optional data (last competition, last training)', async() => {
-      const mockPlayer = { id: 'player-123', name: 'Alex', money: 1000, xp: 50, level: 2 };
-      mockGetPlayerById.mockResolvedValue(mockPlayer);
+      const mockUser = { id: 123, name: 'Alex', xp: 100, money: 100 };
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
       mockGetTrainableHorses.mockResolvedValue([]);
       mockPrisma.horse.count.mockResolvedValue(0);
       mockPrisma.show.findMany.mockResolvedValue([]);
-      mockPrisma.competitionResult.count.mockResolvedValue(0); // No competition results
-      mockPrisma.competitionResult.findFirst.mockResolvedValue(null); // No last competition
-      mockPrisma.trainingLog.findFirst.mockResolvedValue(null); // No last training
+      mockPrisma.competitionResult.count.mockResolvedValue(1); 
+      mockPrisma.competitionResult.findFirst.mockRejectedValue(new Error('Last comp error'));
 
-      const req = { user: { id: 'player-123' } };
+      const req = { params: { userId: '123' } };
       const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
-      // const next = jest.fn(); // No, use the one from beforeEach
 
-      await getDashboardData(req, res, mockNext); // Pass mockNext
+      await getDashboardData(req, res, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toBe('Last comp error');
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error fetching dashboard data for user 123: Last comp error'));
+    });
+
+    it('should handle errors when fetching last training log', async() => {
+      const mockUser = { id: 123, name: 'Alex', xp: 100, money: 100 };
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockGetTrainableHorses.mockResolvedValue([]);
+      mockPrisma.horse.count.mockResolvedValue(0);
+      mockPrisma.show.findMany.mockResolvedValue([]);
+      mockPrisma.competitionResult.count.mockResolvedValue(0);
+      mockPrisma.competitionResult.findFirst.mockResolvedValue(null);
+      mockPrisma.trainingLog.findFirst.mockRejectedValue(new Error('Last training error'));
+
+      const req = { params: { userId: '123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+      await getDashboardData(req, res, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
+      expect(mockNext.mock.calls[0][0].message).toBe('Last training error');
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error fetching dashboard data for user 123: Last training error'));
+    });
+
+    it('should gracefully handle missing optional data (last competition, last training)', async() => {
+      const mockUser = { id: 123, name: 'Alex', money: 1000, xp: 50, level: 1 }; // level should be 1 for xp 50
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+      mockGetTrainableHorses.mockResolvedValue([]);
+      mockPrisma.horse.count.mockResolvedValue(0);
+      mockPrisma.show.findMany.mockResolvedValue([]);
+      mockPrisma.competitionResult.count.mockResolvedValue(0); 
+      mockPrisma.competitionResult.findFirst.mockResolvedValue(null); 
+      mockPrisma.trainingLog.findFirst.mockResolvedValue(null); 
+
+      const req = { params: { userId: '123' } };
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+      await getDashboardData(req, res, mockNext);
 
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        success: true,
         data: expect.objectContaining({
-          lastCompetitionResult: null,
-          lastTrainingLog: null
+          recent: {
+            lastTrained: null,
+            lastShowPlaced: null
+          }
         })
       }));
-      expect(mockNext).not.toHaveBeenCalled(); // No errors should be passed to next
+      expect(mockLogger.info).toHaveBeenCalledWith('[userController.getDashboardData] Dashboard data for user 123');
     });
   });
 });
