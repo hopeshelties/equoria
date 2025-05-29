@@ -56,7 +56,7 @@ jest.unstable_mockModule(join(__dirname, '../utils/isHorseEligible.js'), () => (
 }));
 jest.unstable_mockModule(join(__dirname, '../utils/competitionRewards.js'), () => mockCompetitionRewards);
 jest.unstable_mockModule(join(__dirname, '../utils/horseUpdates.js'), () => mockHorseUpdates);
-jest.unstable_mockModule(join(__dirname, '../utils/playerUpdates.js'), () => mockPlayerUpdates);
+jest.unstable_mockModule(join(__dirname, '../utils/userUpdates.js'), () => mockPlayerUpdates);
 
 // Import the module under test after mocking
 const { enterAndRunShow } = await import(join(__dirname, '../controllers/competitionController.js'));

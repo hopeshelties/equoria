@@ -12,7 +12,7 @@ import {
   hasValidRider
 } from '../utils/competitionRewards.js';
 import { updateHorseRewards } from '../utils/horseUpdates.js';
-import { transferEntryFees } from '../utils/playerUpdates.js';
+import { transferEntryFees } from '../utils/userUpdates.js';
 import logger from '../utils/logger.js';
 
 /**
@@ -214,7 +214,7 @@ async function enterAndRunShow(horseIds, show) {
 
     // Step 4: Check if we have any valid horses
     if (validHorses.length === 0) {
-      logger.warn(`[competitionController.enterAndRunShow] No valid horses available for competition`);
+      logger.warn('[competitionController.enterAndRunShow] No valid horses available for competition');
       return {
         success: false,
         message: 'No valid horses available for competition',
@@ -252,7 +252,7 @@ async function enterAndRunShow(horseIds, show) {
       logger.info(`[competitionController.enterAndRunShow] Enhanced competition completed with ${simulationResults.length} results`);
     } catch (error) {
       logger.error(`[competitionController.enterAndRunShow] Enhanced competition failed: ${error.message}`);
-      throw new Error('Enhanced competition error: ' + error.message);
+      throw new Error(`Enhanced competition error: ${error.message}`);
     }
 
     // Step 7: NEW - Calculate prize distribution and stat gains
@@ -317,15 +317,15 @@ async function enterAndRunShow(horseIds, show) {
             if (horse && horse.ownerId) {
               let xpAmount = 0;
               switch (simResult.placement) {
-                case '1st':
-                  xpAmount = 20;
-                  break;
-                case '2nd':
-                  xpAmount = 15;
-                  break;
-                case '3rd':
-                  xpAmount = 10;
-                  break;
+              case '1st':
+                xpAmount = 20;
+                break;
+              case '2nd':
+                xpAmount = 15;
+                break;
+              case '3rd':
+                xpAmount = 10;
+                break;
               }
 
               if (xpAmount > 0) {
@@ -367,7 +367,7 @@ async function enterAndRunShow(horseIds, show) {
       logger.info(`[competitionController.enterAndRunShow] Successfully saved ${savedResults.length} competition results`);
     } catch (error) {
       logger.error(`[competitionController.enterAndRunShow] Failed to save results: ${error.message}`);
-      throw new Error('Failed to save competition results: ' + error.message);
+      throw new Error(`Failed to save competition results: ${error.message}`);
     }
 
     // Step 9: Extract top three for summary with trait information
@@ -443,7 +443,7 @@ async function enterAndRunShow(horseIds, show) {
 
   } catch (error) {
     logger.error('[competitionController.enterAndRunShow] Error: %o', error);
-    throw new Error('Database error in enterAndRunShow: ' + error.message);
+    throw new Error(`Database error in enterAndRunShow: ${error.message}`);
   }
 }
 

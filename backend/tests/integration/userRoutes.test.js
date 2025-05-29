@@ -42,7 +42,7 @@ jest.unstable_mockModule(join(__dirname, '../../utils/logger.js'), () => ({
 // Import app after mocking
 const app = (await import('../../app.js')).default;
 
-describe('User Routes Integration Tests', () => { // Changed from 'Player Routes'
+describe('User Routes Integration Tests', () => { // Changed from User Routes'
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetUserById.mockClear();
