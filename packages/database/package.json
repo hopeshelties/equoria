@@ -5,26 +5,27 @@
   "type": "module",
 "scripts": {
   "test": "echo \"Error: no test specified\" && exit 1",
-  "generate": "npx prisma generate --schema=../packages/database/prisma/schema.prisma",
-  "studio": "npx prisma studio --schema=../packages/database/prisma/schema.prisma",
   "lint": "eslint .",
   "lint:fix": "eslint . --fix",
-  "migrate": "node scripts/migrate.js",
-  "migrate:dev": "npx prisma migrate dev --schema=../packages/database/prisma/schema.prisma",
-  "migrate:reset": "npx prisma migrate reset --schema=../packages/database/prisma/schema.prisma"
+  "generate": "npx prisma generate --schema=prisma/schema.prisma",
+  "studio": "npx prisma studio --schema=prisma/schema.prisma",
+  "migrate:dev": "npx prisma migrate dev --schema=prisma/schema.prisma",
+  "migrate:reset": "npx prisma migrate reset --schema=prisma/schema.prisma",
+  "migrate:deploy": "npx prisma migrate deploy --schema=prisma/schema.prisma",
+  "migrate:status": "npx prisma migrate status --schema=prisma/schema.prisma"
 },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
-  "prisma": {
-  "schema": "./packages/database/prisma/schema.prisma"
-},
   "devDependencies": {
     "@prisma/client": "^6.8.2",
     "prisma": "^6.8.2"
   },
   "rules": {
     "no-console": "off"
-  }
+  },
+  "prisma": {
+  "schema": "prisma/schema.prisma"
+}
 }

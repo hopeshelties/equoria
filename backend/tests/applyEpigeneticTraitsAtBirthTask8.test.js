@@ -8,7 +8,7 @@
  * 4. Use jest.spyOn(Math, 'random') for deterministic testing
  */
 
-import { jest } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

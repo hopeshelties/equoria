@@ -3,7 +3,6 @@
  * Tests the GET /api/horses/:id/overview endpoint
  */
 
-import { describe, test, expect, jest } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import request from 'supertest';

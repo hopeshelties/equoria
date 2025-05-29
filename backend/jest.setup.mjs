@@ -2,15 +2,21 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { beforeAll, afterAll } from '@jest/globals';
+
+// Import jest explicitly for ESM environments
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 
-import pkg from '@jest/globals';
-const { jest, beforeAll, afterAll } = pkg;
+setTimeout(() => {}, 0); // optional dummy to ensure it's not shadowed
 
-jest.setTimeout(30000);
+// ✅ Correct Jest timeout setup
+// Ensure 'jest' is available in ESM environments
+(globalThis.jest ?? globalThis.jest) && globalThis.jest.setTimeout?.(30000);
+
+
 
 console.log('JEST_SETUP: NODE_ENV:', process.env.NODE_ENV); // eslint-disable-line no-console
 console.log('JEST_SETUP: DATABASE_URL used for tests:', process.env.DATABASE_URL); // eslint-disable-line no-console

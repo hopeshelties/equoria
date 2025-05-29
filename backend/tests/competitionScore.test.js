@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+
 import { calculateCompetitionScore, getDisciplineStatWeights, validateHorseForCompetition } from '../utils/competitionScore.js';
 
 describe('Competition Score Calculation', () => {

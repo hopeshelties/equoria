@@ -13,7 +13,7 @@
  * Note: Simplified due to Horse model constraints
  */
 
-import { jest } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import dotenv from 'dotenv';

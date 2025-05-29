@@ -47,7 +47,7 @@ export default {
     '!**/*.test.js',
     '!**/*.spec.js'
   ],
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'], // Load setup file
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'], // Load setup file
   verbose: true,
   clearMocks: true,
   resetMocks: true,

@@ -24,14 +24,14 @@ export default [
       'no-console': 'warn',
       'no-debugger': 'error',
       'no-alert': 'error',
-      'no-unused-vars': ['error', { 
+      'no-unused-vars': ['error', {
         argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_' 
+        varsIgnorePattern: '^_'
       }],
       'no-undef': 'error',
       'no-unreachable': 'error',
       'no-duplicate-imports': 'error',
-      
+
       // Code style
       'indent': ['error', 2],
       'quotes': ['error', 'single'],
@@ -44,7 +44,7 @@ export default [
       'space-infix-ops': 'error',
       'eol-last': 'error',
       'no-trailing-spaces': 'error',
-      
+
       // Best practices
       'eqeqeq': ['error', 'always'],
       'curly': ['error', 'all'],
@@ -58,7 +58,7 @@ export default [
       'no-var': 'error',
       'prefer-arrow-callback': 'error',
       'arrow-spacing': 'error',
-      
+
       // ES6+
       'prefer-template': 'error',
       'template-curly-spacing': 'error',
@@ -66,7 +66,19 @@ export default [
       'prefer-destructuring': ['error', {
         array: false,
         object: true
-      }]
+      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@jest/globals',
+              importNames: ['default'],
+              message: 'Do not use default import from @jest/globals. Use built-in Jest globals instead.'
+            }
+          ]
+        }
+      ]
     }
   },
   {
@@ -83,18 +95,6 @@ export default [
         afterAll: 'readonly',
         jest: 'readonly'
       }
-    },
-    rules: {
-      'no-console': 'off'
     }
-  },
-  {
-    ignores: [
-      'node_modules/**',
-      'dist/**',
-      'build/**',
-      'coverage/**',
-      '*.min.js'
-    ]
   }
 ];

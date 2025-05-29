@@ -3,7 +3,7 @@
  * Tests for trait application during horse creation based on breeding conditions
  */
 
-import { jest } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

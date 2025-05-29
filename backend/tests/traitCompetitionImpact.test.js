@@ -3,9 +3,6 @@
  * Tests for trait-based competition scoring system
  */
 
-// Import jest for mocking if needed
-// import { jest } from '@jest/globals';
-
 // Import the module under test
 import {
   calculateTraitCompetitionImpact,

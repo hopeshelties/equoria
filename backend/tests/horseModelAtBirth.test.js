@@ -3,7 +3,7 @@
  * Tests for at-birth trait application during horse creation
  */
 
-import { jest } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

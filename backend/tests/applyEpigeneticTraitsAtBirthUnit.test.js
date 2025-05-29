@@ -6,7 +6,7 @@
  * - 3+ ancestors with same most_competed_discipline → affinity + legacy_talent
  */
 
-import { jest } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

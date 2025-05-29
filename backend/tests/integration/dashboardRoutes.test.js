@@ -3,7 +3,7 @@
  * Tests the GET /api/player/dashboard/:playerId endpoint
  */
 
-import { jest } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import request from 'supertest';

@@ -3,7 +3,7 @@
  * Tests the new trait management functions added to horseModel.js
  */
 
-import { jest } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

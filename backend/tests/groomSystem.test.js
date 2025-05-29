@@ -3,7 +3,7 @@
  * Tests for the groom assignment and management system
  */
 
-import { jest } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

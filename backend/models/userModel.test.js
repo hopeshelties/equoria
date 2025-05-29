@@ -1,5 +1,5 @@
 // filepath: c:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\models\\userModel.test.js
-import { jest } from '@jest/globals';
+
 // filepath: c:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\models\\userModel.test.js
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -76,7 +76,7 @@ describe('userModel', () => {
     });
 
     it('should throw error if username is missing', async() => {
-      const { username, ...incompleteData } = baseUserData;
+      const { username: _username, ...incompleteData } = baseUserData;
       await expect(createUser(incompleteData)).rejects.toThrow('Username, email, and password are required');
     });
 

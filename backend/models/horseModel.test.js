@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals'; // Import jest explicitly for ES modules
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

@@ -5,7 +5,7 @@
  * Verifies that horses with matching discipline affinity traits receive a +5 flat bonus.
  */
 
-import { jest } from '@jest/globals';
+
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
 describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
