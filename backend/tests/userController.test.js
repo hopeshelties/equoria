@@ -133,7 +133,7 @@ describe('userController', () => { // Changed from playerController
           xp: testCase.xp, // Store total XP in the mock DB object
           email: 'test@example.com'
         };
-        
+
         mockPrisma.user.findUnique.mockResolvedValue(mockUserForDb); // Changed from mockGetPlayerById
 
         const req = { params: { userId: '123' } }; // Changed from id to userId
@@ -387,7 +387,7 @@ describe('userController', () => { // Changed from playerController
       const req = { params: { userId: '123' } }; // Changed, and ensure it's params.userId
       const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
 
-      await getDashboardData(req, res, mockNext); 
+      await getDashboardData(req, res, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Trainable horses error');
@@ -397,7 +397,7 @@ describe('userController', () => { // Changed from playerController
     it('should handle errors when fetching horse count', async() => {
       const mockUser = { id: 123, name: 'Alex', xp: 100, money: 100 };
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      mockGetTrainableHorses.mockResolvedValue([]); 
+      mockGetTrainableHorses.mockResolvedValue([]);
       mockPrisma.horse.count.mockRejectedValue(new Error('Horse count error'));
 
       const req = { params: { userId: '123' } };
@@ -451,7 +451,7 @@ describe('userController', () => { // Changed from playerController
       mockGetTrainableHorses.mockResolvedValue([]);
       mockPrisma.horse.count.mockResolvedValue(0);
       mockPrisma.show.findMany.mockResolvedValue([]);
-      mockPrisma.competitionResult.count.mockResolvedValue(1); 
+      mockPrisma.competitionResult.count.mockResolvedValue(1);
       mockPrisma.competitionResult.findFirst.mockRejectedValue(new Error('Last comp error'));
 
       const req = { params: { userId: '123' } };
@@ -490,9 +490,9 @@ describe('userController', () => { // Changed from playerController
       mockGetTrainableHorses.mockResolvedValue([]);
       mockPrisma.horse.count.mockResolvedValue(0);
       mockPrisma.show.findMany.mockResolvedValue([]);
-      mockPrisma.competitionResult.count.mockResolvedValue(0); 
-      mockPrisma.competitionResult.findFirst.mockResolvedValue(null); 
-      mockPrisma.trainingLog.findFirst.mockResolvedValue(null); 
+      mockPrisma.competitionResult.count.mockResolvedValue(0);
+      mockPrisma.competitionResult.findFirst.mockResolvedValue(null);
+      mockPrisma.trainingLog.findFirst.mockResolvedValue(null);
 
       const req = { params: { userId: '123' } };
       const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
