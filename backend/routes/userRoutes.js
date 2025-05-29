@@ -1,29 +1,50 @@
 /**
- * Player Routes
- * API endpoints for player-related operations
+ * User Routes
+ * API endpoints for user-related operations
  */
 
 import express from 'express';
 import { param, validationResult } from 'express-validator';
-import { getPlayerProgress, getDashboardData } from '../controllers/playerController.js';
+import { getUserProgress, getDashboardData } from '../controllers/userController.js'; // Updated import
 import logger from '../utils/logger.js';
 
 const router = express.Router();
 
 /**
- * Validation middleware for player ID parameter
+ * Validation middleware for user ID parameter
  */
-const validatePlayerId = [
-  param('id')
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Player ID must be between 1 and 50 characters')
+const validateUserId = [
+  param('id') // For /:id/progress route
+    .isInt({ min: 1 })
+    .withMessage('User ID must be a positive integer')
     .notEmpty()
-    .withMessage('Player ID is required'),
+    .withMessage('User ID is required'),
 
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      logger.warn(`[playerRoutes] Validation errors: ${JSON.stringify(errors.array())}`);
+      logger.warn(`[userRoutes] Validation errors for /:id: ${JSON.stringify(errors.array())}`);
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+    next();
+  }
+];
+
+const validateDashboardUserId = [
+  param('userId') // For /dashboard/:userId route
+    .isInt({ min: 1 })
+    .withMessage('User ID must be a positive integer')
+    .notEmpty()
+    .withMessage('User ID is required'),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      logger.warn(`[userRoutes] Validation errors for /dashboard/:userId: ${JSON.stringify(errors.array())}`);
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -36,20 +57,20 @@ const validatePlayerId = [
 
 /**
  * @swagger
- * /api/player/{id}/progress:
+ * /api/user/{id}/progress:
  *   get:
- *     summary: Get player progress information
- *     tags: [Player]
+ *     summary: Get user progress information
+ *     tags: [User]
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
- *           type: string
- *         description: Player ID
+ *           type: integer
+ *         description: User ID
  *     responses:
  *       200:
- *         description: Player progress retrieved successfully
+ *         description: User progress retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -60,13 +81,13 @@ const validatePlayerId = [
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Player progress retrieved successfully"
+ *                   example: "User progress retrieved successfully"
  *                 data:
  *                   type: object
  *                   properties:
- *                     playerId:
- *                       type: string
- *                       example: "123e4567-e89b-12d3-a456-426614174000"
+ *                     userId:
+ *                       type: integer
+ *                       example: 1
  *                     name:
  *                       type: string
  *                       example: "Alex"
@@ -80,30 +101,30 @@ const validatePlayerId = [
  *                       type: integer
  *                       example: 70
  *       400:
- *         description: Validation error
+ *         description: Validation error or Invalid User ID format
  *       404:
- *         description: Player not found
+ *         description: User not found
  *       500:
  *         description: Internal server error
  */
-router.get('/:id/progress', validatePlayerId, getPlayerProgress);
+router.get('/:id/progress', validateUserId, getUserProgress);
 
 /**
  * @swagger
- * /api/player/dashboard/{playerId}:
+ * /api/user/dashboard/{userId}:
  *   get:
- *     summary: Get player dashboard data
- *     tags: [Player]
+ *     summary: Get user dashboard data
+ *     tags: [User]
  *     parameters:
  *       - in: path
- *         name: playerId
+ *         name: userId
  *         required: true
  *         schema:
- *           type: string
- *         description: Player ID
+ *           type: integer
+ *         description: User ID
  *     responses:
  *       200:
- *         description: Dashboard data retrieved successfully
+ *         description: User dashboard data retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -118,90 +139,73 @@ router.get('/:id/progress', validatePlayerId, getPlayerProgress);
  *                 data:
  *                   type: object
  *                   properties:
- *                     player:
+ *                     user:
  *                       type: object
  *                       properties:
  *                         id:
- *                           type: string
- *                           example: "123e4567-e89b-12d3-a456-426614174000"
+ *                           type: integer
+ *                           example: 1
  *                         name:
  *                           type: string
- *                           example: "Alex"
+ *                           example: "User Name"
  *                         level:
  *                           type: integer
- *                           example: 4
+ *                           example: 5
  *                         xp:
  *                           type: integer
- *                           example: 230
+ *                           example: 550
  *                         money:
  *                           type: integer
- *                           example: 4250
+ *                           example: 10000
  *                     horses:
  *                       type: object
  *                       properties:
  *                         total:
  *                           type: integer
- *                           example: 12
+ *                           example: 10
  *                         trainable:
  *                           type: integer
- *                           example: 4
+ *                           example: 3
  *                     shows:
  *                       type: object
  *                       properties:
  *                         upcomingEntries:
  *                           type: integer
- *                           example: 3
+ *                           example: 2
  *                         nextShowRuns:
  *                           type: array
  *                           items:
  *                             type: string
  *                             format: date-time
- *                           example: ["2025-06-05T10:00:00.000Z", "2025-06-06T14:30:00.000Z"]
- *                     recent:
+ *                           example: ["2024-08-01T10:00:00Z", "2024-08-05T14:00:00Z"]
+ *                     activity:
  *                       type: object
  *                       properties:
  *                         lastTrained:
  *                           type: string
  *                           format: date-time
- *                           example: "2025-06-03T17:00:00.000Z"
+ *                           nullable: true
+ *                           example: "2024-07-20T15:30:00Z"
  *                         lastShowPlaced:
  *                           type: object
+ *                           nullable: true
  *                           properties:
  *                             horseName:
  *                               type: string
- *                               example: "Nova"
+ *                               example: "Champion Stallion"
  *                             placement:
  *                               type: string
- *                               example: "2nd"
+ *                               example: "1st"
  *                             show:
  *                               type: string
- *                               example: "Spring Gala - Dressage"
+ *                               example: "Grand Prix"
  *       400:
- *         description: Validation error
+ *         description: Validation error or Invalid User ID format
  *       404:
- *         description: Player not found
+ *         description: User not found
  *       500:
  *         description: Internal server error
  */
-router.get('/dashboard/:playerId', [
-  param('playerId')
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Player ID must be between 1 and 50 characters')
-    .notEmpty()
-    .withMessage('Player ID is required'),
-
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      logger.warn(`[playerRoutes] Dashboard validation errors: ${JSON.stringify(errors.array())}`);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
-    next();
-  }
-], getDashboardData);
+router.get('/dashboard/:userId', validateDashboardUserId, getDashboardData);
 
 export default router;

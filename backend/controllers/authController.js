@@ -9,6 +9,8 @@ import prisma from '../db/index.js';
  * Register a new user and create a corresponding player record.
  */
 export const register = async(req, res, next) => {
+  // eslint-disable-next-line no-console
+  console.log('REGISTER BODY:', req.body); // TEMPORARY FOR DEBUGGING
   try {
     const { username, email, password, firstName, lastName } = req.body;
 

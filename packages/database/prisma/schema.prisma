@@ -16,8 +16,8 @@ model Horse {
   breed   Breed @relation(fields: [breedId], references: [id])
   breedId Int
 
-  player   Player @relation(fields: [playerId], references: [id]) // Made non-optional
-  playerId String // Made non-optional
+  user     User @relation(fields: [userId], references: [id]) // Changed from player to user
+  userId   Int // Changed from playerId String to userId Int
 
   stable   Stable? @relation(fields: [stableId], references: [id])
   stableId Int?
@@ -79,26 +79,6 @@ model Horse {
   groomInteractions     GroomInteraction[]
 }
 
-model Player {
-  id       String   @id @default(uuid())
-  name     String
-  email    String   @unique
-  money    Int
-  level    Int
-  xp       Int
-  settings Json
-  horses   Horse[]  // 1:N relation to Horse
-  grooms   Groom[]  // 1:N relation to Groom
-  groomAssignments GroomAssignment[]  // 1:N relation to GroomAssignment
-  xpEvents XpEvent[]  // 1:N relation to XpEvent
-
-  userId   Int      @unique // 
-  user     User     @relation(fields: [userId], references: [id]) // 
-
-
-  @@map("players")
-}
-
 model Breed {
   id          Int      @id @default(autoincrement())
   name        String   @unique
@@ -120,7 +100,20 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  player Player? 
+  // Fields from Player model
+  name     String? // Made optional as per previous merge logic
+  money    Int     @default(1000)
+  level    Int     @default(1)
+  xp       Int     @default(0)
+  settings Json    @default("{}")
+
+  // Relationships moved from Player model
+  horses            Horse[]
+  grooms            Groom[]
+  groomAssignments  GroomAssignment[]
+  xpEvents          XpEvent[]
+
+  // player Player? // This relation is removed as Player model is merged
 
   @@map("users")
 }
@@ -143,7 +136,7 @@ model Show {
   runDate    DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  hostPlayer String?  // Player ID who hosts/benefits from entry fees
+  hostPlayer String?  // This might need to be updated to hostUserId Int? or removed if not used
 
   competitionResults CompetitionResult[]
 
@@ -252,8 +245,8 @@ model Groom {
   // Relations
   assignments   GroomAssignment[]
   interactions  GroomInteraction[]
-  player        Player? @relation(fields: [playerId], references: [id])
-  playerId      String?
+  user          User?    @relation(fields: [userId], references: [id]) // Changed from player to user
+  userId        Int?     // Changed from playerId String? to userId Int?
 
   @@map("grooms")
 }
@@ -274,11 +267,11 @@ model GroomAssignment {
   foalId      Int
   groom       Groom @relation(fields: [groomId], references: [id], onDelete: Cascade)
   groomId     Int
-  player      Player? @relation(fields: [playerId], references: [id])
-  playerId    String?
+  user        User?    @relation(fields: [userId], references: [id]) // Changed from player to user
+  userId      Int?     // Changed from playerId String? to userId Int?
   interactions GroomInteraction[]
 
-  @@unique([foalId, groomId, isActive])
+  @@unique([foalId, groomId, isActive]) // This unique constraint might need review if playerId was part of it before
   @@map("groom_assignments")
 }
 
@@ -312,11 +305,11 @@ model XpEvent {
   timestamp DateTime @default(now())
 
   // Relations
-  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  playerId String
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade) // Changed from player to user
+  userId   Int  // Changed from playerId String to userId Int
 
   @@map("xp_events")
-  @@index([playerId])
+  @@index([userId]) // Changed from playerId
   @@index([timestamp])
-  @@index([playerId, timestamp])
+  @@index([userId, timestamp]) // Changed from playerId
 }

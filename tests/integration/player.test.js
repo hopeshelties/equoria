@@ -1,11 +1,13 @@
 import { jest } from '@jest/globals';
-import { createPlayer, getPlayerById, getPlayerWithHorses } from '../../backend/models/playerModel.js';
+// 🎯 Updated import from playerModel.js to userModel.js and function names
+import { createUser, getUserById, getUserWithHorses } from '../../backend/models/userModel.js';
 import { createHorse } from '../../backend/models/horseModel.js';
 
 // Mock the database and logger
 jest.unstable_mockModule('../../backend/db/index.js', () => ({
   default: {
-    player: {
+    // 🎯 Changed player to user
+    user: {
       create: jest.fn(),
       findUnique: jest.fn(),
       delete: jest.fn(),
@@ -29,66 +31,91 @@ jest.unstable_mockModule('../../backend/utils/logger.js', () => ({
 
 const { default: prisma } = await import('../../backend/db/index.js');
 
-describe('Player Integration Tests', () => {
+// 🎯 Renamed describe block
+describe('User Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('Player Creation', () => {
-    test('should create a player successfully', async () => {
-      const playerData = {
-        id: 'test-uuid-123',
-        userId: 1, // Added userId
-        name: 'Test Player',
+  // 🎯 Renamed describe block
+  describe('User Creation', () => {
+    // 🎯 Renamed test
+    test('should create a user successfully', async () => {
+      // 🎯 Updated playerData to userData and its structure
+      const userData = {
+        // id is auto-generated, so not provided here
+        username: 'testuser',
         email: 'test@example.com',
+        password: 'password123',
+        firstName: 'Test',
+        lastName: 'User',
+        name: 'Test User', // Merged from Player
         money: 500,
         level: 3,
         xp: 1000,
         settings: { darkMode: true, notifications: true }
       };
 
-      const mockCreatedPlayer = {
-        ...playerData,
+      const mockCreatedUser = {
+        id: 1, // Example auto-generated ID
+        ...userData,
+        role: 'user', // Default role
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      prisma.player.create.mockResolvedValue(mockCreatedPlayer);
+      // 🎯 Changed prisma.player.create to prisma.user.create
+      prisma.user.create.mockResolvedValue(mockCreatedUser);
 
-      const result = await createPlayer(playerData);
+      // 🎯 Changed createPlayer to createUser
+      const result = await createUser(userData);
 
-      expect(prisma.player.create).toHaveBeenCalledWith({
-        data: playerData,
+      // 🎯 Changed prisma.player.create to prisma.user.create
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: userData,
       });
-      expect(result).toEqual(mockCreatedPlayer);
+      expect(result).toEqual(mockCreatedUser);
     });
 
-    test('should handle player creation errors', async () => {
-      const playerData = {
-        id: 'test-uuid-123',
-        userId: 1, // Added userId
-        name: 'Test Player',
+    // 🎯 Renamed test
+    test('should handle user creation errors', async () => {
+      // 🎯 Updated playerData to userData and its structure
+      const userData = {
+        username: 'testuser',
         email: 'test@example.com',
+        password: 'password123',
+        firstName: 'Test',
+        lastName: 'User',
+        name: 'Test User',
         money: 500,
         level: 3,
         xp: 1000,
         settings: { darkMode: true, notifications: true }
       };
 
-      prisma.player.create.mockRejectedValue(new Error('Database connection failed'));
+      // 🎯 Changed prisma.player.create to prisma.user.create
+      prisma.user.create.mockRejectedValue(new Error('Database connection failed'));
 
-      await expect(createPlayer(playerData)).rejects.toThrow('Database error in createPlayer: Database connection failed');
+      // 🎯 Changed createPlayer to createUser and error message
+      await expect(createUser(userData)).rejects.toThrow('Database error in createUser: Database connection failed');
     });
   });
 
-  describe('Player Retrieval', () => {
-    test('should retrieve a player by ID', async () => {
-      const playerId = 'test-uuid-123';
-      const mockPlayer = {
-        id: playerId,
-        userId: 1, // Added userId
-        name: 'Test Player',
+  // 🎯 Renamed describe block
+  describe('User Retrieval', () => {
+    // 🎯 Renamed test
+    test('should retrieve a user by ID', async () => {
+      // 🎯 Changed playerId to userId and type to Int
+      const userId = 1;
+      const mockUser = {
+        id: userId,
+        username: 'testuser',
         email: 'test@example.com',
+        password: 'password123',
+        firstName: 'Test',
+        lastName: 'User',
+        name: 'Test User',
+        role: 'user',
         money: 500,
         level: 3,
         xp: 1000,
@@ -97,35 +124,45 @@ describe('Player Integration Tests', () => {
         updatedAt: new Date(),
       };
 
-      prisma.player.findUnique.mockResolvedValue(mockPlayer);
+      // 🎯 Changed prisma.player.findUnique to prisma.user.findUnique
+      prisma.user.findUnique.mockResolvedValue(mockUser);
 
-      const result = await getPlayerById(playerId);
+      // 🎯 Changed getPlayerById to getUserById
+      const result = await getUserById(userId);
 
-      expect(prisma.player.findUnique).toHaveBeenCalledWith({
-        where: { id: playerId },
+      // 🎯 Changed prisma.player.findUnique to prisma.user.findUnique
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: userId },
       });
-      expect(result).toEqual(mockPlayer);
+      expect(result).toEqual(mockUser);
     });
 
-    test('should return null when player not found', async () => {
-      const playerId = 'non-existent-uuid';
+    // 🎯 Renamed test
+    test('should return null when user not found', async () => {
+      // 🎯 Changed playerId to userId and type to Int
+      const userId = 999;
 
-      prisma.player.findUnique.mockResolvedValue(null);
+      // 🎯 Changed prisma.player.findUnique to prisma.user.findUnique
+      prisma.user.findUnique.mockResolvedValue(null);
 
-      const result = await getPlayerById(playerId);
+      // 🎯 Changed getPlayerById to getUserById
+      const result = await getUserById(userId);
 
       expect(result).toBeNull();
     });
   });
 
-  describe('Player with Horses', () => {
-    test('should retrieve a player with their horses', async () => {
-      const playerId = 'test-uuid-123';
-      const mockPlayerWithHorses = {
-        id: playerId,
-        userId: 1, // Added userId
-        name: 'Test Player',
+  // 🎯 Renamed describe block
+  describe('User with Horses', () => {
+    // 🎯 Renamed test
+    test('should retrieve a user with their horses', async () => {
+      // 🎯 Changed playerId to userId and type to Int
+      const userId = 1;
+      const mockUserWithHorses = {
+        id: userId,
+        username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
         money: 500,
         level: 3,
         xp: 1000,
@@ -135,6 +172,7 @@ describe('Player Integration Tests', () => {
             id: 1,
             name: 'Starlight',
             age: 4,
+            userId: userId, // 🎯 Horse linked to userId
             breed: { id: 1, name: 'Thoroughbred' },
             stable: null,
           },
@@ -142,6 +180,7 @@ describe('Player Integration Tests', () => {
             id: 2,
             name: 'Comet',
             age: 6,
+            userId: userId, // 🎯 Horse linked to userId
             breed: { id: 1, name: 'Thoroughbred' },
             stable: null,
           },
@@ -150,12 +189,15 @@ describe('Player Integration Tests', () => {
         updatedAt: new Date(),
       };
 
-      prisma.player.findUnique.mockResolvedValue(mockPlayerWithHorses);
+      // 🎯 Changed prisma.player.findUnique to prisma.user.findUnique
+      prisma.user.findUnique.mockResolvedValue(mockUserWithHorses);
 
-      const result = await getPlayerWithHorses(playerId);
+      // 🎯 Changed getPlayerWithHorses to getUserWithHorses
+      const result = await getUserWithHorses(userId);
 
-      expect(prisma.player.findUnique).toHaveBeenCalledWith({
-        where: { id: playerId },
+      // 🎯 Changed prisma.player.findUnique to prisma.user.findUnique
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: userId },
         include: {
           horses: {
             include: {
@@ -165,32 +207,36 @@ describe('Player Integration Tests', () => {
           },
         },
       });
-      expect(result).toEqual(mockPlayerWithHorses);
+      expect(result).toEqual(mockUserWithHorses);
       expect(result.horses).toHaveLength(2);
       expect(result.horses[0].name).toBe('Starlight');
       expect(result.horses[1].name).toBe('Comet');
     });
 
-    test('should confirm player has 2 horses attached', async () => {
-      const playerId = 'test-uuid-123';
-      const mockPlayerWithHorses = {
-        id: playerId,
-        userId: 1, // Added userId
-        name: 'Test Player',
+    // 🎯 Renamed test
+    test('should confirm user has 2 horses attached', async () => {
+      // 🎯 Changed playerId to userId and type to Int
+      const userId = 1;
+      const mockUserWithHorses = {
+        id: userId,
+        username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
         money: 500,
         level: 3,
         xp: 1000,
         settings: { darkMode: true, notifications: true },
         horses: [
-          { id: 1, name: 'Starlight', age: 4 },
-          { id: 2, name: 'Comet', age: 6 },
+          { id: 1, name: 'Starlight', age: 4, userId: userId },
+          { id: 2, name: 'Comet', age: 6, userId: userId },
         ],
       };
 
-      prisma.player.findUnique.mockResolvedValue(mockPlayerWithHorses);
+      // 🎯 Changed prisma.player.findUnique to prisma.user.findUnique
+      prisma.user.findUnique.mockResolvedValue(mockUserWithHorses);
 
-      const result = await getPlayerWithHorses(playerId);
+      // 🎯 Changed getPlayerWithHorses to getUserWithHorses
+      const result = await getUserWithHorses(userId);
 
       expect(result.horses).toHaveLength(2);
       expect(result.horses.map(h => h.name)).toEqual(['Starlight', 'Comet']);
@@ -199,12 +245,13 @@ describe('Player Integration Tests', () => {
 
   describe('JSON Settings Field', () => {
     test('should confirm JSON settings field exists and includes darkMode = true', async () => {
-      const playerId = 'test-uuid-123';
-      const mockPlayer = {
-        id: playerId,
-        userId: 1, // Added userId
-        name: 'Test Player',
+      // 🎯 Changed playerId to userId and type to Int
+      const userId = 1;
+      const mockUser = {
+        id: userId,
+        username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
         money: 500,
         level: 3,
         xp: 1000,
@@ -218,9 +265,11 @@ describe('Player Integration Tests', () => {
         updatedAt: new Date(),
       };
 
-      prisma.player.findUnique.mockResolvedValue(mockPlayer);
+      // 🎯 Changed prisma.player.findUnique to prisma.user.findUnique
+      prisma.user.findUnique.mockResolvedValue(mockUser);
 
-      const result = await getPlayerById(playerId);
+      // 🎯 Changed getPlayerById to getUserById
+      const result = await getUserById(userId);
 
       expect(result.settings).toBeDefined();
       expect(typeof result.settings).toBe('object');
@@ -231,11 +280,15 @@ describe('Player Integration Tests', () => {
     });
 
     test('should handle complex JSON settings structure', async () => {
-      const playerData = {
-        id: 'test-uuid-456',
-        userId: 2, // Added userId
-        name: 'Advanced Player',
+      // 🎯 Updated playerData to userData and its structure
+      const userData = {
+        // id is auto-generated
+        username: 'advanceduser',
         email: 'advanced@example.com',
+        password: 'password123',
+        firstName: 'Advanced',
+        lastName: 'User',
+        name: 'Advanced User',
         money: 1000,
         level: 5,
         xp: 2500,
@@ -258,15 +311,19 @@ describe('Player Integration Tests', () => {
         }
       };
 
-      const mockCreatedPlayer = {
-        ...playerData,
+      const mockCreatedUser = {
+        id: 2, // Example auto-generated ID
+        ...userData,
+        role: 'user',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      prisma.player.create.mockResolvedValue(mockCreatedPlayer);
+      // 🎯 Changed prisma.player.create to prisma.user.create
+      prisma.user.create.mockResolvedValue(mockCreatedUser);
 
-      const result = await createPlayer(playerData);
+      // 🎯 Changed createPlayer to createUser
+      const result = await createUser(userData);
 
       expect(result.settings.darkMode).toBe(true);
       expect(result.settings.notifications.email).toBe(true);
@@ -275,94 +332,94 @@ describe('Player Integration Tests', () => {
     });
   });
 
-  describe('Player Deletion and Integrity', () => {
-    test('should handle player deletion', async () => {
-      const playerId = 'test-uuid-123';
-      const mockDeletedPlayer = {
-        id: playerId,
-        userId: 1, // Added userId
-        name: 'Test Player',
+  // 🎯 Renamed describe block
+  describe('User Deletion and Integrity', () => {
+    // 🎯 Renamed test
+    test('should handle user deletion', async () => {
+      // 🎯 Changed playerId to userId and type to Int
+      const userId = 1;
+      const mockDeletedUser = {
+        id: userId,
+        username: 'testuser',
         email: 'test@example.com',
+        name: 'Test User',
         money: 500,
         level: 3,
         xp: 1000,
         settings: { darkMode: true, notifications: true },
       };
 
-      prisma.player.delete.mockResolvedValue(mockDeletedPlayer);
+      // 🎯 Changed prisma.player.delete to prisma.user.delete
+      prisma.user.delete.mockResolvedValue(mockDeletedUser);
 
-      const result = await prisma.player.delete({
-        where: { id: playerId },
+      // 🎯 Changed prisma.player.delete to prisma.user.delete
+      const result = await prisma.user.delete({
+        where: { id: userId },
       });
 
-      expect(prisma.player.delete).toHaveBeenCalledWith({
-        where: { id: playerId },
+      // 🎯 Changed prisma.player.delete to prisma.user.delete
+      expect(prisma.user.delete).toHaveBeenCalledWith({
+        where: { id: userId },
       });
-      expect(result).toEqual(mockDeletedPlayer);
+      expect(result).toEqual(mockDeletedUser);
     });
 
     test('should confirm cascade behavior or integrity constraints', async () => {
-      const playerId = 'test-uuid-123';
+      // 🎯 Changed playerId to userId and type to Int
+      const userId = 1;
       
-      const mockPlayerWithHorses = {
-        id: playerId,
-        userId: 1, // Added userId
+      const mockUserWithHorses = {
+        id: userId,
+        // 🎯 Horse data should use userId
         horses: [
-          { id: 1, name: 'Starlight', playerId: playerId },
-          { id: 2, name: 'Comet', playerId: playerId },
+          { id: 1, name: 'Starlight', userId: userId },
+          { id: 2, name: 'Comet', userId: userId },
         ],
       };
 
-      prisma.player.findUnique.mockResolvedValue(mockPlayerWithHorses);
+      // 🎯 Changed prisma.player.findUnique to prisma.user.findUnique
+      prisma.user.findUnique.mockResolvedValue(mockUserWithHorses);
 
-      const result = await getPlayerWithHorses(playerId);
+      // 🎯 Changed getPlayerWithHorses to getUserWithHorses
+      const result = await getUserWithHorses(userId);
 
       expect(result.horses).toHaveLength(2);
       result.horses.forEach(horse => {
-        expect(horse.playerId).toBe(playerId);
+        // 🎯 Check horse.userId
+        expect(horse.userId).toBe(userId);
       });
     });
   });
 
-  describe('Horse Creation with Player Link', () => {
-    test('should create horses linked to a player', async () => {
-      const playerId = 'test-uuid-123';
+  // 🎯 Renamed describe block
+  describe('Horse Creation with User Link', () => {
+    // 🎯 Renamed test
+    test('should create horses linked to a user', async () => {
+      // 🎯 Changed playerId to userId and type to Int
+      const testUserId = 1; // Assuming a user with ID 1 exists or is created for this test
       const breedId = 1;
-
-      const horseData1 = {
-        name: 'Starlight',
-        age: 4,
+      const horseData = {
+        name: 'Shadowfax',
+        age: 5,
         breedId: breedId,
-        playerId: playerId,
-        sex: 'Mare',
-        trait: 'Elegant',
-        temperament: 'Gentle',
+        userId: testUserId, // 🎯 Link horse to user via userId
+        // ... other horse fields
       };
+      const mockCreatedHorse = { id: 3, ...horseData, createdAt: new Date(), updatedAt: new Date() };
 
-      const horseData2 = {
-        name: 'Comet',
-        age: 6,
-        breedId: breedId,
-        playerId: playerId,
-        sex: 'Stallion',
-        trait: 'Swift',
-        temperament: 'Spirited',
-      };
+      prisma.horse.create.mockResolvedValue(mockCreatedHorse);
+      // Mock user retrieval if createHorse checks for user existence
+      // prisma.user.findUnique.mockResolvedValue({ id: testUserId, name: 'Test User', ... });
 
-      const mockHorse1 = { id: 1, ...horseData1, breed: { id: breedId, name: 'Thoroughbred' } };
-      const mockHorse2 = { id: 2, ...horseData2, breed: { id: breedId, name: 'Thoroughbred' } };
 
-      prisma.horse.create
-        .mockResolvedValueOnce(mockHorse1)
-        .mockResolvedValueOnce(mockHorse2);
+      const result = await createHorse(horseData);
 
-      const result1 = await createHorse(horseData1);
-      const result2 = await createHorse(horseData2);
-
-      expect(result1.playerId).toBe(playerId);
-      expect(result2.playerId).toBe(playerId);
-      expect(result1.name).toBe('Starlight');
-      expect(result2.name).toBe('Comet');
+      expect(prisma.horse.create).toHaveBeenCalledWith({
+        data: horseData,
+      });
+      expect(result).toEqual(mockCreatedHorse);
+      // 🎯 Verify horse is linked to the correct userId
+      expect(result.userId).toBe(testUserId); 
     });
   });
 });

@@ -11,9 +11,11 @@ const createTestApp = () => {
 
   // Simple registration route
   app.post('/register',
-    body('name').notEmpty(),
+    body('username').notEmpty(), // Changed from 'name'
     body('email').isEmail(),
     body('password').isLength({ min: 8 }),
+    body('firstName').notEmpty(), // Added
+    body('lastName').notEmpty(),  // Added
     register
   );
 
@@ -109,9 +111,11 @@ describe('Authentication Controller (Simple)', () => {
 
   it('should register a new user', async() => {
     const userData = {
-      name: 'Test User',
+      username: 'testuser', // Changed from name: 'Test User'
       email: 'test@example.com',
-      password: 'TestPassword123!'
+      password: 'TestPassword123!',
+      firstName: 'Test',    // Added
+      lastName: 'User'      // Added
     };
 
     const response = await request(app)
@@ -127,9 +131,11 @@ describe('Authentication Controller (Simple)', () => {
   it('should login with valid credentials', async() => {
     // First register a user
     const userData = {
-      name: 'Test User',
+      username: 'logintestuser', // Changed from name: 'Test User'
       email: 'login-test@example.com',
-      password: 'TestPassword123!'
+      password: 'TestPassword123!',
+      firstName: 'LoginTest',   // Added
+      lastName: 'User'          // Added
     };
 
     await request(app)
