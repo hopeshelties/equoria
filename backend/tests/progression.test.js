@@ -1,5 +1,5 @@
 /**
- * Player Progression Tests
+ * User Progression Tests
  * Tests XP gains, level-ups, rollover, and progress reporting
  */
 
@@ -10,13 +10,12 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const mockPlayerId = 'test-player-uuid-123'; // Valid test ID
-const mockNonExistentPlayerId = 'test-non-existent-player-uuid';
-const mockUserId = 1; // Consistent user ID
+const testUserId = 'test-user-uuid-123'; // Valid test ID
+const mockNonExistentUserId = 'test-non-existent-user-uuid';
 
 // Mock Prisma
 const mockPrisma = {
-  player: {
+  user: { // Changed from player to user
     findUnique: jest.fn(),
     update: jest.fn()
   },
@@ -41,127 +40,129 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 }));
 
 // Import modules after mocking
-const { addXp, getPlayerProgress } = await import(join(__dirname, '../models/playerModel.js'));
-const { logXpEvent, getPlayerXpEvents } = await import(join(__dirname, '../models/xpLogModel.js'));
+// Changed playerModel.js to userModel.js and function names
+const { addXpToUser, getUserProgress } = await import(join(__dirname, '../models/userModel.js'));
+// Changed getPlayerXpEvents to getUserXpEvents
+const { logXpEvent, getUserXpEvents } = await import(join(__dirname, '../models/xpLogModel.js'));
 
-describe('Player Progression System', () => {
+describe('User Progression System', () => { // Changed from Player to User
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('XP Earning and Level Progression', () => {
     test('should gain 20 XP correctly', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 0
+        // Removed userId field
       });
 
-      mockPrisma.player.update.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.update.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 20
+        // Removed userId field
       });
 
-      const result = await addXp(mockPlayerId, 20);
+      const result = await addXpToUser(testUserId, 20); // Changed from addXp and mockPlayerId
 
       expect(result.success).toBe(true);
       expect(result.newXp).toBe(20);
       expect(result.newLevel).toBe(1);
       expect(result.leveledUp).toBe(false);
-      expect(mockPrisma.player.update).toHaveBeenCalledWith({
-        where: { id: mockPlayerId },
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({ // Changed from player to user
+        where: { id: testUserId }, // Changed from mockPlayerId
         data: { xp: 20 }
       });
     });
 
     test('should level up when reaching 100 XP', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 20
+        // Removed userId field
       });
 
-      mockPrisma.player.update.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.update.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 2,
         xp: 0
+        // Removed userId field
       });
 
-      const result = await addXp(mockPlayerId, 80);
+      const result = await addXpToUser(testUserId, 80); // Changed from addXp and mockPlayerId
 
       expect(result.success).toBe(true);
       expect(result.newXp).toBe(0);
       expect(result.newLevel).toBe(2);
       expect(result.leveledUp).toBe(true);
-      expect(mockPrisma.player.update).toHaveBeenCalledWith({
-        where: { id: mockPlayerId },
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({ // Changed from player to user
+        where: { id: testUserId }, // Changed from mockPlayerId
         data: { xp: 0, level: 2 }
       });
     });
 
     test('should handle XP rollover correctly', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 90
+        // Removed userId field
       });
 
-      mockPrisma.player.update.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.update.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 2,
         xp: 15
+        // Removed userId field
       });
 
-      const result = await addXp(mockPlayerId, 25);
+      const result = await addXpToUser(testUserId, 25); // Changed from addXp and mockPlayerId
 
       expect(result.success).toBe(true);
       expect(result.newXp).toBe(15);
       expect(result.newLevel).toBe(2);
       expect(result.leveledUp).toBe(true);
-      expect(mockPrisma.player.update).toHaveBeenCalledWith({
-        where: { id: mockPlayerId },
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({ // Changed from player to user
+        where: { id: testUserId }, // Changed from mockPlayerId
         data: { xp: 15, level: 2 }
       });
     });
 
     test('should handle multiple level ups', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 50
+        // Removed userId field
       });
 
-      mockPrisma.player.update.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.update.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 3,
         xp: 0
+        // Removed userId field
       });
 
-      const result = await addXp(mockPlayerId, 150);
+      const result = await addXpToUser(testUserId, 150); // Changed from addXp and mockPlayerId
 
       expect(result.success).toBe(true);
       expect(result.newXp).toBe(0);
       expect(result.newLevel).toBe(3);
       expect(result.leveledUp).toBe(true);
-      expect(mockPrisma.player.update).toHaveBeenCalledWith({
-        where: { id: mockPlayerId },
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({ // Changed from player to user
+        where: { id: testUserId }, // Changed from mockPlayerId
         data: { xp: 0, level: 3 }
       });
     });
@@ -171,7 +172,7 @@ describe('Player Progression System', () => {
     test('should log training XP event correctly', async() => {
       const mockXpEvent = {
         id: 1,
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 5,
         reason: 'Trained horse Thunder in Dressage',
         timestamp: new Date()
@@ -180,7 +181,7 @@ describe('Player Progression System', () => {
       mockPrisma.xpEvent.create.mockResolvedValue(mockXpEvent);
 
       const result = await logXpEvent({
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 5,
         reason: 'Trained horse Thunder in Dressage'
       });
@@ -190,7 +191,7 @@ describe('Player Progression System', () => {
       expect(result.reason).toBe('Trained horse Thunder in Dressage');
       expect(mockPrisma.xpEvent.create).toHaveBeenCalledWith({
         data: {
-          playerId: mockPlayerId,
+          userId: testUserId, // Changed from playerId
           amount: 5,
           reason: 'Trained horse Thunder in Dressage'
         }
@@ -200,7 +201,7 @@ describe('Player Progression System', () => {
     test('should log show placement XP event correctly', async() => {
       const mockXpEvent = {
         id: 2,
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 20,
         reason: 'Horse Lightning placed 1st in Racing competition',
         timestamp: new Date()
@@ -209,7 +210,7 @@ describe('Player Progression System', () => {
       mockPrisma.xpEvent.create.mockResolvedValue(mockXpEvent);
 
       const result = await logXpEvent({
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 20,
         reason: 'Horse Lightning placed 1st in Racing competition'
       });
@@ -219,25 +220,25 @@ describe('Player Progression System', () => {
       expect(result.reason).toBe('Horse Lightning placed 1st in Racing competition');
       expect(mockPrisma.xpEvent.create).toHaveBeenCalledWith({
         data: {
-          playerId: mockPlayerId,
+          userId: testUserId, // Changed from playerId
           amount: 20,
           reason: 'Horse Lightning placed 1st in Racing competition'
         }
       });
     });
 
-    test('should retrieve player XP events', async() => {
+    test('should retrieve user XP events', async() => { // Changed from player to user
       const mockEvents = [
         {
           id: 1,
-          playerId: mockPlayerId,
+          userId: testUserId, // Changed from playerId
           amount: 5,
           reason: 'Trained horse Thunder in Dressage',
           timestamp: new Date('2024-001-01')
         },
         {
           id: 2,
-          playerId: mockPlayerId,
+          userId: testUserId, // Changed from playerId
           amount: 20,
           reason: 'Horse Lightning placed 1st in Racing competition',
           timestamp: new Date('2024-01-02')
@@ -246,13 +247,13 @@ describe('Player Progression System', () => {
 
       mockPrisma.xpEvent.findMany.mockResolvedValue(mockEvents);
 
-      const result = await getPlayerXpEvents(mockPlayerId);
+      const result = await getUserXpEvents(testUserId); // Changed from getPlayerXpEvents and mockPlayerId
 
       expect(result).toHaveLength(2);
       expect(result[0].amount).toBe(5);
       expect(result[1].amount).toBe(20);
       expect(mockPrisma.xpEvent.findMany).toHaveBeenCalledWith({
-        where: { playerId: mockPlayerId },
+        where: { userId: testUserId }, // Changed from playerId
         orderBy: { timestamp: 'desc' },
         take: 50,
         skip: 0
@@ -260,17 +261,17 @@ describe('Player Progression System', () => {
     });
   });
 
-  describe('Player Progress Reporting', () => {
-    test('should return correct progress for level 1 player', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+  describe('User Progress Reporting', () => { // Changed from Player to User
+    test('should return correct progress for level 1 user', async() => { // Changed from player to user
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 45
+        // Removed userId field
       });
 
-      const result = await getPlayerProgress(mockPlayerId);
+      const result = await getUserProgress(testUserId); // Changed from getPlayerProgress and mockPlayerId
 
       expect(result.success).toBe(true);
       expect(result.progress.level).toBe(1);
@@ -279,16 +280,16 @@ describe('Player Progression System', () => {
       expect(result.progress.xpForCurrentLevel).toBe(100);
     });
 
-    test('should return correct progress for level 2 player', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+    test('should return correct progress for level 2 user', async() => { // Changed from player to user
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 2,
         xp: 30
+        // Removed userId field
       });
 
-      const result = await getPlayerProgress(mockPlayerId);
+      const result = await getUserProgress(testUserId); // Changed from getPlayerProgress and mockPlayerId
 
       expect(result.success).toBe(true);
       expect(result.progress.level).toBe(2);
@@ -297,16 +298,16 @@ describe('Player Progression System', () => {
       expect(result.progress.xpForCurrentLevel).toBe(100);
     });
 
-    test('should return correct progress for player at level boundary', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+    test('should return correct progress for user at level boundary', async() => { // Changed from player to user
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 0
+        // Removed userId field
       });
 
-      const result = await getPlayerProgress(mockPlayerId);
+      const result = await getUserProgress(testUserId); // Changed from getPlayerProgress and mockPlayerId
 
       expect(result.success).toBe(true);
       expect(result.progress.level).toBe(1);
@@ -315,73 +316,71 @@ describe('Player Progression System', () => {
       expect(result.progress.xpForCurrentLevel).toBe(100);
     });
 
-    test('should handle non-existent player in getPlayerProgress', async() => {
-      // This mock simulates getPlayerById returning null because the ID is valid but not found
-      mockPrisma.player.findUnique.mockResolvedValue(null);
+    test('should handle non-existent user in getUserProgress', async() => { // Changed from player to user
+      mockPrisma.user.findUnique.mockResolvedValue(null); // Changed from player to user
 
-      const result = await getPlayerProgress(mockNonExistentPlayerId);
+      const result = await getUserProgress(mockNonExistentUserId); // Changed from getPlayerProgress
 
       expect(result.success).toBe(false);
-      // getPlayerProgress itself returns 'Player not found' if getPlayerById returns null
-      expect(result.error).toBe('Player not found');
+      expect(result.error).toBe('User not found'); // Changed from 'Player not found'
     });
   });
 
   describe('Edge Cases and Error Handling', () => {
-    test('should handle negative XP amounts in addXp', async() => {
-      const result = await addXp(mockPlayerId, -10);
+    test('should handle negative XP amounts in addXpToUser', async() => { // Changed from addXp
+      const result = await addXpToUser(testUserId, -10); // Changed from addXp and mockPlayerId
       expect(result.success).toBe(false);
       expect(result.error).toContain('XP amount must be positive');
     });
 
-    test('should handle zero XP amounts in addXp', async() => {
-      const result = await addXp(mockPlayerId, 0);
+    test('should handle zero XP amounts in addXpToUser', async() => { // Changed from addXp
+      const result = await addXpToUser(testUserId, 0); // Changed from addXp and mockPlayerId
       expect(result.success).toBe(false);
       expect(result.error).toContain('XP amount must be positive');
     });
 
-    test('should handle database errors gracefully in addXp', async() => {
-      mockPrisma.player.findUnique.mockRejectedValue(new Error('Database connection failed'));
-      const result = await addXp(mockPlayerId, 20);
+    test('should handle database errors gracefully in addXpToUser', async() => { // Changed from addXp
+      mockPrisma.user.findUnique.mockRejectedValue(new Error('Database connection failed')); // Changed from player to user
+      const result = await addXpToUser(testUserId, 20); // Changed from addXp and mockPlayerId
       expect(result.success).toBe(false);
       expect(result.error).toContain('Database connection failed');
     });
 
-    test('should handle database errors gracefully in getPlayerProgress', async() => {
-      mockPrisma.player.findUnique.mockRejectedValue(new Error('Database connection failed'));
-      const result = await getPlayerProgress(mockPlayerId);
+    test('should handle database errors gracefully in getUserProgress', async() => { // Changed from getPlayerProgress
+      mockPrisma.user.findUnique.mockRejectedValue(new Error('Database connection failed')); // Changed from player to user
+      const result = await getUserProgress(testUserId); // Changed from getPlayerProgress and mockPlayerId
       expect(result.success).toBe(false);
       expect(result.error).toContain('Database connection failed');
     });
 
-    test('should handle invalid (empty string) player ID in addXp', async() => {
-      const result = await addXp('', 20);
+    test('should handle invalid (empty string) user ID in addXpToUser', async() => { // Changed from player to user
+      const result = await addXpToUser('', 20); // Changed from addXp
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Invalid player ID format');
+      expect(result.error).toContain('Invalid user ID format'); // Changed from 'Invalid player ID format'
     });
 
-    test('should handle invalid (empty string) player ID in getPlayerProgress', async() => {
-      const result = await getPlayerProgress('');
+    test('should handle invalid (empty string) user ID in getUserProgress', async() => { // Changed from player to user
+      const result = await getUserProgress(''); // Changed from getPlayerProgress
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Invalid player ID format');
+      expect(result.error).toContain('Invalid user ID format'); // Changed from 'Invalid player ID format'
     });
 
-    test('should handle null player ID in addXp', async() => {
-      const result = await addXp(null, 20);
+    test('should handle null user ID in addXpToUser', async() => { // Changed from player to user
+      const result = await addXpToUser(null, 20); // Changed from addXp
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Player ID is required');
+      expect(result.error).toContain('User ID is required'); // Changed from 'Player ID is required'
     });
 
-    test('should handle null player ID in getPlayerProgress', async() => {
-      const result = await getPlayerProgress(null);
+    test('should handle null user ID in getUserProgress', async() => { // Changed from player to user
+      const result = await getUserProgress(null); // Changed from getPlayerProgress
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Player ID is required');
+      expect(result.error).toContain('User ID is required'); // Changed from 'Player ID is required'
     });
 
     test('should handle XP logging errors gracefully', async() => {
       mockPrisma.xpEvent.create.mockRejectedValue(new Error('XP logging failed'));
       await expect(logXpEvent({
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 5,
         reason: 'Training'
       })).rejects.toThrow('XP logging failed');
@@ -390,36 +389,36 @@ describe('Player Progression System', () => {
 
   describe('Integration Scenarios', () => {
     test('should handle complete training workflow with XP', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 95
+        // Removed userId field
       });
-      mockPrisma.player.update.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.update.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 2,
         xp: 0
+        // Removed userId field
       });
       mockPrisma.xpEvent.create.mockResolvedValue({
         id: 1,
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 5,
         reason: 'Trained horse Thunder in Dressage',
         timestamp: new Date()
       });
 
-      const xpResult = await addXp(mockPlayerId, 5);
+      const xpResult = await addXpToUser(testUserId, 5); // Changed from addXp and mockPlayerId
       expect(xpResult.success).toBe(true);
       expect(xpResult.leveledUp).toBe(true);
       expect(xpResult.newLevel).toBe(2);
       expect(xpResult.newXp).toBe(0);
 
       const logResult = await logXpEvent({
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 5,
         reason: 'Trained horse Thunder in Dressage'
       });
@@ -427,36 +426,36 @@ describe('Player Progression System', () => {
     });
 
     test('should handle complete competition workflow with XP', async() => {
-      mockPrisma.player.findUnique.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.findUnique.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 85
+        // Removed userId field
       });
-      mockPrisma.player.update.mockResolvedValue({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.update.mockResolvedValue({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 2,
         xp: 5
+        // Removed userId field
       });
       mockPrisma.xpEvent.create.mockResolvedValue({
         id: 2,
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 20,
         reason: 'Horse Lightning placed 1st in Racing competition',
         timestamp: new Date()
       });
 
-      const xpResult = await addXp(mockPlayerId, 20);
+      const xpResult = await addXpToUser(testUserId, 20); // Changed from addXp and mockPlayerId
       expect(xpResult.success).toBe(true);
       expect(xpResult.leveledUp).toBe(true);
       expect(xpResult.newLevel).toBe(2);
       expect(xpResult.newXp).toBe(5);
 
       const logResult = await logXpEvent({
-        playerId: mockPlayerId,
+        userId: testUserId, // Changed from playerId
         amount: 20,
         reason: 'Horse Lightning placed 1st in Racing competition'
       });
@@ -464,43 +463,43 @@ describe('Player Progression System', () => {
     });
 
     test('should handle multiple XP sources in sequence', async() => {
-      mockPrisma.player.findUnique.mockResolvedValueOnce({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.findUnique.mockResolvedValueOnce({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 0
+        // Removed userId field
       });
-      mockPrisma.player.update.mockResolvedValueOnce({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.update.mockResolvedValueOnce({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 5
+        // Removed userId field
       });
 
-      const trainingResult = await addXp(mockPlayerId, 5);
+      const trainingResult = await addXpToUser(testUserId, 5); // Changed from addXp and mockPlayerId
       expect(trainingResult.success).toBe(true);
       expect(trainingResult.newXp).toBe(5);
       expect(trainingResult.leveledUp).toBe(false);
 
-      // Mock for the second call to addXp
-      mockPrisma.player.findUnique.mockResolvedValueOnce({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      // Mock for the second call to addXpToUser
+      mockPrisma.user.findUnique.mockResolvedValueOnce({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 5 // Current XP after training
+        // Removed userId field
       });
-      mockPrisma.player.update.mockResolvedValueOnce({
-        id: mockPlayerId,
-        userId: mockUserId,
-        name: 'TestPlayer',
+      mockPrisma.user.update.mockResolvedValueOnce({ // Changed from player to user
+        id: testUserId,
+        username: 'TestUser', // Changed from name to username
         level: 1,
         xp: 25 // XP after competition (5 + 20)
+        // Removed userId field
       });
 
-      const competitionResult = await addXp(mockPlayerId, 20);
+      const competitionResult = await addXpToUser(testUserId, 20); // Changed from addXp and mockPlayerId
       expect(competitionResult.success).toBe(true);
       expect(competitionResult.newXp).toBe(25);
       expect(competitionResult.leveledUp).toBe(false);

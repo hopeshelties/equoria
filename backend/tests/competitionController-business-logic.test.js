@@ -30,7 +30,7 @@ const { saveResult, getResultsByShow } = await import('../models/resultModel.js'
 const { calculateCompetitionScore } = await import('../utils/competitionScore.js');
 
 describe('Competition Controller Business Logic Tests', () => {
-  let testUser, testPlayer, testBreed, testStable;
+  let testUser, testBreed, testStable; // Removed testPlayer
   let testHorse1, testHorse2, testHorse3;
   let testShow;
 
@@ -62,15 +62,17 @@ describe('Competition Controller Business Logic Tests', () => {
       }
     });
 
-    await prisma.player.deleteMany({
-      where: {
-        email: 'competition@test.com'
-      }
-    });
+    // await prisma.player.deleteMany({ // Removed player deletion
+    //   where: {
+    //     email: 'competition@test.com'
+    //   }
+    // });
 
-    await prisma.user.deleteMany({
+    await prisma.user.deleteMany({ // Keep user deletion for cleanup
       where: {
-        email: 'competition-user@test.com'
+        email: {
+          in: ['competition-user@test.com', 'competition@test.com'] // Added old player email for cleanup
+        }
       }
     });
 
@@ -81,20 +83,25 @@ describe('Competition Controller Business Logic Tests', () => {
         username: 'competitiontester',
         firstName: 'Competition',
         lastName: 'Tester',
-        password: 'testpassword123'
-      }
-    });
-
-    testPlayer = await prisma.player.create({
-      data: {
-        name: 'Competition Player',
-        email: 'competition@test.com',
+        password: 'testpassword123',
+        // Added fields that were previously in Player model
         money: 1000,
         level: 2,
         xp: 100,
         settings: { darkMode: false }
       }
     });
+
+    // testPlayer = await prisma.player.create({ // Removed player creation
+    //   data: {
+    //     name: 'Competition Player',
+    //     email: 'competition@test.com',
+    //     money: 1000,
+    //     level: 2,
+    //     xp: 100,
+    //     settings: { darkMode: false }
+    //   }
+    // });
 
     testBreed = await prisma.breed.findFirst();
     if (!testBreed) {
@@ -130,8 +137,9 @@ describe('Competition Controller Business Logic Tests', () => {
         name: 'Competition Star',
         age: 5,
         breedId: testBreed.id,
-        ownerId: testUser.id,
-        playerId: testPlayer.id,
+        ownerId: testUser.id, // Remains user.id
+        // playerId: testPlayer.id, // This needs to be updated to use testUser.id
+        userId: testUser.id, // Changed from playerId to userId
         stableId: testStable.id,
         sex: 'Stallion',
         date_of_birth: new Date('2019-01-01'),
@@ -154,8 +162,9 @@ describe('Competition Controller Business Logic Tests', () => {
         name: 'Competition Runner',
         age: 4,
         breedId: testBreed.id,
-        ownerId: testUser.id,
-        playerId: testPlayer.id,
+        ownerId: testUser.id, // Remains user.id
+        // playerId: testPlayer.id, // This needs to be updated to use testUser.id
+        userId: testUser.id, // Changed from playerId to userId
         stableId: testStable.id,
         sex: 'Mare',
         date_of_birth: new Date('2020-01-01'),
@@ -178,8 +187,9 @@ describe('Competition Controller Business Logic Tests', () => {
         name: 'Competition Novice',
         age: 3,
         breedId: testBreed.id,
-        ownerId: testUser.id,
-        playerId: testPlayer.id,
+        ownerId: testUser.id, // Remains user.id
+        // playerId: testPlayer.id, // This needs to be updated to use testUser.id
+        userId: testUser.id, // Changed from playerId to userId
         stableId: testStable.id,
         sex: 'Gelding',
         date_of_birth: new Date('2021-01-01'),
@@ -226,15 +236,17 @@ describe('Competition Controller Business Logic Tests', () => {
       }
     });
 
-    await prisma.player.deleteMany({
-      where: {
-        email: 'competition@test.com'
-      }
-    });
+    // await prisma.player.deleteMany({ // Removed player deletion
+    //   where: {
+    //     email: 'competition@test.com'
+    //   }
+    // });
 
-    await prisma.user.deleteMany({
+    await prisma.user.deleteMany({ // Keep user deletion for cleanup
       where: {
-        email: 'competition-user@test.com'
+        email: {
+          in: ['competition-user@test.com', 'competition@test.com'] // Added old player email for cleanup
+        }
       }
     });
 

@@ -10,6 +10,8 @@ import { jest, beforeAll, afterAll } from '@jest/globals';
 // Log the NODE_ENV and DATABASE_URL to confirm they are set correctly for tests
 console.log('JEST_SETUP: NODE_ENV:', process.env.NODE_ENV); // eslint-disable-line no-console
 console.log('JEST_SETUP: DATABASE_URL used for tests:', process.env.DATABASE_URL); // eslint-disable-line no-console
+console.log('[JEST DEBUG] Using DATABASE_URL:', process.env.DATABASE_URL); // eslint-disable-line no-console
+
 
 // Global test timeout
 jest.setTimeout(30000);
