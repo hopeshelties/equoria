@@ -1,27 +1,30 @@
-// backend/prismaClient.js
+// packages/database/prismaClient.js or backend/prismaClient.js
 import dotenv from 'dotenv';
-dotenv.config({ path: process.env.NODE_ENV === 'test' ? '../../backend/env.test' : '../../backend/.env' }); // Adjusted path
-
 import { PrismaClient } from '@prisma/client';
 
+dotenv.config({ path: process.env.NODE_ENV === 'test' ? './env.test' : './.env' });
+
 let prisma;
+
 if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient();
 } else {
+  // Use global to prevent multiple instances during development/hot reloads
   if (!global.__prisma) {
     global.__prisma = new PrismaClient();
   }
   prisma = global.__prisma;
 }
 
-// Register for cleanup during tests
+// For tests: register for cleanup
 if (process.env.NODE_ENV === 'test') {
-  // Import the cleanup function dynamically to avoid circular dependencies
-  import('../../backend/jest.setup.js').then(({ registerPrismaForCleanup }) => {
+  try {
+    // Dynamic import to prevent circular dependency
+    const { registerPrismaForCleanup } = await import('./jest.setup.js');
     registerPrismaForCleanup(prisma);
-  }).catch(() => {
-    // Ignore if jest.setup.js is not available (non-test environments)
-  });
+  } catch (err) {
+    console.warn('[PrismaClient] Could not register for test cleanup:', err.message);
+  }
 }
 
 export default prisma;

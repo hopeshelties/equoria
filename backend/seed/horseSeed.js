@@ -12,11 +12,11 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Validate environment
 if (!process.env.DATABASE_URL) {
-  console.error('[seed] DATABASE_URL environment variable is required');
+  logger.error('[seed] DATABASE_URL environment variable is required');
   process.exit(1);
 }
 
-console.log('[seed] Environment loaded successfully');
+logger.info('[seed] Environment loaded successfully');
 
 // Sample horse data
 const sampleHorses = [
@@ -117,11 +117,11 @@ async function checkHorseExists(name) {
   const { default: prisma } = await import('../db/index.js');
   try {
     const existingHorse = await prisma.horse.findFirst({
-      where: { name },
+      where: { name }
     });
     return existingHorse !== null;
   } catch (error) {
-    console.warn(`[seed] Failed to check if horse "${name}" exists: ${error.message}`);
+    logger.warn(`[seed] Failed to check if horse "${name}" exists: ${error.message}`);
     return false; // Assume it doesn't exist and let creation handle any conflicts
   }
 }
@@ -130,25 +130,25 @@ async function checkHorseExists(name) {
 async function findOrCreateBreed(breedName) {
   const { default: prisma } = await import('../db/index.js');
   if (!breedName) {
-    console.warn('[seed] Breed name is undefined or null. Skipping breed creation/connection.');
+    logger.warn('[seed] Breed name is undefined or null. Skipping breed creation/connection.');
     return null;
   }
   try {
     let breed = await prisma.breed.findUnique({
-      where: { name: breedName },
+      where: { name: breedName }
     });
     if (!breed) {
-      console.log(`[seed] Breed "${breedName}" not found, creating new one.`);
+      logger.info(`[seed] Breed "${breedName}" not found, creating new one.`);
       breed = await prisma.breed.create({
-        data: { name: breedName, description: `Seed-created ${breedName}` },
+        data: { name: breedName, description: `Seed-created ${breedName}` }
       });
-      console.log(`[seed] Created breed: ${breed.name} (ID: ${breed.id})`);
+      logger.info(`[seed] Created breed: ${breed.name} (ID: ${breed.id})`);
     } else {
-      console.log(`[seed] Found existing breed: ${breed.name} (ID: ${breed.id})`);
+      logger.info(`[seed] Found existing breed: ${breed.name} (ID: ${breed.id})`);
     }
     return breed;
   } catch (error) {
-    console.error(`[seed] Failed to find or create breed "${breedName}": ${error.message}`);
+    logger.error(`[seed] Failed to find or create breed "${breedName}": ${error.message}`);
     throw error;
   }
 }
@@ -159,61 +159,59 @@ async function ensureReferencedRecordsExist() {
   try {
     await prisma.user.upsert({
       where: { id: 1 },
-      update: { name: 'Default Owner' },
-      create: { id: 1, name: 'Default Owner' },
+      update: { username: 'Default Owner' }, // Changed name to username
+      create: { id: 1, username: 'Default Owner', email: 'owner1@example.com', password: 'password' } // ensure all required fields
     });
-    console.log('[seed] Ensured User ID 1 exists.');
+    logger.info('[seed] Ensured User ID 1 exists.');
   } catch (e) {
-    console.warn('[seed] Could not ensure User ID 1. Error:', e.message);
+    logger.warn(`[seed] Could not ensure User ID 1. Error: ${e.message}`);
   }
   try {
     await prisma.user.upsert({
       where: { id: 2 },
-      update: { name: 'Second Owner' },
-      create: { id: 2, name: 'Second Owner' },
+      update: { username: 'Second Owner' }, // Changed name to username
+      create: { id: 2, username: 'Second Owner', email: 'owner2@example.com', password: 'password' } // ensure all required fields
     });
-    console.log('[seed] Ensured User ID 2 exists.');
+    logger.info('[seed] Ensured User ID 2 exists.');
   } catch (e) {
-    console.warn('[seed] Could not ensure User ID 2. Error:', e.message);
+    logger.warn(`[seed] Could not ensure User ID 2. Error: ${e.message}`);
   }
   try {
     await prisma.stable.upsert({
       where: { id: 1 },
-      update: { name: 'Main Stable'},
-      create: { id: 1, name: 'Main Stable' },
+      update: { name: 'Main Stable' },
+      create: { id: 1, name: 'Main Stable' }
     });
-    console.log('[seed] Ensured Stable ID 1 exists.');
+    logger.info('[seed] Ensured Stable ID 1 exists.');
   } catch (e) {
-    console.warn('[seed] Could not ensure Stable ID 1. Error:', e.message);
+    logger.warn(`[seed] Could not ensure Stable ID 1. Error: ${e.message}`);
   }
   try {
     await prisma.stable.upsert({
       where: { id: 2 },
       update: { name: 'Second Stable' },
-      create: { id: 2, name: 'Second Stable' },
+      create: { id: 2, name: 'Second Stable' }
     });
-    console.log('[seed] Ensured Stable ID 2 exists.');
+    logger.info('[seed] Ensured Stable ID 2 exists.');
   } catch (e) {
-    console.warn('[seed] Could not ensure Stable ID 2. Error:', e.message);
+    logger.warn(`[seed] Could not ensure Stable ID 2. Error: ${e.message}`);
   }
 }
 
 // Seed horses function
-const seedHorses = async (prisma, users) => {
+const seedHorses = async(prisma, users) => {
   if (!users || users.length === 0) {
     logger.warn('No users provided for horse seeding. Skipping horse creation.');
     return [];
   }
 
-  // Assuming the first user in the array is the one to own the horses for simplicity
-  // In a real scenario, you might have more complex logic to assign horses.
-  const owner = users[0]; 
+  const owner = users[0];
 
   const breedsData = [
     { name: 'Thoroughbred', baseSpeed: 80, baseStamina: 70, baseStrength: 60, rarity: 'Common' },
     { name: 'Arabian', baseSpeed: 75, baseStamina: 80, baseStrength: 50, rarity: 'Rare' },
     { name: 'Quarter Horse', baseSpeed: 70, baseStamina: 60, baseStrength: 80, rarity: 'Common' },
-    { name: 'Akhal-Teke', baseSpeed: 85, baseStamina: 75, baseStrength: 65, rarity: 'Epic' },
+    { name: 'Akhal-Teke', baseSpeed: 85, baseStamina: 75, baseStrength: 65, rarity: 'Epic' }
   ];
 
   const createdBreeds = [];
@@ -222,13 +220,12 @@ const seedHorses = async (prisma, users) => {
       const breed = await prisma.breed.upsert({
         where: { name: breedData.name },
         update: breedData,
-        create: breedData,
+        create: breedData
       });
       logger.info(`Upserted breed: ${breed.name}`);
       createdBreeds.push(breed);
     } catch (error) {
       logger.error(`Error seeding breed ${breedData.name}: ${error.message}`);
-      // Decide if you want to throw or continue
     }
   }
 
@@ -239,7 +236,8 @@ const seedHorses = async (prisma, users) => {
       sex: 'Stallion',
       color: 'Bay',
       breedId: createdBreeds.find(b => b.name === 'Thoroughbred')?.id,
-      ownerId: owner.id, // Link to the owner
+      ownerId: owner.id,
+      userId: owner.id, // Added userId
       speed: 82,
       stamina: 72,
       strength: 62,
@@ -248,7 +246,7 @@ const seedHorses = async (prisma, users) => {
       intelligence: 60,
       temperament: 'Spirited',
       health: 100,
-      forSale: false,
+      forSale: false
     },
     {
       name: 'Desert Rose',
@@ -256,7 +254,8 @@ const seedHorses = async (prisma, users) => {
       sex: 'Mare',
       color: 'Chestnut',
       breedId: createdBreeds.find(b => b.name === 'Arabian')?.id,
-      ownerId: owner.id, // Link to the owner
+      ownerId: owner.id,
+      userId: owner.id, // Added userId
       speed: 78,
       stamina: 83,
       strength: 52,
@@ -266,9 +265,8 @@ const seedHorses = async (prisma, users) => {
       temperament: 'Gentle',
       health: 100,
       forSale: true,
-      price: 15000,
-    },
-    // Add more horses as needed
+      price: 15000
+    }
   ];
 
   const createdHorses = [];
@@ -279,50 +277,128 @@ const seedHorses = async (prisma, users) => {
     }
     try {
       const horse = await prisma.horse.create({
-        data: horseData,
+        data: horseData
       });
       logger.info(`Created horse: ${horse.name} for user ID: ${owner.id}`);
       createdHorses.push(horse);
     } catch (error) {
       logger.error(`Error seeding horse ${horseData.name}: ${error.message}`);
-      // Decide if you want to throw or continue
     }
   }
   return createdHorses;
 };
 
+async function seedUserWithHorses() {
+  const { default: prisma } = await import('../db/index.js');
+  logger.info('[seed] Attempting to seed a user with horses...');
+  let userToSeed = await prisma.user.findFirst({ where: { email: 'seeduserwithhorses@example.com' } });
+
+  if (!userToSeed) {
+    logger.info('[seed] User seeduserwithhorses@example.com not found, creating new one.');
+    try {
+      userToSeed = await prisma.user.create({
+        data: {
+          email: 'seeduserwithhorses@example.com',
+          username: 'UserWithHorses',
+          firstName: 'Seed',
+          lastName: 'User',
+          password: 'securepassword123', // Ensure this is hashed in a real app
+          money: 20000,
+          level: 1,
+          xp: 0,
+          settings: { tutorialCompleted: true }
+        }
+      });
+      logger.info(`[seed] Created user: ${userToSeed.username} (ID: ${userToSeed.id})`);
+    } catch (error) {
+      logger.error(`[seed] Failed to create user seeduserwithhorses@example.com: ${error.message}`);
+      return false; // Indicate failure
+    }
+  } else {
+    logger.info(`[seed] Found existing user: ${userToSeed.username} (ID: ${userToSeed.id})`);
+  }
+
+  if (userToSeed) {
+    logger.info(`[seed] Seeding horses for user: ${userToSeed.username}`);
+    await seedHorses(prisma, [userToSeed]); // Pass user in an array as expected by seedHorses
+    return true; // Indicate success
+  }
+  return false; // Indicate failure if user could not be found or created
+}
+
+async function checkUserExists(userId) {
+  const { default: prisma } = await import('../db/index.js');
+  if (!userId) {
+    logger.warn('[seed] checkUserExists called with no userId.');
+    return false;
+  }
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (user) {
+      logger.info(`[seed] User with ID ${userId} exists.`);
+      return true;
+    }
+    logger.info(`[seed] User with ID ${userId} does not exist.`);
+    return false;
+  } catch (error) {
+    logger.error(`[seed] Error checking if user ${userId} exists: ${error.message}`);
+    return false; // Assume user doesn't exist on error
+  }
+}
+
 // Main seeding function
 async function main() {
   try {
     const { default: prisma } = await import('../db/index.js');
-    
-    console.log('[seed] Starting comprehensive seeding process...');
-    
-    const horseSuccess = await seedHorses(prisma, [ 
-      { id: 1, name: 'Default Owner' }, 
-      { id: 2, name: 'Second Owner' } 
-    ]);
-    const playerSuccess = await seedPlayerWithHorses();
-    
-    if (!horseSuccess || !playerSuccess) {
-      console.error('[seed] Seeding completed with issues. Exiting with error code.');
+
+    logger.info('[seed] Starting comprehensive seeding process...');
+
+    // Ensure some base users exist for general horse seeding if needed
+    await ensureReferencedRecordsExist();
+
+    // Get some users to assign horses to, or create a default if none exist
+    const usersToSeed = await prisma.user.findMany({ take: 2 });
+    if (usersToSeed.length === 0) {
+      logger.warn('[seed] No users found in DB. Creating a default one for general horse seeding.');
+      const defaultUser = await prisma.user.create({
+        data: {
+          email: 'defaultseedowner@example.com',
+          username: 'DefaultSeedOwner',
+          firstName: 'Default',
+          lastName: 'Owner',
+          password: 'password123',
+          money: 50000,
+          level: 1,
+          xp: 0,
+          settings: {}
+        }
+      });
+      usersToSeed.push(defaultUser);
+      logger.info(`[seed] Created default user ${defaultUser.username} for general horse seeding.`);
+    }
+
+    const generalHorseSeedSuccess = await seedHorses(prisma, usersToSeed);
+    const userWithHorsesSuccess = await seedUserWithHorses();
+
+    if (!generalHorseSeedSuccess || !userWithHorsesSuccess) {
+      logger.error('[seed] Seeding completed with issues. Exiting with error code.');
       process.exit(1);
     }
-    
-    console.log('[seed] All seeding operations completed successfully.');
-    
+
+    logger.info('[seed] All seeding operations completed successfully.');
+
     await prisma.$disconnect();
-    console.log('[seed] Prisma client disconnected.');
-    
+    logger.info('[seed] Prisma client disconnected.');
+
   } catch (error) {
-    console.error('[seed] Fatal error during seeding process:', error.message);
-    console.error('[seed] Fatal error stack:', error.stack);
+    logger.error(`[seed] Fatal error during seeding process: ${error.message}`);
+    logger.error(`[seed] Fatal error stack: ${error.stack}`);
     process.exit(1);
   }
 }
 
 // Export functions for testing
-export { sampleHorses, findOrCreateBreed, ensureReferencedRecordsExist, checkHorseExists, seedHorses, seedPlayerWithHorses, checkPlayerExists };
+export { sampleHorses, findOrCreateBreed, ensureReferencedRecordsExist, checkHorseExists, seedHorses, seedUserWithHorses, checkUserExists };
 
 // Only run the main function if this script is executed directly (not imported)
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('horseSeed.js')) {
