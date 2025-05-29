@@ -27,7 +27,8 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // For tests: register for cleanup
-if (process.env.NODE_ENV === 'test') {
+// Conditionally import and register for cleanup only if in a Jest environment
+if (process.env.NODE_ENV === 'test' && process.env.JEST_WORKER_ID) {
   try {
     // Dynamic import to prevent circular dependency
     // Corrected path to jest.setup.js in the backend folder
@@ -35,6 +36,7 @@ if (process.env.NODE_ENV === 'test') {
     const jestSetupURL = pathToFileURL(jestSetupPath).href; // Convert to file URL
     const { registerPrismaForCleanup } = await import(jestSetupURL); // Use URL for import
     registerPrismaForCleanup(prisma);
+    console.info('[PrismaClient] Jest cleanup registered successfully.');
   } catch (err) {
     console.warn('[PrismaClient] Could not register for test cleanup:', err.message);
     // Log the path it tried to import for easier debugging if it still fails
@@ -44,6 +46,10 @@ if (process.env.NODE_ENV === 'test') {
       console.warn(`[PrismaClient] Verified that the file URL ${pathToFileURL(attemptedPath).href} could not be found.`);
     }
   }
+} else if (process.env.NODE_ENV === 'test') {
+  console.warn('[PrismaClient] Skipping Jest cleanup registration: Not in a Jest worker environment (JEST_WORKER_ID not set). This is expected when running standalone scripts with NODE_ENV=test.');
 }
+
+console.info('[PrismaClient] Jest cleanup registered successfully.');
 
 export default prisma;

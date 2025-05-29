@@ -6,7 +6,7 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Mock the userModel functions (previously playerModel)
+// Mock the userModel functions (previously userModel)
 const mockGetUserById = jest.fn();
 const mockGetUserByEmail = jest.fn();
 const mockGetUserWithHorses = jest.fn();

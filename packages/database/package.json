@@ -3,18 +3,28 @@
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+"scripts": {
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "generate": "npx prisma generate --schema=../packages/database/prisma/schema.prisma",
+  "studio": "npx prisma studio --schema=../packages/database/prisma/schema.prisma",
+  "lint": "eslint .",
+  "lint:fix": "eslint . --fix",
+  "migrate": "node scripts/migrate.js",
+  "migrate:dev": "npx prisma migrate dev --schema=../packages/database/prisma/schema.prisma",
+  "migrate:reset": "npx prisma migrate reset --schema=../packages/database/prisma/schema.prisma"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "prisma": {
-    "schema": "prisma/schema.prisma"
-  },
+  "schema": "./packages/database/prisma/schema.prisma"
+},
   "devDependencies": {
     "@prisma/client": "^6.8.2",
     "prisma": "^6.8.2"
+  },
+  "rules": {
+    "no-console": "off"
   }
 }

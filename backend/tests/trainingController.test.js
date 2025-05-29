@@ -16,7 +16,7 @@ const mockIncrementDisciplineScore = jest.fn();
 const mockGetHorseById = jest.fn();
 const mockUpdateHorseStat = jest.fn();
 
-// Mock the playerModel functions
+// Mock the userModel functions
 const mockGetPlayerWithHorses = jest.fn();
 const mockAddXp = jest.fn();
 const mockLevelUpIfNeeded = jest.fn();

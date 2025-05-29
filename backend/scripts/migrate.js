@@ -1,24 +1,17 @@
 #!/usr/bin/env node
-
-/**
- * Database Migration Script
- * Handles database migrations for production deployment
- */
+/* eslint-disable no-console */
 
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { execSync } from 'child_process';
 import dotenv from 'dotenv';
 
-// Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables
-const envPath = path.resolve(__dirname, '../.env');
-dotenv.config({ path: envPath });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const { DATABASE_URL } = process.env;
 
 if (!DATABASE_URL) {
   console.error('❌ DATABASE_URL environment variable is required');
@@ -27,19 +20,20 @@ if (!DATABASE_URL) {
 
 console.log('🔄 Starting database migration...');
 
+// Pass CLI arg as migration name (optional)
+const migrationName = process.argv[2] || 'auto-migration';
+
 try {
-  // Change to the database package directory
   const databaseDir = path.resolve(__dirname, '../../packages/database');
   process.chdir(databaseDir);
-  
+
   console.log('📦 Generating Prisma client...');
-  execSync('npx prisma generate', { stdio: 'inherit' });
-  
+  execSync('npx prisma generate --schema=prisma/schema.prisma', { stdio: 'inherit' });
+
   console.log('🗄️ Running database migrations...');
-  execSync('npx prisma migrate deploy', { stdio: 'inherit' });
-  
+  execSync(`npx prisma migrate dev --name ${migrationName} --schema=prisma/schema.prisma`, { stdio: 'inherit' });
+
   console.log('✅ Database migration completed successfully!');
-  
 } catch (error) {
   console.error('❌ Database migration failed:', error.message);
   process.exit(1);

@@ -7,309 +7,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Horse {
-  id        Int      @id @default(autoincrement())
-  name      String
-  age       Int
-  createdAt DateTime @default(now())
-
-  breed   Breed @relation(fields: [breedId], references: [id])
-  breedId Int
-
-  user     User @relation(fields: [userId], references: [id])
-  userId   String // Changed from Int to String
-
-  stable   Stable? @relation(fields: [stableId], references: [id])
-  stableId Int?
-
-  sex                   String?
-  date_of_birth         DateTime?
-  genotype              Json?
-  phenotypic_markings   Json?
-  final_display_color   String?
-  shade                 String?
-  image_url             String?
-  trait                 String?
-  temperament           String?
-  // Core stats for competition scoring (all 10 stat categories)
-  speed                 Int?
-  stamina               Int?
-  agility               Int?
-  balance               Int?
-  precision             Int?
-  intelligence          Int?
-  boldness              Int?
-  flexibility           Int?
-  obedience             Int?
-  focus                 Int?
-
-  // Legacy stats (keeping for backward compatibility)
-  strength              Int?
-  endurance             Int?
-  personality           String?
-  total_earnings        Float?
-  sire_id               Int?
-  dam_id                Int?
-  stud_status           String?
-  stud_fee              Float?
-  last_bred_date        DateTime?
-  for_sale              Boolean? @default(false)
-  sale_price            Float? @default(0)
-  health_status         String?
-  last_vetted_date      DateTime?
-  tack                  Json?
-  trainingCooldown      DateTime?
-  earnings              Float?   @default(0)
-  rider                 Json?    // Required for competition entry
-  disciplineScores      Json?    // Stores discipline scores as {"Dressage": 10, "Show Jumping": 20, ...}
-
-  // New bonding and stress tracking fields
-  bond_score            Int?     @default(50)  // Bonding score between horse and handler (0-100)
-  stress_level          Int?     @default(0)   // Current stress level of the horse (0-100)
-
-  // Epigenetic traits system
-  epigenetic_modifiers  Json?    @default("{\"positive\": [], \"negative\": [], \"hidden\": []}")  // Traits revealed through foal development
-
-  competitionResults    CompetitionResult[]
-  trainingLogs          TrainingLog[]
-  foalDevelopment       FoalDevelopment?
-  foalActivities        FoalActivity[]
-  foalTrainingHistory   FoalTrainingHistory[]
-  groomAssignments      GroomAssignment[]
-  groomInteractions     GroomInteraction[]
-}
-
-model Breed {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  horses Horse[]
-}
-
 model User {
-  id        String   @id @default(uuid()) // Changed from Int @id @default(autoincrement())
-  email     String   @unique
+  /// Unique identifier for each user
+  id        String   @id @default(uuid())
+
+  /// Username used for login or display
   username  String   @unique
+
+  /// Email address (must be unique)
+  email     String   @unique
+
+  /// Hashed password
   password  String
+
+  /// First and last name for display purposes
   firstName String
   lastName  String
-  role      String   @default("user") // user, admin
+
+  /// In-game currency (or balance)
+  money     Int      @default(1000)
+
+  /// Current level of the user
+  level     Int      @default(1)
+
+  /// Experience points toward next level
+  xp        Int      @default(0)
+
+  /// JSON object for customizable settings (theme, preferences, etc.)
+  settings  Json     @default("{}")
+
+  /// Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Fields from Player model
-  name     String? // Made optional as per previous merge logic
-  money    Int     @default(1000)
-  level    Int     @default(1)
-  xp       Int     @default(0)
-  settings Json    @default("{}")
+  /// Relations
+  horses    Horse[]
 
-  // Relationships moved from Player model
-  horses            Horse[]
-  grooms            Groom[]
-  groomAssignments  GroomAssignment[]
-  xpEvents          XpEvent[]
-
-  // player Player? // This relation is removed as Player model is merged
-
-  @@map("users")
+  @@index([email])
 }
 
-model Stable {
-  id   Int     @id @default(autoincrement())
-  name String?
+model Horse {
+  /// Unique identifier for each horse
+  id        String   @id @default(uuid())
 
-  horses Horse[]
-}
+  /// Name of the horse
+  name      String
 
-model Show {
-  id         Int      @id @default(autoincrement())
-  name       String   @unique
-  discipline String
-  levelMin   Int
-  levelMax   Int
-  entryFee   Int
-  prize      Int
-  runDate    DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  hostUserId String?  // Changed from hostPlayer String?
+  /// Foreign key pointing to the owner (User)
+  userId    String
+  owner     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  competitionResults CompetitionResult[]
+  /// Additional fields should be added here as needed...
 
-  @@map("shows")
-}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-model CompetitionResult {
-  id         Int      @id @default(autoincrement())
-  score      Float
-  placement  String?
-  discipline String
-  runDate    DateTime
-  createdAt  DateTime @default(now())
-  showName   String   // Store show name for history
-  prizeWon   Float?   @default(0)
-  statGains  Json?    // Store any stat increases from winning
-
-  horse   Horse @relation(fields: [horseId], references: [id])
-  horseId Int
-
-  show   Show @relation(fields: [showId], references: [id])
-  showId Int
-
-  @@map("competition_results")
-}
-
-model TrainingLog {
-  id         Int      @id @default(autoincrement())
-  discipline String
-  trainedAt  DateTime @default(now())
-
-  horse   Horse @relation(fields: [horseId], references: [id])
-  horseId Int
-
-  @@map("training_logs")
-}
-
-model FoalDevelopment {
-  id                  Int      @id @default(autoincrement())
-  currentDay          Int      @default(0)
-  bondingLevel        Int      @default(50)
-  stressLevel         Int      @default(20)
-  completedActivities Json     @default("{}")
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-
-  foal   Horse @relation(fields: [foalId], references: [id])
-  foalId Int   @unique
-
-  @@map("foal_development")
-}
-
-model FoalActivity {
-  id            Int      @id @default(autoincrement())
-  day           Int
-  activityType  String
-  outcome       String
-  bondingChange Int
-  stressChange  Int
-  description   String
-  createdAt     DateTime @default(now())
-
-  foal   Horse @relation(fields: [foalId], references: [id])
-  foalId Int
-
-  @@map("foal_activities")
-}
-
-model FoalTrainingHistory {
-  id           String   @id @default(uuid())
-  day          Int      // Development day (0-6) when activity occurred
-  activity     String   // Type of training activity performed
-  outcome      String   // Result/outcome of the training activity
-  bond_change  Int      @default(0)  // Change in bonding score (-50 to +50)
-  stress_change Int     @default(0)  // Change in stress level (-50 to +50)
-  timestamp    DateTime @default(now())  // When the activity was performed
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  horse   Horse @relation(fields: [horse_id], references: [id], onDelete: Cascade)
-  horse_id Int
-
-  @@map("foal_training_history")
-  @@index([horse_id])
-  @@index([day])
-  @@index([timestamp])
-  @@index([horse_id, day])
-}
-
-model Groom {
-  id          Int      @id @default(autoincrement())
-  name        String
-  speciality  String   // "foal_care", "general", "training", "medical"
-  experience  Int      @default(1) // Years of experience (1-20)
-  skill_level String   @default("novice") // "novice", "intermediate", "expert", "master"
-  personality String   // "gentle", "energetic", "patient", "strict"
-  hourly_rate Float    @default(15.0) // Cost per hour
-  availability Json    @default("{}") // Available days/hours
-  bio         String?  // Optional biography
-  image_url   String?  // Optional profile image
-  is_active   Boolean  @default(true)
-  hired_date  DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  assignments   GroomAssignment[]
-  interactions  GroomInteraction[]
-  user          User?    @relation(fields: [userId], references: [id]) // Changed from player to user
-  userId        String?     // Changed from Int? to String?
-
-  @@map("grooms")
-}
-
-model GroomAssignment {
-  id          Int      @id @default(autoincrement())
-  startDate   DateTime @default(now())
-  endDate     DateTime?
-  isActive    Boolean  @default(true)
-  isDefault   Boolean  @default(false) // System-assigned default groom
-  priority    Int      @default(1) // 1 = primary, 2 = backup, etc.
-  notes       String?  // Assignment notes
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  foal        Horse @relation(fields: [foalId], references: [id], onDelete: Cascade)
-  foalId      Int
-  groom       Groom @relation(fields: [groomId], references: [id], onDelete: Cascade)
-  groomId     Int
-  user        User?    @relation(fields: [userId], references: [id]) // Changed from player to user
-  userId      String?     // Changed from Int? to String?
-  interactions GroomInteraction[]
-
-  @@unique([foalId, groomId, isActive]) // This unique constraint might need review if playerId was part of it before
-  @@map("groom_assignments")
-}
-
-model GroomInteraction {
-  id              Int      @id @default(autoincrement())
-  interactionType String   // "daily_care", "feeding", "grooming", "exercise", "medical_check"
-  duration        Int      // Duration in minutes
-  bondingChange   Int      @default(0) // Change in bonding score (-10 to +10)
-  stressChange    Int      @default(0) // Change in stress level (-10 to +10)
-  quality         String   @default("good") // "poor", "fair", "good", "excellent"
-  notes           String?  // Optional interaction notes
-  cost            Float    @default(0.0) // Cost of this interaction
-  timestamp       DateTime @default(now())
-  createdAt       DateTime @default(now())
-
-  // Relations
-  foal            Horse @relation(fields: [foalId], references: [id], onDelete: Cascade)
-  foalId          Int
-  groom           Groom @relation(fields: [groomId], references: [id], onDelete: Cascade)
-  groomId         Int
-  assignment      GroomAssignment? @relation(fields: [assignmentId], references: [id])
-  assignmentId    Int?
-
-  @@map("groom_interactions")
-}
-
-model XpEvent {
-  id        Int      @id @default(autoincrement())
-  amount    Int      // Amount of XP gained/lost (positive or negative)
-  reason    String   // Reason for XP change (e.g., "Trained horse in Dressage")
-  timestamp DateTime @default(now())
-
-  // Relations
-  user     User @relation(fields: [userId], references: [id], onDelete: Cascade) // Changed from player to user
-  userId   String  // Changed from Int to String
-
-  @@map("xp_events")
-  @@index([userId]) // Changed from playerId
-  @@index([timestamp])
-  @@index([userId, timestamp]) // Changed from playerId
+  @@index([userId])
 }

@@ -6,6 +6,13 @@
 
 A comprehensive horse breeding and competition simulation game backend built with Node.js, Express, and PostgreSQL.
 
+## Copilot Rules
+- Review the Equoria\copilot folder. 
+- Review copilot-rules.md after every completed task
+- Review DEV_NOTES.md and utilize it
+- Review PROJECT_MILESTONES.md and utilize it
+- Review .copilotignore
+
 ## 🌟 Features
 
 - **🏇 Competition System**: Advanced horse competition simulation with realistic scoring

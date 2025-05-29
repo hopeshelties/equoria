@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-// 🎯 Updated import from playerModel.js to userModel.js and function names
+// 🎯 Updated import from userModel.js to userModel.js and function names
 import { createUser, getUserById, getUserWithHorses } from '../../backend/models/userModel.js';
 import { createHorse } from '../../backend/models/horseModel.js';
 

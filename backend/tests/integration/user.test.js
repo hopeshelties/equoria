@@ -6,14 +6,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Mock the player model
-jest.unstable_mockModule(join(__dirname, '../../models/playerModel.js'), () => ({
-  getPlayerById: jest.fn(),
-  getPlayerWithHorses: jest.fn(),
-  getPlayerByEmail: jest.fn()
+jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
+  getUserById: jest.fn(),
+  getUserWithHorses: jest.fn(),
+  getUserByEmail: jest.fn()
 }));
 
 // Import the mocked functions
-const { getPlayerById, getPlayerWithHorses, getPlayerByEmail } = await import('../../models/playerModel.js');
+const { getUserById, getUserWithHorses, getUserByEmail } = await import('../../models/userModel.js');
 
 describe('Player Integration Tests - Mocked Database', () => {
   const testPlayerId = 'test-player-uuid-123';
@@ -53,9 +53,9 @@ describe('Player Integration Tests - Mocked Database', () => {
     jest.clearAllMocks();
 
     // Setup default mock responses
-    getPlayerById.mockResolvedValue(mockPlayer);
-    getPlayerByEmail.mockResolvedValue(mockPlayer);
-    getPlayerWithHorses.mockResolvedValue({
+    getUserById.mockResolvedValue(mockPlayer);
+    getUserByEmail.mockResolvedValue(mockPlayer);
+    getUserWithHorses.mockResolvedValue({
       ...mockPlayer,
       horses: mockHorses
     });
@@ -63,7 +63,7 @@ describe('Player Integration Tests - Mocked Database', () => {
 
   describe('Player Retrieval from Seeded Data', () => {
     test('should retrieve the seeded player by ID', async() => {
-      const player = await getPlayerById(testPlayerId);
+      const player = await getUserById(testPlayerId);
 
       expect(player).toBeDefined();
       expect(player.id).toBe(testPlayerId);
@@ -75,7 +75,7 @@ describe('Player Integration Tests - Mocked Database', () => {
     });
 
     test('should retrieve the seeded player by email', async() => {
-      const player = await getPlayerByEmail(testPlayerEmail);
+      const player = await getUserByEmail(testPlayerEmail);
 
       expect(player).toBeDefined();
       expect(player.id).toBe(testPlayerId);
@@ -84,9 +84,9 @@ describe('Player Integration Tests - Mocked Database', () => {
     });
 
     test('should return null for non-existent player', async() => {
-      getPlayerById.mockResolvedValueOnce(null);
+      getUserById.mockResolvedValueOnce(null);
 
-      const player = await getPlayerById('nonexistent-uuid-456');
+      const player = await getUserById('nonexistent-uuid-456');
 
       expect(player).toBeNull();
     });
@@ -94,7 +94,7 @@ describe('Player Integration Tests - Mocked Database', () => {
 
   describe('Player with Horses Relationship', () => {
     test('should retrieve player with their 2 horses', async() => {
-      const playerWithHorses = await getPlayerWithHorses(testPlayerId);
+      const playerWithHorses = await getUserWithHorses(testPlayerId);
 
       expect(playerWithHorses).toBeDefined();
       expect(playerWithHorses.id).toBe(testPlayerId);
@@ -112,7 +112,7 @@ describe('Player Integration Tests - Mocked Database', () => {
     });
 
     test('should include breed information for horses', async() => {
-      const playerWithHorses = await getPlayerWithHorses(testPlayerId);
+      const playerWithHorses = await getUserWithHorses(testPlayerId);
 
       expect(playerWithHorses.horses).toHaveLength(2);
 
@@ -125,7 +125,7 @@ describe('Player Integration Tests - Mocked Database', () => {
 
   describe('JSON Settings Field', () => {
     test('should confirm JSON settings field exists and includes darkMode = true', async() => {
-      const player = await getPlayerById(testPlayerId);
+      const player = await getUserById(testPlayerId);
 
       expect(player.settings).toBeDefined();
       expect(typeof player.settings).toBe('object');
@@ -140,7 +140,7 @@ describe('Player Integration Tests - Mocked Database', () => {
     test('should confirm unique email constraint', async() => {
       // This test verifies that the unique constraint on email is working
       // by checking that only one player exists with the test email
-      const player = await getPlayerByEmail(testPlayerEmail);
+      const player = await getUserByEmail(testPlayerEmail);
 
       expect(player).toBeDefined();
       expect(player.id).toBe(testPlayerId);

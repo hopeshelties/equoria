@@ -8,26 +8,42 @@
     "test": "cross-env NODE_ENV=test NODE_OPTIONS=\"--experimental-vm-modules --trace-warnings\" jest --config jest.config.mjs --detectOpenHandles --forceExit",
     "test:watch": "cross-env NODE_ENV=test NODE_OPTIONS=\"--experimental-vm-modules\" jest --config jest.config.mjs --watch",
     "test:coverage": "cross-env NODE_ENV=test NODE_OPTIONS=\"--experimental-vm-modules\" jest --config jest.config.mjs --coverage",
+
     "dev": "nodemon server.js",
     "start": "node server.js",
+    "start:prod": "cross-env NODE_ENV=production node server.js",
+
     "seed": "node seed/horseSeed.js",
     "seed:dev": "cross-env NODE_ENV=development node seed/horseSeed.js",
     "seed:shows": "node seed/seedShows.js",
     "seed:shows:dev": "cross-env NODE_ENV=development node seed/seedShows.js",
+
+    "generate": "npx prisma generate --schema=../packages/database/prisma/schema.prisma",
+    "studio": "npx prisma studio --schema=../packages/database/prisma/schema.prisma",
+
+    "migrate": "node scripts/migrate.js",
+    "migrate:dev": "npx prisma migrate dev --schema=../packages/database/prisma/schema.prisma",
+    "migrate:reset": "npx prisma migrate reset --schema=../packages/database/prisma/schema.prisma",
+    "migrate:deploy": "npx prisma migrate deploy --schema=../packages/database/prisma/schema.prisma",
+    "migrate:status": "npx prisma migrate status --schema=../packages/database/prisma/schema.prisma",
+
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+
     "prepare": "husky install",
     "pre-commit": "lint-staged",
-    "migrate": "node scripts/migrate.js",
-    "build": "echo 'No build step required for Node.js'",
     "postinstall": "npm run migrate",
+
     "health": "curl -f http://localhost:3000/health || exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "prisma": {
+    "schema": "../packages/database/prisma/schema.prisma"
+  },
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "bcryptjs": "^3.0.2",

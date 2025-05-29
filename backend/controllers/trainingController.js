@@ -219,11 +219,11 @@ async function trainHorse(horseId, discipline) {
     // Award XP to horse owner for training
     try {
       if (updatedHorse && updatedHorse.playerId) {
-        // Award XP using playerModel.addXp (use playerId for User model, not ownerId for User model)
+        // Award XP using userModel.addXp (use userId for User model, not ownerId for User model)
         const xpResult = await addXp(updatedHorse.playerId, baseXp);
 
         // Call levelUpIfNeeded after awarding XP (as requested in task)
-        const levelUpResult = await levelUpIfNeeded(updatedHorse.playerId);
+        const _levelUpResult = await levelUpIfNeeded(updatedHorse.playerId);
 
         // Log XP event for auditing
         await logXpEvent({

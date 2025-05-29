@@ -40,7 +40,7 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 }));
 
 // Import modules after mocking
-// Changed playerModel.js to userModel.js and function names
+// Changed userModel.js to userModel.js and function names
 const { addXpToUser, getUserProgress } = await import(join(__dirname, '../models/userModel.js'));
 // Changed getPlayerXpEvents to getUserXpEvents
 const { logXpEvent, getUserXpEvents } = await import(join(__dirname, '../models/xpLogModel.js'));

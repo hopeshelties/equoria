@@ -35,7 +35,7 @@ async function seedTestData() {
       console.log(`✅ Player already exists: ${existingPlayer.name} (ID: ${existingPlayer.id})`);
       testPlayer = existingPlayer;
     } else {
-      // Create player using the playerModel function
+      // Create player using the userModel function
       const playerData = {
         name: 'Test Player',
         email: 'test-player@example.com',
