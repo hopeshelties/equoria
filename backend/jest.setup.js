@@ -45,8 +45,8 @@ afterAll(async() => {
 
 // Global error handler for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-}); // eslint-disable-line no-console
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason); // eslint-disable-line no-console
+});
 
 // Export functions for Prisma cleanup
 export function registerPrismaForCleanup(prisma) {
