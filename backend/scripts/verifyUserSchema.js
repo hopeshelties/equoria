@@ -1,6 +1,6 @@
 /**
  * Schema Verification Script for Player Model
- * 
+ *
  * This script verifies that the players table has the required columns
  * Run with: node scripts/verifyPlayerSchema.js
  */
@@ -70,14 +70,14 @@ async function verifyPlayerSchema() {
 
   } catch (error) {
     console.error('❌ Schema verification failed:', error.message);
-    
+
     if (error.message.includes('Unknown column') || error.message.includes('column') || error.message.includes('field')) {
       console.error('\n💡 Possible Issues:');
       console.error('- Missing level or xp columns in players table');
       console.error('- Incorrect column types (should be INTEGER)');
       console.error('- Database migration needed');
     }
-    
+
     logger.error('[verifyPlayerSchema] Schema error: %o', error);
     throw error;
   }

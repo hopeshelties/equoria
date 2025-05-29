@@ -62,7 +62,7 @@ describe('Player Integration Tests - Mocked Database', () => {
   });
 
   describe('Player Retrieval from Seeded Data', () => {
-    test('should retrieve the seeded player by ID', async () => {
+    test('should retrieve the seeded player by ID', async() => {
       const player = await getPlayerById(testPlayerId);
 
       expect(player).toBeDefined();
@@ -74,7 +74,7 @@ describe('Player Integration Tests - Mocked Database', () => {
       expect(player.xp).toBe(1000);
     });
 
-    test('should retrieve the seeded player by email', async () => {
+    test('should retrieve the seeded player by email', async() => {
       const player = await getPlayerByEmail(testPlayerEmail);
 
       expect(player).toBeDefined();
@@ -83,7 +83,7 @@ describe('Player Integration Tests - Mocked Database', () => {
       expect(player.email).toBe(testPlayerEmail);
     });
 
-    test('should return null for non-existent player', async () => {
+    test('should return null for non-existent player', async() => {
       getPlayerById.mockResolvedValueOnce(null);
 
       const player = await getPlayerById('nonexistent-uuid-456');
@@ -93,7 +93,7 @@ describe('Player Integration Tests - Mocked Database', () => {
   });
 
   describe('Player with Horses Relationship', () => {
-    test('should retrieve player with their 2 horses', async () => {
+    test('should retrieve player with their 2 horses', async() => {
       const playerWithHorses = await getPlayerWithHorses(testPlayerId);
 
       expect(playerWithHorses).toBeDefined();
@@ -111,7 +111,7 @@ describe('Player Integration Tests - Mocked Database', () => {
       });
     });
 
-    test('should include breed information for horses', async () => {
+    test('should include breed information for horses', async() => {
       const playerWithHorses = await getPlayerWithHorses(testPlayerId);
 
       expect(playerWithHorses.horses).toHaveLength(2);
@@ -124,7 +124,7 @@ describe('Player Integration Tests - Mocked Database', () => {
   });
 
   describe('JSON Settings Field', () => {
-    test('should confirm JSON settings field exists and includes darkMode = true', async () => {
+    test('should confirm JSON settings field exists and includes darkMode = true', async() => {
       const player = await getPlayerById(testPlayerId);
 
       expect(player.settings).toBeDefined();
@@ -137,7 +137,7 @@ describe('Player Integration Tests - Mocked Database', () => {
   });
 
   describe('Database Constraints', () => {
-    test('should confirm unique email constraint', async () => {
+    test('should confirm unique email constraint', async() => {
       // This test verifies that the unique constraint on email is working
       // by checking that only one player exists with the test email
       const player = await getPlayerByEmail(testPlayerEmail);
