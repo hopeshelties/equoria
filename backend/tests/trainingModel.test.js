@@ -34,7 +34,7 @@ describe('trainingModel', () => {
   });
 
   describe('logTrainingSession', () => {
-    it('should log a training session with all required fields', async () => {
+    it('should log a training session with all required fields', async() => {
       const mockResult = {
         id: 1,
         horseId: 5,
@@ -60,17 +60,17 @@ describe('trainingModel', () => {
       expect(result).toEqual(mockResult);
     });
 
-    it('should throw error if horseId is missing', async () => {
+    it('should throw error if horseId is missing', async() => {
       await expect(logTrainingSession({ discipline: 'Racing' }))
         .rejects.toThrow('Horse ID is required');
     });
 
-    it('should throw error if discipline is missing', async () => {
+    it('should throw error if discipline is missing', async() => {
       await expect(logTrainingSession({ horseId: 5 }))
         .rejects.toThrow('Discipline is required');
     });
 
-    it('should throw error if horseId is not a positive integer', async () => {
+    it('should throw error if horseId is not a positive integer', async() => {
       await expect(logTrainingSession({ horseId: -1, discipline: 'Racing' }))
         .rejects.toThrow('Horse ID must be a positive integer');
 
@@ -81,7 +81,7 @@ describe('trainingModel', () => {
         .rejects.toThrow('Horse ID must be a positive integer');
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockTrainingLogCreate.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(logTrainingSession({ horseId: 5, discipline: 'Racing' }))
@@ -90,7 +90,7 @@ describe('trainingModel', () => {
   });
 
   describe('getLastTrainingDate', () => {
-    it('should return the most recent training date for horse and discipline', async () => {
+    it('should return the most recent training date for horse and discipline', async() => {
       const mockResult = {
         trainedAt: new Date('2025-01-15T10:00:00Z')
       };
@@ -110,7 +110,7 @@ describe('trainingModel', () => {
       expect(result).toEqual(new Date('2025-01-15T10:00:00Z'));
     });
 
-    it('should return null if no training records found', async () => {
+    it('should return null if no training records found', async() => {
       mockTrainingLogFindFirst.mockResolvedValue(null);
 
       const result = await getLastTrainingDate(5, 'Racing');
@@ -118,7 +118,7 @@ describe('trainingModel', () => {
       expect(result).toBeNull();
     });
 
-    it('should throw error if horseId is not a positive integer', async () => {
+    it('should throw error if horseId is not a positive integer', async() => {
       await expect(getLastTrainingDate(-1, 'Racing'))
         .rejects.toThrow('Horse ID must be a positive integer');
 
@@ -129,7 +129,7 @@ describe('trainingModel', () => {
         .rejects.toThrow('Horse ID must be a positive integer');
     });
 
-    it('should throw error if discipline is missing', async () => {
+    it('should throw error if discipline is missing', async() => {
       await expect(getLastTrainingDate(5, ''))
         .rejects.toThrow('Discipline is required');
 
@@ -137,7 +137,7 @@ describe('trainingModel', () => {
         .rejects.toThrow('Discipline is required');
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockTrainingLogFindFirst.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(getLastTrainingDate(5, 'Racing'))
@@ -146,7 +146,7 @@ describe('trainingModel', () => {
   });
 
   describe('getHorseAge', () => {
-    it('should return horse age from database', async () => {
+    it('should return horse age from database', async() => {
       const mockResult = {
         age: 5
       };
@@ -161,7 +161,7 @@ describe('trainingModel', () => {
       expect(result).toBe(5);
     });
 
-    it('should return null if horse not found', async () => {
+    it('should return null if horse not found', async() => {
       mockHorseFindUnique.mockResolvedValue(null);
 
       const result = await getHorseAge(999);
@@ -169,7 +169,7 @@ describe('trainingModel', () => {
       expect(result).toBeNull();
     });
 
-    it('should throw error if horseId is not a positive integer', async () => {
+    it('should throw error if horseId is not a positive integer', async() => {
       await expect(getHorseAge(-1))
         .rejects.toThrow('Horse ID must be a positive integer');
 
@@ -180,7 +180,7 @@ describe('trainingModel', () => {
         .rejects.toThrow('Horse ID must be a positive integer');
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockHorseFindUnique.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(getHorseAge(5))
@@ -189,7 +189,7 @@ describe('trainingModel', () => {
   });
 
   describe('Integration scenarios', () => {
-    it('should handle multiple training sessions for same horse different disciplines', async () => {
+    it('should handle multiple training sessions for same horse different disciplines', async() => {
       // Mock successful logging
       mockTrainingLogCreate.mockResolvedValue({
         id: 1, horseId: 5, discipline: 'Racing', trainedAt: new Date()
@@ -201,7 +201,7 @@ describe('trainingModel', () => {
       expect(mockTrainingLogCreate).toHaveBeenCalledTimes(2);
     });
 
-    it('should validate horse age before allowing training', async () => {
+    it('should validate horse age before allowing training', async() => {
       // Mock horse age check
       mockHorseFindUnique.mockResolvedValue({ age: 2 });
 

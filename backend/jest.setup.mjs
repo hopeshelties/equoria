@@ -2,61 +2,112 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { beforeAll, afterAll } from '@jest/globals';
-
-// Import jest explicitly for ESM environments
+import { beforeAll, afterAll, jest } from '@jest/globals';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 
-setTimeout(() => {}, 0); // optional dummy to ensure it's not shadowed
+// Set Jest timeout
+if (typeof jest !== 'undefined') {
+  jest.setTimeout(30000);
+}
 
-// ✅ Correct Jest timeout setup
-// Ensure 'jest' is available in ESM environments
-(globalThis.jest ?? globalThis.jest) && globalThis.jest.setTimeout?.(30000);
-
-
-
-console.log('JEST_SETUP: NODE_ENV:', process.env.NODE_ENV); // eslint-disable-line no-console
-console.log('JEST_SETUP: DATABASE_URL used for tests:', process.env.DATABASE_URL); // eslint-disable-line no-console
+console.log('JEST_SETUP: NODE_ENV:', process.env.NODE_ENV);
+console.log('JEST_SETUP: DATABASE_URL used for tests:', process.env.DATABASE_URL);
 
 const prismaInstances = new Set();
+const activeHandles = new Set();
+let cleanupInProgress = false;
 
-const originalConsoleError = console.error; // eslint-disable-line no-console
-const originalConsoleWarn = console.warn; // eslint-disable-line no-console
+// Global cleanup function
+async function performGlobalCleanup() {
+  if (cleanupInProgress) {return;}
+  cleanupInProgress = true;
 
-beforeAll(() => {
-  // console.error = jest.fn();
-  // console.warn = jest.fn();
+  console.log('[Jest Cleanup] Starting global cleanup...');
+
+  // Disconnect all Prisma instances
+  const disconnectPromises = Array.from(prismaInstances).map(async(prisma) => {
+    try {
+      await prisma.$disconnect();
+      console.log('[Jest Cleanup] Prisma instance disconnected');
+    } catch (err) {
+      console.warn('[Jest Cleanup] Error disconnecting Prisma:', err.message);
+    }
+  });
+
+  await Promise.all(disconnectPromises);
+  prismaInstances.clear();
+
+  // Clear any remaining handles
+  activeHandles.clear();
+
+  console.log('[Jest Cleanup] Global cleanup completed');
+}
+
+beforeAll(async() => {
+  // Any global setup
 });
 
 afterAll(async() => {
-  console.error = originalConsoleError;
-  console.warn = originalConsoleWarn;
-  for (const prisma of prismaInstances) {
-    try {
-      await prisma.$disconnect();
-    } catch (err) {
-      console.warn('[Jest Setup] Error during cleanup registration:', err.message);
-    }
-  }
-  prismaInstances.clear();
+  await performGlobalCleanup();
+});
+
+// Handle process exit events
+process.on('beforeExit', async() => {
+  await performGlobalCleanup();
+});
+
+process.on('exit', () => {
+  console.log('[Jest Setup] Process exiting');
+});
+
+process.on('SIGTERM', async() => {
+  console.log('[Jest Setup] SIGTERM received');
+  await performGlobalCleanup();
+  process.exit(0);
+});
+
+process.on('SIGINT', async() => {
+  console.log('[Jest Setup] SIGINT received');
+  await performGlobalCleanup();
+  process.exit(0);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason); // eslint-disable-line no-console
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit the process, just log it
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  // Don't exit the process, just log it
 });
 
 export function registerPrismaForCleanup(prisma) {
-  prismaInstances.add(prisma);
+  if (prisma && typeof prisma.$disconnect === 'function') {
+    prismaInstances.add(prisma);
+    console.log('[Jest Setup] Prisma instance registered for cleanup');
+  }
 }
 
 export async function disconnectPrisma(prisma) {
   try {
-    await prisma.$disconnect();
-    prismaInstances.delete(prisma);
+    if (prisma && typeof prisma.$disconnect === 'function') {
+      await prisma.$disconnect();
+      prismaInstances.delete(prisma);
+      console.log('[Jest Setup] Prisma instance disconnected and unregistered');
+    }
   } catch (err) {
-    console.warn('[Jest Setup] Error during cleanup registration:', err.message);
+    console.warn('[Jest Setup] Error during Prisma disconnect:', err.message);
   }
+}
+
+export function registerHandle(handle) {
+  activeHandles.add(handle);
+}
+
+export function unregisterHandle(handle) {
+  activeHandles.delete(handle);
 }

@@ -163,7 +163,7 @@ describe('trainingCooldown', () => {
   });
 
   describe('setCooldown', () => {
-    it('should set cooldown 7 days in the future', async () => {
+    it('should set cooldown 7 days in the future', async() => {
       const beforeTime = new Date();
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 7);
@@ -192,7 +192,7 @@ describe('trainingCooldown', () => {
       expect(cooldownDate.getTime()).toBeLessThanOrEqual(expectedMaxDate.getTime() + 60000);
     });
 
-    it('should return updated horse with relations', async () => {
+    it('should return updated horse with relations', async() => {
       const updatedHorse = {
         ...testHorse,
         trainingCooldown: new Date(),
@@ -209,7 +209,7 @@ describe('trainingCooldown', () => {
       expect(result.breed.id).toBe(testBreed.id);
     });
 
-    it('should throw error for non-existent horse ID', async () => {
+    it('should throw error for non-existent horse ID', async() => {
       const nonExistentId = 999999;
 
       // Mock database error for non-existent horse
@@ -220,37 +220,37 @@ describe('trainingCooldown', () => {
         .toThrow(`Horse with ID ${nonExistentId} not found`);
     });
 
-    it('should throw error for null horse ID', async () => {
+    it('should throw error for null horse ID', async() => {
       await expect(setCooldown(null))
         .rejects
         .toThrow('Horse ID is required');
     });
 
-    it('should throw error for undefined horse ID', async () => {
+    it('should throw error for undefined horse ID', async() => {
       await expect(setCooldown(undefined))
         .rejects
         .toThrow('Horse ID is required');
     });
 
-    it('should throw error for invalid horse ID (string)', async () => {
+    it('should throw error for invalid horse ID (string)', async() => {
       await expect(setCooldown('invalid'))
         .rejects
         .toThrow('Horse ID must be a valid positive integer');
     });
 
-    it('should throw error for invalid horse ID (negative)', async () => {
+    it('should throw error for invalid horse ID (negative)', async() => {
       await expect(setCooldown(-1))
         .rejects
         .toThrow('Horse ID must be a valid positive integer');
     });
 
-    it('should throw error for invalid horse ID (zero)', async () => {
+    it('should throw error for invalid horse ID (zero)', async() => {
       await expect(setCooldown(0))
         .rejects
         .toThrow('Horse ID must be a valid positive integer');
     });
 
-    it('should handle string horse ID that can be parsed to integer', async () => {
+    it('should handle string horse ID that can be parsed to integer', async() => {
       const updatedHorse = {
         ...testHorse,
         trainingCooldown: new Date()
@@ -299,7 +299,7 @@ describe('trainingCooldown', () => {
   });
 
   describe('Integration Tests', () => {
-    it('should complete full training cooldown workflow', async () => {
+    it('should complete full training cooldown workflow', async() => {
       // 1. Verify horse can initially train
       expect(canTrain(testHorse)).toBe(true);
       expect(getCooldownTimeRemaining(testHorse)).toBeNull();
@@ -334,7 +334,7 @@ describe('trainingCooldown', () => {
       expect(formatted).toContain('remaining');
     });
 
-    it('should work with horse retrieved from database', async () => {
+    it('should work with horse retrieved from database', async() => {
       // Mock setting cooldown
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 7);

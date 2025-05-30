@@ -196,7 +196,7 @@ describe('horseSeed', () => {
       expect(mockLogger.info).toHaveBeenCalledWith('[seed] Ensured Stable ID 1 exists.');
       expect(mockLogger.info).toHaveBeenCalledWith('[seed] Ensured Stable ID 2 exists.');
     });
-    
+
     it('should handle errors gracefully when stable creation fails', async() => {
       const error = new Error('Stable DB error');
       mockPrisma.user.upsert.mockResolvedValue({ id: 1, username: 'A User' });
@@ -290,7 +290,7 @@ describe('horseSeed', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error seeding horse Desert Rose: Failed to create horse'));
     });
   });
-  
+
   describe('main execution (integration)', () => {
     it('should call ensureReferencedRecordsExist and seedHorses with sample data', async() => {
       const {
@@ -316,7 +316,7 @@ describe('horseSeed', () => {
       mockPrisma.user.upsert.mockRejectedValue(new Error('Main execution DB error'));
 
       await expect(actualMain()).rejects.toThrow('Main execution DB error');
-      
+
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error during database seeding: Main execution DB error'));
       expect(mockPrisma.$disconnect).toHaveBeenCalled();
     });

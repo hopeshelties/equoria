@@ -4,13 +4,11 @@ import { DatabaseError } from '../errors/index.js';
 
 const DEFAULT_XP_PER_LEVEL = 100;
 
-/** XP threshold formula — scalable for future level curves */
 function xpThreshold(level) {
   return DEFAULT_XP_PER_LEVEL * level;
 }
 
-/** Create a new user */
-export async function createUser(userData) {
+async function createUser(userData) {
   try {
     const { username, email, password, ...rest } = userData;
     if (!username || !email || !password) {
@@ -48,8 +46,7 @@ export async function createUser(userData) {
   }
 }
 
-/** Find a user by ID */
-export async function getUserById(id) {
+async function getUserById(id) {
   try {
     if (!id) {throw new Error('User ID is required.');}
     return await prisma.user.findUnique({ where: { id } });
@@ -59,8 +56,7 @@ export async function getUserById(id) {
   }
 }
 
-/** Get user with related horses */
-export async function getUserWithHorses(id) {
+async function getUserWithHorses(id) {
   try {
     if (!id) {throw new Error('User ID is required.');}
     return await prisma.user.findUnique({
@@ -75,8 +71,7 @@ export async function getUserWithHorses(id) {
   }
 }
 
-/** Find a user by email */
-export async function getUserByEmail(email) {
+async function getUserByEmail(email) {
   try {
     if (!email) {throw new Error('Email required.');}
     return await prisma.user.findUnique({
@@ -88,8 +83,7 @@ export async function getUserByEmail(email) {
   }
 }
 
-/** Update an existing user */
-export async function updateUser(id, updateData) {
+async function updateUser(id, updateData) {
   try {
     if (!id) {throw new Error('User ID is required.');}
     delete updateData.id;
@@ -105,8 +99,7 @@ export async function updateUser(id, updateData) {
   }
 }
 
-/** Delete a user by ID */
-export async function deleteUser(id) {
+async function deleteUser(id) {
   try {
     if (!id) {throw new Error('User ID is required.');}
     return await prisma.user.delete({ where: { id } });
@@ -116,8 +109,7 @@ export async function deleteUser(id) {
   }
 }
 
-/** Add XP to a user and level them up if needed */
-export async function addXpToUser(userId, amount) {
+async function addXpToUser(userId, amount) {
   try {
     if (!userId) {throw new Error('User ID is required.');}
     if (typeof amount !== 'number' || amount <= 0) {
@@ -165,8 +157,7 @@ export async function addXpToUser(userId, amount) {
   }
 }
 
-/** Get current XP and progress for next level */
-export async function getUserProgress(userId) {
+async function getUserProgress(userId) {
   try {
     const user = await getUserById(userId);
     if (!user) {throw new Error('User not found.');}
@@ -184,8 +175,7 @@ export async function getUserProgress(userId) {
   }
 }
 
-/** Get full stats summary for dashboard/profile */
-export async function getUserStats(userId) {
+async function getUserStats(userId) {
   try {
     if (!userId) {throw new Error('User ID is required.');}
 
@@ -219,13 +209,13 @@ export async function getUserStats(userId) {
   }
 }
 
-// Deprecated (backward compatibility only)
-export async function addUserXp(userId, amount) {
+// Deprecated
+async function addUserXp(userId, amount) {
   logger.warn('[addUserXp] DEPRECATED: Use addXpToUser instead.');
   return addXpToUser(userId, amount);
 }
 
-export async function checkAndLevelUpUser(userId) {
+async function checkAndLevelUpUser(userId) {
   logger.warn('[checkAndLevelUpUser] DEPRECATED: XP is auto-managed now.');
   const user = await getUserById(userId);
   return {
@@ -236,7 +226,8 @@ export async function checkAndLevelUpUser(userId) {
   };
 }
 
-export default {
+// ✅ Named exports only — no default export
+export {
   createUser,
   getUserById,
   getUserWithHorses,

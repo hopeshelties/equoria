@@ -222,16 +222,16 @@ async function trainHorse(horseId, discipline) {
       const xpResult = await addXpToUser(updatedHorse.playerId, baseXp);
 
       // Log XP event for auditing
-        await logXpEvent({
-          playerId: updatedHorse.playerId,
-          amount: baseXp,
-          reason: `Trained horse ${updatedHorse.name} in ${discipline}`
-        });
+      await logXpEvent({
+        playerId: updatedHorse.playerId,
+        amount: baseXp,
+        reason: `Trained horse ${updatedHorse.name} in ${discipline}`
+      });
 
-        logger.info(`[trainingController.trainHorse] Awarded ${baseXp} XP to player ${updatedHorse.playerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.newLevel}!` : ''}`);
-      } else if (updatedHorse && !updatedHorse.playerId) {
-        logger.warn(`[trainingController.trainHorse] Horse ${updatedHorse.id} (${updatedHorse.name}) has no playerId - XP cannot be awarded`);
-      }
+      logger.info(`[trainingController.trainHorse] Awarded ${baseXp} XP to player ${updatedHorse.playerId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.newLevel}!` : ''}`);
+    } else if (updatedHorse && !updatedHorse.playerId) {
+      logger.warn(`[trainingController.trainHorse] Horse ${updatedHorse.id} (${updatedHorse.name}) has no playerId - XP cannot be awarded`);
+    }
     } catch (error) {
       logger.error(`[trainingController.trainHorse] Failed to award training XP: ${error.message}`);
       // Continue with training completion even if XP award fails

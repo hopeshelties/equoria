@@ -2,11 +2,14 @@ export default {
   testEnvironment: 'node',
   transform: {},
 
+  // Enable Jest globals (describe, it, expect, jest, etc.)
+  injectGlobals: true,
+
   // Ensures Jest treats both JS and MJS files correctly
   moduleFileExtensions: ['js', 'mjs'],
 
   // Setup file path must match your actual filename
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'], // Point back to .mjs
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'],
 
   // Recommended test file globs
   testMatch: [
@@ -21,6 +24,16 @@ export default {
   resetMocks: true,
   restoreMocks: true,
   testTimeout: 30000,
+
+  // Force Jest to exit and detect open handles
+  forceExit: true,
+  detectOpenHandles: true,
+
+  // Limit concurrent tests to reduce database connection issues
+  maxWorkers: 1,
+
+  // Run tests serially to avoid database conflicts
+  runInBand: true,
 
   // Makes sure Prisma-generated clients don't break things
   transformIgnorePatterns: [
@@ -52,13 +65,13 @@ export default {
     '/node_modules/',
     '/build/',
     '/dist/'
-  ],
-  collectCoverageFrom: [
+  ],  collectCoverageFrom: [
     '**/*.js',
     '!**/node_modules/**',
     '!**/coverage/**',
     '!jest.config.mjs',
     '!**/*.test.js',
-    '!**/*.spec.js'
+    '!**/*.spec.js',
+    '!jest.setup.mjs'
   ]
 };
