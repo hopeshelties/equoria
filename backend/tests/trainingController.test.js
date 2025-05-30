@@ -1,6 +1,8 @@
 import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { addXpToUser } from '../models/horseModel.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

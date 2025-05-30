@@ -1,4 +1,4 @@
-import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
+import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 
 /**
  * Lineage Trait Check Utility Tests

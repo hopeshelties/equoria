@@ -5,6 +5,7 @@ import { logXpEvent } from '../models/xpLogModel.js';
 import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import logger from '../utils/logger.js';
 
+
 /**
  * Check if a horse is eligible to train in a specific discipline
  * @param {number} horseId - ID of the horse to check
