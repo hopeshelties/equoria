@@ -1,9 +1,9 @@
 import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
+
 /**
  * Horse Model At-Birth Traits Integration Tests
  * Tests for at-birth trait application during horse creation
  */
-
 
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -52,6 +52,10 @@ describe('Horse Model At-Birth Traits Integration', () => {
     jest.clearAllMocks();
   });
 
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   describe('createHorse with at-birth traits', () => {
     const mockCreatedHorse = {
       id: 1,
@@ -94,7 +98,6 @@ describe('Horse Model At-Birth Traits Integration', () => {
 
       const result = await createHorse(horseData);
 
-      // Verify at-birth trait function was called
       expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).toHaveBeenCalledWith({
         sireId: 10,
         damId: 20,
@@ -102,7 +105,6 @@ describe('Horse Model At-Birth Traits Integration', () => {
         feedQuality: undefined
       });
 
-      // Verify horse was created with traits
       expect(mockPrisma.horse.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           name: 'Test Foal',
@@ -224,10 +226,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
 
       await createHorse(horseData);
 
-      // Should not call at-birth trait function
       expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
 
-      // Should create horse with default empty traits
       expect(mockPrisma.horse.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
@@ -241,7 +241,6 @@ describe('Horse Model At-Birth Traits Integration', () => {
         name: 'Foundling Horse',
         age: 0,
         breedId: 1
-        // No sire_id or dam_id
       };
 
       mockPrisma.horse.create.mockResolvedValue({
@@ -265,17 +264,14 @@ describe('Horse Model At-Birth Traits Integration', () => {
         dam_id: 20
       };
 
-      // Mock trait application failure
       mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockRejectedValue(new Error('Trait application failed'));
       mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
 
       const result = await createHorse(horseData);
 
-      // Should still create the horse
       expect(mockPrisma.horse.create).toHaveBeenCalled();
       expect(result).toEqual(mockCreatedHorse);
 
-      // Should log the error
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Error applying at-birth traits: Trait application failed')
       );
@@ -287,7 +283,6 @@ describe('Horse Model At-Birth Traits Integration', () => {
         age: 0,
         breedId: 1,
         dam_id: 20
-        // Missing sire_id
       };
 
       mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
@@ -303,7 +298,6 @@ describe('Horse Model At-Birth Traits Integration', () => {
         age: 0,
         breedId: 1,
         sire_id: 10
-        // Missing dam_id
       };
 
       mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
@@ -346,7 +340,6 @@ describe('Horse Model At-Birth Traits Integration', () => {
 
       await createHorse(horseData);
 
-      // Should log the breeding analysis
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining('Breeding analysis - Lineage specialization: true, Inbreeding: true')
       );

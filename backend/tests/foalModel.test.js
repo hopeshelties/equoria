@@ -1,4 +1,5 @@
-import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
+import { jest, describe, beforeEach, expect, it } from '@jest/globals';
+
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -8,23 +9,23 @@ const __dirname = dirname(__filename);
 // Mock the database
 const mockPrisma = {
   horse: {
-    findUnique: jest.fn(),
+    findUnique: jest.fn()
   },
   foalDevelopment: {
     findUnique: jest.fn(),
     create: jest.fn(),
-    update: jest.fn(),
+    update: jest.fn()
   },
   foalActivity: {
     findMany: jest.fn(),
-    create: jest.fn(),
-  },
+    create: jest.fn()
+  }
 };
 
 // Mock the logger
 const mockLogger = {
   info: jest.fn(),
-  error: jest.fn(),
+  error: jest.fn()
 };
 
 // Mock modules
@@ -45,7 +46,7 @@ describe('foalModel', () => {
   });
 
   describe('getFoalDevelopment', () => {
-    it('should return foal development data for valid foal', async () => {
+    it('should return foal development data for valid foal', async() => {
       const mockHorse = {
         id: 1,
         name: 'Test Foal',
@@ -90,7 +91,7 @@ describe('foalModel', () => {
       expect(result.development.bondingLevel).toBe(60);
     });
 
-    it('should throw error for horse that is not a foal', async () => {
+    it('should throw error for horse that is not a foal', async() => {
       const mockHorse = {
         id: 1,
         name: 'Adult Horse',
@@ -103,19 +104,19 @@ describe('foalModel', () => {
       await expect(getFoalDevelopment(1)).rejects.toThrow('Horse is not a foal');
     });
 
-    it('should throw error for non-existent horse', async () => {
+    it('should throw error for non-existent horse', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       await expect(getFoalDevelopment(999)).rejects.toThrow('Foal not found');
     });
 
-    it('should throw error for invalid foal ID', async () => {
+    it('should throw error for invalid foal ID', async() => {
       await expect(getFoalDevelopment('invalid')).rejects.toThrow('Foal ID must be a positive integer');
       await expect(getFoalDevelopment(-1)).rejects.toThrow('Foal ID must be a positive integer');
       await expect(getFoalDevelopment(0)).rejects.toThrow('Foal ID must be a positive integer');
     });
 
-    it('should create default development record for new foal', async () => {
+    it('should create default development record for new foal', async() => {
       const mockHorse = {
         id: 1,
         name: 'New Foal',
@@ -153,7 +154,7 @@ describe('foalModel', () => {
   });
 
   describe('completeActivity', () => {
-    it('should complete an available activity successfully', async () => {
+    it('should complete an available activity successfully', async() => {
       const mockDevelopment = {
         currentDay: 0,
         bondingLevel: 50,
@@ -184,15 +185,15 @@ describe('foalModel', () => {
       expect(result).toHaveProperty('development');
     });
 
-    it('should throw error for invalid foal ID', async () => {
+    it('should throw error for invalid foal ID', async() => {
       await expect(completeActivity('invalid', 'gentle_touch')).rejects.toThrow('Foal ID must be a positive integer');
     });
 
-    it('should throw error for missing activity type', async () => {
+    it('should throw error for missing activity type', async() => {
       await expect(completeActivity(1, '')).rejects.toThrow('Activity type is required');
     });
 
-    it('should throw error for unavailable activity', async () => {
+    it('should throw error for unavailable activity', async() => {
       const mockDevelopment = {
         currentDay: 0,
         bondingLevel: 50,
@@ -207,7 +208,7 @@ describe('foalModel', () => {
   });
 
   describe('advanceDay', () => {
-    it('should advance foal to next day successfully', async () => {
+    it('should advance foal to next day successfully', async() => {
       const mockDevelopment = {
         currentDay: 2,
         bondingLevel: 60,
@@ -238,7 +239,7 @@ describe('foalModel', () => {
       expect(result).toHaveProperty('development');
     });
 
-    it('should throw error for foal that has completed development', async () => {
+    it('should throw error for foal that has completed development', async() => {
       const mockDevelopment = {
         currentDay: 6,
         bondingLevel: 80,
@@ -250,7 +251,7 @@ describe('foalModel', () => {
       await expect(advanceDay(1)).rejects.toThrow('Foal has already completed development period');
     });
 
-    it('should throw error for invalid foal ID', async () => {
+    it('should throw error for invalid foal ID', async() => {
       await expect(advanceDay('invalid')).rejects.toThrow('Foal ID must be a positive integer');
     });
   });

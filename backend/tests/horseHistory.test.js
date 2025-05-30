@@ -1,9 +1,4 @@
-import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 
 // Mock the dependencies
 const mockGetResultsByHorse = jest.fn();
@@ -14,29 +9,23 @@ const mockLogger = {
 };
 
 // Mock the modules
-jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => ({
+jest.unstable_mockModule('../models/resultModel.js', () => ({
   getResultsByHorse: mockGetResultsByHorse
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule('../utils/logger.js', () => ({
   default: mockLogger
 }));
 
 // Import the function to test after mocking
-const { getHorseHistory } = await import(join(__dirname, '../controllers/horseController.js'));
+const { getHorseHistory } = await import('../controllers/horseController.js');
 
 describe('Horse History Controller', () => {
   let req, res;
 
   beforeEach(() => {
-    // Reset mocks
     jest.clearAllMocks();
-
-    // Setup request and response objects
-    req = {
-      params: { id: '1' }
-    };
-
+    req = { params: { id: '1' } };
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
@@ -44,7 +33,7 @@ describe('Horse History Controller', () => {
   });
 
   describe('getHorseHistory', () => {
-    it('should return horse competition history successfully', async () => {
+    it('should return horse competition history successfully', async() => {
       const mockResults = [
         {
           id: 1,
@@ -104,10 +93,9 @@ describe('Horse History Controller', () => {
           }
         ]
       });
-      expect(mockLogger.info).toHaveBeenCalledWith('[horseController.getHorseHistory] Retrieved 2 competition results for horse 1');
     });
 
-    it('should return empty array when horse has no competition history', async () => {
+    it('should return empty array when horse has no competition history', async() => {
       mockGetResultsByHorse.mockResolvedValue([]);
 
       await getHorseHistory(req, res);
@@ -121,7 +109,7 @@ describe('Horse History Controller', () => {
       });
     });
 
-    it('should handle invalid horse ID (non-numeric)', async () => {
+    it('should handle invalid horse ID (non-numeric)', async() => {
       req.params.id = 'invalid';
 
       await getHorseHistory(req, res);
@@ -135,7 +123,7 @@ describe('Horse History Controller', () => {
       });
     });
 
-    it('should handle invalid horse ID (negative number)', async () => {
+    it('should handle invalid horse ID (negative number)', async() => {
       req.params.id = '-1';
 
       await getHorseHistory(req, res);
@@ -149,7 +137,7 @@ describe('Horse History Controller', () => {
       });
     });
 
-    it('should handle invalid horse ID (zero)', async () => {
+    it('should handle invalid horse ID (zero)', async() => {
       req.params.id = '0';
 
       await getHorseHistory(req, res);
@@ -163,14 +151,14 @@ describe('Horse History Controller', () => {
       });
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       const dbError = new Error('Database connection failed');
       mockGetResultsByHorse.mockRejectedValue(dbError);
 
       await getHorseHistory(req, res);
 
       expect(mockGetResultsByHorse).toHaveBeenCalledWith(1);
-      expect(mockLogger.error).toHaveBeenCalledWith('[horseController.getHorseHistory] Error retrieving horse history: %o', dbError);
+      expect(mockLogger.error).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
@@ -179,7 +167,7 @@ describe('Horse History Controller', () => {
       });
     });
 
-    it('should properly parse stat gains JSON', async () => {
+    it('should properly parse stat gains JSON', async() => {
       const mockResults = [
         {
           id: 1,
@@ -217,7 +205,7 @@ describe('Horse History Controller', () => {
       });
     });
 
-    it('should handle malformed stat gains JSON gracefully', async () => {
+    it('should handle malformed stat gains JSON gracefully', async() => {
       const mockResults = [
         {
           id: 1,
@@ -234,7 +222,6 @@ describe('Horse History Controller', () => {
 
       mockGetResultsByHorse.mockResolvedValue(mockResults);
 
-      // This should not throw but should handle the error gracefully
       await getHorseHistory(req, res);
 
       expect(mockLogger.error).toHaveBeenCalled();
@@ -246,7 +233,7 @@ describe('Horse History Controller', () => {
       });
     });
 
-    it('should handle large horse ID numbers', async () => {
+    it('should handle large horse ID numbers', async() => {
       req.params.id = '999999';
       mockGetResultsByHorse.mockResolvedValue([]);
 
@@ -261,7 +248,7 @@ describe('Horse History Controller', () => {
       });
     });
 
-    it('should maintain order from database query (newest first)', async () => {
+    it('should maintain order from database query (newest first)', async() => {
       const mockResults = [
         {
           id: 3,

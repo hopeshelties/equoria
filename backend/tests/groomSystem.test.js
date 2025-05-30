@@ -1,9 +1,8 @@
-import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
+import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 /**
  * Groom System Tests
  * Tests for the groom assignment and management system
  */
-
 
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -55,7 +54,6 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 const {
   assignGroomToFoal,
   ensureDefaultGroomAssignment,
-  getOrCreateDefaultGroom,
   calculateGroomInteractionEffects,
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
@@ -83,7 +81,7 @@ describe('Groom Assignment System', () => {
       availability: { monday: true, tuesday: true }
     };
 
-    it('should assign groom to foal successfully', async () => {
+    it('should assign groom to foal successfully', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue(mockGroom);
       mockPrisma.groomAssignment.findFirst.mockResolvedValue(null); // No existing assignment
@@ -122,20 +120,20 @@ describe('Groom Assignment System', () => {
       });
     });
 
-    it('should throw error when foal not found', async () => {
+    it('should throw error when foal not found', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       await expect(assignGroomToFoal(999, 1, 'player-1')).rejects.toThrow('Foal with ID 999 not found');
     });
 
-    it('should throw error when groom not found', async () => {
+    it('should throw error when groom not found', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue(null);
 
       await expect(assignGroomToFoal(1, 999, 'player-1')).rejects.toThrow('Groom with ID 999 not found');
     });
 
-    it('should throw error when groom is not active', async () => {
+    it('should throw error when groom is not active', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue({
         ...mockGroom,
@@ -145,7 +143,7 @@ describe('Groom Assignment System', () => {
       await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow('Groom Sarah Johnson is not currently active');
     });
 
-    it('should throw error when groom already assigned', async () => {
+    it('should throw error when groom already assigned', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue(mockGroom);
       mockPrisma.groomAssignment.findFirst.mockResolvedValue({
@@ -158,7 +156,7 @@ describe('Groom Assignment System', () => {
       await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow('Groom Sarah Johnson is already assigned to this foal');
     });
 
-    it('should deactivate existing primary assignments when assigning new primary', async () => {
+    it('should deactivate existing primary assignments when assigning new primary', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue(mockGroom);
       mockPrisma.groomAssignment.findFirst.mockResolvedValue(null);
@@ -190,7 +188,7 @@ describe('Groom Assignment System', () => {
   });
 
   describe('ensureDefaultGroomAssignment', () => {
-    it('should return existing assignment if one exists', async () => {
+    it('should return existing assignment if one exists', async() => {
       const existingAssignment = {
         id: 1,
         foalId: 1,
@@ -211,7 +209,7 @@ describe('Groom Assignment System', () => {
       expect(result.assignment).toEqual(existingAssignment);
     });
 
-    it('should create default assignment if none exists', async () => {
+    it('should create default assignment if none exists', async() => {
       mockPrisma.groomAssignment.findFirst.mockResolvedValue(null);
       mockPrisma.groom.findFirst.mockResolvedValue(null); // No existing groom
       mockPrisma.groom.create.mockResolvedValue({
@@ -221,7 +219,6 @@ describe('Groom Assignment System', () => {
         playerId: 'player-1'
       });
 
-      // Mock the assignGroomToFoal call
       mockPrisma.horse.findUnique.mockResolvedValue({ id: 1, name: 'Test Foal', age: 1 });
       mockPrisma.groom.findUnique.mockResolvedValue({
         id: 1,
@@ -285,7 +282,6 @@ describe('Groom Assignment System', () => {
       const foalCareEffects = calculateGroomInteractionEffects(foalCareGroom, mockFoal, 'daily_care', 60);
       const generalEffects = calculateGroomInteractionEffects(generalGroom, mockFoal, 'daily_care', 60);
 
-      // Foal care specialist should generally have better bonding effects
       expect(foalCareEffects.modifiers.specialty).toBeGreaterThan(generalEffects.modifiers.specialty);
     });
 
@@ -315,7 +311,6 @@ describe('Groom Assignment System', () => {
       const longEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 120);
 
       expect(longEffects.cost).toBeGreaterThan(shortEffects.cost);
-      // Longer interactions should generally have more effect (though randomness may affect this)
     });
   });
 
@@ -366,7 +361,7 @@ describe('Groom Assignment System', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockPrisma.horse.findUnique.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow('Database connection failed');
@@ -384,7 +379,6 @@ describe('Groom Assignment System', () => {
         hourly_rate: 18.0
       };
 
-      // Should not throw error, should use defaults
       const effects = calculateGroomInteractionEffects(invalidGroom, { id: 1, bond_score: 50 }, 'daily_care', 60);
 
       expect(effects).toHaveProperty('bondingChange');
