@@ -24,7 +24,7 @@ const sampleHorses = [
     name: 'Midnight Comet',
     age: 4,
     breedName: 'Thoroughbred',
-    ownerId: 1,
+    userId: 1,
     stableId: 1,
     sex: 'Stallion',
     date_of_birth: new Date('2020-05-10'),
@@ -54,7 +54,7 @@ const sampleHorses = [
     name: 'Golden Dawn',
     age: 5,
     breedName: 'Arabian',
-    ownerId: 1,
+    userId: 1,
     stableId: 1,
     sex: 'Mare',
     date_of_birth: new Date('2019-03-15'),
@@ -84,7 +84,7 @@ const sampleHorses = [
     name: 'Shadowfax Spirit',
     age: 1,
     breedName: 'Thoroughbred',
-    ownerId: 2,
+    userId: 2,
     stableId: 2,
     sex: 'Colt',
     date_of_birth: new Date('2023-07-22'),
@@ -159,8 +159,8 @@ async function ensureReferencedRecordsExist() {
   try {
     await prisma.user.upsert({
       where: { id: 1 },
-      update: { username: 'Default Owner' }, // Changed name to username
-      create: { id: 1, username: 'Default Owner', email: 'owner1@example.com', password: 'password' } // ensure all required fields
+      update: { username: 'Default User' },
+      create: { id: 1, username: 'Default User', email: 'user1@example.com', password: 'password' }
     });
     logger.info('[seed] Ensured User ID 1 exists.');
   } catch (e) {
@@ -169,8 +169,8 @@ async function ensureReferencedRecordsExist() {
   try {
     await prisma.user.upsert({
       where: { id: 2 },
-      update: { username: 'Second Owner' }, // Changed name to username
-      create: { id: 2, username: 'Second Owner', email: 'owner2@example.com', password: 'password' } // ensure all required fields
+      update: { username: 'Second User' },
+      create: { id: 2, username: 'Second User', email: 'user2@example.com', password: 'password' }
     });
     logger.info('[seed] Ensured User ID 2 exists.');
   } catch (e) {
@@ -205,7 +205,7 @@ const seedHorses = async(prisma, users) => {
     return [];
   }
 
-  const owner = users[0];
+  const user = users[0];
 
   const breedsData = [
     { name: 'Thoroughbred', baseSpeed: 80, baseStamina: 70, baseStrength: 60, rarity: 'Common' },
@@ -236,8 +236,7 @@ const seedHorses = async(prisma, users) => {
       sex: 'Stallion',
       color: 'Bay',
       breedId: createdBreeds.find(b => b.name === 'Thoroughbred')?.id,
-      ownerId: owner.id,
-      userId: owner.id, // Added userId
+      userId: user.id,
       speed: 82,
       stamina: 72,
       strength: 62,
@@ -254,8 +253,7 @@ const seedHorses = async(prisma, users) => {
       sex: 'Mare',
       color: 'Chestnut',
       breedId: createdBreeds.find(b => b.name === 'Arabian')?.id,
-      ownerId: owner.id,
-      userId: owner.id, // Added userId
+      userId: user.id,
       speed: 78,
       stamina: 83,
       strength: 52,
@@ -279,7 +277,7 @@ const seedHorses = async(prisma, users) => {
       const horse = await prisma.horse.create({
         data: horseData
       });
-      logger.info(`Created horse: ${horse.name} for user ID: ${owner.id}`);
+      logger.info(`Created horse: ${horse.name} for user ID: ${user.id}`);
       createdHorses.push(horse);
     } catch (error) {
       logger.error(`Error seeding horse ${horseData.name}: ${error.message}`);
@@ -362,10 +360,10 @@ async function main() {
       logger.warn('[seed] No users found in DB. Creating a default one for general horse seeding.');
       const defaultUser = await prisma.user.create({
         data: {
-          email: 'defaultseedowner@example.com',
-          username: 'DefaultSeedOwner',
+          email: 'defaultseeduser@example.com',
+          username: 'DefaultSeedUser',
           firstName: 'Default',
-          lastName: 'Owner',
+          lastName: 'User',
           password: 'password123',
           money: 50000,
           level: 1,

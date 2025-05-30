@@ -53,9 +53,9 @@ model Horse {
   /// Name of the horse
   name      String
 
-  /// Foreign key pointing to the owner (User)
+  /// Foreign key pointing to the user (User)
   userId    String
-  owner     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   /// Additional fields should be added here as needed...
 

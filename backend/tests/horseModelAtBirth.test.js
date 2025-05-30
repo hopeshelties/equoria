@@ -120,9 +120,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
         }),
         include: {
           breed: true,
-          owner: true,
-          stable: true,
-          player: true
+          user: true,
+          stable: true
         }
       });
 

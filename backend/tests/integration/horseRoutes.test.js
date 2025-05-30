@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import request from 'supertest';
@@ -9,7 +10,7 @@ const __dirname = dirname(__filename);
 // Mock the database module BEFORE importing the app
 jest.unstable_mockModule(join(__dirname, '../../db/index.js'), () => ({
   default: {
-    player: {
+    user: {
       findUnique: jest.fn()
     },
     horse: {

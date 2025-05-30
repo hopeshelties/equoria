@@ -355,6 +355,7 @@ export const getLeaderboardStats = async(req, res) => {
 
 // Aliases
 export const getTopPlayersByLevel = getTopUsersByLevel;
+export const getTopPlayersByXP = getTopUsersByXP;
 export const getTopPlayersByHorseEarnings = getTopUsersByHorseEarnings;
 
 // Export block
@@ -362,6 +363,7 @@ export default {
   getTopUsersByLevel,
   getTopPlayersByLevel,
   getTopUsersByXP,
+  getTopPlayersByXP,
   getTopHorsesByEarnings,
   getTopHorsesByPerformance,
   getTopUsersByHorseEarnings,

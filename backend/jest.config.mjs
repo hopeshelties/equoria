@@ -32,9 +32,6 @@ export default {
   // Limit concurrent tests to reduce database connection issues
   maxWorkers: 1,
 
-  // Run tests serially to avoid database conflicts
-  runInBand: true,
-
   // Makes sure Prisma-generated clients don't break things
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$|@prisma/client))'

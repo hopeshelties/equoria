@@ -151,21 +151,21 @@ router.get('/status/:horseId', [
 
 
 /**
- * GET /api/training/trainable/:playerId
- * Get all horses owned by a player that are eligible for training
+ * GET /api/training/trainable/:userId
+ * Get all horses owned by a user that are eligible for training
  */
-router.get('/trainable/:playerId', [
-  param('playerId')
+router.get('/trainable/:userId', [
+  param('userId')
     .isUUID()
-    .withMessage('Player ID must be a valid UUID'),
+    .withMessage('User ID must be a valid UUID'),
   handleValidationErrors
 ], async(req, res) => {
   try {
-    const { playerId } = req.params;
+    const { userId } = req.params;
 
-    logger.info(`[trainingRoutes.getTrainableHorses] Getting trainable horses for player ${playerId}`);
+    logger.info(`[trainingRoutes.getTrainableHorses] Getting trainable horses for user ${userId}`);
 
-    const horses = await getTrainableHorses(playerId);
+    const horses = await getTrainableHorses(userId);
 
     res.json({
       success: true,

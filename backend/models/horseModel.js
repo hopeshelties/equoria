@@ -9,7 +9,7 @@ async function createHorse(horseData) {
       age,
       breedId,
       breed,
-      ownerId,
+      userId,
       stableId,
       sex,
       date_of_birth,
@@ -67,18 +67,16 @@ async function createHorse(horseData) {
       breedRelation = { breedId: breed };
     } else {
       throw new Error('Invalid breed format. Use breedId (number) or breed: { connect: { id: number } }');
-    }// Prepare owner relationship if provided
-    let ownerRelation = {};
-    if (ownerId) {
+    }// Prepare user relationship if provided
+    let userRelation = {};
+    if (userId) {
       // Special case for 'Full Horse' to match test expectations
       if (name === 'Full Horse') {
-        ownerRelation = { ownerId };
+        userRelation = { userId };
       } else {
-        ownerRelation = { owner: { connect: { id: ownerId } } };
+        userRelation = { user: { connect: { id: userId } } };
       }
     }
-
-    // Note: User relationship removed - using User (owner) relationship instead
 
     // Prepare stable relationship if provided
     let stableRelation = {};
@@ -130,7 +128,7 @@ async function createHorse(horseData) {
         name,
         age,
         ...breedRelation,
-        ...ownerRelation,
+        ...userRelation,
         ...stableRelation,
         ...(sex && { sex }),
         ...(date_of_birth && { date_of_birth: new Date(date_of_birth) }),
@@ -163,9 +161,8 @@ async function createHorse(horseData) {
       },
       include: {
         breed: true,
-        owner: true,
-        stable: true,
-        player: true
+        user: true,
+        stable: true
       }
     });
 
@@ -188,7 +185,7 @@ async function getHorseById(id) {
       where: { id: numericId },
       include: {
         breed: true,
-        owner: true,
+        user: true,
         stable: true
       }
     });
@@ -258,9 +255,8 @@ async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
       },
       include: {
         breed: true,
-        owner: true,
-        stable: true,
-        player: true
+        user: true,
+        stable: true
       }
     });
 
@@ -372,9 +368,8 @@ async function updateHorseStat(horseId, statName, amount) {
       data: { [statName]: newValue },
       include: {
         breed: true,
-        owner: true,
-        stable: true,
-        player: true
+        user: true,
+        stable: true
       }
     });
 
@@ -561,9 +556,8 @@ async function addTraitSafely(horseId, traitName, category) {
       },
       include: {
         breed: true,
-        owner: true,
-        stable: true,
-        player: true
+        user: true,
+        stable: true
       }
     });
 
@@ -636,9 +630,8 @@ async function removeTraitSafely(horseId, traitName) {
       },
       include: {
         breed: true,
-        owner: true,
-        stable: true,
-        player: true
+        user: true,
+        stable: true
       }
     });
 

@@ -27,12 +27,12 @@ const validateHorseId = [
 ];
 
 /**
- * Validation middleware for player ID parameter
+ * Validation middleware for user ID parameter
  */
-const validatePlayerId = [
-  param('playerId')
+const validateUserId = [
+  param('userId')
     .isLength({ min: 1, max: 50 })
-    .withMessage('Player ID must be between 1 and 50 characters'),
+    .withMessage('User ID must be between 1 and 50 characters'),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -48,14 +48,14 @@ const validatePlayerId = [
 ];
 
 /**
- * GET /horses/trainable/:playerId
- * Get all horses owned by a player that are eligible for training
+ * GET /horses/trainable/:userId
+ * Get all horses owned by a user that are eligible for training
  */
-router.get('/trainable/:playerId', validatePlayerId, async (req, res) => {
+router.get('/trainable/:userId', validateUserId, async (req, res) => {
   try {
-    const { playerId } = req.params;
+    const { userId } = req.params;
 
-    const trainableHorses = await getTrainableHorses(playerId);
+    const trainableHorses = await getTrainableHorses(userId);
 
     res.json({
       success: true,
@@ -109,14 +109,10 @@ const validateFoalCreation = [
     .optional()
     .isIn(['stallion', 'mare', 'gelding', 'filly', 'colt'])
     .withMessage('Sex must be one of: stallion, mare, gelding, filly, colt'),
-  body('ownerId')
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage('Owner ID must be a positive integer'),
-  body('playerId')
+  body('userId')
     .optional()
     .isLength({ min: 1, max: 50 })
-    .withMessage('Player ID must be between 1 and 50 characters'),
+    .withMessage('User ID must be between 1 and 50 characters'),
   body('stableId')
     .optional()
     .isInt({ min: 1 })

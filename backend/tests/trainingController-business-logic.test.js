@@ -15,6 +15,7 @@
  * 8. Error handling maintains data integrity
  */
 
+import { jest, describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import dotenv from 'dotenv';
@@ -31,12 +32,10 @@ const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses, trainRouteH
 
 describe('Training Controller Business Logic Tests', () => {
   let testUser;
-  // let testPlayer; // 🎯 Removed testPlayer as User model now holds player fields
   let adultHorse; // 3+ years old, eligible for training
   let youngHorse; // Under 3 years old, not eligible
   let trainedHorse; // Horse that has been trained recently
-  // let playerWithHorses; // 🎯 Removed playerWithHorses, will use a user with horses
-  let userWithHorses; // 🎯 Added userWithHorses
+  let userWithHorses;
 
   beforeAll(async() => { // Kept async() as per previous lint fix attempt
     // Clean up any existing test data
@@ -58,25 +57,22 @@ describe('Training Controller Business Logic Tests', () => {
       }
     });
 
-    // 🎯 Updated to prisma.user.deleteMany for player-like data
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: ['controller-test-user@example.com', 'controller-multi-user@example.com'] // 🎯 Updated emails
+          in: ['controller-test-user@example.com', 'controller-multi-user@example.com']
         }
       }
     });
 
-    // Create test Users (for legacy ownerId relationship AND merged player fields)
+    // Create test users
     testUser = await prisma.user.create({
       data: {
-        email: 'controller-test-user@example.com', // 🎯 Updated email
-        username: 'controllertestuser', // 🎯 Updated username
+        email: 'controller-test-user@example.com',
+        username: 'controllertestuser',
         firstName: 'Controller',
         lastName: 'Tester',
         password: 'hashedpassword',
-        // Merged Player fields
-        name: 'Controller Test User',
         money: 1000,
         level: 1,
         xp: 0,
@@ -84,24 +80,19 @@ describe('Training Controller Business Logic Tests', () => {
       }
     });
 
-    // 🎯 Renamed multiUser to userWithHorses and updated data
     userWithHorses = await prisma.user.create({
       data: {
-        email: 'controller-multi-user@example.com', // 🎯 Updated email
-        username: 'controllermultiuser', // 🎯 Updated username
+        email: 'controller-multi-user@example.com',
+        username: 'controllermultiuser',
         firstName: 'Multi',
         lastName: 'Tester',
         password: 'hashedpassword',
-        // Merged Player fields
-        name: 'Multi Horse User',
         money: 2000,
         level: 2,
         xp: 150,
         settings: { theme: 'dark' }
       }
     });
-
-    // 🎯 Removed separate Player creation as fields are merged into User
 
     // Ensure we have a breed
     let breed = await prisma.breed.findFirst();
@@ -114,13 +105,13 @@ describe('Training Controller Business Logic Tests', () => {
       });
     }
 
-    // Create test horses with User relationship (which now includes player fields)
+    // Create test horses
     adultHorse = await prisma.horse.create({
       data: {
         name: 'Controller Adult Horse',
         age: 4, // Eligible for training
         breedId: breed.id,
-        userId: testUser.id, // 🎯 Changed from ownerId/playerId to userId
+        userId: testUser.id,
         sex: 'Mare',
         date_of_birth: new Date('2020-01-01'),
         health_status: 'Excellent',
@@ -138,7 +129,7 @@ describe('Training Controller Business Logic Tests', () => {
         name: 'Controller Young Horse',
         age: 2, // Too young for training
         breedId: breed.id,
-        userId: testUser.id, // 🎯 Changed from ownerId/playerId to userId
+        userId: testUser.id,
         sex: 'Colt',
         date_of_birth: new Date('2022-01-01'),
         health_status: 'Excellent',
@@ -156,7 +147,7 @@ describe('Training Controller Business Logic Tests', () => {
         name: 'Controller Trained Horse',
         age: 5,
         breedId: breed.id,
-        userId: testUser.id, // 🎯 Changed from ownerId/playerId to userId
+        userId: testUser.id,
         sex: 'Stallion',
         date_of_birth: new Date('2019-01-01'),
         health_status: 'Excellent',
@@ -177,7 +168,7 @@ describe('Training Controller Business Logic Tests', () => {
         name: 'Controller Horse 1',
         age: 6,
         breedId: breed.id,
-        userId: userWithHorses.id, // 🎯 Changed from ownerId/playerId to userId
+        userId: userWithHorses.id,
         sex: 'Mare',
         date_of_birth: new Date('2018-01-01'),
         health_status: 'Good',
@@ -195,7 +186,7 @@ describe('Training Controller Business Logic Tests', () => {
         name: 'Controller Horse 2',
         age: 3, // Just eligible
         breedId: breed.id,
-        userId: userWithHorses.id, // 🎯 Changed from ownerId/playerId to userId
+        userId: userWithHorses.id,
         sex: 'Stallion',
         date_of_birth: new Date('2021-01-01'),
         health_status: 'Fair',
@@ -238,16 +229,13 @@ describe('Training Controller Business Logic Tests', () => {
       }
     });
 
-    // 🎯 Updated to prisma.user.deleteMany for player-like data
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: ['controller-test-user@example.com', 'controller-multi-user@example.com'] // 🎯 Updated emails
+          in: ['controller-test-user@example.com', 'controller-multi-user@example.com']
         }
       }
     });
-
-    // 🎯 Removed separate User deletion as it's covered by the above
 
     await prisma.$disconnect();
   });
@@ -304,7 +292,7 @@ describe('Training Controller Business Logic Tests', () => {
           name: 'Workflow Test Horse',
           age: 4,
           breedId: (await prisma.breed.findFirst()).id,
-          userId: testUser.id, // 🎯 Changed from ownerId/playerId to userId
+          userId: testUser.id,
           sex: 'Mare',
           date_of_birth: new Date('2020-01-01'),
           health_status: 'Excellent',
@@ -317,14 +305,13 @@ describe('Training Controller Business Logic Tests', () => {
         }
       });
 
-      // Get initial user XP (formerly player XP)
-      // 🎯 Changed initialPlayer to initialUser and prisma.player to prisma.user
+      // Get initial user XP
       const initialUser = await prisma.user.findUnique({
         where: { id: testUser.id }
       });
       const initialXP = initialUser.xp;
 
-      const result = await trainHorse(workflowHorse.id, 'Show Jumping', testUser.id); // 🎯 Pass userId to trainHorse
+      const result = await trainHorse(workflowHorse.id, 'Show Jumping', testUser.id);
 
       // VERIFY: Training success
       expect(result.success).toBe(true);
@@ -347,8 +334,7 @@ describe('Training Controller Business Logic Tests', () => {
       });
       expect(trainingLogs).toHaveLength(1);
 
-      // VERIFY: User received XP (formerly player)
-      // 🎯 Changed finalPlayer to finalUser and prisma.player to prisma.user
+      // VERIFY: User received XP
       const finalUser = await prisma.user.findUnique({
         where: { id: testUser.id }
       });
@@ -371,7 +357,7 @@ describe('Training Controller Business Logic Tests', () => {
     });
 
     it('REJECTS training for ineligible horse (under age)', async() => { // Kept async() as per previous lint fix attempt
-      const result = await trainHorse(youngHorse.id, 'Racing', testUser.id); // 🎯 Pass userId
+      const result = await trainHorse(youngHorse.id, 'Racing', testUser.id);
 
       expect(result).toEqual({
         success: false,
@@ -382,7 +368,7 @@ describe('Training Controller Business Logic Tests', () => {
     });
 
     it('REJECTS training for horse in cooldown', async() => { // Kept async() as per previous lint fix attempt
-      const result = await trainHorse(trainedHorse.id, 'Dressage', testUser.id); // 🎯 Pass userId
+      const result = await trainHorse(trainedHorse.id, 'Dressage', testUser.id);
 
       expect(result).toEqual({
         success: false,
@@ -393,13 +379,13 @@ describe('Training Controller Business Logic Tests', () => {
     });
 
     it('THROWS error for non-existent horse ID', async() => { // Kept async() as per previous lint fix attempt
-      await expect(trainHorse(99999, 'Endurance', testUser.id)).rejects.toThrow('Horse not found'); // 🎯 Pass userId
+      await expect(trainHorse(99999, 'Endurance', testUser.id)).rejects.toThrow('Horse not found');
     });
 
     it('THROWS error for invalid input parameters to trainHorse', async() => { // Kept async() as per previous lint fix attempt
-      await expect(trainHorse('invalid', 'Dressage', testUser.id)).rejects.toThrow('Horse ID must be a positive integer'); // 🎯 Pass userId
-      await expect(trainHorse(adultHorse.id, '', testUser.id)).rejects.toThrow('Discipline is required'); // 🎯 Pass userId
-      await expect(trainHorse(adultHorse.id, 'Dressage', null)).rejects.toThrow('User ID is required for XP events'); // 🎯 Updated error message for missing userId
+      await expect(trainHorse('invalid', 'Dressage', testUser.id)).rejects.toThrow('Horse ID must be a positive integer');
+      await expect(trainHorse(adultHorse.id, '', testUser.id)).rejects.toThrow('Discipline is required');
+      await expect(trainHorse(adultHorse.id, 'Dressage', null)).rejects.toThrow('User ID is required for XP events');
     });
   });
 
@@ -450,7 +436,7 @@ describe('Training Controller Business Logic Tests', () => {
       // youngHorse (age 2, ineligible) belongs to testUser
       // trainedHorse (age 5, in cooldown) belongs to testUser
 
-      const result = await getTrainableHorses(userWithHorses.id); // 🎯 Pass userId
+      const result = await getTrainableHorses(userWithHorses.id);
 
       expect(result).toBeInstanceOf(Array);
       expect(result.length).toBe(2); // Should find 2 horses for userWithHorses
@@ -474,7 +460,7 @@ describe('Training Controller Business Logic Tests', () => {
         }
       });
 
-      const result = await getTrainableHorses(noHorseUser.id); // 🎯 Pass userId
+      const result = await getTrainableHorses(noHorseUser.id);
       expect(result).toEqual([]);
 
       // Clean up

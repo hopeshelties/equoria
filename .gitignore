@@ -1,5 +1,8 @@
 # dependencies
-/node_modules
+/node_modules/
+/copilot
+/.cursor
+/Project Cheatsheets
 
 # next.js
 /.next/
