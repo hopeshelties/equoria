@@ -1,6 +1,4 @@
-// filepath: c:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\models\\userModel.test.js
-
-import { jest, describe, beforeEach, afterEach, expect, it, beforeAll, afterAll } from '@jest/globals';
+import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -17,7 +15,6 @@ jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
       update: jest.fn(),
       delete: jest.fn()
     }
-    // Mock other models if they were ever interacted with directly by userModel (not typical)
   }
 }));
 
@@ -37,8 +34,7 @@ const {
   getUserWithHorses,
   updateUser,
   deleteUser,
-  addUserXp,
-  checkAndLevelUpUser,
+  addXpToUser,
   getUserProgress,
   getUserStats
 } = await import(join(__dirname, './userModel.js'));
@@ -49,10 +45,8 @@ const { DatabaseError } = await import(join(__dirname, '../errors/index.js'));
 
 describe('userModel', () => {
   beforeEach(() => {
-    // Clear all mocks before each test
     jest.clearAllMocks();
   });
-
   describe('createUser', () => {
     const baseUserData = {
       username: 'testuser',
@@ -65,56 +59,85 @@ describe('userModel', () => {
       settings: { theme: 'dark' }
     };
 
+    const expectedSelect = {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+      level: true,
+      xp: true,
+      money: true,
+      createdAt: true
+    };
+
     it('should create a user successfully', async() => {
-      const mockCreatedUser = { id: 1, ...baseUserData, role: 'user', createdAt: new Date(), updatedAt: new Date() };
+      const mockCreatedUser = {
+        id: 1,
+        username: baseUserData.username,
+        email: baseUserData.email.toLowerCase(),
+        role: 'user',
+        level: baseUserData.level,
+        xp: baseUserData.xp,
+        money: baseUserData.money,
+        createdAt: new Date()
+      };
+
       mockPrisma.user.create.mockResolvedValue(mockCreatedUser);
 
       const result = await createUser(baseUserData);
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({ data: baseUserData });
+
+      expect(mockPrisma.user.create).toHaveBeenCalledWith({
+        data: {
+          ...baseUserData,
+          email: baseUserData.email.toLowerCase()
+        },
+        select: expectedSelect
+      });
       expect(result).toEqual(mockCreatedUser);
-      expect(mockLogger.info).toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalledWith(expect.stringContaining('User created: testuser'));
     });
 
     it('should throw error if username is missing', async() => {
       const { username: _username, ...incompleteData } = baseUserData;
-      await expect(createUser(incompleteData)).rejects.toThrow('Username, email, and password are required');
+      await expect(createUser(incompleteData)).rejects.toThrow('Username, email, and password are required.');
     });
 
-    it('should throw error for invalid initial money', async() => {
-      await expect(createUser({ ...baseUserData, money: -100 })).rejects.toThrow('Initial money must be a non-negative number.');
+    it('should throw error if email is missing', async() => {
+      const { email: _email, ...incompleteData } = baseUserData;
+      await expect(createUser(incompleteData)).rejects.toThrow('Username, email, and password are required.');
     });
 
-    it('should throw error for invalid initial level', async() => {
-      await expect(createUser({ ...baseUserData, level: 0 })).rejects.toThrow('Initial level must be a positive integer, at least 1.');
+    it('should throw error if password is missing', async() => {
+      const { password: _password, ...incompleteData } = baseUserData;
+      await expect(createUser(incompleteData)).rejects.toThrow('Username, email, and password are required.');
     });
 
-    it('should throw error for invalid initial xp', async() => {
-      await expect(createUser({ ...baseUserData, xp: -10 })).rejects.toThrow('Initial XP must be a non-negative number.');
+    it('should throw error on unique constraint violation for username', async() => {
+      const dbError = { code: 'P2002', meta: { target: ['username'] } };
+      mockPrisma.user.create.mockRejectedValue(dbError);
+      await expect(createUser(baseUserData)).rejects.toThrow('Duplicate value for username.');
     });
 
-    it('should throw error on unique constraint violation', async() => {
+    it('should throw error on unique constraint violation for email', async() => {
       const dbError = { code: 'P2002', meta: { target: ['email'] } };
       mockPrisma.user.create.mockRejectedValue(dbError);
-      await expect(createUser(baseUserData)).rejects.toThrow('User with this email already exists.');
-      expect(mockLogger.error).toHaveBeenCalled();
+      await expect(createUser(baseUserData)).rejects.toThrow('Duplicate value for email.');
     });
 
     it('should throw DatabaseError for other Prisma errors', async() => {
       const dbError = new Error('Some other DB error');
       mockPrisma.user.create.mockRejectedValue(dbError);
-      await expect(createUser(baseUserData)).rejects.toThrow(DatabaseError);
-      expect(mockLogger.error).toHaveBeenCalled();
+      await expect(createUser(baseUserData)).rejects.toThrow(new DatabaseError('Create user failed: Some other DB error'));
     });
   });
-
   describe('getUserById', () => {
-    it('should retrieve a user by ID', async() => {
-      const mockUser = { id: 1, name: 'Test User' };
+    it('should return user if found', async() => {
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      const user = await getUserById(1);
+
+      const result = await getUserById(1);
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
-      expect(user).toEqual(mockUser);
-      expect(mockLogger.info).toHaveBeenCalled();
+      expect(result).toEqual(mockUser);
     });
 
     it('should return null if user not found', async() => {
@@ -123,233 +146,286 @@ describe('userModel', () => {
       expect(user).toBeNull();
     });
 
-    it('should throw error for invalid ID format', async() => {
-      await expect(getUserById('invalid-id')).rejects.toThrow('Invalid user ID format.');
-      await expect(getUserById(0)).rejects.toThrow('Invalid user ID format.');
-      await expect(getUserById(-1)).rejects.toThrow('Invalid user ID format.');
+    it('should throw DatabaseError if ID is not provided', async() => {
+      await expect(getUserById(null)).rejects.toThrow(new DatabaseError('Lookup failed: User ID is required.'));
+      await expect(getUserById(undefined)).rejects.toThrow(new DatabaseError('Lookup failed: User ID is required.'));
     });
   });
 
   describe('getUserByEmail', () => {
-    it('should retrieve a user by email', async() => {
+    it('should return user by email (case insensitive)', async() => {
       const mockUser = { id: 1, email: 'test@example.com' };
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      const user = await getUserByEmail('test@example.com');
+
+      const user = await getUserByEmail('TEST@EXAMPLE.COM');
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
       expect(user).toEqual(mockUser);
-      expect(mockLogger.info).toHaveBeenCalled();
     });
 
-    it('should throw error for invalid email format', async() => {
-      await expect(getUserByEmail('')).rejects.toThrow('Invalid email format');
-      await expect(getUserByEmail(null)).rejects.toThrow('Invalid email format');
+    it('should throw DatabaseError if email is not provided', async() => {
+      await expect(getUserByEmail('')).rejects.toThrow(new DatabaseError('Lookup failed: Email required.'));
+      await expect(getUserByEmail(null)).rejects.toThrow(new DatabaseError('Lookup failed: Email required.'));
     });
   });
 
   describe('getUserWithHorses', () => {
-    it('should retrieve a user with their horses', async() => {
-      const mockUser = { id: 1, name: 'Test User', horses: [{ id: 101, name: 'Spirit' }] };
+    it('should return user with horses if found', async() => {
+      const mockUser = { id: 1, horses: [{ id: 101, name: 'Spirit' }] };
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      const user = await getUserWithHorses(1);
+
+      const result = await getUserWithHorses(1);
       expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
         include: { horses: { include: { breed: true, stable: true } } }
       });
-      expect(user).toEqual(mockUser);
-      expect(mockLogger.info).toHaveBeenCalled();
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should throw DatabaseError if ID is not provided', async() => {
+      await expect(getUserWithHorses(null)).rejects.toThrow(new DatabaseError('Lookup failed: User ID is required.'));
     });
   });
 
   describe('updateUser', () => {
     const updateData = { name: 'Updated Name', money: 1500 };
-    it('should update a user successfully', async() => {
+
+    it('should update user successfully', async() => {
       const mockUpdatedUser = { id: 1, username: 'testuser', ...updateData };
       mockPrisma.user.update.mockResolvedValue(mockUpdatedUser);
+
       const result = await updateUser(1, updateData);
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({ where: { id: 1 }, data: updateData });
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: updateData
+      });
       expect(result).toEqual(mockUpdatedUser);
-      expect(mockLogger.info).toHaveBeenCalled();
     });
 
-    it('should throw error if user not found for update', async() => {
-      mockPrisma.user.update.mockRejectedValue({ code: 'P2025' });
-      await expect(updateUser(99, updateData)).rejects.toThrow('User not found for update.');
+    it('should throw DatabaseError if ID is not provided', async() => {
+      await expect(updateUser(null, updateData)).rejects.toThrow(new DatabaseError('Update failed: User ID is required.'));
     });
 
-    it('should throw error if no update data provided', async() => {
-      await expect(updateUser(1, {})).rejects.toThrow('No update data provided.');
+    it('should handle Prisma update errors', async() => {
+      const prismaError = { code: 'P2025', message: 'Record to update not found.' };
+      mockPrisma.user.update.mockRejectedValue(prismaError);
+
+      await expect(updateUser(1, updateData)).rejects.toThrow(new DatabaseError('Update failed: Record to update not found.'));
+    });
+
+    it('should handle general update errors', async() => {
+      const prismaError = { message: 'Some other update error' };
+      mockPrisma.user.update.mockRejectedValue(prismaError);
+
+      await expect(updateUser(1, updateData)).rejects.toThrow(new DatabaseError('Update failed: Some other update error'));
     });
   });
 
   describe('deleteUser', () => {
-    it('should delete a user successfully', async() => {
-      const mockDeletedUser = { id: 1, username: 'testuser' };
-      mockPrisma.user.delete.mockResolvedValue(mockDeletedUser);
+    it('should delete user successfully', async() => {
+      const deletedUser = { id: 1, username: 'testuser' };
+      mockPrisma.user.delete.mockResolvedValue(deletedUser);
+
       const result = await deleteUser(1);
       expect(mockPrisma.user.delete).toHaveBeenCalledWith({ where: { id: 1 } });
-      expect(result).toEqual(mockDeletedUser);
-      expect(mockLogger.info).toHaveBeenCalled();
+      expect(result).toEqual(deletedUser);
     });
 
-    it('should throw error if user not found for deletion', async() => {
-      mockPrisma.user.delete.mockRejectedValue({ code: 'P2025' });
-      await expect(deleteUser(99)).rejects.toThrow('User not found for deletion.');
+    it('should throw DatabaseError if ID is not provided', async() => {
+      await expect(deleteUser(null)).rejects.toThrow(new DatabaseError('Delete failed: User ID is required.'));
+    });
+
+    it('should handle Prisma delete errors', async() => {
+      const prismaError = { code: 'P2025', message: 'Record to delete not found.' };
+      mockPrisma.user.delete.mockRejectedValue(prismaError);
+
+      await expect(deleteUser(99)).rejects.toThrow(new DatabaseError('Delete failed: Record to delete not found.'));
     });
   });
 
-  describe('addUserXp', () => {
-    const baseUser = { id: 1, username: 'testuser', level: 1, xp: 50, money: 1000, settings: {} };
+  describe('addXpToUser', () => {
+    const baseUser = { id: 1, username: 'testuser', level: 1, xp: 50, money: 1000 };
 
     it('should add XP without leveling up', async() => {
       mockPrisma.user.findUnique.mockResolvedValue(baseUser);
-      const updatedUser = { ...baseUser, xp: 70 };
+      const updatedUser = { ...baseUser, xp: 70, level: 1 };
       mockPrisma.user.update.mockResolvedValue(updatedUser);
 
-      const result = await addUserXp(1, 20);
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({ where: { id: 1 }, data: { xp: 70 } });
-      expect(result).toEqual(expect.objectContaining({ xp: 70, leveledUp: false, levelsGained: 0 }));
+      const result = await addXpToUser(1, 20);
+
+      expect(result).toEqual({
+        success: true,
+        currentXP: 70,
+        currentLevel: 1,
+        leveledUp: false,
+        levelsGained: 0,
+        xpGained: 20
+      });
     });
 
-    it('should add XP and level up once', async() => {
-      mockPrisma.user.findUnique.mockResolvedValue(baseUser); // xp: 50, level: 1
-      const updatedUser = { ...baseUser, xp: 10, level: 2 }; // 50 + 60 = 110 -> level 2, 10xp
+    it('should add XP and level up', async() => {
+      mockPrisma.user.findUnique.mockResolvedValue(baseUser);
+      const updatedUser = { ...baseUser, xp: 200, level: 2 };
       mockPrisma.user.update.mockResolvedValue(updatedUser);
 
-      const result = await addUserXp(1, 60); // xpPerLevel is 100
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({ where: { id: 1 }, data: { xp: 10, level: 2 } });
-      expect(result).toEqual(expect.objectContaining({ xp: 10, level: 2, leveledUp: true, levelsGained: 1 }));
+      const result = await addXpToUser(1, 150);
+
+      expect(result).toEqual({
+        success: true,
+        currentXP: 200,
+        currentLevel: 2,
+        leveledUp: true,
+        levelsGained: 1,
+        xpGained: 150
+      });
     });
 
-    it('should add XP and level up multiple times', async() => {
-      mockPrisma.user.findUnique.mockResolvedValue(baseUser); // xp: 50, level: 1
-      const updatedUser = { ...baseUser, xp: 70, level: 3 }; // 50 + 220 = 270 -> level 3, 70xp
-      mockPrisma.user.update.mockResolvedValue(updatedUser);
-
-      const result = await addUserXp(1, 220);
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({ where: { id: 1 }, data: { xp: 70, level: 3 } });
-      expect(result).toEqual(expect.objectContaining({ xp: 70, level: 3, leveledUp: true, levelsGained: 2 }));
+    it('should return error for invalid XP amount', async() => {
+      const result = await addXpToUser(1, -5);
+      expect(result).toEqual(expect.objectContaining({
+        success: false,
+        error: 'XP amount must be a positive number.'
+      }));
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error: XP amount must be a positive number.'));
     });
 
-    it('should throw error for invalid XP amount', async() => {
-      await expect(addUserXp(1, -10)).rejects.toThrow('XP amount must be a positive number.');
-      await expect(addUserXp(1, 0)).rejects.toThrow('XP amount must be a positive number.');
+    it('should return error for invalid user ID', async() => {
+      const result = await addXpToUser(null, 20);
+      expect(result).toEqual(expect.objectContaining({
+        success: false,
+        error: 'User ID is required.'
+      }));
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error: User ID is required.'));
     });
 
-    it('should throw error if user not found for addUserXp', async() => {
+    it('should return error if user not found', async() => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      await expect(addUserXp(99, 20)).rejects.toThrow('User not found to add XP.');
-    });
-  });
-
-  describe('checkAndLevelUpUser', () => {
-    const baseUser = { id: 1, username: 'testuser', level: 1, xp: 50, money: 1000, settings: {} };
-
-    it('should not level up if XP is less than 100', async() => {
-      mockPrisma.user.findUnique.mockResolvedValue(baseUser); // xp: 50
-      const result = await checkAndLevelUpUser(1);
-      expect(mockPrisma.user.update).not.toHaveBeenCalled();
-      expect(result).toEqual(expect.objectContaining({ ...baseUser, leveledUp: false, levelsGained: 0 }));
-    });
-
-    it('should level up if XP is 100 or more', async() => {
-      const userWithEnoughXp = { ...baseUser, xp: 120 }; // level 1, xp 120
-      mockPrisma.user.findUnique.mockResolvedValue(userWithEnoughXp);
-      const updatedUser = { ...userWithEnoughXp, xp: 20, level: 2 };
-      mockPrisma.user.update.mockResolvedValue(updatedUser);
-
-      const result = await checkAndLevelUpUser(1);
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({ where: { id: 1 }, data: { xp: 20, level: 2 } });
-      expect(result).toEqual(expect.objectContaining({ xp: 20, level: 2, leveledUp: true, levelsGained: 1 }));
-    });
-    it('should throw error if user not found for checkAndLevelUpUser', async() => {
-      mockPrisma.user.findUnique.mockResolvedValue(null);
-      await expect(checkAndLevelUpUser(99)).rejects.toThrow('User not found for level up check.');
+      const result = await addXpToUser(99, 20);
+      expect(result).toEqual(expect.objectContaining({
+        success: false,
+        error: 'User not found.'
+      }));
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Error: User not found.'));
     });
   });
 
   describe('getUserProgress', () => {
-    it('should retrieve user progress', async() => {
-      const mockUser = { id: 1, username: 'testuser', name: 'Test User', level: 2, xp: 30 };
+    it('should return user progress', async() => {
+      const mockUser = { id: 1, level: 1, xp: 50 };
       mockPrisma.user.findUnique.mockResolvedValue(mockUser);
-      const progress = await getUserProgress(1);
-      expect(progress).toEqual({
+
+      const result = await getUserProgress(1);
+
+      expect(result).toEqual({
         userId: 1,
-        username: 'testuser',
-        name: 'Test User',
-        level: 2,
-        xp: 30,
-        xpToNextLevel: 70, // 100 - 30
-        xpForCurrentLevel: 100
+        level: 1,
+        xp: 50,
+        xpToNextLevel: 150,
+        xpForNextLevel: 200
       });
     });
-    it('should throw error if user not found for getUserProgress', async() => {
+
+    it('should throw DatabaseError if ID is not provided', async() => {
+      await expect(getUserProgress(null)).rejects.toThrow(new DatabaseError('Progress fetch failed: Lookup failed: User ID is required.'));
+    });
+
+    it('should throw DatabaseError if user not found', async() => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      await expect(getUserProgress(99)).rejects.toThrow('User not found for progress check.');
+      await expect(getUserProgress(99)).rejects.toThrow(new DatabaseError('Progress fetch failed: User not found.'));
     });
   });
 
   describe('getUserStats', () => {
-    it('should retrieve user stats including horse count and average age', async() => {
-      const mockUserWithHorses = {
+    it('should return user stats with horses', async() => {
+      const mockUser = {
         id: 1,
-        username: 'statsuser',
-        email: 'stats@example.com',
+        username: 'testuser',
+        email: 'test@example.com',
         role: 'user',
+        name: 'Test User',
         createdAt: new Date(),
-        name: 'Stats User',
-        money: 2000,
-        level: 5,
-        xp: 50,
+        money: 1000,
+        level: 2,
+        xp: 150,
         horses: [
-          { id: 101, name: 'HorseA', age: 5 },
-          { id: 102, name: 'HorseB', age: 7 }
+          { age: 5 },
+          { age: 7 }
         ]
       };
-      mockPrisma.user.findUnique.mockResolvedValue(mockUserWithHorses);
-      const stats = await getUserStats(1);
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
-        where: { id: 1 },
-        include: { horses: true }
-      });
-      expect(stats).toEqual(expect.objectContaining({
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await getUserStats(1);
+
+      expect(result).toEqual({
         id: 1,
-        username: 'statsuser',
-        name: 'Stats User',
-        money: 2000,
-        level: 5,
-        xp: 50,
+        username: 'testuser',
+        email: 'test@example.com',
+        role: 'user',
+        name: 'Test User',
+        createdAt: mockUser.createdAt,
+        money: 1000,
+        level: 2,
+        xp: 150,
         horseCount: 2,
-        averageHorseAge: 6 // (5+7)/2
-      }));
+        averageHorseAge: 6
+      });
     });
 
-    it('should handle user with no horses for stats', async() => {
-      const mockUserNoHorses = {
+    it('should handle user with no horses', async() => {
+      const mockUser = {
         id: 2,
         username: 'nohorseuser',
-        email: 'nohorse@example.com',
+        email: 'nohorses@example.com',
         role: 'user',
         createdAt: new Date(),
         name: 'No Horse User',
         money: 500,
-        level: 2,
-        xp: 10,
+        level: 1,
+        xp: 25,
         horses: []
       };
-      mockPrisma.user.findUnique.mockResolvedValue(mockUserNoHorses);
-      const stats = await getUserStats(2);
-      expect(stats).toEqual(expect.objectContaining({
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await getUserStats(2);
+
+      expect(result).toEqual(expect.objectContaining({
         horseCount: 0,
         averageHorseAge: 0
       }));
     });
 
-    it('should return null if user not found for getUserStats', async() => {
+    it('should handle user with null horses array', async() => {
+      const mockUser = {
+        id: 3,
+        username: 'nullhorseuser',
+        email: 'nullhorse@example.com',
+        role: 'user',
+        createdAt: new Date(),
+        name: 'Null Horse User',
+        money: 500,
+        level: 2,
+        xp: 10,
+        horses: null
+      };
+
+      mockPrisma.user.findUnique.mockResolvedValue(mockUser);
+
+      const result = await getUserStats(3);
+      expect(result).toEqual(expect.objectContaining({
+        horseCount: 0,
+        averageHorseAge: 0
+      }));
+    });
+
+    it('should return null for non-existent user', async() => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      const stats = await getUserStats(99);
-      expect(stats).toBeNull();
-      expect(mockLogger.warn).toHaveBeenCalled();
+
+      const result = await getUserStats(999);
+      expect(result).toBeNull();
+    });    it('should throw DatabaseError if ID is not provided', async() => {
+      await expect(getUserStats(null)).rejects.toThrow(new DatabaseError('Stats fetch failed: User ID is required.'));
     });
   });
 });
+

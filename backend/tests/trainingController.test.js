@@ -1,3 +1,4 @@
+import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -16,9 +17,8 @@ const mockGetHorseById = jest.fn();
 const mockUpdateHorseStat = jest.fn();
 
 // Mock the userModel functions
-const mockGetPlayerWithHorses = jest.fn();
-const mockAddXp = jest.fn();
-const mockLevelUpIfNeeded = jest.fn();
+const mockGetUserWithHorses = jest.fn();
+const mockAddXpToUser = jest.fn();
 
 jest.unstable_mockModule(join(__dirname, '../models/trainingModel.js'), () => ({
   getHorseAge: mockGetHorseAge,
@@ -34,9 +34,8 @@ jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
 }));
 
 jest.unstable_mockModule(join(__dirname, '../models/userModel.js'), () => ({
-  getPlayerWithHorses: mockGetPlayerWithHorses,
-  addXp: mockAddXp,
-  levelUpIfNeeded: mockLevelUpIfNeeded
+  getUserWithHorses: mockGetUserWithHorses,
+  addXpToUser: mockAddXpToUser
 }));
 
 // Import the module after mocking
@@ -45,9 +44,8 @@ const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses } = await im
 describe('trainingController', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetPlayerWithHorses.mockClear();
-    mockAddXp.mockClear();
-    mockLevelUpIfNeeded.mockClear();
+    mockGetUserWithHorses.mockClear();
+    mockAddXpToUser.mockClear();
   });
 
   describe('canTrain', () => {

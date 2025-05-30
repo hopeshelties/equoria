@@ -17,7 +17,7 @@ jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
     breed: {
       findUnique: jest.fn()
     },
-    player: {
+    user: {
       findUnique: jest.fn()
     },
     $disconnect: jest.fn()

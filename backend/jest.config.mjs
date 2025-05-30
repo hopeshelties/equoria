@@ -6,7 +6,7 @@ export default {
   moduleFileExtensions: ['js', 'mjs'],
 
   // Setup file path must match your actual filename
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'], // Point back to .mjs
 
   // Recommended test file globs
   testMatch: [

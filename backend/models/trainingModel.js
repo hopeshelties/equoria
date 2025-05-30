@@ -15,7 +15,7 @@ async function logTrainingSession({ horseId, discipline }) {
     if (horseId === undefined || horseId === null) {
       throw new Error('Horse ID is required');
     }
-    
+
     if (!discipline) {
       throw new Error('Discipline is required');
     }
@@ -32,13 +32,13 @@ async function logTrainingSession({ horseId, discipline }) {
     const trainingLog = await prisma.trainingLog.create({
       data: {
         horseId: parsedHorseId,
-        discipline: discipline,
+        discipline,
         trainedAt: new Date()
       }
     });
 
     logger.info(`[trainingModel.logTrainingSession] Successfully logged training session: ID ${trainingLog.id}`);
-    
+
     return trainingLog;
 
   } catch (error) {
@@ -73,13 +73,13 @@ async function getLastTrainingDate(horseId, discipline) {
     const trainingLog = await prisma.trainingLog.findFirst({
       where: {
         horseId: parsedHorseId,
-        discipline: discipline
+        discipline
       },
       orderBy: {
         trainedAt: 'desc'
       }
     });
-    
+
     if (!trainingLog) {
       logger.info(`[trainingModel.getLastTrainingDate] No training records found for horse ${parsedHorseId} in ${discipline}`);
       return null;
@@ -87,7 +87,7 @@ async function getLastTrainingDate(horseId, discipline) {
 
     const lastTrainingDate = trainingLog.trainedAt;
     logger.info(`[trainingModel.getLastTrainingDate] Last training date for horse ${parsedHorseId} in ${discipline}: ${lastTrainingDate}`);
-    
+
     return lastTrainingDate;
 
   } catch (error) {
@@ -117,15 +117,15 @@ async function getHorseAge(horseId) {
       where: { id: parsedHorseId },
       select: { age: true }
     });
-    
+
     if (!horse) {
       logger.info(`[trainingModel.getHorseAge] Horse ${parsedHorseId} not found`);
       return null;
     }
 
-    const age = horse.age;
+    const { age } = horse;
     logger.info(`[trainingModel.getHorseAge] Horse ${parsedHorseId} is ${age} years old`);
-    
+
     return age;
 
   } catch (error) {
@@ -159,7 +159,7 @@ async function getAnyRecentTraining(horseId) {
         trainedAt: 'desc'
       }
     });
-    
+
     if (!trainingLog) {
       logger.info(`[trainingModel.getAnyRecentTraining] No training records found for horse ${parsedHorseId}`);
       return null;
@@ -167,7 +167,7 @@ async function getAnyRecentTraining(horseId) {
 
     const lastTrainingDate = trainingLog.trainedAt;
     logger.info(`[trainingModel.getAnyRecentTraining] Most recent training date for horse ${parsedHorseId}: ${lastTrainingDate} (discipline: ${trainingLog.discipline})`);
-    
+
     return lastTrainingDate;
 
   } catch (error) {
@@ -181,4 +181,4 @@ export {
   getLastTrainingDate,
   getHorseAge,
   getAnyRecentTraining
-}; 
+};

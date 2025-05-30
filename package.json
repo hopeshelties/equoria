@@ -1,0 +1,21 @@
+{
+  "name": "equoria-monorepo",
+  "version": "1.0.0",
+  "description": "Root package for the Equoria project, enabling easier script execution for sub-projects.",
+  "private": true,
+  "scripts": {
+    "test-backend": "cd backend && npm test",
+    "lint-backend": "cd backend && npm run lint",
+    "lint-fix-backend": "cd backend && npm run lint:fix",
+    "format-backend": "cd backend && npm run format",
+    "dev-backend": "cd backend && npm run dev",
+    "start-backend": "cd backend && npm run start"
+  },
+  "keywords": [
+    "equoria",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+

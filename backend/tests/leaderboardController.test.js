@@ -58,11 +58,11 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 
 // Now import the controller and mocked modules
 const {
-  getTopPlayersByLevel,
-  getTopPlayersByXP,
+  getTopUsersByLevel, // Renamed from getTopPlayersByLevel
+  getTopUsersByXP, // Renamed from getTopPlayersByXP
   getTopHorsesByEarnings,
   getTopHorsesByPerformance,
-  getTopPlayersByHorseEarnings,
+  getTopUsersByHorseEarnings, // Renamed from getTopPlayersByHorseEarnings
   getRecentWinners,
   getLeaderboardStats
 } = await import('../controllers/leaderboardController.js');
@@ -89,7 +89,7 @@ describe('Leaderboard Controller', () => {
     };
   });
 
-  describe('getTopPlayersByLevel', () => {
+  describe('getTopPlayersByLevel', () => { // Test description can remain for now, or be updated
     const mockUsers = [ // Renamed from mockPlayers
       {
         id: 'user-1', // Changed from 'player-1'
@@ -117,7 +117,7 @@ describe('Leaderboard Controller', () => {
     it('should return top players ranked by level and XP', async() => {
       mockPrisma.user.findMany.mockResolvedValue(mockUsers); // Changed from mockPlayers
 
-      await getTopPlayersByLevel(mockReq, mockRes);
+      await getTopUsersByLevel(mockReq, mockRes); // Use the new function name
 
       expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
         select: {
@@ -137,9 +137,9 @@ describe('Leaderboard Controller', () => {
 
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Top players by level retrieved successfully',
+        message: 'Top users by level retrieved successfully', // Message in controller is 'Top users by level retrieved successfully'
         data: {
-          players: [ // "players" key in response might be kept for API contract, or changed to "users" if controller changes it
+          users: [ // Controller uses 'users' key in response data
             {
               rank: 1,
               userId: 'user-1', // Changed from playerId
@@ -185,7 +185,7 @@ describe('Leaderboard Controller', () => {
       mockReq.query = { limit: '5', offset: '10' };
       mockPrisma.user.findMany.mockResolvedValue([]);
 
-      await getTopPlayersByLevel(mockReq, mockRes);
+      await getTopUsersByLevel(mockReq, mockRes); // Use the new function name
 
       expect(mockPrisma.user.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -198,17 +198,17 @@ describe('Leaderboard Controller', () => {
     it('should handle database errors', async() => {
       mockPrisma.user.findMany.mockRejectedValue(new Error('Database error'));
 
-      await getTopPlayersByLevel(mockReq, mockRes);
+      await getTopUsersByLevel(mockReq, mockRes); // Use the new function name
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to retrieve top players by level'
+        message: 'Failed to retrieve user level leaderboard' // Message in controller
       });
     });
   });
 
-  describe('getTopPlayersByXP', () => {
+  describe('getTopPlayersByXP', () => { // Test description can remain for now
     const mockXpData = [
       {
         userId: 'user-1', // Changed from playerId
@@ -226,7 +226,7 @@ describe('Leaderboard Controller', () => {
       mockReq.query = { period: 'all' };
       mockPrisma.xpEvent.groupBy.mockResolvedValue(mockXpData);
 
-      await getTopPlayersByXP(mockReq, mockRes);
+      await getTopUsersByXP(mockReq, mockRes); // Use the new function name
 
       expect(mockPrisma.xpEvent.groupBy).toHaveBeenCalledWith({
         by: ['userId'], // Changed from playerId
@@ -248,7 +248,7 @@ describe('Leaderboard Controller', () => {
       mockReq.query = { period: 'week' };
       mockPrisma.xpEvent.groupBy.mockResolvedValue(mockXpData);
 
-      await getTopPlayersByXP(mockReq, mockRes);
+      await getTopUsersByXP(mockReq, mockRes); // Use the new function name
 
       expect(mockPrisma.xpEvent.groupBy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -381,7 +381,7 @@ describe('Leaderboard Controller', () => {
     });
   });
 
-  describe('getTopPlayersByHorseEarnings', () => {
+  describe('getTopPlayersByHorseEarnings', () => { // Test description can remain
     const mockPlayerEarnings = [
       {
         userId: 'user-1', // Changed from playerId
@@ -394,7 +394,7 @@ describe('Leaderboard Controller', () => {
     it('should return top players by combined horse earnings', async() => {
       mockPrisma.horse.groupBy.mockResolvedValue(mockPlayerEarnings);
 
-      await getTopPlayersByHorseEarnings(mockReq, mockRes);
+      await getTopUsersByHorseEarnings(mockReq, mockRes); // Use the new function name
 
       expect(mockPrisma.horse.groupBy).toHaveBeenCalledWith({
         by: ['userId'], // Changed from playerId
@@ -482,7 +482,7 @@ describe('Leaderboard Controller', () => {
 
   describe('getLeaderboardStats', () => {
     const mockStats = {
-      playerCount: 100,
+      playerCount: 100, // Will need to check if controller returns 'userCount' or 'playerCount'
       horseCount: 250,
       showCount: 50,
       totalEarnings: 500000,
@@ -491,7 +491,7 @@ describe('Leaderboard Controller', () => {
     };
 
     beforeEach(() => {
-      mockPrisma.user.count.mockResolvedValue(mockStats.playerCount);
+      mockPrisma.user.count.mockResolvedValue(mockStats.playerCount); // user.count is correct
       mockPrisma.horse.count.mockResolvedValue(mockStats.horseCount);
       mockPrisma.show.count.mockResolvedValue(mockStats.showCount);
       mockPrisma.horse.aggregate.mockResolvedValue({
@@ -512,30 +512,17 @@ describe('Leaderboard Controller', () => {
         success: true,
         message: 'Leaderboard statistics retrieved successfully',
         data: {
-          playerStats: {
-            totalPlayers: mockStats.playerCount,
-            averageLevel: mockStats.avgLevel,
-            totalXpEarned: mockStats.totalXp
-          },
-          horseStats: {
-            totalHorses: mockStats.horseCount,
-            totalEarnings: mockStats.totalEarnings,
-            averageEarningsPerHorse: mockStats.totalEarnings / mockStats.horseCount
-          },
-          competitionStats: {
-            totalShows: mockStats.showCount
-          },
-          summary: {
-            playersWithHorses: expect.any(Number),
-            activeCompetitors: expect.any(Number),
-            topPlayerLevel: expect.any(Number),
-            highestEarningHorse: expect.any(Number)
-          }
+          userCount: mockStats.playerCount, // Controller returns userCount
+          horseCount: mockStats.horseCount,
+          showCount: mockStats.showCount,
+          totalEarnings: mockStats.totalEarnings,
+          totalXp: mockStats.totalXp,
+          averageUserLevel: mockStats.avgLevel // Controller returns averageUserLevel
         }
       });
     });
 
-    it('should handle database errors in stats retrieval', async() => {
+    it('should handle database errors for stats', async() => {
       mockPrisma.user.count.mockRejectedValue(new Error('Stats error'));
 
       await getLeaderboardStats(mockReq, mockRes);

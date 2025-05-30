@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import request from 'supertest';
 import app from '../app.js';
 import { createTestUser, createLoginData } from './helpers/authHelper.js';

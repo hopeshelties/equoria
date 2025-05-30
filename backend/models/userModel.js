@@ -187,15 +187,18 @@ export async function getUserProgress(userId) {
 /** Get full stats summary for dashboard/profile */
 export async function getUserStats(userId) {
   try {
+    if (!userId) {throw new Error('User ID is required.');}
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: { horses: true }
     });
     if (!user) {return null;}
 
-    const horseCount = user.horses.length;
+    const horses = user.horses || [];
+    const horseCount = horses.length;
     const avgHorseAge = horseCount
-      ? parseFloat((user.horses.reduce((acc, h) => acc + h.age, 0) / horseCount).toFixed(2))
+      ? parseFloat((horses.reduce((acc, h) => acc + h.age, 0) / horseCount).toFixed(2))
       : 0;
 
     return {
