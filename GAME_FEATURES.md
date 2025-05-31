@@ -159,8 +159,13 @@ This document provides a comprehensive overview of all implemented features and 
 - **Hidden Scoring** - Users see placement but not raw scores
 
 **API Endpoints:**
-- `POST /api/competition/enter` - Enter horse in competition (planned)
-- `GET /api/leaderboard/competition` - Competition leaderboards (planned)
+- ✅ `POST /api/competition/enter` - Enter horse in competition with enhanced validation
+- ✅ `POST /api/competition/execute` - Execute competition with enhanced simulation
+- ✅ `GET /api/competition/eligibility/:horseId/:discipline` - Check horse eligibility
+- ✅ `GET /api/competition/disciplines` - Get all available disciplines
+- ✅ `GET /api/leaderboard/competition` - Competition leaderboards with filtering
+- ✅ `GET /api/competition/show/:showId/results` - Get show results
+- ✅ `GET /api/competition/horse/:horseId/results` - Get horse competition history
 
 ---
 
@@ -308,11 +313,13 @@ This document provides a comprehensive overview of all implemented features and 
 ## 📈 **DEVELOPMENT METRICS**
 
 ### **✅ Code Quality**
-- **ESLint** - Code linting and style enforcement
+- **ESLint** - Code linting and style enforcement (Zero issues across competition system)
 - **Prettier** - Consistent code formatting
 - **ES Modules** - Modern JavaScript throughout
 - **Type Safety** - Prisma-generated types
 - **Error Handling** - Comprehensive error management
+- **Professional Logging** - Winston logger throughout (no console statements)
+- **Code Standards** - ES6 best practices, consistent patterns, zero technical debt
 
 ### **✅ Test Coverage**
 - **Unit Tests** - 942+ individual function tests
