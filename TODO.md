@@ -40,6 +40,8 @@ This file tracks current tasks and issues that need to be addressed in the Equor
   - [x] **epigeneticTraits.test.js**: Added breeding system documentation, enhanced readability, **EXCELLENT UNIT TESTING** (22/22 tests passing)
   - [x] **cronJobsIntegration.test.js**: Added cron job system documentation, fixed ESLint errors, **MOCKING ISSUES** (12/13 tests passing, demonstrates over-mocking risks)
   - [x] **data-check.test.js**: Added live data validation documentation, enhanced readability, **DISCOVERED CRITICAL SCHEMA ISSUES** (incomplete migration: ownerId→userId, missing role field, broken relationships)
+  - [x] **dbConnection.test.js**: Added alternative import path documentation, enhanced readability, **GOOD INFRASTRUCTURE TESTING** (1/1 test passing)
+  - [x] **disciplineAffinityBonusTask9.test.js**: Added trait bonus documentation, fixed field naming, **DISCOVERED TRAIT STACKING BUG** (12/13 tests passing, additional traits beyond affinity not working)
 - [ ] **Comprehensive Test Review** - Review remaining test files to ensure balanced mocking and real-world results
   - [ ] Identify over-mocked tests that lose touch with reality
   - [ ] Replace excessive mocking with integration tests, real databases, fakes, or contract testing

@@ -1,14 +1,42 @@
 /**
- * TASK 9: Unit Tests for Discipline Affinity Trait Bonus in Competition Logic
+ * 🧪 UNIT TEST: Discipline Affinity Trait Bonus - Competition Score Enhancement
  *
- * Tests the integration of discipline_affinity_* traits in competition score calculation.
- * Verifies that horses with matching discipline affinity traits receive a +5 flat bonus.
+ * This test validates the discipline affinity trait system that provides competitive
+ * advantages to horses with matching discipline-specific traits.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Discipline affinity bonus: +5 flat score bonus for matching discipline_affinity_* traits
+ * - Trait matching logic: Only matching discipline traits provide bonuses (racing ≠ dressage)
+ * - Discipline name conversion: "Show Jumping" → "discipline_affinity_show_jumping"
+ * - Multiple trait handling: Only one +5 bonus even with multiple affinity traits
+ * - Integration with existing traits: Affinity bonus stacks with other trait effects
+ * - Edge case handling: Missing/null/undefined epigenetic modifiers
+ * - Score calculation accuracy: Trait bonuses properly integrated into competition scoring
+ * - Random variance accommodation: Tests account for ±9% luck modifier variance
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. simulateCompetition() - Complete competition simulation with trait bonuses
+ * 2. Discipline matching: Racing, Show Jumping, Dressage, Cross Country affinity traits
+ * 3. Non-matching scenarios: Wrong discipline traits provide no bonus
+ * 4. Multiple trait scenarios: Multiple affinity traits don't stack bonuses
+ * 5. Discipline name conversion: Space-separated names to underscore format
+ * 6. Trait integration: Affinity bonuses work with existing trait system
+ * 7. Edge cases: Missing fields, null values, undefined arrays
+ * 8. Deterministic testing: Controlled randomness for exact score verification
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete competition simulation, trait calculations, score algorithms
+ * ✅ REAL: Discipline matching logic, trait bonus application, random variance
+ * 🔧 MOCK: Math.random() only - for deterministic testing of specific scenarios
+ *
+ * 💡 TEST STRATEGY: Unit testing with controlled randomness to validate
+ *    trait bonus accuracy and competitive advantage consistency
  */
 
-
+import { jest, describe, it, expect } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
-describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
+describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhancement', () => {
 
   // Helper function to create a test horse with specific traits
   function createTestHorse(id, name, traits = {}) {
@@ -21,7 +49,7 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
       agility: 70,
       balance: 70,
       health: 'Good',
-      stress_level: 20,
+      stressLevel: 20,
       trainingScore: 50,
       tack: {
         saddleBonus: 5,
@@ -31,7 +59,7 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
         bonusPercent: 0,
         penaltyPercent: 0
       },
-      epigenetic_modifiers: {
+      epigeneticModifiers: {
         positive: traits.positive || [],
         negative: traits.negative || [],
         hidden: traits.hidden || []
@@ -266,7 +294,7 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
   });
 
   describe('Edge Cases and Error Handling', () => {
-    it('should handle horses without epigenetic_modifiers gracefully', () => {
+    it('should handle horses without epigeneticModifiers gracefully', () => {
       const horseWithoutModifiers = {
         id: 1,
         name: 'NoModifiers',
@@ -276,9 +304,9 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
         agility: 70,
         balance: 70,
         health: 'Good',
-        stress_level: 20,
+        stressLevel: 20,
         trainingScore: 50
-        // No epigenetic_modifiers field
+        // No epigeneticModifiers field
       };
 
       const show = createTestShow('Racing');
@@ -288,9 +316,9 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
       }).not.toThrow();
     });
 
-    it('should handle horses with null epigenetic_modifiers gracefully', () => {
+    it('should handle horses with null epigeneticModifiers gracefully', () => {
       const horseWithNullModifiers = createTestHorse(1, 'NullModifiers');
-      horseWithNullModifiers.epigenetic_modifiers = null;
+      horseWithNullModifiers.epigeneticModifiers = null;
 
       const show = createTestShow('Racing');
 
@@ -301,7 +329,7 @@ describe('TASK 9: Discipline Affinity Trait Bonus in Competition Logic', () => {
 
     it('should handle horses with undefined positive traits gracefully', () => {
       const horseWithUndefinedPositive = createTestHorse(1, 'UndefinedPositive');
-      horseWithUndefinedPositive.epigenetic_modifiers.positive = undefined;
+      horseWithUndefinedPositive.epigeneticModifiers.positive = undefined;
 
       const show = createTestShow('Racing');
 
