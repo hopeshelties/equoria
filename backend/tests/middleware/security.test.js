@@ -81,7 +81,7 @@ describe('Security Middleware', () => {
       expect(typeof limiter).toBe('function');
     });
 
-    it('should limit requests when threshold is exceeded', async () => {
+    it('should limit requests when threshold is exceeded', async() => {
       const limiter = createRateLimiter(60000, 2); // Very low limit for testing
 
       app.use(limiter);
@@ -115,15 +115,15 @@ describe('Security Middleware', () => {
   describe('Helmet Configuration', () => {
     it('should have proper CSP directives', () => {
       expect(helmetConfig.contentSecurityPolicy.directives).toEqual({
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'"],
-        fontSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        mediaSrc: ["'self'"],
-        frameSrc: ["'none'"],
+        defaultSrc: ['\'self\''],
+        styleSrc: ['\'self\'', '\'unsafe-inline\''],
+        scriptSrc: ['\'self\''],
+        imgSrc: ['\'self\'', 'data:', 'https:'],
+        connectSrc: ['\'self\''],
+        fontSrc: ['\'self\''],
+        objectSrc: ['\'none\''],
+        mediaSrc: ['\'self\''],
+        frameSrc: ['\'none\'']
       });
     });
 
@@ -152,7 +152,7 @@ describe('Security Middleware', () => {
       });
     });
 
-    it('should apply security headers through helmet', async () => {
+    it('should apply security headers through helmet', async() => {
       const middleware = createSecurityMiddleware();
 
       app.use(middleware);

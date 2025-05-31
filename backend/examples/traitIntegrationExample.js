@@ -116,7 +116,7 @@ const stressImpactPercent = stressedHorse.stress_level * 0.002; // 0.2% per stre
 const stressImpact = baseScore * stressImpactPercent;
 
 const resilientEffects = getCombinedTraitEffects(['resilient']);
-const resilientStressImpact = resilientEffects.competitionStressResistance 
+const resilientStressImpact = resilientEffects.competitionStressResistance
   ? stressImpact * (1 - resilientEffects.competitionStressResistance)
   : stressImpact;
 
@@ -127,7 +127,7 @@ console.log(`- Stress Impact: -${stressImpact.toFixed(1)} points`);
 console.log(`- Final Score: ${(baseScore - stressImpact).toFixed(1)}`);
 
 console.log(`\nResilient Horse (${resilientHorse.name}):`);
-console.log(`- Stress Resistance: ${resilientEffects.competitionStressResistance ? (resilientEffects.competitionStressResistance * 100).toFixed(1) + '%' : 'None'}`);
+console.log(`- Stress Resistance: ${resilientEffects.competitionStressResistance ? `${(resilientEffects.competitionStressResistance * 100).toFixed(1)}%` : 'None'}`);
 console.log(`- Reduced Stress Impact: -${resilientStressImpact.toFixed(1)} points`);
 console.log(`- Final Score: ${(baseScore - resilientStressImpact).toFixed(1)}\n`);
 
@@ -171,7 +171,7 @@ const stableDrift = calculateTemperamentDrift(stableHorse, {
   bondScore: 30
 });
 
-console.log(`High Stress Scenario (Stress: 80, Recent Competition, Low Bond: 30)`);
+console.log('High Stress Scenario (Stress: 80, Recent Competition, Low Bond: 30)');
 console.log(`\nNervous Horse (${unstableHorse.name}):`);
 console.log(`- Drift Occurred: ${unstableDrift.driftOccurred}`);
 console.log(`- Reason: ${unstableDrift.reason}`);

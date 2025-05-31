@@ -10,27 +10,27 @@ import prisma from '../db/index.js';
  * Comprehensive audit logging for sensitive operations
  */
 export const auditLog = (operationType, sensitivityLevel = 'medium') => {
-  return async (req, res, next) => {
+  return async(req, res, next) => {
     // Skip audit logging in test environment
     if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined) {
       return next();
     }
-    
+
     const startTime = Date.now();
     const originalSend = res.send;
-    
+
     // Capture response data
     res.send = function(data) {
       const endTime = Date.now();
       const duration = endTime - startTime;
-      
+
       // Log the operation
       logOperation(req, res, operationType, sensitivityLevel, duration, data);
-      
+
       // Call original send
       originalSend.call(this, data);
     };
-    
+
     next();
   };
 };
@@ -58,12 +58,12 @@ async function logOperation(req, res, operationType, sensitivityLevel, duration,
       requestQuery: req.query,
       success: res.statusCode < 400
     };
-    
+
     // Add response data for failed operations
     if (res.statusCode >= 400) {
       logEntry.errorResponse = sanitizeLogData(responseData);
     }
-    
+
     // Log to different levels based on sensitivity
     if (sensitivityLevel === 'high' || res.statusCode >= 400) {
       logger.warn('[audit] Sensitive operation:', logEntry);
@@ -77,15 +77,15 @@ async function logOperation(req, res, operationType, sensitivityLevel, duration,
         duration: logEntry.duration
       });
     }
-    
+
     // Store in database for high-sensitivity operations
     if (sensitivityLevel === 'high') {
       await storeAuditLog(logEntry);
     }
-    
+
     // Check for suspicious patterns
     await checkSuspiciousActivity(logEntry);
-    
+
   } catch (error) {
     logger.error('[audit] Failed to log operation:', error);
   }
@@ -99,7 +99,7 @@ async function storeAuditLog(logEntry) {
     // Note: You'll need to create an audit_logs table in your schema
     // For now, we'll just log to file
     logger.warn('[audit] HIGH SENSITIVITY OPERATION:', logEntry);
-    
+
     // TODO: Implement database storage
     // await prisma.auditLog.create({
     //   data: {
@@ -115,7 +115,7 @@ async function storeAuditLog(logEntry) {
     //     timestamp: logEntry.timestamp
     //   }
     // });
-    
+
   } catch (error) {
     logger.error('[audit] Failed to store audit log:', error);
   }
@@ -128,18 +128,18 @@ const suspiciousActivityCache = new Map();
 
 async function checkSuspiciousActivity(logEntry) {
   try {
-    const userId = logEntry.userId;
-    if (!userId) return;
-    
+    const { userId } = logEntry;
+    if (!userId) {return;}
+
     const now = Date.now();
     const windowMs = 5 * 60 * 1000; // 5 minutes
-    
+
     // Get user's recent activity
     let userActivity = suspiciousActivityCache.get(userId) || [];
-    
+
     // Clean old entries
     userActivity = userActivity.filter(entry => now - entry.timestamp < windowMs);
-    
+
     // Add current entry
     userActivity.push({
       timestamp: now,
@@ -148,13 +148,13 @@ async function checkSuspiciousActivity(logEntry) {
       ip: logEntry.ip,
       path: logEntry.path
     });
-    
+
     // Update cache
     suspiciousActivityCache.set(userId, userActivity);
-    
+
     // Check for suspicious patterns
     const suspiciousPatterns = detectSuspiciousPatterns(userActivity, logEntry);
-    
+
     if (suspiciousPatterns.length > 0) {
       logger.error('[audit] SUSPICIOUS ACTIVITY DETECTED:', {
         userId,
@@ -162,11 +162,11 @@ async function checkSuspiciousActivity(logEntry) {
         patterns: suspiciousPatterns,
         recentActivity: userActivity.slice(-10) // Last 10 activities
       });
-      
+
       // TODO: Implement alerting system
       // await sendSecurityAlert(userId, suspiciousPatterns);
     }
-    
+
   } catch (error) {
     logger.error('[audit] Failed to check suspicious activity:', error);
   }
@@ -178,7 +178,7 @@ async function checkSuspiciousActivity(logEntry) {
 function detectSuspiciousPatterns(userActivity, currentEntry) {
   const patterns = [];
   const now = Date.now();
-  
+
   // Pattern 1: Too many failed requests
   const failedRequests = userActivity.filter(entry => entry.statusCode >= 400);
   if (failedRequests.length >= 10) {
@@ -188,9 +188,9 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
       severity: 'high'
     });
   }
-  
+
   // Pattern 2: Rapid-fire requests (potential automation)
-  const rapidRequests = userActivity.filter(entry => 
+  const rapidRequests = userActivity.filter(entry =>
     now - entry.timestamp < 30000 // Last 30 seconds
   );
   if (rapidRequests.length >= 20) {
@@ -200,7 +200,7 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
       severity: 'medium'
     });
   }
-  
+
   // Pattern 3: Multiple IP addresses (account sharing/compromise)
   const uniqueIPs = new Set(userActivity.map(entry => entry.ip));
   if (uniqueIPs.size >= 3) {
@@ -211,9 +211,9 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
       severity: 'high'
     });
   }
-  
+
   // Pattern 4: Unusual operation patterns
-  const sensitiveOps = userActivity.filter(entry => 
+  const sensitiveOps = userActivity.filter(entry =>
     ['breeding', 'training', 'transaction', 'stat_modification'].includes(entry.operationType)
   );
   if (sensitiveOps.length >= 15) {
@@ -223,23 +223,23 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
       severity: 'medium'
     });
   }
-  
+
   // Pattern 5: Error followed by success (potential exploit attempt)
   const recentEntries = userActivity.slice(-5);
   const hasErrorThenSuccess = recentEntries.some((entry, index) => {
-    if (index === 0) return false;
+    if (index === 0) {return false;}
     const prevEntry = recentEntries[index - 1];
-    return prevEntry.statusCode >= 400 && entry.statusCode < 400 && 
+    return prevEntry.statusCode >= 400 && entry.statusCode < 400 &&
            prevEntry.operationType === entry.operationType;
   });
-  
+
   if (hasErrorThenSuccess) {
     patterns.push({
       type: 'error_then_success_pattern',
       severity: 'high'
     });
   }
-  
+
   return patterns;
 }
 
@@ -247,22 +247,22 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
  * Sanitize sensitive data for logging
  */
 function sanitizeLogData(data) {
-  if (!data || typeof data !== 'object') return data;
-  
+  if (!data || typeof data !== 'object') {return data;}
+
   const sensitiveFields = [
     'password', 'token', 'secret', 'key', 'auth', 'credential',
     'ssn', 'social', 'credit', 'card', 'cvv', 'pin'
   ];
-  
+
   const sanitized = { ...data };
-  
+
   for (const field of Object.keys(sanitized)) {
     const fieldLower = field.toLowerCase();
     if (sensitiveFields.some(sensitive => fieldLower.includes(sensitive))) {
       sanitized[field] = '[REDACTED]';
     }
   }
-  
+
   return sanitized;
 }
 
@@ -282,12 +282,12 @@ export const auditAdmin = auditLog('admin_operation', 'high');
 setInterval(() => {
   const now = Date.now();
   const maxAge = 10 * 60 * 1000; // 10 minutes
-  
+
   for (const [userId, activities] of suspiciousActivityCache.entries()) {
-    const recentActivities = activities.filter(activity => 
+    const recentActivities = activities.filter(activity =>
       now - activity.timestamp < maxAge
     );
-    
+
     if (recentActivities.length === 0) {
       suspiciousActivityCache.delete(userId);
     } else {
@@ -304,4 +304,4 @@ export default {
   auditStatModification,
   auditAuth,
   auditAdmin
-}; 
+};

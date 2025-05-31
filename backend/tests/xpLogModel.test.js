@@ -46,7 +46,7 @@ describe('xpLogModel', () => {
   });
 
   describe('logXpEvent', () => {
-    it('should log XP event successfully', async () => {
+    it('should log XP event successfully', async() => {
       const mockXpEvent = {
         id: 1,
         userId: 'user-123',
@@ -82,7 +82,7 @@ describe('xpLogModel', () => {
       expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.logXpEvent] Logging XP event: User user-123, Amount: 5, Reason: Trained horse in Dressage');
     });
 
-    it('should validate required parameters', async () => {
+    it('should validate required parameters', async() => {
       // Test missing userId
       await expect(logXpEvent({
         amount: 5,
@@ -105,7 +105,7 @@ describe('xpLogModel', () => {
       expect(mockPrismaXpEvent.create).not.toHaveBeenCalled();
     });
 
-    it('should handle database errors', async () => {
+    it('should handle database errors', async() => {
       mockPrismaXpEvent.create.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(logXpEvent({
@@ -117,7 +117,7 @@ describe('xpLogModel', () => {
       expect(mockLogger.error).toHaveBeenCalledWith('[xpLogModel.logXpEvent] Error logging XP event: Database connection failed');
     });
 
-    it('should handle negative XP amounts', async () => {
+    it('should handle negative XP amounts', async() => {
       const mockXpEvent = {
         id: 2,
         userId: 'user-123',
@@ -146,7 +146,7 @@ describe('xpLogModel', () => {
   });
 
   describe('getUserXpEvents', () => {
-    it('should retrieve XP events for a user', async () => {
+    it('should retrieve XP events for a user', async() => {
       const mockEvents = [
         {
           id: 1,
@@ -179,7 +179,7 @@ describe('xpLogModel', () => {
       expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.getUserXpEvents] Getting XP events for user user-123, limit: 50, offset: 0');
     });
 
-    it('should handle date filters', async () => {
+    it('should handle date filters', async() => {
       const startDate = new Date('2024-01-01T00:00:00Z');
       const endDate = new Date('2024-01-02T00:00:00Z');
 
@@ -208,7 +208,7 @@ describe('xpLogModel', () => {
   });
 
   describe('getUserXpSummary', () => {
-    it('should calculate XP summary correctly', async () => {
+    it('should calculate XP summary correctly', async() => {
       const mockEvents = [
         { amount: 20 },
         { amount: 15 },
@@ -234,7 +234,7 @@ describe('xpLogModel', () => {
       });
     });
 
-    it('should handle empty results', async () => {
+    it('should handle empty results', async() => {
       mockPrismaXpEvent.findMany.mockResolvedValue([]);
 
       const result = await getUserXpSummary('user-123');
@@ -247,7 +247,7 @@ describe('xpLogModel', () => {
       });
     });
 
-    it('should handle date filters in summary', async () => {
+    it('should handle date filters in summary', async() => {
       const startDate = new Date('2024-01-01T00:00:00Z');
       const endDate = new Date('2024-01-02T00:00:00Z');
 
@@ -269,7 +269,7 @@ describe('xpLogModel', () => {
   });
 
   describe('getRecentXpEvents', () => {
-    it('should retrieve recent XP events across all users', async () => {
+    it('should retrieve recent XP events across all users', async() => {
       const mockEvents = [
         {
           id: 3,
@@ -309,7 +309,7 @@ describe('xpLogModel', () => {
       expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.getRecentXpEvents] Getting recent XP events, limit: 10, offset: 0');
     });
 
-    it('should use default options', async () => {
+    it('should use default options', async() => {
       mockPrismaXpEvent.findMany.mockResolvedValue([]);
 
       await getRecentXpEvents();

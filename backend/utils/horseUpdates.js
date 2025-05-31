@@ -64,7 +64,7 @@ async function updateHorseStat(horseId, statName, increase = 1) {
 
     // Validate stat name
     const validStats = [
-      'speed', 'stamina', 'agility', 'balance', 'precision', 
+      'speed', 'stamina', 'agility', 'balance', 'precision',
       'intelligence', 'boldness', 'flexibility', 'obedience', 'focus'
     ];
 
@@ -128,4 +128,4 @@ export {
   updateHorseEarnings,
   updateHorseStat,
   updateHorseRewards
-}; 
+};

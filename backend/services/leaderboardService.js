@@ -16,7 +16,7 @@ import prisma from '../../packages/database/prismaClient.js';
 export async function getTopUsersByXp(options = {}) {
   try {
     const { limit = 10, offset = 0 } = options;
-    
+
     const users = await prisma.user.findMany({
       select: {
         id: true,
@@ -42,7 +42,7 @@ export async function getTopUsersByXp(options = {}) {
     }));
 
     logger.info(`[leaderboardService.getTopUsersByXp] Retrieved ${users.length} users for leaderboard`);
-    
+
     return rankedUsers;
 
   } catch (error) {
@@ -61,7 +61,7 @@ export async function getTopUsersByXp(options = {}) {
 export async function getTopUsersByLevel(options = {}) {
   try {
     const { limit = 10, offset = 0 } = options;
-    
+
     const users = await prisma.user.findMany({
       select: {
         id: true,
@@ -86,7 +86,7 @@ export async function getTopUsersByLevel(options = {}) {
     }));
 
     logger.info(`[leaderboardService.getTopUsersByLevel] Retrieved ${users.length} users for level leaderboard`);
-    
+
     return rankedUsers;
 
   } catch (error) {
@@ -105,7 +105,7 @@ export async function getTopUsersByLevel(options = {}) {
 export async function getTopUsersByMoney(options = {}) {
   try {
     const { limit = 10, offset = 0 } = options;
-    
+
     const users = await prisma.user.findMany({
       select: {
         id: true,
@@ -130,7 +130,7 @@ export async function getTopUsersByMoney(options = {}) {
     }));
 
     logger.info(`[leaderboardService.getTopUsersByMoney] Retrieved ${users.length} users for money leaderboard`);
-    
+
     return rankedUsers;
 
   } catch (error) {

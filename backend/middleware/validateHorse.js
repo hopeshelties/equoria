@@ -45,13 +45,13 @@ const validateCreateHorse = [
     .optional()
     .isString().withMessage('Temperament must be a string if provided.')
     .isLength({ min: 2, max: 50 }).withMessage('Temperament must be between 2 and 50 characters if provided.'),
-  
+
   // Stats - optional, integers 0-100
   ['precision', 'strength', 'speed', 'agility', 'endurance', 'intelligence', 'personality'].forEach(stat => {
     body(stat)
       .optional().isInt({ min: 0, max: 100 }).withMessage(`${stat.charAt(0).toUpperCase() + stat.slice(1)} must be an integer between 0 and 100 if provided.`);
   }),
-  
+
   body('total_earnings')
     .optional().isFloat({ min: 0 }).withMessage('Total earnings must be a non-negative number if provided.'),
   body('sire_id')

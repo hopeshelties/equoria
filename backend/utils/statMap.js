@@ -2,37 +2,37 @@
  * Stat mapping for all competition disciplines
  * Each discipline has three stats in order of importance:
  * - Primary stat (50% weight)
- * - Secondary stat (30% weight) 
+ * - Secondary stat (30% weight)
  * - Tertiary stat (20% weight)
- * 
+ *
  * Available stat categories:
- * speed, stamina, agility, balance, precision, intelligence, 
+ * speed, stamina, agility, balance, precision, intelligence,
  * boldness, flexibility, obedience, focus
  */
 const statMap = {
-  "Western Pleasure":      ["focus", "obedience", "intelligence"],
-  "Reining":               ["agility", "precision", "focus"],
-  "Cutting":               ["intelligence", "agility", "boldness"],
-  "Barrel Racing":         ["speed", "agility", "obedience"],
-  "Roping":                ["precision", "focus", "speed"],
-  "Team Penning":          ["intelligence", "agility", "stamina"],
-  "Rodeo":                 ["boldness", "agility", "stamina"],
-  "Hunter":                ["balance", "precision", "intelligence"],
-  "Saddleseat":            ["flexibility", "balance", "obedience"],
-  "Endurance":             ["stamina", "intelligence", "speed"],
-  "Eventing":              ["stamina", "boldness", "agility"],
-  "Dressage":              ["precision", "focus", "obedience"],
-  "Show Jumping":          ["balance", "agility", "boldness"],
-  "Vaulting":              ["flexibility", "balance", "obedience"],
-  "Polo":                  ["speed", "boldness", "agility"],
-  "Cross Country":         ["stamina", "boldness", "intelligence"],
-  "Combined Driving":      ["obedience", "stamina", "focus"],
-  "Fine Harness":          ["flexibility", "precision", "balance"],
-  "Gaited":                ["flexibility", "balance", "obedience"],
-  "Gymkhana":              ["speed", "flexibility", "focus"],
-  "Steeplechase":          ["stamina", "boldness", "balance"],
-  "Racing":                ["speed", "stamina", "focus"],
-  "Harness Racing":        ["speed", "precision", "stamina"]
+  'Western Pleasure':      ['focus', 'obedience', 'intelligence'],
+  'Reining':               ['agility', 'precision', 'focus'],
+  'Cutting':               ['intelligence', 'agility', 'boldness'],
+  'Barrel Racing':         ['speed', 'agility', 'obedience'],
+  'Roping':                ['precision', 'focus', 'speed'],
+  'Team Penning':          ['intelligence', 'agility', 'stamina'],
+  'Rodeo':                 ['boldness', 'agility', 'stamina'],
+  'Hunter':                ['balance', 'precision', 'intelligence'],
+  'Saddleseat':            ['flexibility', 'balance', 'obedience'],
+  'Endurance':             ['stamina', 'intelligence', 'speed'],
+  'Eventing':              ['stamina', 'boldness', 'agility'],
+  'Dressage':              ['precision', 'focus', 'obedience'],
+  'Show Jumping':          ['balance', 'agility', 'boldness'],
+  'Vaulting':              ['flexibility', 'balance', 'obedience'],
+  'Polo':                  ['speed', 'boldness', 'agility'],
+  'Cross Country':         ['stamina', 'boldness', 'intelligence'],
+  'Combined Driving':      ['obedience', 'stamina', 'focus'],
+  'Fine Harness':          ['flexibility', 'precision', 'balance'],
+  'Gaited':                ['flexibility', 'balance', 'obedience'],
+  'Gymkhana':              ['speed', 'flexibility', 'focus'],
+  'Steeplechase':          ['stamina', 'boldness', 'balance'],
+  'Racing':                ['speed', 'stamina', 'focus'],
+  'Harness Racing':        ['speed', 'precision', 'stamina']
 };
 
 /**
@@ -76,4 +76,4 @@ export {
   getAllDisciplines,
   getAllStatCategories,
   isDisciplineValid
-}; 
+};

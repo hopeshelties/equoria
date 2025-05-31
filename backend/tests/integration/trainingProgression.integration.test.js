@@ -1,9 +1,9 @@
 /**
  * INTEGRATION TEST: Complete Training Progression Workflow
- * 
+ *
  * This test validates the ENTIRE training progression from young horse
  * to competition-ready athlete, following balanced mocking principles.
- * 
+ *
  * WORKFLOW TESTED:
  * 1. Horse Maturation (Age Progression)
  * 2. First Training Session (Age Validation)
@@ -11,7 +11,7 @@
  * 4. Training Cooldown Management
  * 5. XP & Progression Tracking
  * 6. Competition Readiness
- * 
+ *
  * MOCKING STRATEGY (Balanced Approach):
  * ✅ REAL: Database operations, business logic, training calculations, XP system
  * 🔧 MOCK: Only Date.now() for time-based testing (cooldowns)
@@ -40,18 +40,18 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   let matureHorse;
   let originalDateNow;
 
-  beforeAll(async () => {
+  beforeAll(async() => {
     // Clean up any existing test data
     await cleanupTestData();
-    
+
     // Mock Date.now for time-based testing (ONLY for cooldown testing)
     originalDateNow = Date.now;
   });
 
-  afterAll(async () => {
+  afterAll(async() => {
     // Restore mocks
     Date.now = originalDateNow;
-    
+
     // Clean up test data
     await cleanupTestData();
     await prisma.$disconnect();
@@ -63,15 +63,15 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
       await prisma.trainingLog.deleteMany({
         where: { horse: { name: { startsWith: 'Training Integration' } } }
       });
-      
+
       await prisma.xpEvent.deleteMany({
         where: { user: { email: 'training-integration@example.com' } }
       });
-      
+
       await prisma.horse.deleteMany({
         where: { name: { startsWith: 'Training Integration' } }
       });
-      
+
       await prisma.user.deleteMany({
         where: { email: 'training-integration@example.com' }
       });
@@ -81,7 +81,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   }
 
   describe('🔐 STEP 1: User Setup & Authentication', () => {
-    it('should create user for training progression testing', async () => {
+    it('should create user for training progression testing', async() => {
       const userData = {
         username: 'trainingprogression',
         firstName: 'Training',
@@ -108,7 +108,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   });
 
   describe('🐴 STEP 2: Horse Creation & Age Validation', () => {
-    it('should create young horse (under training age)', async () => {
+    it('should create young horse (under training age)', async() => {
       const breed = await prisma.breed.findFirst() || await prisma.breed.create({
         data: {
           name: 'Training Integration Breed',
@@ -139,7 +139,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
       expect(youngHorse.disciplineScores).toEqual({});
     });
 
-    it('should create mature horse (training eligible)', async () => {
+    it('should create mature horse (training eligible)', async() => {
       const breed = await prisma.breed.findFirst();
 
       matureHorse = await prisma.horse.create({
@@ -167,7 +167,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   });
 
   describe('🚫 STEP 3: Age Restriction Enforcement', () => {
-    it('should block training for young horse (under 3 years)', async () => {
+    it('should block training for young horse (under 3 years)', async() => {
       const response = await request(app)
         .post('/api/training/train')
         .set('Authorization', `Bearer ${authToken}`)
@@ -195,7 +195,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   });
 
   describe('🏋️ STEP 4: First Training Session', () => {
-    it('should successfully train mature horse for first time', async () => {
+    it('should successfully train mature horse for first time', async() => {
       // Get initial user XP
       const initialUser = await prisma.user.findUnique({
         where: { id: testUser.id }
@@ -222,7 +222,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
 
       // VERIFY: Training log created
       const trainingLogs = await prisma.trainingLog.findMany({
-        where: { 
+        where: {
           horseId: matureHorse.id,
           discipline: 'Racing'
         }
@@ -247,7 +247,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   });
 
   describe('⏰ STEP 5: Training Cooldown Management', () => {
-    it('should enforce 7-day cooldown period', async () => {
+    it('should enforce 7-day cooldown period', async() => {
       // Attempt to train same horse immediately (should fail)
       const response = await request(app)
         .post('/api/training/train')
@@ -263,7 +263,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
 
       // VERIFY: No new training log
       const dressageLogs = await prisma.trainingLog.findMany({
-        where: { 
+        where: {
           horseId: matureHorse.id,
           discipline: 'Dressage'
         }
@@ -277,7 +277,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
       expect(unchangedHorse.disciplineScores.Dressage).toBeUndefined();
     });
 
-    it.skip('should allow training after cooldown expires (requires proper time mocking)', async () => {
+    it.skip('should allow training after cooldown expires (requires proper time mocking)', async() => {
       // NOTE: This test requires proper Date.now mocking that affects the training system
       // The cooldown system is working correctly - this test validates the time progression logic
       // Skip for now to focus on other integration tests
@@ -285,7 +285,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   });
 
   describe('📈 STEP 6: Discipline Specialization', () => {
-    it.skip('should build expertise in multiple disciplines over time (requires proper time mocking)', async () => {
+    it.skip('should build expertise in multiple disciplines over time (requires proper time mocking)', async() => {
       // NOTE: This test requires proper time mocking to bypass cooldown periods
       // The training system is working correctly - cooldown prevents rapid successive training
       // Skip for now to focus on other integration tests
@@ -293,7 +293,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   });
 
   describe('🎯 STEP 7: User Progression Tracking', () => {
-    it('should track user XP and level progression from training', async () => {
+    it('should track user XP and level progression from training', async() => {
       const finalUser = await prisma.user.findUnique({
         where: { id: testUser.id }
       });
@@ -308,7 +308,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
       });
 
       expect(allXpEvents.length).toBeGreaterThanOrEqual(1); // At least one training session
-      
+
       // VERIFY: All XP events are training-related
       allXpEvents.forEach(event => {
         expect(event.reason).toContain('Trained horse');
@@ -318,7 +318,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   });
 
   describe('🏆 STEP 8: Competition Readiness Validation', () => {
-    it('should validate horse is ready for competition', async () => {
+    it('should validate horse is ready for competition', async() => {
       const competitionReadyHorse = await prisma.horse.findUnique({
         where: { id: matureHorse.id },
         include: {
@@ -346,7 +346,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
   });
 
   describe('🎊 STEP 9: End-to-End Workflow Validation', () => {
-    it('should validate complete training progression integrity', async () => {
+    it('should validate complete training progression integrity', async() => {
       // VERIFY: Complete training progression from young to competition-ready
       const youngHorseCheck = await prisma.horse.findUnique({
         where: { id: youngHorse.id },
@@ -376,7 +376,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
       expect(finalUserCheck.xpEvents.length).toBe(matureHorseCheck.trainingLogs.length);
     });
 
-    it('should validate all business rules were enforced throughout progression', async () => {
+    it('should validate all business rules were enforced throughout progression', async() => {
       // Age restrictions enforced
       const youngHorseTrainingLogs = await prisma.trainingLog.findMany({
         where: { horseId: youngHorse.id }

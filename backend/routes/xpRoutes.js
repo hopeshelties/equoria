@@ -13,7 +13,7 @@ const router = express.Router();
  * GET /api/xp/player/:playerId/events
  * Get XP events for a specific player
  */
-router.get('/player/:playerId/events', async (req, res) => {
+router.get('/player/:playerId/events', async(req, res) => {
   try {
     const { playerId } = req.params;
     const { limit = 50, offset = 0, startDate, endDate } = req.query;
@@ -84,7 +84,7 @@ router.get('/player/:playerId/events', async (req, res) => {
  * GET /api/xp/player/:playerId/summary
  * Get XP summary for a specific player
  */
-router.get('/player/:playerId/summary', async (req, res) => {
+router.get('/player/:playerId/summary', async(req, res) => {
   try {
     const { playerId } = req.params;
     const { startDate, endDate } = req.query;
@@ -152,7 +152,7 @@ router.get('/player/:playerId/summary', async (req, res) => {
  * GET /api/xp/recent
  * Get recent XP events across all players (for admin/analytics)
  */
-router.get('/recent', async (req, res) => {
+router.get('/recent', async(req, res) => {
   try {
     const { limit = 100, offset = 0 } = req.query;
 
@@ -208,7 +208,7 @@ router.get('/recent', async (req, res) => {
  * GET /api/xp/stats
  * Get overall XP statistics (for admin dashboard)
  */
-router.get('/stats', async (req, res) => {
+router.get('/stats', async(req, res) => {
   try {
     logger.info('[xpRoutes] GET /api/xp/stats');
 
@@ -222,12 +222,12 @@ router.get('/stats', async (req, res) => {
       totalXpDeducted: recentEvents.reduce((sum, event) => sum + Math.max(0, -event.amount), 0),
       netXp: recentEvents.reduce((sum, event) => sum + event.amount, 0),
       uniquePlayers: new Set(recentEvents.map(event => event.playerId)).size,
-      averageXpPerEvent: recentEvents.length > 0 ? 
+      averageXpPerEvent: recentEvents.length > 0 ?
         recentEvents.reduce((sum, event) => sum + event.amount, 0) / recentEvents.length : 0,
-      
+
       // Breakdown by reason type
       reasonBreakdown: {},
-      
+
       // Recent activity (last 24 hours)
       recentActivity: {
         last24Hours: 0,
@@ -239,12 +239,12 @@ router.get('/stats', async (req, res) => {
     // Calculate reason breakdown
     recentEvents.forEach(event => {
       const reasonKey = event.reason.includes('Trained') ? 'Training' :
-                       event.reason.includes('place') ? 'Competition' : 'Other';
-      
+        event.reason.includes('place') ? 'Competition' : 'Other';
+
       if (!stats.reasonBreakdown[reasonKey]) {
         stats.reasonBreakdown[reasonKey] = { count: 0, totalXp: 0 };
       }
-      
+
       stats.reasonBreakdown[reasonKey].count++;
       stats.reasonBreakdown[reasonKey].totalXp += event.amount;
     });
@@ -257,9 +257,9 @@ router.get('/stats', async (req, res) => {
 
     recentEvents.forEach(event => {
       const eventDate = new Date(event.timestamp);
-      if (eventDate >= oneDayAgo) stats.recentActivity.last24Hours++;
-      if (eventDate >= sevenDaysAgo) stats.recentActivity.last7Days++;
-      if (eventDate >= thirtyDaysAgo) stats.recentActivity.last30Days++;
+      if (eventDate >= oneDayAgo) {stats.recentActivity.last24Hours++;}
+      if (eventDate >= sevenDaysAgo) {stats.recentActivity.last7Days++;}
+      if (eventDate >= thirtyDaysAgo) {stats.recentActivity.last30Days++;}
     });
 
     res.json({

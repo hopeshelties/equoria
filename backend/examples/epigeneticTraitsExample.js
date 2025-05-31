@@ -112,14 +112,14 @@ console.log('Running 5 breeding attempts:');
 for (let i = 1; i <= 5; i++) {
   const result = calculateEpigeneticTraits(rareBreeding);
   console.log(`Attempt ${i}:`, result);
-  
+
   // Check for rare traits
   const allTraits = [...result.positive, ...result.negative, ...result.hidden];
   const rareTraits = allTraits.filter(trait => {
     const def = getTraitDefinition(trait);
     return def && (def.rarity === 'rare' || def.rarity === 'legendary');
   });
-  
+
   if (rareTraits.length > 0) {
     console.log(`  🌟 Rare traits found: ${rareTraits.join(', ')}`);
   }
@@ -159,7 +159,7 @@ const strategies = [
     params: { damTraits: ['resilient'], sireTraits: ['bold'], damBondScore: 95, damStressLevel: 50 }
   },
   {
-    name: 'Low Stress Strategy', 
+    name: 'Low Stress Strategy',
     params: { damTraits: ['resilient'], sireTraits: ['bold'], damBondScore: 50, damStressLevel: 5 }
   },
   {
@@ -170,19 +170,19 @@ const strategies = [
 
 strategies.forEach(strategy => {
   console.log(`\n${strategy.name}:`);
-  
+
   // Run 10 simulations for each strategy
   let totalPositive = 0;
   let totalNegative = 0;
   let totalHidden = 0;
-  
+
   for (let i = 0; i < 10; i++) {
     const result = calculateEpigeneticTraits(strategy.params);
     totalPositive += result.positive.length;
     totalNegative += result.negative.length;
     totalHidden += result.hidden.length;
   }
-  
+
   console.log(`  Average positive traits: ${(totalPositive / 10).toFixed(1)}`);
   console.log(`  Average negative traits: ${(totalNegative / 10).toFixed(1)}`);
   console.log(`  Average hidden traits: ${(totalHidden / 10).toFixed(1)}`);
@@ -195,16 +195,16 @@ console.log('How to integrate with game breeding system');
 
 function simulateBreeding(dam, sire, foalDevelopmentData) {
   console.log(`\nBreeding ${dam.name} (${dam.traits.join(', ')}) with ${sire.name} (${sire.traits.join(', ')})`);
-  
+
   const breedingParams = {
     damTraits: dam.traits,
     sireTraits: sire.traits,
     damBondScore: foalDevelopmentData.bondingLevel,
     damStressLevel: foalDevelopmentData.stressLevel
   };
-  
+
   const offspring = calculateEpigeneticTraits(breedingParams);
-  
+
   console.log('Foal development conditions:');
   console.log(`  Bonding Level: ${foalDevelopmentData.bondingLevel}/100`);
   console.log(`  Stress Level: ${foalDevelopmentData.stressLevel}/100`);
@@ -213,7 +213,7 @@ function simulateBreeding(dam, sire, foalDevelopmentData) {
   console.log(`  Positive: ${offspring.positive.join(', ') || 'None'}`);
   console.log(`  Negative: ${offspring.negative.join(', ') || 'None'}`);
   console.log(`  Hidden: ${offspring.hidden.join(', ') || 'None'}`);
-  
+
   return offspring;
 }
 
@@ -264,4 +264,4 @@ console.log('• High stress levels increase negative trait probability');
 console.log('• Environmental factors can generate new traits');
 console.log('• Rare traits are usually hidden initially');
 console.log('• Conflicting traits are automatically resolved');
-console.log('• Deterministic results available with seeds for testing'); 
+console.log('• Deterministic results available with seeds for testing');

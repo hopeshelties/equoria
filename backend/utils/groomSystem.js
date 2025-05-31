@@ -158,19 +158,19 @@ export const DEFAULT_GROOMS = [
 export async function assignGroomToFoal(foalId, groomId, playerId, options = {}) {
   try {
     const { priority = 1, notes = null, isDefault = false } = options;
-    
+
     logger.info(`[groomSystem.assignGroomToFoal] Assigning groom ${groomId} to foal ${foalId}`);
-    
+
     // Validate foal exists
     const foal = await prisma.horse.findUnique({
       where: { id: foalId },
       select: { id: true, name: true, age: true }
     });
-    
+
     if (!foal) {
       throw new Error(`Foal with ID ${foalId} not found`);
     }
-    
+
     // Validate groom exists and is available
     const groom = await prisma.groom.findUnique({
       where: { id: groomId },
@@ -191,7 +191,7 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
     if (!groom.isActive) {
       throw new Error(`Groom ${groom.name} is not currently active`);
     }
-    
+
     // Check for existing active assignment
     const existingAssignment = await prisma.groomAssignment.findFirst({
       where: {
@@ -200,11 +200,11 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
         isActive: true
       }
     });
-    
+
     if (existingAssignment) {
       throw new Error(`Groom ${groom.name} is already assigned to this foal`);
     }
-    
+
     // Deactivate other assignments if this is primary (priority 1)
     if (priority === 1) {
       await prisma.groomAssignment.updateMany({
@@ -219,7 +219,7 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
         }
       });
     }
-    
+
     // Create new assignment
     const assignment = await prisma.groomAssignment.create({
       data: {
@@ -238,15 +238,15 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
         }
       }
     });
-    
+
     logger.info(`[groomSystem.assignGroomToFoal] Successfully assigned ${groom.name} to foal ${foal.name}`);
-    
+
     return {
       success: true,
       assignment,
       message: `${groom.name} has been assigned to ${foal.name}`
     };
-    
+
   } catch (error) {
     logger.error(`[groomSystem.assignGroomToFoal] Error: ${error.message}`);
     throw error;
@@ -262,7 +262,7 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
 export async function ensureDefaultGroomAssignment(foalId, playerId) {
   try {
     logger.info(`[groomSystem.ensureDefaultGroomAssignment] Checking default assignment for foal ${foalId}`);
-    
+
     // Check if foal already has an active assignment
     const existingAssignment = await prisma.groomAssignment.findFirst({
       where: {
@@ -273,7 +273,7 @@ export async function ensureDefaultGroomAssignment(foalId, playerId) {
         groom: true
       }
     });
-    
+
     if (existingAssignment) {
       logger.info(`[groomSystem.ensureDefaultGroomAssignment] Foal ${foalId} already has active assignment`);
       return {
@@ -283,22 +283,22 @@ export async function ensureDefaultGroomAssignment(foalId, playerId) {
         isExisting: true
       };
     }
-    
+
     // Find or create default grooms for the player
     const defaultGroom = await getOrCreateDefaultGroom(playerId);
-    
+
     // Assign the default groom
     const assignment = await assignGroomToFoal(foalId, defaultGroom.id, playerId, {
       priority: 1,
       notes: 'Auto-assigned default groom',
       isDefault: true
     });
-    
+
     return {
       ...assignment,
       isNew: true
     };
-    
+
   } catch (error) {
     logger.error(`[groomSystem.ensureDefaultGroomAssignment] Error: ${error.message}`);
     throw error;
@@ -320,25 +320,25 @@ export async function getOrCreateDefaultGroom(playerId) {
         speciality: 'foal_care'
       }
     });
-    
+
     if (existingGroom) {
       return existingGroom;
     }
-    
+
     // Create a default foal care groom
     const defaultGroomData = DEFAULT_GROOMS[0]; // Sarah Johnson - foal care specialist
-    
+
     const newGroom = await prisma.groom.create({
       data: {
         ...defaultGroomData,
         userId: playerId
       }
     });
-    
+
     logger.info(`[groomSystem.getOrCreateDefaultGroom] Created default groom ${newGroom.name} for player ${playerId}`);
-    
+
     return newGroom;
-    
+
   } catch (error) {
     logger.error(`[groomSystem.getOrCreateDefaultGroom] Error: ${error.message}`);
     throw error;
@@ -376,7 +376,7 @@ export async function recordGroomInteraction(foalId, groomId, interactionType, d
     return {
       success: true,
       interaction,
-      message: `Groom interaction recorded successfully`
+      message: 'Groom interaction recorded successfully'
     };
 
   } catch (error) {
@@ -401,39 +401,39 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
     const specialty = GROOM_SPECIALTIES[groom.speciality] || GROOM_SPECIALTIES.general;
     const skillLevel = SKILL_LEVELS[groom.skillLevel] || SKILL_LEVELS.intermediate;
     const personality = PERSONALITY_TRAITS[groom.personality] || PERSONALITY_TRAITS.gentle;
-    
+
     // Base bonding change (1-5 points per 30 minutes)
-    let baseBondingChange = Math.floor((duration / 30) * (2 + Math.random() * 3));
-    
+    const baseBondingChange = Math.floor((duration / 30) * (2 + Math.random() * 3));
+
     // Base stress reduction (1-3 points per 30 minutes)
-    let baseStressReduction = Math.floor((duration / 30) * (1 + Math.random() * 2));
-    
+    const baseStressReduction = Math.floor((duration / 30) * (1 + Math.random() * 2));
+
     // Apply modifiers
     const totalBondingModifier = specialty.bondingModifier * skillLevel.bondingModifier * personality.bondingModifier;
     const totalStressModifier = specialty.stressReduction * personality.stressReduction;
-    
+
     // Calculate final changes
     let bondingChange = Math.round(baseBondingChange * totalBondingModifier);
     let stressChange = -Math.round(baseStressReduction * totalStressModifier); // Negative = stress reduction
-    
+
     // Apply experience bonus
     const experienceBonus = Math.floor(groom.experience / 5); // +1 bonding per 5 years experience
     bondingChange += experienceBonus;
-    
+
     // Check for errors based on skill level
     const errorOccurred = Math.random() < skillLevel.errorChance;
     if (errorOccurred) {
       bondingChange = Math.max(0, bondingChange - 2);
       stressChange += 1; // Increase stress slightly
     }
-    
+
     // Ensure reasonable bounds
     bondingChange = Math.max(0, Math.min(10, bondingChange));
     stressChange = Math.max(-10, Math.min(5, stressChange));
-    
+
     // Calculate cost
     const cost = (duration / 60) * groom.hourlyRate * skillLevel.costModifier;
-    
+
     // Determine quality based on results
     let quality = 'good';
     if (errorOccurred) {
@@ -445,7 +445,7 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
     } else {
       quality = 'fair';
     }
-    
+
     return {
       bondingChange,
       stressChange,
@@ -459,7 +459,7 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
         experience: experienceBonus
       }
     };
-    
+
   } catch (error) {
     logger.error(`[groomSystem.calculateGroomInteractionEffects] Error: ${error.message}`);
     throw error;

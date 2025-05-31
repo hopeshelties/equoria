@@ -24,7 +24,7 @@ function basicAffinityExample() {
   ];
 
   const result = checkLineageForDisciplineAffinity(racingLineage);
-  
+
   console.log('Ancestors:', racingLineage.map(a => `${a.name} (${a.discipline})`).join(', '));
   console.log(`Result: ${JSON.stringify(result)}`);
   console.log(`Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage detected!` : 'No strong discipline affinity'}\n`);
@@ -43,7 +43,7 @@ function noAffinityExample() {
   ];
 
   const result = checkLineageForDisciplineAffinity(diverseLineage);
-  
+
   console.log('Ancestors:', diverseLineage.map(a => `${a.name} (${a.discipline})`).join(', '));
   console.log(`Result: ${JSON.stringify(result)}`);
   console.log(`Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage detected!` : 'Diverse lineage - no single discipline dominance'}\n`);
@@ -90,14 +90,14 @@ function competitionHistoryExample() {
   ];
 
   const result = checkLineageForDisciplineAffinity(ancestorsWithHistory);
-  
+
   console.log('Ancestors with competition history:');
   ancestorsWithHistory.forEach(ancestor => {
     const disciplines = ancestor.competitionHistory.map(c => c.discipline);
     const uniqueDisciplines = [...new Set(disciplines)];
     console.log(`- ${ancestor.name}: ${uniqueDisciplines.join(', ')} (${disciplines.length} competitions)`);
   });
-  
+
   console.log(`Result: ${JSON.stringify(result)}`);
   console.log(`Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage from competition analysis!` : 'No clear discipline preference from competitions'}\n`);
 }
@@ -130,7 +130,7 @@ function disciplineScoresExample() {
   ];
 
   const result = checkLineageForDisciplineAffinity(ancestorsWithScores);
-  
+
   console.log('Ancestors with discipline scores:');
   ancestorsWithScores.forEach(ancestor => {
     const scores = Object.entries(ancestor.disciplineScores)
@@ -138,7 +138,7 @@ function disciplineScoresExample() {
       .join(', ');
     console.log(`- ${ancestor.name}: ${scores}`);
   });
-  
+
   console.log(`Result: ${JSON.stringify(result)}`);
   console.log(`Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage from score analysis!` : 'No clear discipline preference from scores'}\n`);
 }
@@ -154,11 +154,11 @@ function detailedAnalysisExample() {
     { id: 4, name: 'Jumper D', discipline: 'Show Jumping' },
     { id: 5, name: 'Racer A', discipline: 'Racing' },
     { id: 6, name: 'Dancer A', discipline: 'Dressage' },
-    { id: 7, name: 'Unknown', /* no discipline */ }
+    { id: 7, name: 'Unknown' /* no discipline */ }
   ];
 
   const result = checkLineageForDisciplineAffinityDetailed(mixedLineage);
-  
+
   console.log('Mixed lineage analysis:');
   console.log(`- Total ancestors analyzed: ${result.totalAnalyzed}`);
   console.log(`- Ancestors with known disciplines: ${result.totalWithDisciplines}`);
@@ -180,13 +180,13 @@ function specificDisciplineExample() {
   ];
 
   console.log('Checking for specific discipline affinities:');
-  
+
   const racingCheck = checkSpecificDisciplineAffinity(lineage, 'Racing', 2);
   console.log(`Racing (need 2): ${racingCheck.hasAffinity} - ${racingCheck.count}/${racingCheck.required} (${racingCheck.percentage}%)`);
-  
+
   const jumpingCheck = checkSpecificDisciplineAffinity(lineage, 'Show Jumping', 2);
   console.log(`Show Jumping (need 2): ${jumpingCheck.hasAffinity} - ${jumpingCheck.count}/${jumpingCheck.required} (${jumpingCheck.percentage}%)`);
-  
+
   const dressageCheck = checkSpecificDisciplineAffinity(lineage, 'Dressage', 2);
   console.log(`Dressage (need 2): ${dressageCheck.hasAffinity} - ${dressageCheck.count}/${dressageCheck.required} (${dressageCheck.percentage}%)\n`);
 }
@@ -196,15 +196,15 @@ console.log('⚠️ Example 7: Edge Cases');
 
 function edgeCasesExample() {
   console.log('Testing edge cases:');
-  
+
   // Empty array
   const emptyResult = checkLineageForDisciplineAffinity([]);
   console.log(`Empty array: ${JSON.stringify(emptyResult)}`);
-  
+
   // Null input
   const nullResult = checkLineageForDisciplineAffinity(null);
   console.log(`Null input: ${JSON.stringify(nullResult)}`);
-  
+
   // Ancestors without discipline info
   const noDisciplineResult = checkLineageForDisciplineAffinity([
     { id: 1, name: 'Unknown 1' },
@@ -212,7 +212,7 @@ function edgeCasesExample() {
     { id: 3, name: 'Unknown 3' }
   ]);
   console.log(`No discipline info: ${JSON.stringify(noDisciplineResult)}`);
-  
+
   // Exactly 3 matching
   const exactlyThreeResult = checkLineageForDisciplineAffinity([
     { id: 1, discipline: 'Racing' },
@@ -227,7 +227,7 @@ console.log('🌟 Example 8: Real-world Breeding Scenario');
 
 function breedingScenarioExample() {
   console.log('Breeding scenario: Analyzing lineage for foal trait application');
-  
+
   const proposedMating = {
     sire: {
       name: 'Thunder Strike',
@@ -246,27 +246,27 @@ function breedingScenarioExample() {
       ]
     }
   };
-  
+
   // Combine lineages for analysis
   const combinedLineage = [...proposedMating.sire.lineage, ...proposedMating.dam.lineage];
-  
+
   console.log(`Sire (${proposedMating.sire.name}) lineage: Racing specialists`);
   console.log(`Dam (${proposedMating.dam.name}) lineage: Dressage specialists`);
-  
+
   const result = checkLineageForDisciplineAffinityDetailed(combinedLineage);
-  
+
   console.log('\nCombined lineage analysis:');
   console.log(`- Discipline breakdown: ${JSON.stringify(result.disciplineBreakdown)}`);
   console.log(`- Strongest affinity: ${result.affinity ? result.discipline : 'None'} (${result.affinityStrength}%)`);
-  
+
   // Check for specific discipline affinities
   const racingAffinity = checkSpecificDisciplineAffinity(combinedLineage, 'Racing');
   const dressageAffinity = checkSpecificDisciplineAffinity(combinedLineage, 'Dressage');
-  
-  console.log(`\nSpecific affinities:`);
+
+  console.log('\nSpecific affinities:');
   console.log(`- Racing: ${racingAffinity.hasAffinity} (${racingAffinity.count}/3)`);
   console.log(`- Dressage: ${dressageAffinity.hasAffinity} (${dressageAffinity.count}/3)`);
-  
+
   console.log('\nBreeding recommendation:');
   if (racingAffinity.hasAffinity && dressageAffinity.hasAffinity) {
     console.log('🌟 Excellent cross-discipline lineage! Foal may inherit versatility traits.');
@@ -290,7 +290,7 @@ async function runAllExamples() {
     specificDisciplineExample();
     edgeCasesExample();
     breedingScenarioExample();
-    
+
     console.log('\n✅ All lineage trait check examples completed successfully!');
     console.log('\n📝 Key Usage Patterns:');
     console.log('- Use checkLineageForDisciplineAffinity() for simple yes/no affinity checks');
@@ -298,7 +298,7 @@ async function runAllExamples() {
     console.log('- Use checkSpecificDisciplineAffinity() to check for particular disciplines');
     console.log('- Function handles multiple data sources: direct discipline, competition history, scores');
     console.log('- Requires 3+ ancestors with same discipline for affinity = true');
-    
+
   } catch (error) {
     console.error('Error running examples:', error.message);
   }

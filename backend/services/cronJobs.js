@@ -25,7 +25,7 @@ class CronJobService {
     logger.info('[CronJobService] Starting cron job service');
 
     // Daily trait evaluation job - runs at midnight
-    const dailyTraitJob = cron.schedule('0 0 * * *', async () => {
+    const dailyTraitJob = cron.schedule('0 0 * * *', async() => {
       await this.evaluateDailyFoalTraits();
     }, {
       scheduled: false,
@@ -101,7 +101,7 @@ class CronJobService {
         try {
           const result = await this.evaluateFoalTraits(foal);
           processedCount++;
-          
+
           if (result.traitsRevealed > 0) {
             updatedCount++;
           }
@@ -122,7 +122,7 @@ class CronJobService {
         foalsProcessed: processedCount,
         foalsUpdated: updatedCount,
         errors: errorCount,
-        duration: duration
+        duration
       });
 
     } catch (error) {
@@ -142,7 +142,7 @@ class CronJobService {
 
       // Get current development day
       const currentDay = foal.foalDevelopment?.currentDay || 0;
-      
+
       // Skip foals that have completed development (day > 6)
       if (currentDay > 6) {
         logger.info(`[CronJobService.evaluateFoalTraits] Foal ${foal.id} has completed development (day ${currentDay})`);
@@ -189,8 +189,8 @@ class CronJobService {
 
       return {
         traitsRevealed: totalNewTraits,
-        newTraits: newTraits,
-        updatedTraits: updatedTraits
+        newTraits,
+        updatedTraits
       };
 
     } catch (error) {
@@ -210,8 +210,8 @@ class CronJobService {
     try {
       const logEntry = {
         timestamp: new Date().toISOString(),
-        foalId: foalId,
-        foalName: foalName,
+        foalId,
+        foalName,
         developmentDay: currentDay,
         traitsRevealed: {
           positive: newTraits.positive,
@@ -289,4 +289,4 @@ class CronJobService {
 // Create singleton instance
 const cronJobService = new CronJobService();
 
-export default cronJobService; 
+export default cronJobService;

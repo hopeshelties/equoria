@@ -8,11 +8,11 @@ import {
 } from '../utils/competitionRewards.js';
 
 describe('Competition Rewards System', () => {
-  
+
   describe('calculatePrizeDistribution', () => {
     it('should calculate correct prize distribution for 1000 prize pool', () => {
       const distribution = calculatePrizeDistribution(1000);
-      
+
       expect(distribution.first).toBe(500);   // 50%
       expect(distribution.second).toBe(300);  // 30%
       expect(distribution.third).toBe(200);   // 20%
@@ -20,7 +20,7 @@ describe('Competition Rewards System', () => {
 
     it('should handle odd prize amounts with rounding', () => {
       const distribution = calculatePrizeDistribution(1001);
-      
+
       expect(distribution.first).toBe(501);   // 50.05% rounded
       expect(distribution.second).toBe(300);  // 30.03% rounded
       expect(distribution.third).toBe(200);   // 20.02% rounded
@@ -28,7 +28,7 @@ describe('Competition Rewards System', () => {
 
     it('should handle small prize amounts', () => {
       const distribution = calculatePrizeDistribution(10);
-      
+
       expect(distribution.first).toBe(5);     // 50%
       expect(distribution.second).toBe(3);    // 30%
       expect(distribution.third).toBe(2);     // 20%
@@ -36,7 +36,7 @@ describe('Competition Rewards System', () => {
 
     it('should handle zero prize pool', () => {
       const distribution = calculatePrizeDistribution(0);
-      
+
       expect(distribution.first).toBe(0);
       expect(distribution.second).toBe(0);
       expect(distribution.third).toBe(0);
@@ -83,16 +83,16 @@ describe('Competition Rewards System', () => {
   describe('calculateStatGains', () => {
     // Mock Math.random for predictable testing
     const originalRandom = Math.random;
-    
+
     afterEach(() => {
       Math.random = originalRandom;
     });
 
     it('should grant stat gain for 1st place with 10% chance (lucky roll)', () => {
       Math.random = jest.fn(() => 0.05); // 5% < 10% chance
-      
+
       const statGain = calculateStatGains('1st', 'Racing');
-      
+
       expect(statGain).not.toBeNull();
       expect(statGain.gain).toBe(1);
       expect(['speed', 'stamina', 'focus']).toContain(statGain.stat);
@@ -100,17 +100,17 @@ describe('Competition Rewards System', () => {
 
     it('should not grant stat gain for 1st place with unlucky roll', () => {
       Math.random = jest.fn(() => 0.15); // 15% > 10% chance
-      
+
       const statGain = calculateStatGains('1st', 'Racing');
-      
+
       expect(statGain).toBeNull();
     });
 
     it('should grant stat gain for 2nd place with 5% chance (lucky roll)', () => {
       Math.random = jest.fn(() => 0.03); // 3% < 5% chance
-      
+
       const statGain = calculateStatGains('2nd', 'Show Jumping');
-      
+
       expect(statGain).not.toBeNull();
       expect(statGain.gain).toBe(1);
       expect(['balance', 'agility', 'boldness']).toContain(statGain.stat);
@@ -118,9 +118,9 @@ describe('Competition Rewards System', () => {
 
     it('should grant stat gain for 3rd place with 3% chance (lucky roll)', () => {
       Math.random = jest.fn(() => 0.01); // 1% < 3% chance
-      
+
       const statGain = calculateStatGains('3rd', 'Dressage');
-      
+
       expect(statGain).not.toBeNull();
       expect(statGain.gain).toBe(1);
       expect(['precision', 'intelligence', 'obedience']).toContain(statGain.stat);
@@ -232,4 +232,4 @@ describe('Competition Rewards System', () => {
       expect(hasValidRider(horse)).toBe(true); // Empty object is still an object
     });
   });
-}); 
+});

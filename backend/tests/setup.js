@@ -20,4 +20,4 @@ if (!process.env.NODE_ENV) {
 }
 
 console.log('🧪 Test environment loaded');
-console.log('📊 Database:', process.env.DATABASE_URL?.replace(/:[^:@]*@/, ':***@')); // Hide password in logs 
+console.log('📊 Database:', process.env.DATABASE_URL?.replace(/:[^:@]*@/, ':***@')); // Hide password in logs

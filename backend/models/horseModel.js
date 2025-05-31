@@ -97,8 +97,8 @@ async function createHorse(horseData) {
         logger.info(`[horseModel.createHorse] Applying at-birth traits for newborn with sire ${sireId} and dam ${damId}`);
 
         const atBirthResult = await applyEpigeneticTraitsAtBirth({
-          sireId: sireId,
-          damId: damId,
+          sireId,
+          damId,
           mareStress: horseData.mareStress,
           feedQuality: horseData.feedQuality
         });
@@ -157,7 +157,7 @@ async function createHorse(horseData) {
         ...(health_status && { health_status }),
         ...(last_vetted_date && { last_vetted_date: new Date(last_vetted_date) }),
         ...(tack && { tack }),
-        epigeneticModifiers: epigeneticModifiers
+        epigeneticModifiers
       },
       include: {
         breed: true,

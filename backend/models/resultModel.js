@@ -89,7 +89,7 @@ async function saveResult(resultData) {
 
   } catch (error) {
     logger.error('[resultModel.saveResult] Database error: %o', error);
-    throw new Error('Database error in saveResult: ' + error.message);
+    throw new Error(`Database error in saveResult: ${error.message}`);
   }
 }
 
@@ -124,7 +124,7 @@ async function getResultsByHorse(horseId) {
 
   } catch (error) {
     logger.error('[resultModel.getResultsByHorse] Database error: %o', error);
-    throw new Error('Database error in getResultsByHorse: ' + error.message);
+    throw new Error(`Database error in getResultsByHorse: ${error.message}`);
   }
 }
 
@@ -159,7 +159,7 @@ async function getResultsByShow(showId) {
 
   } catch (error) {
     logger.error('[resultModel.getResultsByShow] Database error: %o', error);
-    throw new Error('Database error in getResultsByShow: ' + error.message);
+    throw new Error(`Database error in getResultsByShow: ${error.message}`);
   }
 }
 
@@ -196,7 +196,7 @@ async function getResultById(resultId) {
 
   } catch (error) {
     logger.error('[resultModel.getResultById] Database error: %o', error);
-    throw new Error('Database error in getResultById: ' + error.message);
+    throw new Error(`Database error in getResultById: ${error.message}`);
   }
 }
 
@@ -221,7 +221,7 @@ async function getResultsByUser(userId, options = {}) {
 
     const whereClause = {
       horse: {
-        userId: userId
+        userId
       }
     };
 

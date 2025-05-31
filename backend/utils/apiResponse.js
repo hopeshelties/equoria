@@ -7,8 +7,8 @@ export class ApiResponse {
   constructor(success, message, data = null, meta = null) {
     this.success = success;
     this.message = message;
-    if (data !== null) this.data = data;
-    if (meta !== null) this.meta = meta;
+    if (data !== null) {this.data = data;}
+    if (meta !== null) {this.meta = meta;}
     this.timestamp = new Date().toISOString();
   }
 
@@ -45,9 +45,9 @@ export class ApiResponse {
   }
 
   static validationError(message = 'Validation failed', errors = []) {
-    return new ApiResponse(false, message, null, { 
-      statusCode: 400, 
-      validationErrors: errors 
+    return new ApiResponse(false, message, null, {
+      statusCode: 400,
+      validationErrors: errors
     });
   }
 
@@ -129,4 +129,4 @@ export const responseHandler = (req, res, next) => {
   next();
 };
 
-export default ApiResponse; 
+export default ApiResponse;

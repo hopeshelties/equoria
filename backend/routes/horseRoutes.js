@@ -51,7 +51,7 @@ const validateUserId = [
  * GET /horses/trainable/:userId
  * Get all horses owned by a user that are eligible for training
  */
-router.get('/trainable/:userId', validateUserId, async (req, res) => {
+router.get('/trainable/:userId', validateUserId, async(req, res) => {
   try {
     const { userId } = req.params;
 
@@ -75,7 +75,7 @@ router.get('/trainable/:userId', validateUserId, async (req, res) => {
  * GET /horses/:id/history
  * Get competition history for a specific horse
  */
-router.get('/:id/history', validateHorseId, async (req, res) => {
+router.get('/:id/history', validateHorseId, async(req, res) => {
   try {
     // Dynamic import for ES module
     const { getHorseHistory } = await import('../controllers/horseController.js');
@@ -139,7 +139,7 @@ const validateFoalCreation = [
  * POST /horses/foals
  * Create a new foal with epigenetic traits applied at birth
  */
-router.post('/foals', validateFoalCreation, async (req, res) => {
+router.post('/foals', validateFoalCreation, async(req, res) => {
   try {
     // Dynamic import for ES module
     const { createFoal } = await import('../controllers/horseController.js');
@@ -157,7 +157,7 @@ router.post('/foals', validateFoalCreation, async (req, res) => {
  * GET /horses/:id/overview
  * Get comprehensive overview data for a specific horse
  */
-router.get('/:id/overview', validateHorseId, async (req, res) => {
+router.get('/:id/overview', validateHorseId, async(req, res) => {
   try {
     await getHorseOverview(req, res);
   } catch (error) {

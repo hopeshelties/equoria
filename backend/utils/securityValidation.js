@@ -12,7 +12,7 @@ import logger from './logger.js';
 export const validateHorseData = (horseData, isUpdate = false) => {
   const errors = [];
   const sanitized = { ...horseData };
-  
+
   // Name validation
   if (sanitized.name) {
     sanitized.name = sanitized.name.toString().trim();
@@ -24,7 +24,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
       errors.push('Horse name contains invalid characters');
     }
   }
-  
+
   // Age validation
   if (sanitized.age !== undefined) {
     const age = parseInt(sanitized.age);
@@ -33,7 +33,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
     }
     sanitized.age = age;
   }
-  
+
   // Sex validation
   if (sanitized.sex) {
     const validSexes = ['Stallion', 'Mare', 'Gelding', 'Colt', 'Filly', 'Rig', 'Spayed Mare'];
@@ -41,7 +41,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
       errors.push('Invalid horse sex');
     }
   }
-  
+
   // Stat validation (prevent stat hacking)
   const statFields = ['precision', 'strength', 'speed', 'agility', 'endurance', 'intelligence', 'personality'];
   for (const stat of statFields) {
@@ -53,7 +53,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
       sanitized[stat] = value;
     }
   }
-  
+
   // Financial validation
   if (sanitized.total_earnings !== undefined) {
     const earnings = parseFloat(sanitized.total_earnings);
@@ -62,7 +62,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
     }
     sanitized.total_earnings = earnings;
   }
-  
+
   if (sanitized.stud_fee !== undefined) {
     const fee = parseFloat(sanitized.stud_fee);
     if (isNaN(fee) || fee < 0 || fee > 1000000) {
@@ -70,7 +70,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
     }
     sanitized.stud_fee = fee;
   }
-  
+
   if (sanitized.sale_price !== undefined) {
     const price = parseFloat(sanitized.sale_price);
     if (isNaN(price) || price < 0 || price > 10000000) {
@@ -78,7 +78,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
     }
     sanitized.sale_price = price;
   }
-  
+
   // Prevent direct modification of protected fields in updates
   if (isUpdate) {
     const protectedFields = ['id', 'createdAt', 'updatedAt'];
@@ -89,7 +89,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
       }
     }
   }
-  
+
   return { isValid: errors.length === 0, errors, sanitized };
 };
 
@@ -99,7 +99,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
 export const validatePlayerData = (playerData, isUpdate = false) => {
   const errors = [];
   const sanitized = { ...playerData };
-  
+
   // Name validation
   if (sanitized.name) {
     sanitized.name = sanitized.name.toString().trim();
@@ -110,7 +110,7 @@ export const validatePlayerData = (playerData, isUpdate = false) => {
       errors.push('Player name contains invalid characters');
     }
   }
-  
+
   // Email validation
   if (sanitized.email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -119,7 +119,7 @@ export const validatePlayerData = (playerData, isUpdate = false) => {
     }
     sanitized.email = sanitized.email.toLowerCase().trim();
   }
-  
+
   // Money validation (prevent money hacking)
   if (sanitized.money !== undefined) {
     const money = parseFloat(sanitized.money);
@@ -128,7 +128,7 @@ export const validatePlayerData = (playerData, isUpdate = false) => {
     }
     sanitized.money = money;
   }
-  
+
   // Level validation
   if (sanitized.level !== undefined) {
     const level = parseInt(sanitized.level);
@@ -137,7 +137,7 @@ export const validatePlayerData = (playerData, isUpdate = false) => {
     }
     sanitized.level = level;
   }
-  
+
   // XP validation
   if (sanitized.xp !== undefined) {
     const xp = parseInt(sanitized.xp);
@@ -146,7 +146,7 @@ export const validatePlayerData = (playerData, isUpdate = false) => {
     }
     sanitized.xp = xp;
   }
-  
+
   // Settings validation
   if (sanitized.settings) {
     if (typeof sanitized.settings !== 'object') {
@@ -163,7 +163,7 @@ export const validatePlayerData = (playerData, isUpdate = false) => {
       }
     }
   }
-  
+
   return { isValid: errors.length === 0, errors, sanitized };
 };
 
@@ -173,12 +173,12 @@ export const validatePlayerData = (playerData, isUpdate = false) => {
 export const validateBreedingData = (breedingData) => {
   const errors = [];
   const sanitized = { ...breedingData };
-  
+
   // Sire and Dam ID validation
   if (!sanitized.sireId || !sanitized.damId) {
     errors.push('Both sire and dam IDs are required');
   }
-  
+
   if (sanitized.sireId) {
     const sireId = parseInt(sanitized.sireId);
     if (isNaN(sireId) || sireId <= 0) {
@@ -186,7 +186,7 @@ export const validateBreedingData = (breedingData) => {
     }
     sanitized.sireId = sireId;
   }
-  
+
   if (sanitized.damId) {
     const damId = parseInt(sanitized.damId);
     if (isNaN(damId) || damId <= 0) {
@@ -194,12 +194,12 @@ export const validateBreedingData = (breedingData) => {
     }
     sanitized.damId = damId;
   }
-  
+
   // Prevent self-breeding
   if (sanitized.sireId === sanitized.damId) {
     errors.push('A horse cannot breed with itself');
   }
-  
+
   // Breeding fee validation
   if (sanitized.breedingFee !== undefined) {
     const fee = parseFloat(sanitized.breedingFee);
@@ -208,7 +208,7 @@ export const validateBreedingData = (breedingData) => {
     }
     sanitized.breedingFee = fee;
   }
-  
+
   return { isValid: errors.length === 0, errors, sanitized };
 };
 
@@ -218,7 +218,7 @@ export const validateBreedingData = (breedingData) => {
 export const validateTrainingData = (trainingData) => {
   const errors = [];
   const sanitized = { ...trainingData };
-  
+
   // Horse ID validation
   if (!sanitized.horseId) {
     errors.push('Horse ID is required');
@@ -229,7 +229,7 @@ export const validateTrainingData = (trainingData) => {
     }
     sanitized.horseId = horseId;
   }
-  
+
   // Discipline validation
   if (!sanitized.discipline) {
     errors.push('Discipline is required');
@@ -239,7 +239,7 @@ export const validateTrainingData = (trainingData) => {
       errors.push('Invalid discipline');
     }
   }
-  
+
   // Prevent direct stat modification in training requests
   const protectedFields = ['precision', 'strength', 'speed', 'agility', 'endurance', 'intelligence', 'personality'];
   for (const field of protectedFields) {
@@ -248,7 +248,7 @@ export const validateTrainingData = (trainingData) => {
       logger.warn(`[security] Removed protected field from training request: ${field}`);
     }
   }
-  
+
   return { isValid: errors.length === 0, errors, sanitized };
 };
 
@@ -258,7 +258,7 @@ export const validateTrainingData = (trainingData) => {
 export const validateTransactionData = (transactionData) => {
   const errors = [];
   const sanitized = { ...transactionData };
-  
+
   // Amount validation
   if (!sanitized.amount) {
     errors.push('Transaction amount is required');
@@ -269,7 +269,7 @@ export const validateTransactionData = (transactionData) => {
     }
     sanitized.amount = amount;
   }
-  
+
   // Transaction type validation
   if (!sanitized.type) {
     errors.push('Transaction type is required');
@@ -279,7 +279,7 @@ export const validateTransactionData = (transactionData) => {
       errors.push('Invalid transaction type');
     }
   }
-  
+
   // Description validation
   if (sanitized.description) {
     sanitized.description = sanitized.description.toString().trim();
@@ -289,7 +289,7 @@ export const validateTransactionData = (transactionData) => {
     // Sanitize description
     sanitized.description = sanitized.description.replace(/[<>]/g, '');
   }
-  
+
   return { isValid: errors.length === 0, errors, sanitized };
 };
 
@@ -313,8 +313,8 @@ export const verifyDataIntegrity = (data, expectedHash) => {
  * Sanitizes input to prevent XSS and injection attacks
  */
 export const sanitizeInput = (input) => {
-  if (typeof input !== 'string') return input;
-  
+  if (typeof input !== 'string') {return input;}
+
   return input
     .trim()
     .replace(/[<>]/g, '') // Remove potential HTML tags
@@ -344,21 +344,21 @@ export const validateRateLimit = (userId, operation, maxRequests = 10, windowMs 
   if (!global.rateLimitStore) {
     global.rateLimitStore = new Map();
   }
-  
+
   const key = `${userId}_${operation}`;
   const now = Date.now();
   const windowStart = now - windowMs;
-  
+
   let requests = global.rateLimitStore.get(key) || [];
   requests = requests.filter(timestamp => timestamp > windowStart);
-  
+
   if (requests.length >= maxRequests) {
     return { allowed: false, resetTime: requests[0] + windowMs };
   }
-  
+
   requests.push(now);
   global.rateLimitStore.set(key, requests);
-  
+
   return { allowed: true, remaining: maxRequests - requests.length };
 };
 
@@ -367,30 +367,30 @@ export const validateRateLimit = (userId, operation, maxRequests = 10, windowMs 
  */
 export const validateFileUpload = (file) => {
   const errors = [];
-  
+
   if (!file) {
     errors.push('No file provided');
     return { isValid: false, errors };
   }
-  
+
   // File size validation (5MB max)
   const maxSize = 5 * 1024 * 1024;
   if (file.size > maxSize) {
     errors.push('File size exceeds 5MB limit');
   }
-  
+
   // File type validation
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
   if (!allowedTypes.includes(file.mimetype)) {
     errors.push('Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed');
   }
-  
+
   // File name validation
   const fileName = file.originalname || file.name || '';
   if (!/^[a-zA-Z0-9\-_\.\s]+$/.test(fileName)) {
     errors.push('Invalid file name characters');
   }
-  
+
   return { isValid: errors.length === 0, errors };
 };
 
@@ -406,4 +406,4 @@ export default {
   validateId,
   validateRateLimit,
   validateFileUpload
-}; 
+};

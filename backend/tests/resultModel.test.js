@@ -41,7 +41,7 @@ describe('resultModel', () => {
   });
 
   describe('saveResult', () => {
-    it('should save a competition result with all required fields', async () => {
+    it('should save a competition result with all required fields', async() => {
       const resultData = {
         horseId: 1,
         showId: 2,
@@ -89,7 +89,7 @@ describe('resultModel', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should save a result without placement (null for non-top-3)', async () => {
+    it('should save a result without placement (null for non-top-3)', async() => {
       const resultData = {
         horseId: 3,
         showId: 2,
@@ -129,7 +129,7 @@ describe('resultModel', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should throw error if horseId is missing', async () => {
+    it('should throw error if horseId is missing', async() => {
       const resultData = {
         showId: 2,
         score: 85.5,
@@ -143,7 +143,7 @@ describe('resultModel', () => {
       expect(mockPrisma.competitionResult.create).not.toHaveBeenCalled();
     });
 
-    it('should throw error if showId is missing', async () => {
+    it('should throw error if showId is missing', async() => {
       const resultData = {
         horseId: 1,
         score: 85.5,
@@ -157,7 +157,7 @@ describe('resultModel', () => {
       expect(mockPrisma.competitionResult.create).not.toHaveBeenCalled();
     });
 
-    it('should throw error if score is missing', async () => {
+    it('should throw error if score is missing', async() => {
       const resultData = {
         horseId: 1,
         showId: 2,
@@ -170,7 +170,7 @@ describe('resultModel', () => {
       expect(mockPrisma.competitionResult.create).not.toHaveBeenCalled();
     });
 
-    it('should throw error if discipline is missing', async () => {
+    it('should throw error if discipline is missing', async() => {
       const resultData = {
         horseId: 1,
         showId: 2,
@@ -183,7 +183,7 @@ describe('resultModel', () => {
       expect(mockPrisma.competitionResult.create).not.toHaveBeenCalled();
     });
 
-    it('should throw error if runDate is missing', async () => {
+    it('should throw error if runDate is missing', async() => {
       const resultData = {
         horseId: 1,
         showId: 2,
@@ -196,7 +196,7 @@ describe('resultModel', () => {
       expect(mockPrisma.competitionResult.create).not.toHaveBeenCalled();
     });
 
-    it('should validate score is a number', async () => {
+    it('should validate score is a number', async() => {
       const resultData = {
         horseId: 1,
         showId: 2,
@@ -211,7 +211,7 @@ describe('resultModel', () => {
       expect(mockPrisma.competitionResult.create).not.toHaveBeenCalled();
     });
 
-    it('should validate horseId is a positive integer', async () => {
+    it('should validate horseId is a positive integer', async() => {
       const resultData = {
         horseId: -1,
         showId: 2,
@@ -226,7 +226,7 @@ describe('resultModel', () => {
       expect(mockPrisma.competitionResult.create).not.toHaveBeenCalled();
     });
 
-    it('should validate showId is a positive integer', async () => {
+    it('should validate showId is a positive integer', async() => {
       const resultData = {
         horseId: 1,
         showId: 0,
@@ -241,7 +241,7 @@ describe('resultModel', () => {
       expect(mockPrisma.competitionResult.create).not.toHaveBeenCalled();
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       const resultData = {
         horseId: 1,
         showId: 2,
@@ -259,7 +259,7 @@ describe('resultModel', () => {
   });
 
   describe('getResultsByHorse', () => {
-    it('should retrieve all results for a specific horse', async () => {
+    it('should retrieve all results for a specific horse', async() => {
       const horseId = 1;
       const expectedResults = [
         {
@@ -306,7 +306,7 @@ describe('resultModel', () => {
       expect(results).toEqual(expectedResults);
     });
 
-    it('should return empty array if no results found for horse', async () => {
+    it('should return empty array if no results found for horse', async() => {
       const horseId = 999;
       mockPrisma.competitionResult.findMany.mockResolvedValue([]);
 
@@ -315,13 +315,13 @@ describe('resultModel', () => {
       expect(results).toEqual([]);
     });
 
-    it('should validate horseId is a positive integer', async () => {
+    it('should validate horseId is a positive integer', async() => {
       await expect(getResultsByHorse(-1)).rejects.toThrow('Horse ID must be a positive integer');
       await expect(getResultsByHorse('invalid')).rejects.toThrow('Horse ID must be a positive integer');
       expect(mockPrisma.competitionResult.findMany).not.toHaveBeenCalled();
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockPrisma.competitionResult.findMany.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(getResultsByHorse(1)).rejects.toThrow('Database error in getResultsByHorse: Database connection failed');
@@ -329,7 +329,7 @@ describe('resultModel', () => {
   });
 
   describe('getResultsByShow', () => {
-    it('should retrieve all results for a specific show', async () => {
+    it('should retrieve all results for a specific show', async() => {
       const showId = 2;
       const expectedResults = [
         {
@@ -376,7 +376,7 @@ describe('resultModel', () => {
       expect(results).toEqual(expectedResults);
     });
 
-    it('should return empty array if no results found for show', async () => {
+    it('should return empty array if no results found for show', async() => {
       const showId = 999;
       mockPrisma.competitionResult.findMany.mockResolvedValue([]);
 
@@ -385,13 +385,13 @@ describe('resultModel', () => {
       expect(results).toEqual([]);
     });
 
-    it('should validate showId is a positive integer', async () => {
+    it('should validate showId is a positive integer', async() => {
       await expect(getResultsByShow(-1)).rejects.toThrow('Show ID must be a positive integer');
       await expect(getResultsByShow('invalid')).rejects.toThrow('Show ID must be a positive integer');
       expect(mockPrisma.competitionResult.findMany).not.toHaveBeenCalled();
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockPrisma.competitionResult.findMany.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(getResultsByShow(1)).rejects.toThrow('Database error in getResultsByShow: Database connection failed');
@@ -399,7 +399,7 @@ describe('resultModel', () => {
   });
 
   describe('getResultById', () => {
-    it('should retrieve a specific result by ID', async () => {
+    it('should retrieve a specific result by ID', async() => {
       const resultId = 1;
       const expectedResult = {
         id: 1,
@@ -432,7 +432,7 @@ describe('resultModel', () => {
       expect(result).toEqual(expectedResult);
     });
 
-    it('should return null if result not found', async () => {
+    it('should return null if result not found', async() => {
       const resultId = 999;
       mockPrisma.competitionResult.findUnique.mockResolvedValue(null);
 
@@ -441,13 +441,13 @@ describe('resultModel', () => {
       expect(result).toBeNull();
     });
 
-    it('should validate resultId is a positive integer', async () => {
+    it('should validate resultId is a positive integer', async() => {
       await expect(getResultById(-1)).rejects.toThrow('Result ID must be a positive integer');
       await expect(getResultById('invalid')).rejects.toThrow('Result ID must be a positive integer');
       expect(mockPrisma.competitionResult.findUnique).not.toHaveBeenCalled();
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockPrisma.competitionResult.findUnique.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(getResultById(1)).rejects.toThrow('Database error in getResultById: Database connection failed');

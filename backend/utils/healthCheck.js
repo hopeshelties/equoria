@@ -14,7 +14,7 @@ export class HealthCheck {
       return {
         status: 'healthy',
         message: 'Database connection successful',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
     } catch (error) {
       logger.error('Database health check failed:', error);
@@ -22,7 +22,7 @@ export class HealthCheck {
         status: 'unhealthy',
         message: 'Database connection failed',
         error: error.message,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
     }
   }
@@ -42,9 +42,9 @@ export class HealthCheck {
         rss: `${totalMemMB}MB`,
         heapUsed: `${heapUsedMB}MB`,
         heapTotal: `${heapTotalMB}MB`,
-        external: `${Math.round(memUsage.external / 1024 / 1024)}MB`,
+        external: `${Math.round(memUsage.external / 1024 / 1024)}MB`
       },
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 
@@ -60,9 +60,9 @@ export class HealthCheck {
       message: 'Server uptime',
       data: {
         uptime: `${days}d ${hours}h ${minutes}m ${seconds}s`,
-        uptimeSeconds: Math.floor(uptimeSeconds),
+        uptimeSeconds: Math.floor(uptimeSeconds)
       },
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 
@@ -75,9 +75,9 @@ export class HealthCheck {
         platform: process.platform,
         arch: process.arch,
         environment: process.env.NODE_ENV || 'development',
-        pid: process.pid,
+        pid: process.pid
       },
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     };
   }
 
@@ -86,14 +86,14 @@ export class HealthCheck {
       this.checkDatabase(),
       this.checkMemoryUsage(),
       Promise.resolve(this.getUptime()),
-      Promise.resolve(this.getSystemInfo()),
+      Promise.resolve(this.getSystemInfo())
     ]);
 
     const results = {
       database: checks[0].status === 'fulfilled' ? checks[0].value : { status: 'error', message: 'Health check failed' },
       memory: checks[1].status === 'fulfilled' ? checks[1].value : { status: 'error', message: 'Memory check failed' },
       uptime: checks[2].status === 'fulfilled' ? checks[2].value : { status: 'error', message: 'Uptime check failed' },
-      system: checks[3].status === 'fulfilled' ? checks[3].value : { status: 'error', message: 'System check failed' },
+      system: checks[3].status === 'fulfilled' ? checks[3].value : { status: 'error', message: 'System check failed' }
     };
 
     // Determine overall health
@@ -111,7 +111,7 @@ export class HealthCheck {
       status: overallStatus,
       message: `System health check completed - ${overallStatus}`,
       timestamp: new Date().toISOString(),
-      checks: results,
+      checks: results
     };
   }
 }
@@ -119,10 +119,10 @@ export class HealthCheck {
 /**
  * Express route handler for health checks
  */
-export const healthCheckHandler = async (req, res) => {
+export const healthCheckHandler = async(req, res) => {
   try {
     const healthData = await HealthCheck.performFullHealthCheck();
-    
+
     // Set appropriate HTTP status based on health
     let statusCode = 200;
     if (healthData.status === 'warning') {
@@ -138,7 +138,7 @@ export const healthCheckHandler = async (req, res) => {
       status: 'error',
       message: 'Health check failed',
       error: error.message,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 };
@@ -150,28 +150,28 @@ export const livenessHandler = (req, res) => {
   res.status(200).json({
     status: 'alive',
     message: 'Server is running',
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   });
 };
 
 /**
  * Readiness probe (for Kubernetes/Docker)
  */
-export const readinessHandler = async (req, res) => {
+export const readinessHandler = async(req, res) => {
   try {
     const dbCheck = await HealthCheck.checkDatabase();
-    
+
     if (dbCheck.status === 'healthy') {
       res.status(200).json({
         status: 'ready',
         message: 'Server is ready to accept requests',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       });
     } else {
       res.status(503).json({
         status: 'not_ready',
         message: 'Server is not ready - database unavailable',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       });
     }
   } catch (error) {
@@ -180,9 +180,9 @@ export const readinessHandler = async (req, res) => {
       status: 'not_ready',
       message: 'Server is not ready',
       error: error.message,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString()
     });
   }
 };
 
-export default HealthCheck; 
+export default HealthCheck;

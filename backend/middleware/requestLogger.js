@@ -6,7 +6,7 @@ import logger from '../utils/logger.js';
  */
 export const requestLogger = (req, res, next) => {
   const start = Date.now();
-  
+
   // Log request start
   logger.info(`[${req.method}] ${req.originalUrl}`, {
     method: req.method,
@@ -22,7 +22,7 @@ export const requestLogger = (req, res, next) => {
   const originalEnd = res.end;
   res.end = function(chunk, encoding) {
     const duration = Date.now() - start;
-    
+
     logger.info(`[${req.method}] ${req.originalUrl} - ${res.statusCode}`, {
       method: req.method,
       url: req.originalUrl,

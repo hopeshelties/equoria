@@ -62,16 +62,16 @@ async function createShow(showData) {
  */
 async function seedShows(count = 10) {
   console.log(`🌱 Starting show seeding process (${count} shows)...`);
-  
+
   try {
     // Generate mock shows
     const mockShows = generateMockShows(count);
     console.log(`📋 Generated ${mockShows.length} mock shows`);
-    
+
     let successCount = 0;
     let skipCount = 0;
     let errorCount = 0;
-    
+
     for (const showData of mockShows) {
       // Check if show already exists (by name)
       const exists = await checkShowExists(showData.name);
@@ -80,7 +80,7 @@ async function seedShows(count = 10) {
         skipCount++;
         continue;
       }
-      
+
       // Create the show
       const createdShow = await createShow(showData);
       if (createdShow) {
@@ -89,14 +89,14 @@ async function seedShows(count = 10) {
         errorCount++;
       }
     }
-    
+
     // Summary
     console.log('\n📊 Seeding Summary:');
     console.log(`✅ Successfully created: ${successCount} shows`);
     console.log(`⏭️  Skipped (already exist): ${skipCount} shows`);
     console.log(`❌ Failed to create: ${errorCount} shows`);
     console.log(`📈 Total processed: ${successCount + skipCount + errorCount} shows`);
-    
+
     if (errorCount === 0) {
       console.log('\n🎉 Show seeding completed successfully!');
       return true;
@@ -104,7 +104,7 @@ async function seedShows(count = 10) {
       console.log('\n⚠️  Show seeding completed with some errors.');
       return false;
     }
-    
+
   } catch (error) {
     console.error(`💥 Fatal error during show seeding: ${error.message}`);
     return false;
@@ -117,7 +117,7 @@ async function seedShows(count = 10) {
 async function main() {
   try {
     const success = await seedShows(15); // Seed 15 shows by default
-    
+
     if (success) {
       console.log('\n🏁 Show seeding process completed successfully!');
       process.exit(0);
@@ -146,4 +146,4 @@ const executedFileUrl = `file:///${process.argv[1].replace(/\\/g, '/')}`;
 
 if (currentFileUrl === executedFileUrl) {
   main();
-} 
+}

@@ -93,4 +93,4 @@ export {
   calculateStatGains,
   calculateEntryFees,
   hasValidRider
-}; 
+};

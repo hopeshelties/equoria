@@ -18,4 +18,4 @@ function getHealthModifier(healthRating) {
 
 export {
   getHealthModifier
-}; 
+};

@@ -147,8 +147,8 @@ async function completeEnrichmentActivity(foalId, day, activity) {
 
     // Validate activity is appropriate for the given day
     const availableActivities = getAvailableActivities(parsedDay, {});
-    const activityDefinition = availableActivities.find(a => 
-      a.type === activity || a.name === activity || 
+    const activityDefinition = availableActivities.find(a =>
+      a.type === activity || a.name === activity ||
       a.type.toLowerCase().replace('_', ' ') === activity.toLowerCase() ||
       a.name.toLowerCase() === activity.toLowerCase()
     );
@@ -273,7 +273,7 @@ async function completeActivity(foalId, activityType) {
       data: {
         bondingLevel: newBondingLevel,
         stressLevel: newStressLevel,
-        completedActivities: completedActivities
+        completedActivities
       }
     });
 
@@ -282,7 +282,7 @@ async function completeActivity(foalId, activityType) {
       data: {
         foalId: parsedFoalId,
         day: development.currentDay,
-        activityType: activityType,
+        activityType,
         outcome: outcome.result,
         bondingChange: outcome.bondingChange,
         stressChange: outcome.stressChange,
@@ -433,4 +433,4 @@ export {
   advanceDay,
   getAvailableActivities,
   completeEnrichmentActivity
-}; 
+};

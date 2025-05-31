@@ -5,11 +5,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Import the trait effects system
-const { 
-  getTraitEffects, 
-  getAllTraitEffects, 
-  hasTraitEffect, 
-  getCombinedTraitEffects 
+const {
+  getTraitEffects,
+  getAllTraitEffects,
+  hasTraitEffect,
+  getCombinedTraitEffects
 } = await import(join(__dirname, '../utils/traitEffects.js'));
 
 describe('Trait Effects System', () => {
@@ -51,7 +51,7 @@ describe('Trait Effects System', () => {
   describe('getCombinedTraitEffects', () => {
     test('should combine multiple trait effects correctly', () => {
       const combined = getCombinedTraitEffects(['resilient', 'intelligent']);
-      
+
       // Should have effects from both traits
       expect(combined.suppressTemperamentDrift).toBe(true); // from resilient
       expect(combined.trainingXpModifier).toBe(0.25); // from intelligent
@@ -61,7 +61,7 @@ describe('Trait Effects System', () => {
 
     test('should handle numeric modifiers additively', () => {
       const combined = getCombinedTraitEffects(['resilient', 'athletic']);
-      
+
       // Both traits have competitionScoreModifier
       // resilient: 0.03, athletic: 0.05 = 0.08 total
       expect(combined.competitionScoreModifier).toBe(0.08);
@@ -69,14 +69,14 @@ describe('Trait Effects System', () => {
 
     test('should handle boolean effects correctly', () => {
       const combined = getCombinedTraitEffects(['resilient', 'calm']);
-      
+
       // Both have suppressTemperamentDrift: true
       expect(combined.suppressTemperamentDrift).toBe(true);
     });
 
     test('should merge object effects correctly', () => {
       const combined = getCombinedTraitEffects(['athletic', 'legendary_bloodline']);
-      
+
       // Both have baseStatBoost objects
       expect(combined.baseStatBoost).toBeDefined();
       expect(combined.baseStatBoost.stamina).toBe(5); // athletic: 2 + legendary: 3
@@ -97,7 +97,7 @@ describe('Trait Effects System', () => {
 
     test('should ignore invalid trait names', () => {
       const combined = getCombinedTraitEffects(['resilient', 'invalid_trait', 'intelligent']);
-      
+
       // Should only include effects from valid traits
       expect(combined.suppressTemperamentDrift).toBe(true); // from resilient
       expect(combined.trainingXpModifier).toBe(0.25); // from intelligent
@@ -216,7 +216,7 @@ describe('Trait Effects System', () => {
 
     test('should include all expected trait categories', () => {
       const allEffects = getAllTraitEffects();
-      
+
       // Positive traits
       expect(allEffects.resilient).toBeDefined();
       expect(allEffects.calm).toBeDefined();
@@ -224,14 +224,14 @@ describe('Trait Effects System', () => {
       expect(allEffects.intelligent).toBeDefined();
       expect(allEffects.athletic).toBeDefined();
       expect(allEffects.trainability_boost).toBeDefined();
-      
+
       // Negative traits
       expect(allEffects.nervous).toBeDefined();
       expect(allEffects.lazy).toBeDefined();
       expect(allEffects.fragile).toBeDefined();
       expect(allEffects.aggressive).toBeDefined();
       expect(allEffects.stubborn).toBeDefined();
-      
+
       // Rare traits
       expect(allEffects.legendary_bloodline).toBeDefined();
       expect(allEffects.burnout).toBeDefined();

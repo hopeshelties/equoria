@@ -28,7 +28,7 @@ async function seedTestData() {
 
     // Create test player
     const existingPlayer = await prisma.user.findUnique({ where: { email: 'test-player@example.com' } });
-    
+
     let testPlayer;
     if (existingPlayer) {
       // eslint-disable-next-line no-console
@@ -111,7 +111,7 @@ async function seedTestData() {
     const existingHorse2 = await prisma.horse.findUnique({ where: { id: 7 } });
 
     let horse1, horse2;
-    
+
     if (existingHorse1) {
       // eslint-disable-next-line no-console
       console.log(`✅ Horse ID 6 already exists: ${existingHorse1.name}`);

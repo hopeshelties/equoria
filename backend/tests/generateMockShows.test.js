@@ -30,7 +30,7 @@ describe('generateMockShows', () => {
 
     it('should generate shows with all required properties', () => {
       const shows = generateMockShows(3);
-      
+
       shows.forEach(show => {
         expect(show).toHaveProperty('id');
         expect(show).toHaveProperty('name');
@@ -46,13 +46,13 @@ describe('generateMockShows', () => {
     it('should generate unique sequential IDs', () => {
       const shows = generateMockShows(5);
       const ids = shows.map(show => show.id);
-      
+
       expect(ids).toEqual([1, 2, 3, 4, 5]);
     });
 
     it('should use only valid disciplines', () => {
       const shows = generateMockShows(20); // Generate more to test variety
-      
+
       shows.forEach(show => {
         expect(validDisciplines).toContain(show.discipline);
       });
@@ -60,7 +60,7 @@ describe('generateMockShows', () => {
 
     it('should generate realistic show names', () => {
       const shows = generateMockShows(10);
-      
+
       shows.forEach(show => {
         expect(typeof show.name).toBe('string');
         expect(show.name.length).toBeGreaterThan(0);
@@ -71,18 +71,18 @@ describe('generateMockShows', () => {
 
     it('should respect level constraints', () => {
       const shows = generateMockShows(20);
-      
+
       shows.forEach(show => {
         // levelMin should be between 1 and 7
         expect(show.levelMin).toBeGreaterThanOrEqual(1);
         expect(show.levelMin).toBeLessThanOrEqual(7);
-        
+
         // levelMax should be greater than levelMin
         expect(show.levelMax).toBeGreaterThan(show.levelMin);
-        
+
         // levelMax should not exceed 10
         expect(show.levelMax).toBeLessThanOrEqual(10);
-        
+
         // levelMax should be at most levelMin + 3
         expect(show.levelMax).toBeLessThanOrEqual(show.levelMin + 3);
       });
@@ -90,7 +90,7 @@ describe('generateMockShows', () => {
 
     it('should respect entry fee range (100-500)', () => {
       const shows = generateMockShows(20);
-      
+
       shows.forEach(show => {
         expect(show.entryFee).toBeGreaterThanOrEqual(100);
         expect(show.entryFee).toBeLessThanOrEqual(500);
@@ -100,7 +100,7 @@ describe('generateMockShows', () => {
 
     it('should respect prize range (500-2000)', () => {
       const shows = generateMockShows(20);
-      
+
       shows.forEach(show => {
         expect(show.prize).toBeGreaterThanOrEqual(500);
         expect(show.prize).toBeLessThanOrEqual(2000);
@@ -114,10 +114,10 @@ describe('generateMockShows', () => {
       thirtyDaysAgo.setDate(today.getDate() - 30);
       const thirtyDaysFromNow = new Date(today);
       thirtyDaysFromNow.setDate(today.getDate() + 30);
-      
+
       // Generate shows after setting up date boundaries
       const shows = generateMockShows(20);
-      
+
       shows.forEach(show => {
         expect(show.runDate).toBeInstanceOf(Date);
         // Add a small buffer (1 second) to account for timing precision
@@ -129,7 +129,7 @@ describe('generateMockShows', () => {
     it('should generate variety in disciplines across multiple shows', () => {
       const shows = generateMockShows(50); // Generate many to test variety
       const usedDisciplines = new Set(shows.map(show => show.discipline));
-      
+
       // Should use multiple different disciplines (not all the same)
       expect(usedDisciplines.size).toBeGreaterThan(1);
     });
@@ -138,7 +138,7 @@ describe('generateMockShows', () => {
       const shows = generateMockShows(20);
       const names = shows.map(show => show.name);
       const uniqueNames = new Set(names);
-      
+
       // Should generate some variety in names (though duplicates are possible)
       expect(uniqueNames.size).toBeGreaterThan(1);
     });
@@ -147,7 +147,7 @@ describe('generateMockShows', () => {
   describe('generateSingleMockShow', () => {
     it('should generate a single show with default properties', () => {
       const show = generateSingleMockShow();
-      
+
       expect(show).toHaveProperty('id');
       expect(show).toHaveProperty('name');
       expect(show).toHaveProperty('discipline');
@@ -167,16 +167,16 @@ describe('generateMockShows', () => {
         entryFee: 200,
         prize: 1000
       };
-      
+
       const show = generateSingleMockShow(overrides);
-      
+
       expect(show.name).toBe('Custom Test Show');
       expect(show.discipline).toBe('Dressage');
       expect(show.levelMin).toBe(3);
       expect(show.levelMax).toBe(6);
       expect(show.entryFee).toBe(200);
       expect(show.prize).toBe(1000);
-      
+
       // Should still have other properties
       expect(show).toHaveProperty('id');
       expect(show).toHaveProperty('runDate');
@@ -184,7 +184,7 @@ describe('generateMockShows', () => {
 
     it('should maintain constraints for non-overridden properties', () => {
       const show = generateSingleMockShow({ name: 'Custom Show' });
-      
+
       // Non-overridden properties should still follow constraints
       expect(validDisciplines).toContain(show.discipline);
       expect(show.levelMax).toBeGreaterThan(show.levelMin);
@@ -199,7 +199,7 @@ describe('generateMockShows', () => {
     it('should only use disciplines that exist in statMap', () => {
       const shows = generateMockShows(30);
       const usedDisciplines = shows.map(show => show.discipline);
-      
+
       usedDisciplines.forEach(discipline => {
         expect(validDisciplines).toContain(discipline);
       });
@@ -208,9 +208,9 @@ describe('generateMockShows', () => {
     it('should eventually use most available disciplines with enough shows', () => {
       const shows = generateMockShows(100); // Generate many shows
       const usedDisciplines = new Set(shows.map(show => show.discipline));
-      
+
       // Should use a good variety of the available disciplines
       expect(usedDisciplines.size).toBeGreaterThan(validDisciplines.length * 0.5);
     });
   });
-}); 
+});

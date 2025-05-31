@@ -22,7 +22,7 @@ router.post('/discover/batch',
         return true;
       })
   ],
-  async (req, res) => {
+  async(req, res) => {
     try {
       // Check for validation errors
       const errors = validationResult(req);
@@ -69,11 +69,11 @@ router.post('/discover/batch',
  * POST /api/traits/discover/:foalId
  * Trigger trait discovery for a specific foal
  */
-router.post('/discover/:foalId', 
+router.post('/discover/:foalId',
   [
     param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')
   ],
-  async (req, res) => {
+  async(req, res) => {
     try {
       // Check for validation errors
       const errors = validationResult(req);
@@ -92,7 +92,7 @@ router.post('/discover/:foalId',
 
       res.json({
         success: true,
-        message: discoveryResults.traitsRevealed.length > 0 
+        message: discoveryResults.traitsRevealed.length > 0
           ? `Discovered ${discoveryResults.traitsRevealed.length} new traits!`
           : 'No new traits discovered at this time',
         data: {
@@ -112,14 +112,14 @@ router.post('/discover/:foalId',
 
     } catch (error) {
       logger.error(`[traitDiscoveryRoutes] POST /discover/${req.params.foalId} error: ${error.message}`);
-      
+
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
           message: error.message
         });
       }
-      
+
       if (error.message.includes('not a foal')) {
         return res.status(400).json({
           success: false,
@@ -143,7 +143,7 @@ router.get('/progress/:foalId',
   [
     param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')
   ],
-  async (req, res) => {
+  async(req, res) => {
     try {
       // Check for validation errors
       const errors = validationResult(req);
@@ -167,7 +167,7 @@ router.get('/progress/:foalId',
 
     } catch (error) {
       logger.error(`[traitDiscoveryRoutes] GET /progress/${req.params.foalId} error: ${error.message}`);
-      
+
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
@@ -187,7 +187,7 @@ router.get('/progress/:foalId',
  * GET /api/traits/conditions
  * Get all available discovery conditions and their requirements
  */
-router.get('/conditions', async (req, res) => {
+router.get('/conditions', async(req, res) => {
   try {
     logger.info('[traitDiscoveryRoutes] GET /conditions - Getting discovery conditions');
 
@@ -230,7 +230,7 @@ router.post('/check-conditions/:foalId',
   [
     param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')
   ],
-  async (req, res) => {
+  async(req, res) => {
     try {
       // Check for validation errors
       const errors = validationResult(req);
@@ -278,7 +278,7 @@ router.post('/check-conditions/:foalId',
 
     } catch (error) {
       logger.error(`[traitDiscoveryRoutes] POST /check-conditions/${req.params.foalId} error: ${error.message}`);
-      
+
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
@@ -315,4 +315,4 @@ function categorizeCondition(conditionKey) {
   return 'other';
 }
 
-export default router; 
+export default router;

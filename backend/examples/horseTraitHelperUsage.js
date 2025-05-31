@@ -1,6 +1,6 @@
 /**
  * TASK 7: Example Usage of Instance-Style Helper Methods
- * 
+ *
  * This file demonstrates how to use the new instance-style helper methods
  * for trait management in training and competition systems.
  */
@@ -25,7 +25,7 @@ async function exampleTrainingWithTraits(horseId) {
     const hasNervous = await hasTrait(horseId, 'nervous');
     const hasBold = await hasTrait(horseId, 'bold');
 
-    console.log(`Horse traits check:`);
+    console.log('Horse traits check:');
     console.log(`- Resilient: ${hasResilient}`);
     console.log(`- Nervous: ${hasNervous}`);
     console.log(`- Bold: ${hasBold}`);
@@ -34,7 +34,7 @@ async function exampleTrainingWithTraits(horseId) {
     const positiveTraits = await getPositiveTraitsArray(horseId);
     const negativeTraits = await getNegativeTraitsArray(horseId);
 
-    console.log(`\nAll traits:`);
+    console.log('\nAll traits:');
     console.log(`- Positive: ${positiveTraits.join(', ') || 'None'}`);
     console.log(`- Negative: ${negativeTraits.join(', ') || 'None'}`);
 
@@ -46,21 +46,21 @@ async function exampleTrainingWithTraits(horseId) {
     if (hasResilient) {
       trainingBonus += 10; // 10% bonus to training effectiveness
       stressReduction += 5; // Reduces stress by 5 points
-      console.log(`+ Resilient trait: +10% training bonus, -5 stress`);
+      console.log('+ Resilient trait: +10% training bonus, -5 stress');
     }
 
     if (hasBold) {
       trainingBonus += 5; // 5% bonus for bold horses
-      console.log(`+ Bold trait: +5% training bonus`);
+      console.log('+ Bold trait: +5% training bonus');
     }
 
     // Negative trait effects
     if (hasNervous) {
       trainingBonus -= 15; // 15% penalty for nervous horses
-      console.log(`- Nervous trait: -15% training penalty`);
+      console.log('- Nervous trait: -15% training penalty');
     }
 
-    console.log(`\nFinal training modifiers:`);
+    console.log('\nFinal training modifiers:');
     console.log(`- Training effectiveness: ${trainingBonus > 0 ? '+' : ''}${trainingBonus}%`);
     console.log(`- Stress reduction: ${stressReduction} points`);
 
@@ -89,7 +89,7 @@ async function exampleCompetitionWithTraits(horseId, competitionType) {
     const positiveTraits = await getPositiveTraitsArray(horseId);
     const negativeTraits = await getNegativeTraitsArray(horseId);
 
-    console.log(`Horse entering competition with:`);
+    console.log('Horse entering competition with:');
     console.log(`- Positive traits: ${positiveTraits.join(', ') || 'None'}`);
     console.log(`- Negative traits: ${negativeTraits.join(', ') || 'None'}`);
 
@@ -108,24 +108,24 @@ async function exampleCompetitionWithTraits(horseId, competitionType) {
       if (hasBold) {
         performanceModifier += 15; // Bold horses excel at jumping
         confidenceBoost += 10;
-        console.log(`+ Bold trait in Show Jumping: +15% performance, +10 confidence`);
+        console.log('+ Bold trait in Show Jumping: +15% performance, +10 confidence');
       }
       if (hasSpooky) {
         performanceModifier -= 20; // Spooky horses struggle with jumps
-        console.log(`- Spooky trait in Show Jumping: -20% performance`);
+        console.log('- Spooky trait in Show Jumping: -20% performance');
       }
     } else if (competitionType === 'Dressage') {
       if (hasResilient) {
         performanceModifier += 10; // Resilient horses handle pressure well
-        console.log(`+ Resilient trait in Dressage: +10% performance`);
+        console.log('+ Resilient trait in Dressage: +10% performance');
       }
       if (hasNervous) {
         performanceModifier -= 12; // Nervous horses struggle with precision
-        console.log(`- Nervous trait in Dressage: -12% performance`);
+        console.log('- Nervous trait in Dressage: -12% performance');
       }
     }
 
-    console.log(`\nCompetition results:`);
+    console.log('\nCompetition results:');
     console.log(`- Performance modifier: ${performanceModifier > 0 ? '+' : ''}${performanceModifier}%`);
     console.log(`- Confidence boost: +${confidenceBoost} points`);
 
@@ -154,39 +154,39 @@ async function exampleAddTraitBasedOnEvent(horseId, eventType) {
 
     // Determine trait based on event
     switch (eventType) {
-      case 'successful_difficult_training':
-        traitToAdd = 'resilient';
-        category = 'positive';
-        console.log(`Horse completed difficult training successfully!`);
-        break;
-      
-      case 'traumatic_accident':
-        traitToAdd = 'nervous';
-        category = 'negative';
-        console.log(`Horse experienced a traumatic accident.`);
-        break;
-      
-      case 'major_competition_win':
-        traitToAdd = 'bold';
-        category = 'positive';
-        console.log(`Horse won a major competition!`);
-        break;
-      
-      case 'repeated_spooking':
-        traitToAdd = 'spooky';
-        category = 'negative';
-        console.log(`Horse has been spooking repeatedly.`);
-        break;
-      
-      default:
-        console.log(`No trait changes for event: ${eventType}`);
-        return null;
+    case 'successful_difficult_training':
+      traitToAdd = 'resilient';
+      category = 'positive';
+      console.log('Horse completed difficult training successfully!');
+      break;
+
+    case 'traumatic_accident':
+      traitToAdd = 'nervous';
+      category = 'negative';
+      console.log('Horse experienced a traumatic accident.');
+      break;
+
+    case 'major_competition_win':
+      traitToAdd = 'bold';
+      category = 'positive';
+      console.log('Horse won a major competition!');
+      break;
+
+    case 'repeated_spooking':
+      traitToAdd = 'spooky';
+      category = 'negative';
+      console.log('Horse has been spooking repeatedly.');
+      break;
+
+    default:
+      console.log(`No trait changes for event: ${eventType}`);
+      return null;
     }
 
     if (traitToAdd) {
       // Check if horse already has this trait
       const alreadyHasTrait = await hasTrait(horseId, traitToAdd);
-      
+
       if (alreadyHasTrait) {
         console.log(`Horse already has the '${traitToAdd}' trait. No change needed.`);
         return null;
@@ -195,14 +195,14 @@ async function exampleAddTraitBasedOnEvent(horseId, eventType) {
       // Add the trait
       console.log(`Adding '${traitToAdd}' trait to '${category}' category...`);
       const updatedHorse = await addTrait(horseId, traitToAdd, category);
-      
+
       console.log(`Successfully added '${traitToAdd}' trait!`);
-      
+
       // Show updated traits
       const positiveTraits = await getPositiveTraitsArray(horseId);
       const negativeTraits = await getNegativeTraitsArray(horseId);
-      
-      console.log(`Updated traits:`);
+
+      console.log('Updated traits:');
       console.log(`- Positive: ${positiveTraits.join(', ') || 'None'}`);
       console.log(`- Negative: ${negativeTraits.join(', ') || 'None'}`);
 
@@ -228,32 +228,32 @@ async function exampleCompleteWorkflow(horseId) {
     console.log(`\n=== Complete Trait Management Workflow for Horse ${horseId} ===`);
 
     // 1. Check current traits
-    console.log(`\n1. Current trait status:`);
+    console.log('\n1. Current trait status:');
     const positiveTraits = await getPositiveTraitsArray(horseId);
     const negativeTraits = await getNegativeTraitsArray(horseId);
-    
+
     console.log(`- Positive traits: ${positiveTraits.join(', ') || 'None'}`);
     console.log(`- Negative traits: ${negativeTraits.join(', ') || 'None'}`);
 
     // 2. Check for specific traits
-    console.log(`\n2. Checking for specific traits:`);
+    console.log('\n2. Checking for specific traits:');
     const importantTraits = ['resilient', 'bold', 'nervous', 'spooky', 'people_trusting'];
-    
+
     for (const trait of importantTraits) {
       const hasTrait_ = await hasTrait(horseId, trait);
       console.log(`- ${trait}: ${hasTrait_ ? '✓' : '✗'}`);
     }
 
     // 3. Simulate training session
-    console.log(`\n3. Training session simulation:`);
+    console.log('\n3. Training session simulation:');
     const trainingResults = await exampleTrainingWithTraits(horseId);
 
     // 4. Simulate competition
-    console.log(`\n4. Competition simulation:`);
+    console.log('\n4. Competition simulation:');
     const competitionResults = await exampleCompetitionWithTraits(horseId, 'Show Jumping');
 
     // 5. Simulate event-based trait addition
-    console.log(`\n5. Event-based trait modification:`);
+    console.log('\n5. Event-based trait modification:');
     const eventResults = await exampleAddTraitBasedOnEvent(horseId, 'successful_difficult_training');
 
     return {

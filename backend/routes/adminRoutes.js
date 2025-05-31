@@ -10,7 +10,7 @@ const router = express.Router();
  * GET /api/admin/cron/status
  * Get status of all cron jobs
  */
-router.get('/cron/status', async (req, res) => {
+router.get('/cron/status', async(req, res) => {
   try {
     logger.info('[adminRoutes] GET /api/admin/cron/status');
 
@@ -34,7 +34,7 @@ router.get('/cron/status', async (req, res) => {
  * POST /api/admin/cron/start
  * Start cron job service
  */
-router.post('/cron/start', async (req, res) => {
+router.post('/cron/start', async(req, res) => {
   try {
     logger.info('[adminRoutes] POST /api/admin/cron/start');
 
@@ -58,7 +58,7 @@ router.post('/cron/start', async (req, res) => {
  * POST /api/admin/cron/stop
  * Stop cron job service
  */
-router.post('/cron/stop', async (req, res) => {
+router.post('/cron/stop', async(req, res) => {
   try {
     logger.info('[adminRoutes] POST /api/admin/cron/stop');
 
@@ -82,7 +82,7 @@ router.post('/cron/stop', async (req, res) => {
  * POST /api/admin/traits/evaluate
  * Manually trigger daily trait evaluation
  */
-router.post('/traits/evaluate', async (req, res) => {
+router.post('/traits/evaluate', async(req, res) => {
   try {
     logger.info('[adminRoutes] POST /api/admin/traits/evaluate - Manual trait evaluation triggered');
 
@@ -108,7 +108,7 @@ router.post('/traits/evaluate', async (req, res) => {
  * GET /api/admin/foals/development
  * Get all foals in development period for monitoring
  */
-router.get('/foals/development', async (req, res) => {
+router.get('/foals/development', async(req, res) => {
   try {
     logger.info('[adminRoutes] GET /api/admin/foals/development');
 
@@ -143,7 +143,7 @@ router.get('/foals/development', async (req, res) => {
     res.json({
       success: true,
       data: {
-        foals: foals,
+        foals,
         count: foals.length
       }
     });
@@ -161,7 +161,7 @@ router.get('/foals/development', async (req, res) => {
  * GET /api/admin/traits/definitions
  * Get all trait definitions for reference
  */
-router.get('/traits/definitions', async (req, res) => {
+router.get('/traits/definitions', async(req, res) => {
   try {
     logger.info('[adminRoutes] GET /api/admin/traits/definitions');
 
@@ -182,4 +182,4 @@ router.get('/traits/definitions', async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

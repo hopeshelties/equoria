@@ -59,7 +59,7 @@ describe('Foal Enrichment API', () => {
       stressChange: 5
     };
 
-    it('should complete enrichment activity successfully', async () => {
+    it('should complete enrichment activity successfully', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.horse.update.mockResolvedValue({
         ...mockFoal,
@@ -110,7 +110,7 @@ describe('Foal Enrichment API', () => {
       });
     });
 
-    it('should handle foal with null bond_score and stress_level', async () => {
+    it('should handle foal with null bond_score and stress_level', async() => {
       const foalWithNulls = {
         ...mockFoal,
         bond_score: null,
@@ -132,7 +132,7 @@ describe('Foal Enrichment API', () => {
       expect(result.levels.stress_level).toBeGreaterThanOrEqual(0); // Should use default 0
     });
 
-    it('should validate foal ID is a positive integer', async () => {
+    it('should validate foal ID is a positive integer', async() => {
       await expect(completeEnrichmentActivity('invalid', 3, 'Trailer Exposure'))
         .rejects.toThrow('Foal ID must be a positive integer');
 
@@ -143,7 +143,7 @@ describe('Foal Enrichment API', () => {
         .rejects.toThrow('Foal ID must be a positive integer');
     });
 
-    it('should validate day is between 0 and 6', async () => {
+    it('should validate day is between 0 and 6', async() => {
       await expect(completeEnrichmentActivity(1, -1, 'Trailer Exposure'))
         .rejects.toThrow('Day must be between 0 and 6');
 
@@ -154,7 +154,7 @@ describe('Foal Enrichment API', () => {
         .rejects.toThrow('Day must be between 0 and 6');
     });
 
-    it('should validate activity is required and is a string', async () => {
+    it('should validate activity is required and is a string', async() => {
       await expect(completeEnrichmentActivity(1, 3, ''))
         .rejects.toThrow('Activity is required and must be a string');
 
@@ -165,14 +165,14 @@ describe('Foal Enrichment API', () => {
         .rejects.toThrow('Activity is required and must be a string');
     });
 
-    it('should throw error if foal not found', async () => {
+    it('should throw error if foal not found', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       await expect(completeEnrichmentActivity(999, 3, 'Trailer Exposure'))
         .rejects.toThrow('Foal not found');
     });
 
-    it('should throw error if horse is not a foal (age > 1)', async () => {
+    it('should throw error if horse is not a foal (age > 1)', async() => {
       const adultHorse = {
         ...mockFoal,
         age: 3
@@ -184,7 +184,7 @@ describe('Foal Enrichment API', () => {
         .rejects.toThrow('Horse is not a foal (must be 1 year old or younger)');
     });
 
-    it('should throw error if activity is not appropriate for the day', async () => {
+    it('should throw error if activity is not appropriate for the day', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
 
       // Try to do a day 3 activity on day 0
@@ -196,7 +196,7 @@ describe('Foal Enrichment API', () => {
         .rejects.toThrow('Activity "Invalid Activity" is not appropriate for day 3');
     });
 
-    it('should accept activity by type or name', async () => {
+    it('should accept activity by type or name', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.horse.update.mockResolvedValue({
         ...mockFoal,
@@ -218,7 +218,7 @@ describe('Foal Enrichment API', () => {
       expect(result3.success).toBe(true);
     });
 
-    it('should enforce bonding and stress level bounds (0-100)', async () => {
+    it('should enforce bonding and stress level bounds (0-100)', async() => {
       // Test with extreme values
       const extremeFoal = {
         ...mockFoal,
@@ -240,7 +240,7 @@ describe('Foal Enrichment API', () => {
       expect(result.levels.stress_level).toBeGreaterThanOrEqual(0);
     });
 
-    it('should handle database errors gracefully', async () => {
+    it('should handle database errors gracefully', async() => {
       mockPrisma.horse.findUnique.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(completeEnrichmentActivity(1, 3, 'Trailer Exposure'))
@@ -251,7 +251,7 @@ describe('Foal Enrichment API', () => {
       );
     });
 
-    it('should validate all day 3 activities are available', async () => {
+    it('should validate all day 3 activities are available', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.horse.update.mockResolvedValue({
         ...mockFoal,

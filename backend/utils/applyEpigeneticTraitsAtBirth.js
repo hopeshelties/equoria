@@ -57,7 +57,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
 
       // Risk of fragile trait
       const fragileChance = inbreedingAnalysis.severity === 'high' ? 0.80 :
-                           inbreedingAnalysis.severity === 'moderate' ? 0.50 : 0.25;
+        inbreedingAnalysis.severity === 'moderate' ? 0.50 : 0.25;
       if (Math.random() < fragileChance) {
         negative.push('fragile');
         logger.info('[applyEpigeneticTraitsAtBirth] Applied fragile trait (inbreeding)');
@@ -65,7 +65,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
 
       // Risk of reactive trait
       const reactiveChance = inbreedingAnalysis.severity === 'high' ? 0.70 :
-                            inbreedingAnalysis.severity === 'moderate' ? 0.40 : 0.20;
+        inbreedingAnalysis.severity === 'moderate' ? 0.40 : 0.20;
       if (Math.random() < reactiveChance) {
         negative.push('reactive');
         logger.info('[applyEpigeneticTraitsAtBirth] Applied reactive trait (inbreeding)');
@@ -73,7 +73,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
 
       // Risk of low_immunity trait
       const immunityChance = inbreedingAnalysis.severity === 'high' ? 0.60 :
-                            inbreedingAnalysis.severity === 'moderate' ? 0.35 : 0.15;
+        inbreedingAnalysis.severity === 'moderate' ? 0.35 : 0.15;
       if (Math.random() < immunityChance) {
         negative.push('low_immunity');
         logger.info('[applyEpigeneticTraitsAtBirth] Applied low_immunity trait (inbreeding)');

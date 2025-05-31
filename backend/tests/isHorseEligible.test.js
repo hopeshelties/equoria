@@ -219,7 +219,7 @@ describe('isHorseEligibleForShow', () => {
         trait: 'Swift',
         health_status: 'Excellent'
       };
-      
+
       const openShow = {
         id: 'championship-2024',
         name: 'Annual Championship',
@@ -227,9 +227,9 @@ describe('isHorseEligibleForShow', () => {
         levelMax: 20,
         discipline: 'All-Around'
       };
-      
+
       const previousEntries = ['local-show-1', 'regional-show-2'];
-      
+
       expect(isHorseEligibleForShow(eligibleHorse, openShow, previousEntries)).toBe(true);
     });
 
@@ -240,7 +240,7 @@ describe('isHorseEligibleForShow', () => {
         age: 3,
         level: 1
       };
-      
+
       const beginnerShow = {
         id: 'beginner-show',
         name: 'Beginner Competition',
@@ -248,7 +248,7 @@ describe('isHorseEligibleForShow', () => {
         levelMax: 5,
         discipline: 'Training'
       };
-      
+
       expect(isHorseEligibleForShow(minRequirementHorse, beginnerShow)).toBe(true);
     });
 
@@ -259,7 +259,7 @@ describe('isHorseEligibleForShow', () => {
         age: 20,
         level: 50
       };
-      
+
       const veteranShow = {
         id: 'veteran-show',
         name: 'Veteran Competition',
@@ -267,7 +267,7 @@ describe('isHorseEligibleForShow', () => {
         levelMax: 50,
         discipline: 'Senior'
       };
-      
+
       expect(isHorseEligibleForShow(maxRequirementHorse, veteranShow)).toBe(true);
     });
   });
@@ -295,4 +295,4 @@ describe('isHorseEligibleForShow', () => {
       expect(isHorseEligibleForShow(validHorse, emptyIdShow, previousEntries)).toBe(false);
     });
   });
-}); 
+});

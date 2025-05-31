@@ -3,7 +3,7 @@
  * Tests for groom calculation logic without database dependencies
  */
 
-import { 
+import {
   calculateGroomInteractionEffects,
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
@@ -117,8 +117,8 @@ describe('Groom System Logic Tests', () => {
       expect(longEffects.cost).toBeGreaterThan(shortEffects.cost);
 
       // Cost should be approximately hourlyRate * (duration/60) * skill_modifier
-      const expectedShortCost = 18.0 * (30/60) * 1.0; // intermediate skill modifier = 1.0
-      const expectedLongCost = 18.0 * (120/60) * 1.0;
+      const expectedShortCost = 18.0 * (30 / 60) * 1.0; // intermediate skill modifier = 1.0
+      const expectedLongCost = 18.0 * (120 / 60) * 1.0;
 
       expect(shortEffects.cost).toBeCloseTo(expectedShortCost, 1);
       expect(longEffects.cost).toBeCloseTo(expectedLongCost, 1);
@@ -166,7 +166,7 @@ describe('Groom System Logic Tests', () => {
       expect(GROOM_SPECIALTIES).toHaveProperty('medical');
 
       // Check foalCare specialty details
-      const foalCare = GROOM_SPECIALTIES.foalCare;
+      const { foalCare } = GROOM_SPECIALTIES;
       expect(foalCare.name).toBe('Foal Care Specialist');
       expect(foalCare.bondingModifier).toBe(1.5);
       expect(foalCare.stressReduction).toBe(1.3);
@@ -226,7 +226,7 @@ describe('Groom System Logic Tests', () => {
       expect(PERSONALITY_TRAITS).toHaveProperty('strict');
 
       // Check gentle personality
-      const gentle = PERSONALITY_TRAITS.gentle;
+      const { gentle } = PERSONALITY_TRAITS;
       expect(gentle.name).toBe('Gentle');
       expect(gentle.bondingModifier).toBe(1.2);
       expect(gentle.stressReduction).toBe(1.4);
@@ -315,7 +315,7 @@ describe('Groom System Logic Tests', () => {
 
       // Should not throw error, should use defaults
       const effects = calculateGroomInteractionEffects(invalidGroom, { bondScore: 50 }, 'dailyCare', 60);
-      
+
       expect(effects).toHaveProperty('bondingChange');
       expect(effects).toHaveProperty('stressChange');
       expect(effects).toHaveProperty('cost');

@@ -10,22 +10,22 @@ import logger from '../utils/logger.js';
 
 // CORS configuration
 export const corsOptions = {
-  origin: function (origin, callback) {
+  origin(origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
+    if (!origin) {return callback(null, true);}
+
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:3001'
     ];
-    
+
     // Add production origins from environment
     if (process.env.ALLOWED_ORIGINS) {
       allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(','));
     }
-    
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -56,7 +56,7 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
         userAgent: req.get('User-Agent'),
         url: req.originalUrl
       });
-      
+
       res.status(429).json({
         success: false,
         error: 'Too many requests from this IP, please try again later.',
@@ -70,16 +70,16 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
 export const helmetConfig = {
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
-    },
+      defaultSrc: ['\'self\''],
+      styleSrc: ['\'self\'', '\'unsafe-inline\''],
+      scriptSrc: ['\'self\''],
+      imgSrc: ['\'self\'', 'data:', 'https:'],
+      connectSrc: ['\'self\''],
+      fontSrc: ['\'self\''],
+      objectSrc: ['\'none\''],
+      mediaSrc: ['\'self\''],
+      frameSrc: ['\'none\'']
+    }
   },
   crossOriginEmbedderPolicy: false, // Disable for API compatibility
   hsts: {
