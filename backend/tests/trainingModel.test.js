@@ -1,3 +1,36 @@
+/**
+ * 🧪 UNIT TEST: Training Model - Training Session Logging & Horse Data
+ *
+ * This test validates the training model's core functionality for logging training
+ * sessions, retrieving training history, and managing horse age data.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Training session logging with required fields (horseId, discipline, timestamp)
+ * - Horse ID validation: must be positive integer
+ * - Discipline validation: required non-empty string
+ * - Training history retrieval by horse and discipline
+ * - Horse age retrieval for training eligibility checks
+ * - Database error handling with graceful error messages
+ * - Input validation for all parameters
+ * - Multiple training sessions per horse across different disciplines
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. logTrainingSession() - Training session logging with validation
+ * 2. getLastTrainingDate() - Training history retrieval with ordering
+ * 3. getHorseAge() - Horse age data retrieval for eligibility
+ * 4. Input validation for all functions
+ * 5. Database error handling scenarios
+ * 6. Integration scenarios with multiple sessions
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: All business logic, validation rules, error handling, data processing
+ * ✅ REAL: Input validation, parameter checking, response formatting
+ * 🔧 MOCK: Database operations (Prisma calls) - external dependency
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked database to focus on model
+ *    business logic while ensuring predictable test outcomes for data operations
+ */
+
 import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -25,7 +58,7 @@ jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
 // Import the module after mocking
 const { logTrainingSession, getLastTrainingDate, getHorseAge } = await import(join(__dirname, '../models/trainingModel.js'));
 
-describe('trainingModel', () => {
+describe('🏋️ UNIT: Training Model - Training Session Logging & Horse Data', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockTrainingLogCreate.mockClear();

@@ -1,7 +1,39 @@
+/**
+ * 🧪 UNIT TEST: Training Controller - Horse Training Business Logic
+ *
+ * This test validates the training controller's core business logic for horse
+ * training eligibility, session execution, and progression tracking.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Horses must be 3+ years old to train (age eligibility)
+ * - Global 7-day training cooldown per horse (not per discipline)
+ * - Training awards +5 XP to horse owner and triggers level-up checks
+ * - Discipline scores increment with each training session
+ * - Horse stats improve based on discipline focus (Speed for Racing, etc.)
+ * - Training logs are properly recorded for cooldown tracking
+ * - XP system integration with user progression
+ * - Error handling for database failures and invalid inputs
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. canTrain() - Training eligibility validation with age and cooldown checks
+ * 2. trainHorse() - Complete training workflow with XP rewards and stat updates
+ * 3. getTrainingStatus() - Detailed training status with cooldown calculations
+ * 4. getTrainableHorses() - Horse filtering for training availability
+ * 5. Edge cases: exact cooldown timing, database errors, invalid inputs
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Business logic for eligibility, cooldown calculations, XP distribution
+ * ✅ REAL: Training progression rules, stat updates, validation logic
+ * 🔧 MOCK: Database operations (training logs, horse lookups, user updates) - external dependencies
+ * 🔧 MOCK: Model layer calls - focus on controller logic without database complexity
+ *
+ * 💡 TEST STRATEGY: Unit testing with comprehensive mocking to isolate controller
+ *    business logic and ensure predictable test outcomes for complex training rules
+ */
+
 import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,7 +76,7 @@ jest.unstable_mockModule(join(__dirname, '../models/userModel.js'), () => ({
 // Import the module after mocking
 const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses } = await import(join(__dirname, '../controllers/trainingController.js'));
 
-describe('trainingController', () => {
+describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetUserWithHorses.mockClear();

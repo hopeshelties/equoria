@@ -1,6 +1,37 @@
+/**
+ * 🧪 UNIT TEST: Competition Controller - Show Entry & Execution
+ *
+ * This test validates the competition controller's core functionality for
+ * entering horses in shows and executing competition logic with XP rewards.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Only top 3 horses receive XP rewards (4th place and below get no XP)
+ * - XP amounts vary based on placement and show prize pool
+ * - Horse eligibility validation (owner, rider, health, stats requirements)
+ * - Competition scoring uses real horse stats and discipline weightings
+ * - Show execution handles multiple horses with proper ranking
+ * - XP events are properly logged for user progression tracking
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. enterAndRunShow() - Complete show entry and execution workflow
+ * 2. XP reward distribution based on competition placement
+ * 3. Horse validation and eligibility checking
+ * 4. Competition scoring and ranking logic
+ * 5. Edge cases with different horse stat configurations
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Competition scoring logic, placement calculations, XP distribution rules
+ * ✅ REAL: Horse stat evaluation, discipline weighting, ranking algorithms
+ * 🔧 MOCK: Database operations (user XP updates, horse lookups) - external dependencies
+ * 🔧 MOCK: Horse data - simplified for focused testing of competition logic
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked data sources to focus on competition
+ *    business logic while ensuring predictable test outcomes and fast execution
+ */
+
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
-// ✅ Mock modules before importing the subject under test
+// Mock external dependencies before importing the subject under test
 jest.unstable_mockModule('../models/userModel.js', () => ({
   addXpToUser: jest.fn().mockResolvedValue({
     success: true,
@@ -49,7 +80,7 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('competitionController', () => {
+describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
   describe('enterAndRunShow', () => {
     it('should successfully enter and run show with 5 horses and award XP to top 3', async() => {
       const horseIds = ['h1', 'h2', 'h3', 'h4', 'h5'];

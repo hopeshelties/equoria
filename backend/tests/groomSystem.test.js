@@ -1,9 +1,41 @@
-import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 /**
- * Groom System Tests
- * Tests for the groom assignment and management system
+ * 🧪 UNIT TEST: Groom System - Foal Care Assignment & Management
+ *
+ * This test validates the groom system's functionality for assigning, managing,
+ * and calculating effects of professional groom care for foals.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Groom assignment to foals with validation (active status, availability)
+ * - Priority-based assignment system (primary vs secondary grooms)
+ * - Default groom auto-creation for new foals without assignments
+ * - Groom interaction effect calculations (bonding, stress, cost)
+ * - Specialty modifiers: foalCare > general > training > medical for foals
+ * - Skill level impact: master > expert > intermediate > novice (cost & effectiveness)
+ * - Experience bonuses: years of experience improve effectiveness
+ * - Duration scaling: longer sessions = proportionally higher costs/effects
+ * - Personality trait effects: gentle, energetic, patient, strict modifiers
+ * - Assignment deactivation when reassigning primary grooms
+ * - Database error handling with comprehensive logging
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. assignGroomToFoal() - Groom assignment with validation and priority management
+ * 2. ensureDefaultGroomAssignment() - Auto-assignment for foals without grooms
+ * 3. calculateGroomInteractionEffects() - Complex effect calculation with modifiers
+ * 4. System Constants - GROOM_SPECIALTIES, SKILL_LEVELS, PERSONALITY_TRAITS validation
+ * 5. Error handling for missing entities and database failures
+ * 6. Edge cases: inactive grooms, duplicate assignments, invalid data
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: All business logic, calculation algorithms, validation rules, effect modifiers
+ * ✅ REAL: Assignment priority logic, cost calculations, specialty bonuses, experience scaling
+ * 🔧 MOCK: Database operations (Prisma calls) - external dependency
+ * 🔧 MOCK: Logger calls - external dependency for audit trails
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked database to focus on groom management
+ *    business logic while ensuring predictable test outcomes for complex calculations
  */
 
+import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -60,7 +92,7 @@ const {
   PERSONALITY_TRAITS
 } = await import(join(__dirname, '../utils/groomSystem.js'));
 
-describe('Groom Assignment System', () => {
+describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -105,7 +137,7 @@ describe('Groom Assignment System', () => {
         data: {
           foalId: 1,
           groomId: 1,
-          playerId: 'player-1',
+          userId: 'player-1',
           priority: 1,
           notes: null,
           isDefault: false,
@@ -216,7 +248,7 @@ describe('Groom Assignment System', () => {
         id: 1,
         name: 'Sarah Johnson',
         speciality: 'foalCare',
-        playerId: 'player-1'
+        userId: 'player-1'
       });
 
       mockPrisma.horse.findUnique.mockResolvedValue({ id: 1, name: 'Test Foal', age: 1 });

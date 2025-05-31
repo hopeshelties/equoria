@@ -1,3 +1,39 @@
+/**
+ * 🧪 UNIT TEST: XP Log Model - Experience Point Event Tracking
+ *
+ * This test validates the XP log model's functionality for tracking, logging,
+ * and analyzing user experience point events across the game system.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - XP event logging with required fields (userId, amount, reason, timestamp)
+ * - Input validation: userId required, amount must be number, reason must be string
+ * - Negative XP support for penalties and rule violations
+ * - User XP event retrieval with pagination and date filtering
+ * - XP summary calculations: total gained, total lost, net total, event count
+ * - Recent XP events across all users for admin analytics
+ * - Date range filtering for historical analysis
+ * - Database error handling with descriptive logging
+ * - Proper ordering: newest events first (desc timestamp)
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. logXpEvent() - XP event creation with validation and logging
+ * 2. getUserXpEvents() - User XP history with pagination and date filters
+ * 3. getUserXpSummary() - XP statistics calculation with date range support
+ * 4. getRecentXpEvents() - Global XP activity feed for analytics
+ * 5. Input validation for all functions
+ * 6. Database error handling scenarios
+ * 7. Edge cases: negative XP, empty results, date boundaries
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: All business logic, validation rules, calculation algorithms, error handling
+ * ✅ REAL: XP summary calculations, date filtering logic, pagination handling
+ * 🔧 MOCK: Database operations (Prisma calls) - external dependency
+ * 🔧 MOCK: Logger calls - external dependency for audit trails
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked database to focus on XP tracking
+ *    business logic while ensuring predictable test outcomes for analytics calculations
+ */
+
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -34,7 +70,7 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 // Import the module after mocking
 const { logXpEvent, getUserXpEvents, getUserXpSummary, getRecentXpEvents } = await import(join(__dirname, '../models/xpLogModel.js'));
 
-describe('xpLogModel', () => {
+describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPrismaXpEvent.create.mockClear();

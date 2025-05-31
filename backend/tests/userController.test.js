@@ -1,3 +1,36 @@
+/**
+ * 🧪 UNIT TEST: User Controller - Progress & Dashboard APIs
+ *
+ * This test validates the user controller's API endpoints for progress tracking
+ * and dashboard data aggregation, focusing on response formatting and error handling.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - User progress calculation: XP to next level = 100 - (totalXP % 100)
+ * - Current level XP display: totalXP % 100 (progress within current level)
+ * - Level calculation: Math.floor(totalXP / 100) + 1
+ * - Dashboard data aggregation from multiple sources (horses, shows, activity)
+ * - Proper error handling with appropriate HTTP status codes
+ * - Data privacy: sensitive fields (email, money) excluded from progress responses
+ * - Production vs development error message handling
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. getUserProgress() - User progress API with XP calculations
+ * 2. getDashboardData() - Comprehensive dashboard data aggregation
+ * 3. Error handling for missing users and database failures
+ * 4. Response formatting and data transformation
+ * 5. Edge cases: various XP values, missing optional data
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Controller logic, XP calculations, response formatting, error handling
+ * ✅ REAL: HTTP request/response handling, status codes, data transformation
+ * 🔧 MOCK: Database operations (Prisma calls) - external dependency
+ * 🔧 MOCK: Training controller calls - external dependency
+ * 🔧 MOCK: Logger calls - external dependency
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked dependencies to focus on controller
+ *    logic and API response formatting while ensuring predictable test outcomes
+ */
+
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -56,7 +89,7 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 // Import the module after mocking - change controller name
 const { getUserProgress, getDashboardData } = await import(join(__dirname, '../controllers/userController.js')); // Changed from playerController.js
 
-describe('userController', () => { // Changed from playerController
+describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
   let mockNext;
 
   beforeEach(() => {

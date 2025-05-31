@@ -1,6 +1,40 @@
-import { calculateEpigeneticTraits } from '../utils/epigeneticTraits.js';
+/**
+ * 🧪 UNIT TEST: Epigenetic Traits Calculation System
+ *
+ * This test validates the complex epigenetic trait inheritance system that determines
+ * offspring traits based on parent genetics and environmental breeding conditions.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Trait inheritance probability based on parent traits (40-50% base chance)
+ * - Environmental modifiers: high bonding (+20% positive), high stress (+20% negative)
+ * - Trait rarity system: common (50%), rare (15%), legendary (5%) inheritance rates
+ * - Trait conflict resolution: opposing traits cannot coexist (calm vs nervous)
+ * - Environmental trait generation based on breeding conditions
+ * - Trait visibility system: rare/legendary traits often hidden (70%/90%)
+ * - Deterministic results with seeded random number generation
+ * - Input validation for all breeding parameters
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. calculateEpigeneticTraits() - Main trait calculation with environmental factors
+ * 2. getTraitDefinition() - Trait metadata retrieval
+ * 3. getTraitsByType() - Trait filtering by positive/negative/all types
+ * 4. checkTraitConflict() - Trait conflict validation
+ * 5. Edge cases: extreme values, empty inputs, invalid parameters
+ * 6. Probability distributions and inheritance patterns
+ * 7. Environmental trait generation under various conditions
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: All trait calculation logic, probability calculations, conflict resolution
+ * ✅ REAL: Environmental factor processing, inheritance algorithms, validation
+ * 🔧 MOCK: None - pure algorithmic testing with deterministic seeded randomness
+ *
+ * 💡 TEST STRATEGY: Pure unit testing with seeded randomness for deterministic
+ *    validation of complex genetic inheritance algorithms and environmental effects
+ */
 
-describe('Trait Calculation System', () => {
+import { calculateEpigeneticTraits, getTraitDefinition, getTraitsByType, checkTraitConflict } from '../utils/epigeneticTraits.js';
+
+describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
   describe('Edge Cases', () => {
     it('should handle extreme bonding values', () => {
       // Test with maximum bonding
@@ -282,6 +316,182 @@ describe('Trait Calculation System', () => {
       }
 
       expect(foundDifference).toBe(true);
+    });
+  });
+
+  describe('getTraitDefinition', () => {
+    it('should return trait definition for valid traits', () => {
+      const resilientDef = getTraitDefinition('resilient');
+
+      expect(resilientDef).toEqual({
+        type: 'positive',
+        rarity: 'common',
+        conflicts: ['fragile']
+      });
+
+      const nervousDef = getTraitDefinition('nervous');
+
+      expect(nervousDef).toEqual({
+        type: 'negative',
+        rarity: 'common',
+        conflicts: ['bold', 'calm']
+      });
+    });
+
+    it('should return null for invalid traits', () => {
+      const invalidDef = getTraitDefinition('nonexistent_trait');
+      expect(invalidDef).toBeNull();
+    });
+
+    it('should return correct definition for rare traits', () => {
+      const legendaryDef = getTraitDefinition('legendary_bloodline');
+
+      expect(legendaryDef).toEqual({
+        type: 'positive',
+        rarity: 'legendary',
+        conflicts: []
+      });
+    });
+  });
+
+  describe('getTraitsByType', () => {
+    it('should return all traits when type is "all"', () => {
+      const allTraits = getTraitsByType('all');
+
+      expect(Array.isArray(allTraits)).toBe(true);
+      expect(allTraits.length).toBeGreaterThan(10);
+      expect(allTraits).toContain('resilient');
+      expect(allTraits).toContain('nervous');
+      expect(allTraits).toContain('legendary_bloodline');
+    });
+
+    it('should return only positive traits when type is "positive"', () => {
+      const positiveTraits = getTraitsByType('positive');
+
+      expect(Array.isArray(positiveTraits)).toBe(true);
+      expect(positiveTraits).toContain('resilient');
+      expect(positiveTraits).toContain('bold');
+      expect(positiveTraits).toContain('intelligent');
+      expect(positiveTraits).not.toContain('nervous');
+      expect(positiveTraits).not.toContain('stubborn');
+    });
+
+    it('should return only negative traits when type is "negative"', () => {
+      const negativeTraits = getTraitsByType('negative');
+
+      expect(Array.isArray(negativeTraits)).toBe(true);
+      expect(negativeTraits).toContain('nervous');
+      expect(negativeTraits).toContain('stubborn');
+      expect(negativeTraits).toContain('fragile');
+      expect(negativeTraits).not.toContain('resilient');
+      expect(negativeTraits).not.toContain('bold');
+    });
+
+    it('should default to "all" when no type specified', () => {
+      const defaultTraits = getTraitsByType();
+      const allTraits = getTraitsByType('all');
+
+      expect(defaultTraits).toEqual(allTraits);
+    });
+  });
+
+  describe('checkTraitConflict', () => {
+    it('should detect conflicts between opposing traits', () => {
+      expect(checkTraitConflict('calm', 'nervous')).toBe(true);
+      expect(checkTraitConflict('nervous', 'calm')).toBe(true);
+      expect(checkTraitConflict('resilient', 'fragile')).toBe(true);
+      expect(checkTraitConflict('bold', 'nervous')).toBe(true);
+    });
+
+    it('should return false for non-conflicting traits', () => {
+      expect(checkTraitConflict('resilient', 'bold')).toBe(false);
+      expect(checkTraitConflict('intelligent', 'athletic')).toBe(false);
+      expect(checkTraitConflict('calm', 'resilient')).toBe(false);
+    });
+
+    it('should return false for unknown traits', () => {
+      expect(checkTraitConflict('unknown_trait', 'resilient')).toBe(false);
+      expect(checkTraitConflict('resilient', 'unknown_trait')).toBe(false);
+      expect(checkTraitConflict('unknown1', 'unknown2')).toBe(false);
+    });
+
+    it('should handle self-comparison correctly', () => {
+      expect(checkTraitConflict('resilient', 'resilient')).toBe(false);
+      expect(checkTraitConflict('nervous', 'nervous')).toBe(false);
+    });
+  });
+
+  describe('Boundary Value Testing', () => {
+    it('should handle bond score boundaries (0, 50, 100)', () => {
+      const testParams = {
+        damTraits: ['resilient'],
+        sireTraits: ['bold'],
+        damStressLevel: 50,
+        seed: 12345
+      };
+
+      // Test boundary values
+      const result0 = calculateEpigeneticTraits({ ...testParams, damBondScore: 0 });
+      const result50 = calculateEpigeneticTraits({ ...testParams, damBondScore: 50 });
+      const result100 = calculateEpigeneticTraits({ ...testParams, damBondScore: 100 });
+
+      // All should return valid results
+      expect(result0).toHaveProperty('positive');
+      expect(result50).toHaveProperty('positive');
+      expect(result100).toHaveProperty('positive');
+    });
+
+    it('should handle stress level boundaries (0, 50, 100)', () => {
+      const testParams = {
+        damTraits: ['resilient'],
+        sireTraits: ['bold'],
+        damBondScore: 50,
+        seed: 12345
+      };
+
+      // Test boundary values
+      const result0 = calculateEpigeneticTraits({ ...testParams, damStressLevel: 0 });
+      const result50 = calculateEpigeneticTraits({ ...testParams, damStressLevel: 50 });
+      const result100 = calculateEpigeneticTraits({ ...testParams, damStressLevel: 100 });
+
+      // All should return valid results
+      expect(result0).toHaveProperty('positive');
+      expect(result50).toHaveProperty('positive');
+      expect(result100).toHaveProperty('positive');
+    });
+
+    it('should reject out-of-bounds values', () => {
+      const baseParams = {
+        damTraits: ['resilient'],
+        sireTraits: ['bold'],
+        seed: 12345
+      };
+
+      // Test out-of-bounds bond scores
+      expect(() => calculateEpigeneticTraits({
+        ...baseParams,
+        damBondScore: -1,
+        damStressLevel: 50
+      })).toThrow('Bond scores must be between 0-100');
+
+      expect(() => calculateEpigeneticTraits({
+        ...baseParams,
+        damBondScore: 101,
+        damStressLevel: 50
+      })).toThrow('Bond scores must be between 0-100');
+
+      // Test out-of-bounds stress levels
+      expect(() => calculateEpigeneticTraits({
+        ...baseParams,
+        damBondScore: 50,
+        damStressLevel: -1
+      })).toThrow('stress levels between 0-100');
+
+      expect(() => calculateEpigeneticTraits({
+        ...baseParams,
+        damBondScore: 50,
+        damStressLevel: 101
+      })).toThrow('stress levels between 0-100');
     });
   });
 });

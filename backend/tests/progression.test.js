@@ -1,9 +1,43 @@
-import { addXpToUser, getUserProgress } from '../controllers/progressionController';
-import * as db from '../models/userModel';
+/**
+ * 🧪 UNIT TEST: Progression Controller - User XP & Level Management
+ *
+ * This test validates the progression controller's functionality for managing
+ * user experience points, level progression, and progress tracking.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - XP earning and accumulation with positive number validation
+ * - Level progression: 100 XP per level with rollover handling
+ * - Multiple level ups from large XP gains (e.g., 130 XP = 2 levels + 30 XP)
+ * - Progress reporting with accurate level and XP calculations
+ * - Error handling for invalid inputs (negative XP, empty user IDs)
+ * - Database error handling with descriptive error messages
+ * - Integration scenarios: training and competition XP workflows
+ * - Edge cases: zero XP, null user IDs, non-existent users
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. addXpToUser() - XP addition with level progression calculations
+ * 2. getUserProgress() - Progress reporting with validation
+ * 3. Input validation for both functions
+ * 4. Database error handling scenarios
+ * 5. Integration workflows for training and competition
+ * 6. Edge cases and boundary conditions
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Controller logic, XP calculations, level progression, validation rules
+ * ✅ REAL: Error handling, input processing, business rule enforcement
+ * 🔧 MOCK: User model database operations - external dependency
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked user model to focus on progression
+ *    business logic while ensuring predictable test outcomes for XP calculations
+ */
 
-jest.mock('../models/userModel');
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { addXpToUser, getUserProgress } from '../controllers/progressionController.js';
+import * as db from '../models/userModel.js';
 
-describe('User Progression System', () => {
+jest.mock('../models/userModel.js');
+
+describe('📈 UNIT: Progression Controller - User XP & Level Management', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

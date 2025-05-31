@@ -1,3 +1,33 @@
+/**
+ * 🧪 UNIT TEST: Horse Model - Discipline Score Management
+ *
+ * This test validates the horse model's discipline score tracking functionality,
+ * focusing on the business logic for updating and retrieving training scores.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Discipline scores are stored as JSON objects on horse records
+ * - Scores can be added incrementally (cumulative training progress)
+ * - Multiple disciplines can be tracked independently per horse
+ * - Invalid inputs (negative scores, invalid IDs) are properly rejected
+ * - Non-existent horses are handled gracefully with appropriate errors
+ * - Score retrieval returns empty object for horses with no training history
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. updateDisciplineScore() - Adding and updating training scores
+ * 2. getDisciplineScores() - Retrieving current training progress
+ * 3. createHorse() - Basic horse creation for test setup
+ * 4. Input validation and error handling for all operations
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Business logic for score calculations, validation, error handling
+ * ✅ REAL: JSON manipulation, data transformation, input validation
+ * 🔧 MOCK: Database operations (Prisma calls) - external dependency
+ * 🔧 MOCK: Logger calls - external dependency for error reporting
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked database to focus on business logic
+ *    validation while avoiding database complexity and ensuring fast execution
+ */
+
 import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -5,7 +35,7 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Mock the modules BEFORE importing the module under test
+// Mock external dependencies BEFORE importing the module under test
 jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: {
     horse: {
@@ -23,12 +53,12 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
   }
 }));
 
-// Now import the module under test and the mocks
+// Import the module under test and mocked dependencies
 const { createHorse, updateDisciplineScore, getDisciplineScores } = await import(join(__dirname, '../models/horseModel.js'));
 const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
 const mockLogger = (await import(join(__dirname, '../utils/logger.js'))).default;
 
-describe('horseModel - Additional Tests', () => {
+describe('🐎 UNIT: Horse Model - Discipline Score Management', () => {
   beforeEach(() => {
     mockPrisma.horse.create.mockClear();
     mockPrisma.horse.findUnique.mockClear();
