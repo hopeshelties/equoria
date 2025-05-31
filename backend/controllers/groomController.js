@@ -6,7 +6,6 @@
 import {
   assignGroomToFoal,
   ensureDefaultGroomAssignment,
-  getOrCreateDefaultGroom,
   calculateGroomInteractionEffects,
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
@@ -419,7 +418,7 @@ export async function hireGroom(req, res) {
  * GET /api/grooms/definitions
  * Get groom system definitions (specialties, skill levels, personalities)
  */
-export async function getGroomDefinitions(req, res) {
+export async function getGroomDefinitions(_req, res) {
   try {
     logger.info('[groomController.getGroomDefinitions] Getting groom system definitions');
 

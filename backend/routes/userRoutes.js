@@ -5,7 +5,8 @@
 
 import express from 'express';
 import { param, validationResult } from 'express-validator';
-import { getUserProgress, getDashboardData } from '../controllers/userController.js'; // Updated import
+import { getUserProgressAPI, getDashboardData } from '../controllers/userController.js'; // Updated import
+import { authenticateToken } from '../middleware/auth.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -15,8 +16,8 @@ const router = express.Router();
  */
 const validateUserId = [
   param('id') // For /:id/progress route
-    .isInt({ min: 1 })
-    .withMessage('User ID must be a positive integer')
+    .isUUID()
+    .withMessage('User ID must be a valid UUID')
     .notEmpty()
     .withMessage('User ID is required'),
 
@@ -36,8 +37,8 @@ const validateUserId = [
 
 const validateDashboardUserId = [
   param('userId') // For /dashboard/:userId route
-    .isInt({ min: 1 })
-    .withMessage('User ID must be a positive integer')
+    .isUUID()
+    .withMessage('User ID must be a valid UUID')
     .notEmpty()
     .withMessage('User ID is required'),
 
@@ -107,7 +108,7 @@ const validateDashboardUserId = [
  *       500:
  *         description: Internal server error
  */
-router.get('/:id/progress', validateUserId, getUserProgress);
+router.get('/:id/progress', authenticateToken, validateUserId, getUserProgressAPI);
 
 /**
  * @swagger
@@ -206,6 +207,6 @@ router.get('/:id/progress', validateUserId, getUserProgress);
  *       500:
  *         description: Internal server error
  */
-router.get('/dashboard/:userId', validateDashboardUserId, getDashboardData);
+router.get('/dashboard/:userId', authenticateToken, validateDashboardUserId, getDashboardData);
 
 export default router;

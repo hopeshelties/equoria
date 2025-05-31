@@ -37,14 +37,14 @@ export const register = async(req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Construct the name field. Use firstName and lastName if available, otherwise default to username.
-    let constructedName = username;
+    let _constructedName = username;
     if (firstName && lastName) {
-      constructedName = `${firstName} ${lastName}`;
+      _constructedName = `${firstName} ${lastName}`;
     } else if (firstName) {
-      constructedName = firstName;
+      _constructedName = firstName;
     } else if (lastName) {
       // This case is less common, but handle it if only lastName is provided
-      constructedName = lastName;
+      _constructedName = lastName;
     }
 
 

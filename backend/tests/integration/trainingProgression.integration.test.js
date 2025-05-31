@@ -1,23 +1,32 @@
 /**
- * INTEGRATION TEST: Complete Training Progression Workflow
+ * 🧪 INTEGRATION TEST: Complete Training Progression Workflow
  *
  * This test validates the ENTIRE training progression from young horse
  * to competition-ready athlete, following balanced mocking principles.
  *
- * WORKFLOW TESTED:
+ * 📋 BUSINESS RULES TESTED:
+ * - Horses must be 3+ years old to train
+ * - ONE training session per week total (any discipline) - 7-day cooldown
+ * - Horses can change disciplines week-to-week but NOT within same week
+ * - Training awards +5 discipline score and +5 XP to user
+ * - Multi-discipline progression happens over multiple weeks (not same week)
+ *
+ * 🎯 WORKFLOW TESTED:
  * 1. Horse Maturation (Age Progression)
  * 2. First Training Session (Age Validation)
- * 3. Discipline Specialization
- * 4. Training Cooldown Management
- * 5. XP & Progression Tracking
- * 6. Competition Readiness
+ * 3. Weekly Training Cooldown Management
+ * 4. XP & Progression Tracking
+ * 5. Competition Readiness
  *
- * MOCKING STRATEGY (Balanced Approach):
- * ✅ REAL: Database operations, business logic, training calculations, XP system
- * 🔧 MOCK: Only Date.now() for time-based testing (cooldowns)
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Database operations, business logic, training calculations, XP system, cooldown enforcement
+ * 🔧 MOCK: Only timestamp manipulation for simulating weekly progression (minimal, realistic)
+ *
+ * 💡 TEST STRATEGY: Use test data manipulation to simulate weekly time passage rather than
+ *    complex time mocking, ensuring we test real business logic with realistic scenarios
  */
 
-import { jest, describe, beforeAll, afterAll, expect, it } from '@jest/globals';
+import { describe, beforeAll, afterAll, expect, it } from '@jest/globals';
 import request from 'supertest';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -76,7 +85,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
         where: { email: 'training-integration@example.com' }
       });
     } catch (error) {
-      console.warn('Cleanup warning (can be ignored):', error.message);
+      // Cleanup warning can be ignored
     }
   }
 
@@ -277,22 +286,82 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
       expect(unchangedHorse.disciplineScores.Dressage).toBeUndefined();
     });
 
-    it.skip('should allow training after cooldown expires (requires proper time mocking)', async() => {
-      // NOTE: This test requires proper Date.now mocking that affects the training system
-      // The cooldown system is working correctly - this test validates the time progression logic
-      // Skip for now to focus on other integration tests
+    it('should allow training after cooldown expires (using test data manipulation)', async() => {
+      // BALANCED MOCKING APPROACH: Test real business logic with realistic test data
+      // Instead of mocking time, we manipulate training log timestamps to simulate time passage
+
+      // STEP 1: Get the existing training log from the first training session
+      const existingTrainingLog = await prisma.trainingLog.findFirst({
+        where: { horseId: matureHorse.id },
+        orderBy: { trainedAt: 'desc' }
+      });
+
+      expect(existingTrainingLog).toBeTruthy();
+      expect(existingTrainingLog.discipline).toBe('Racing');
+
+      // STEP 2: Verify horse is currently in cooldown (real business logic test)
+      const cooldownResponse = await request(app)
+        .post('/api/training/train')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          horseId: matureHorse.id,
+          discipline: 'Dressage'
+        })
+        .expect(400);
+
+      expect(cooldownResponse.body.success).toBe(false);
+      expect(cooldownResponse.body.message).toContain('cooldown');
+
+      // STEP 3: Simulate time passage by updating training log timestamp (8 days ago)
+      // This tests the real cooldown calculation logic with realistic data
+      const eightDaysAgo = new Date();
+      eightDaysAgo.setDate(eightDaysAgo.getDate() - 8);
+
+      await prisma.trainingLog.update({
+        where: { id: existingTrainingLog.id },
+        data: { trainedAt: eightDaysAgo }
+      });
+
+      // STEP 4: Verify training is now allowed (real business logic validation)
+      const successResponse = await request(app)
+        .post('/api/training/train')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          horseId: matureHorse.id,
+          discipline: 'Dressage'
+        })
+        .expect(200);
+
+      expect(successResponse.body.success).toBe(true);
+      expect(successResponse.body.message).toContain('trained in Dressage');
+
+      // STEP 5: Verify real database changes occurred
+      const updatedHorse = await prisma.horse.findUnique({
+        where: { id: matureHorse.id }
+      });
+      expect(updatedHorse.disciplineScores.Dressage).toBeGreaterThanOrEqual(5);
+
+      // STEP 6: Verify training log was created with real timestamp
+      const dressageLog = await prisma.trainingLog.findFirst({
+        where: {
+          horseId: matureHorse.id,
+          discipline: 'Dressage'
+        }
+      });
+      expect(dressageLog).toBeTruthy();
+      expect(dressageLog.trainedAt).toBeInstanceOf(Date);
+
+      // STEP 7: Verify XP was awarded (real progression system test)
+      const finalUser = await prisma.user.findUnique({
+        where: { id: testUser.id }
+      });
+      expect(finalUser.xp).toBeGreaterThan(5); // Should have XP from both training sessions
     });
   });
 
-  describe('📈 STEP 6: Discipline Specialization', () => {
-    it.skip('should build expertise in multiple disciplines over time (requires proper time mocking)', async() => {
-      // NOTE: This test requires proper time mocking to bypass cooldown periods
-      // The training system is working correctly - cooldown prevents rapid successive training
-      // Skip for now to focus on other integration tests
-    });
-  });
 
-  describe('🎯 STEP 7: User Progression Tracking', () => {
+
+  describe('🎯 STEP 6: User Progression Tracking', () => {
     it('should track user XP and level progression from training', async() => {
       const finalUser = await prisma.user.findUnique({
         where: { id: testUser.id }
@@ -317,7 +386,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
     });
   });
 
-  describe('🏆 STEP 8: Competition Readiness Validation', () => {
+  describe('🏆 STEP 7: Competition Readiness Validation', () => {
     it('should validate horse is ready for competition', async() => {
       const competitionReadyHorse = await prisma.horse.findUnique({
         where: { id: matureHorse.id },
@@ -345,7 +414,7 @@ describe('🏋️ INTEGRATION: Complete Training Progression Workflow', () => {
     });
   });
 
-  describe('🎊 STEP 9: End-to-End Workflow Validation', () => {
+  describe('🎊 STEP 8: End-to-End Workflow Validation', () => {
     it('should validate complete training progression integrity', async() => {
       // VERIFY: Complete training progression from young to competition-ready
       const youngHorseCheck = await prisma.horse.findUnique({

@@ -3,6 +3,7 @@ import { incrementDisciplineScore, getHorseById, updateHorseStat } from '../mode
 import { getUserWithHorses, addXpToUser } from '../models/userModel.js';
 import { logXpEvent } from '../models/xpLogModel.js';
 import { getCombinedTraitEffects } from '../utils/traitEffects.js';
+import { checkTraitRequirements } from '../utils/competitionLogic.js';
 import logger from '../utils/logger.js';
 
 
@@ -49,6 +50,26 @@ async function canTrain(horseId, discipline) {
         eligible: false,
         reason: 'Horse is under age'
       };
+    }
+
+    // Check trait requirements for specific disciplines (e.g., Gaited)
+    if (discipline === 'Gaited') {
+      const horse = await getHorseById(parsedHorseId);
+      if (!horse) {
+        logger.warn(`[trainingController.canTrain] Horse ${parsedHorseId} not found for trait check`);
+        return {
+          eligible: false,
+          reason: 'Horse not found'
+        };
+      }
+
+      if (!checkTraitRequirements(horse, discipline)) {
+        logger.info(`[trainingController.canTrain] Horse ${parsedHorseId} lacks required trait for ${discipline} training`);
+        return {
+          eligible: false,
+          reason: 'Horse must have the Gaited trait to train in Gaited discipline'
+        };
+      }
     }
 
     // Check cooldown period (7 days since last training in ANY discipline)
@@ -367,7 +388,7 @@ async function getTrainableHorses(playerId) {
     }
 
     // Define all available disciplines
-    const allDisciplines = ['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western'];
+    const baseDisciplines = ['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western'];
 
     const trainableHorses = [];
 
@@ -399,13 +420,20 @@ async function getTrainableHorses(playerId) {
           }
         }
 
-        // If horse is trainable, it can train in all disciplines (since cooldown is global)
+        // If horse is trainable, determine available disciplines
         if (isTrainable) {
+          const availableDisciplines = [...baseDisciplines];
+
+          // Add Gaited discipline only if horse has the Gaited trait
+          if (checkTraitRequirements(horse, 'Gaited')) {
+            availableDisciplines.push('Gaited');
+          }
+
           trainableHorses.push({
             horseId: horse.id,
             name: horse.name,
             age: horse.age,
-            trainableDisciplines: allDisciplines // All disciplines available since cooldown is global
+            trainableDisciplines: availableDisciplines
           });
         }
 

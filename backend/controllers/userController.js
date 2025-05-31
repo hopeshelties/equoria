@@ -1,67 +1,108 @@
 /**
- * User Controller
- * Handles user-related API endpoints including progress tracking and dashboard
+ * 🎯 USER CONTROLLER - Comprehensive User Progress & Dashboard Management
+ *
+ * This controller handles all user-related API endpoints with focus on progress tracking,
+ * level progression, and dashboard functionality integration.
+ *
+ * 📋 FEATURES PROVIDED:
+ * - Complete user progress tracking with XP, levels, and progress percentages
+ * - Consistent XP calculation using userModel.getUserProgress() for accuracy
+ * - Comprehensive dashboard data including horses, shows, and activity
+ * - Proper error handling and validation for all endpoints
+ * - Integration with training system and XP progression
+ *
+ * 🔧 TECHNICAL APPROACH:
+ * - Uses userModel.getUserProgress() for consistent XP threshold calculations
+ * - Calculates progress percentage within current level (0-100%)
+ * - Provides detailed progress data for frontend progress bars and UI
+ * - Integrates with authentication middleware for secure access
+ * - Follows RESTful API patterns with proper HTTP status codes
+ *
+ * 🎮 BUSINESS LOGIC:
+ * - Level progression: 100 XP per level (Level 1: 0 XP, Level 2: 100 XP, etc.)
+ * - Progress percentage: (current level progress / XP needed for next level) * 100
+ * - Dashboard aggregates: horse counts, training status, show participation
+ * - Activity tracking: last training, last competition placement
+ *
+ * ✅ QUALITY STANDARDS:
+ * - Comprehensive error handling with proper HTTP status codes
+ * - Detailed logging for debugging and monitoring
+ * - Input validation and sanitization
+ * - Consistent response format across all endpoints
  */
 
 import { getTrainableHorses } from '../controllers/trainingController.js';
+import { getUserProgress } from '../models/userModel.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
 import AppError from '../errors/AppError.js';
 
 /**
- * Get user progress information
- * Returns current level, XP, and XP needed to reach next level
+ * Get comprehensive user progress information
+ * Returns detailed progress data including level, XP, progress percentage, and thresholds
  *
  * @route GET /user/:id/progress
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next middleware function
  */
-export const getUserProgress = async(req, res, next) => {
+export const getUserProgressAPI = async(req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = parseInt(id, 10);
+    const userId = id; // UUID string, no parsing needed
 
-    if (isNaN(userId)) {
-      logger.warn(`[userController.getUserProgress] Invalid user ID format: ${id}`);
-      return next(new AppError('Invalid user ID format', 400));
+    if (!userId) {
+      logger.warn(`[userController.getUserProgressAPI] Missing user ID: ${id}`);
+      return next(new AppError('User ID is required', 400));
     }
 
-    logger.info(`[userController.getUserProgress] Getting progress for user ${userId}`);
+    logger.info(`[userController.getUserProgressAPI] Getting comprehensive progress for user ${userId}`);
 
+    // Use userModel.getUserProgress for consistent XP calculations
+    const progressData = await getUserProgress(userId);
+
+    // Get additional user data for complete response
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, level: true, xp: true }
+      select: { id: true, username: true, money: true }
     });
 
     if (!user) {
-      logger.warn(`[userController.getUserProgress] User ${userId} not found`);
+      logger.warn(`[userController.getUserProgressAPI] User ${userId} not found`);
       return next(new AppError('User not found', 404));
     }
 
-    // Calculate XP needed to reach next level
-    // Formula: xpToNextLevel = 100 - (user.xp % 100)
-    const xpToNextLevel = 100 - (user.xp % 100);
+    // Calculate progress percentage within current level
+    // Level thresholds: Level 1=0, Level 2=200, Level 3=300, Level 4=400, Level 5=500
+    // Level 1: 0-199 XP (200 XP range), Level 2+: 100 XP ranges each
+    const xpForCurrentLevel = progressData.level === 1 ? 0 : progressData.level * 100;
+    const xpProgressInLevel = progressData.xp - xpForCurrentLevel;
+    const xpNeededForLevel = progressData.level === 1 ? 200 : 100; // Level 1: 200 XP, others: 100 XP
+    const progressPercentage = Math.round((xpProgressInLevel / xpNeededForLevel) * 100);
 
-    // Prepare response data
-    const progressData = {
+    // Prepare comprehensive response data
+    const completeProgressData = {
       userId: user.id,
-      name: user.name,
-      level: user.level,
-      xp: user.xp,
-      xpToNextLevel
+      username: user.username,
+      level: progressData.level,
+      xp: progressData.xp,
+      xpToNextLevel: progressData.xpToNextLevel,
+      xpForNextLevel: progressData.xpForNextLevel,
+      xpForCurrentLevel,
+      progressPercentage: Math.max(0, Math.min(100, progressPercentage)),
+      totalEarnings: user.money
     };
 
-    logger.info(`[userController.getUserProgress] Successfully retrieved progress for user ${user.name} (Level ${user.level}, XP: ${user.xp}/${user.xp + xpToNextLevel})`);
+    logger.info(`[userController.getUserProgressAPI] Successfully retrieved progress for user ${user.username} (Level ${progressData.level}, XP: ${progressData.xp}/${progressData.xpForNextLevel}, ${progressPercentage}% progress)`);
 
     res.json({
       success: true,
       message: 'User progress retrieved successfully',
-      data: progressData
+      data: completeProgressData
     });
 
   } catch (error) {
-    logger.error(`[userController.getUserProgress] Error getting user progress: ${error.message}`);
+    logger.error(`[userController.getUserProgressAPI] Error getting user progress: ${error.message}`);
     next(error); // Pass to global error handler
   }
 };
@@ -76,18 +117,17 @@ export const getUserProgress = async(req, res, next) => {
  * @param {Function} next - Express next middleware function
  */
 export const getDashboardData = async(req, res, next) => {
-  const { userId: userIdParam } = req.params;
-  const userId = parseInt(userIdParam, 10);
+  const { userId } = req.params; // UUID string, no parsing needed
 
-  if (isNaN(userId)) {
-    logger.warn(`[userController.getDashboardData] Invalid user ID format: ${userIdParam}`);
-    return next(new AppError('Invalid user ID format', 400));
+  if (!userId) {
+    logger.warn(`[userController.getDashboardData] Missing user ID: ${userId}`);
+    return next(new AppError('User ID is required', 400));
   }
 
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, level: true, xp: true, money: true }
+      select: { id: true, username: true, level: true, xp: true, money: true }
     });
 
     if (!user) {
@@ -104,7 +144,7 @@ export const getDashboardData = async(req, res, next) => {
     let trainableHorsesCount = 0;
     try {
       const trainableHorsesResult = await getTrainableHorses(userId);
-      trainableHorsesCount = trainableHorsesResult.length;
+      trainableHorsesCount = Array.isArray(trainableHorsesResult) ? trainableHorsesResult.length : 0;
     } catch (error) {
       logger.error(`[userController.getDashboardData] Error getting trainable horses for user ${userId}: ${error.message}`, { error });
       // Not critical, proceed with 0, but log error.
@@ -191,7 +231,7 @@ export const getDashboardData = async(req, res, next) => {
     const dashboardData = {
       user: {
         id: user.id,
-        name: user.name,
+        username: user.username,
         level: user.level,
         xp: user.xp,
         money: user.money

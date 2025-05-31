@@ -6,10 +6,12 @@
   "scripts": {
     "test-backend": "cd backend && npm test",
     "lint-backend": "cd backend && npm run lint",
-    "lint-fix-backend": "cd backend && npm run lint:fix",
+    "lint:fix-backend": "cd backend && npm run lint:fix",
     "format-backend": "cd backend && npm run format",
     "dev-backend": "cd backend && npm run dev",
-    "start-backend": "cd backend && npm run start"
+    "start-backend": "cd backend && npm run start",
+    "lint": "cd backend && npm run lint",
+    "lint:fix": "cd backend && npm run lint:fix"
   },
   "keywords": [
     "equoria",
