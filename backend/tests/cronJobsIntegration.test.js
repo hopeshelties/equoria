@@ -1,4 +1,42 @@
-import { jest, describe, beforeEach, afterEach, expect, it, beforeAll, afterAll } from '@jest/globals';
+/**
+ * 🧪 INTEGRATION TEST: Cron Jobs System - Automated Trait Evaluation & Admin API
+ *
+ * This test validates the cron job system for automated foal trait evaluation
+ * and related admin API endpoints with comprehensive mocking strategy.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Daily trait evaluation: Automated foal trait discovery based on environmental factors
+ * - Bond score effects: High bonding increases positive trait probability
+ * - Stress level effects: High stress increases negative trait probability
+ * - Development completion: Foals with completed development (age 1+) not re-evaluated
+ * - Trait uniqueness: No duplicate traits generated during evaluation
+ * - Multiple foal handling: Batch processing of multiple foals in single evaluation
+ * - Admin API endpoints: Status checking, manual triggers, foal listing, trait definitions
+ * - Error handling: Graceful handling of database errors and missing data
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. evaluateDailyFoalTraits() - Automated trait evaluation for foals in development
+ * 2. Admin API endpoints: /api/admin/cron/status, /api/admin/traits/evaluate
+ * 3. Foal development tracking: /api/admin/foals/development
+ * 4. Trait definitions API: /api/admin/traits/definitions
+ * 5. Service control: /api/admin/cron/start, /api/admin/cron/stop
+ * 6. Error scenarios: Database failures, missing fields, invalid data
+ * 7. Environmental factor processing: Bond scores and stress levels affecting outcomes
+ * 8. Batch processing: Multiple foals evaluated in single cron run
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ⚠️  HEAVY MOCKING: Database operations, cron service, external dependencies
+ * ✅ REAL: HTTP request handling, API response validation, data structure validation
+ * 🔧 MOCK: Prisma database operations, cron job service, trait evaluation algorithms
+ *
+ * 💡 TEST STRATEGY: Integration testing with extensive mocking to validate
+ *    cron job workflows and admin API functionality without external dependencies
+ *
+ * ⚠️  NOTE: This test uses heavy mocking which may not reflect real-world behavior.
+ *    Consider adding integration tests with real database for more realistic validation.
+ */
+
+import { jest, describe, beforeEach, expect, it, beforeAll } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import request from 'supertest';
@@ -50,7 +88,7 @@ const app = (await import('../app.js')).default;
 const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
 const mockCronJobService = (await import(join(__dirname, '../services/cronJobs.js'))).default;
 
-describe('Cron Jobs Integration Tests', () => {
+describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin API', () => {
   let testBreed;
   let testFoals = [];
 

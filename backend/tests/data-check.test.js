@@ -1,6 +1,45 @@
+/**
+ * 🧪 INTEGRATION TEST: Database Data Check - Live Data Validation & Debugging
+ *
+ * This test validates the current state of the database by checking actual data
+ * and relationships to help with debugging and data integrity verification.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - User data integrity: All users have required fields (id, email, username)
+ * - User profile completeness: firstName, lastName, role, money, level, xp fields
+ * - Horse ownership relationships: Horses properly linked to users via userId
+ * - Database schema consistency: Field names and data types match expectations
+ * - Data existence validation: Graceful handling of empty tables
+ * - Relationship integrity: User-horse relationships properly established
+ * - Field accessibility: All expected fields can be queried without errors
+ * - Data structure validation: Objects have expected properties and types
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. User table data validation - Basic user information and structure
+ * 2. User profile completeness - Full user data including game progression
+ * 3. Horse-user relationships - Ownership links and data integrity
+ * 4. Database connectivity - Live database query execution
+ * 5. Schema validation - Field existence and accessibility
+ * 6. Empty table handling - Graceful behavior with no data
+ * 7. Data logging - Console output for debugging and verification
+ * 8. Relationship queries - Include statements and nested data access
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete database operations, live data queries, relationship validation
+ * ✅ REAL: Schema verification, data integrity checks, actual database state
+ * 🔧 MOCK: None - full integration testing with live database for debugging
+ *
+ * 💡 TEST STRATEGY: Live database validation for debugging and data integrity
+ *    verification with console logging to help identify data issues
+ *
+ * ⚠️  NOTE: This test uses console.log for debugging purposes and queries live data.
+ *    Console warnings are expected and intentional for data inspection.
+ */
+
+import { jest, describe, it, expect, afterAll } from '@jest/globals';
 import prisma from '../db/index.js';
 
-describe('Database Data Check', () => {
+describe('🔍 INTEGRATION: Database Data Check - Live Data Validation & Debugging', () => {
   afterAll(async() => {
     await prisma.$disconnect();
   });

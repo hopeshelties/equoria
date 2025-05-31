@@ -1,6 +1,41 @@
+/**
+ * 🧪 UNIT TEST: Competition Trait Match Fairness - Statistical Validation
+ *
+ * This test validates the fairness and statistical consistency of trait-based
+ * competition advantages across multiple disciplines with large sample testing.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Discipline affinity trait bonuses: +5 score advantage for matching traits
+ * - Statistical fairness: trait advantage should be meaningful but not overpowering
+ * - Win rate expectations: 55-75% for trait-matched horses (better than random, not dominant)
+ * - Cross-discipline consistency: trait advantages work equally across all disciplines
+ * - Random variance handling: large sample sizes reduce statistical noise
+ * - Competition simulation accuracy: realistic outcomes with trait modifiers
+ * - Trait naming conventions: discipline_affinity_[discipline_name] format
+ * - Multiple run validation: consistent results across repeated test batches
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. Show Jumping trait advantage validation (60 runs across 3 batches)
+ * 2. Racing trait advantage validation (60 runs across 3 batches)
+ * 3. Dressage trait advantage validation (60 runs across 3 batches)
+ * 4. Cross Country trait advantage validation (60 runs across 3 batches)
+ * 5. Large sample consistency testing (100 runs for statistical reliability)
+ * 6. Win rate boundaries: >50% but <85% for balanced gameplay
+ * 7. Statistical variance: trait advantage consistent across multiple batches
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete competition simulation, trait calculations, randomness, scoring
+ * ✅ REAL: Statistical analysis, win rate calculations, batch processing, variance testing
+ * 🔧 MOCK: None - pure algorithmic testing with no external dependencies
+ *
+ * 💡 TEST STRATEGY: Statistical validation with large sample sizes to ensure
+ *    trait advantages provide meaningful but balanced competitive benefits
+ */
+
+import { jest, describe, it, expect } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
-describe('TASK 10: Competition Trait Match Fairness Tests', () => {
+describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation', () => {
 
   const createTestHorse = (id, name, overrides = {}) => ({
     id,
@@ -17,12 +52,12 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       bridleBonus: 3
     },
     health: 'Good',
-    stress_level: 20,
+    stressLevel: 20,
     rider: {
       bonusPercent: 0,
       penaltyPercent: 0
     },
-    epigenetic_modifiers: {
+    epigeneticModifiers: {
       positive: [],
       negative: [],
       hidden: []
@@ -52,14 +87,14 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       for (let i = 0; i < runsPerBatch; i++) {
         const horses = [
           createTestHorse(1, 'JumpSpecialist', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: ['discipline_affinity_show_jumping'], // Matches event discipline
               negative: [],
               hidden: []
             }
           }),
           createTestHorse(2, 'RegularHorse', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
               hidden: []
@@ -102,14 +137,14 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       for (let i = 0; i < runsPerBatch; i++) {
         const horses = [
           createTestHorse(1, 'RacingSpecialist', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: ['discipline_affinity_racing'], // Matches event discipline
               negative: [],
               hidden: []
             }
           }),
           createTestHorse(2, 'RegularHorse', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
               hidden: []
@@ -150,14 +185,14 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       for (let i = 0; i < runsPerBatch; i++) {
         const horses = [
           createTestHorse(1, 'DressageSpecialist', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: ['discipline_affinity_dressage'], // Matches event discipline
               negative: [],
               hidden: []
             }
           }),
           createTestHorse(2, 'RegularHorse', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
               hidden: []
@@ -198,14 +233,14 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
       for (let i = 0; i < runsPerBatch; i++) {
         const horses = [
           createTestHorse(1, 'CrossCountrySpecialist', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: ['discipline_affinity_cross_country'], // Matches event discipline
               negative: [],
               hidden: []
             }
           }),
           createTestHorse(2, 'RegularHorse', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
               hidden: []
@@ -242,14 +277,14 @@ describe('TASK 10: Competition Trait Match Fairness Tests', () => {
     for (let i = 0; i < totalRuns; i++) {
       const horses = [
         createTestHorse(1, 'JumpSpecialist', {
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: ['discipline_affinity_show_jumping'],
             negative: [],
             hidden: []
           }
         }),
         createTestHorse(2, 'RegularHorse', {
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []

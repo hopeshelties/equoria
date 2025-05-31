@@ -1,20 +1,41 @@
 /**
- * Training System Business Logic Tests
+ * 🧪 INTEGRATION TEST: Training System - Complete Business Logic Validation
  *
- * These tests validate business requirements rather than implementation details.
- * They test actual outcomes, stat changes, database updates, and game state.
+ * This test validates the complete training system business logic with real
+ * database operations and comprehensive workflow testing.
  *
- * Business Requirements Being Tested:
- * 1. Horses must be 3+ years old to train
- * 2. Training increases discipline scores by +5 (+ trait effects)
- * 3. Only one discipline per week (global 7-day cooldown)
- * 4. Training awards XP to horse owners
- * 5. Training logs are created for cooldown tracking
- * 6. Trait effects modify training outcomes
- * 7. Age validation prevents training of young horses
- * 8. Stat gains occur randomly during training (15% base chance)
+ * 📋 BUSINESS RULES TESTED:
+ * - Age requirements: Horses must be 3+ years old to train
+ * - Discipline score progression: +5 base increase (+ trait effects)
+ * - Global training cooldown: Only one discipline per week (7-day cooldown)
+ * - XP reward system: Training awards XP to horse owners
+ * - Training log creation: Cooldown tracking and history
+ * - Trait effect integration: Trait bonuses modify training outcomes
+ * - Age validation enforcement: Young horses blocked from training
+ * - Random stat gains: 15% base chance for additional stat increases
+ * - Database integrity: All changes properly persisted and validated
+ * - Error handling: Proper responses for invalid training attempts
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. POST /api/training/train - Complete training workflow with validation
+ * 2. Age requirement enforcement (3+ years old)
+ * 3. Discipline score progression and accumulation
+ * 4. Global cooldown system (7-day restriction)
+ * 5. XP award system for successful training
+ * 6. Training log creation and tracking
+ * 7. Database state validation after training
+ * 8. Error scenarios and edge cases
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete training workflow, database operations, business logic
+ * ✅ REAL: Age validation, cooldown checking, XP calculations, score updates
+ * 🔧 MOCK: None - full integration testing with real database and HTTP requests
+ *
+ * 💡 TEST STRATEGY: Complete integration testing with real database to validate
+ *    entire training system workflow and ensure business requirements work correctly
  */
 
+import { jest, describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import request from 'supertest';
@@ -30,7 +51,7 @@ dotenv.config({ path: join(__dirname, '../.env.test') });
 const app = (await import('../app.js')).default;
 const { default: prisma } = await import(join(__dirname, '../db/index.js'));
 
-describe('Training System Business Logic Tests', () => {
+describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validation', () => {
   let testUser;
   let testPlayer;
   let adultHorse; // 3+ years old, eligible for training
@@ -102,14 +123,13 @@ describe('Training System Business Logic Tests', () => {
       });
     }
 
-    // Create test horses with BOTH User and Player relationships
+    // Create test horses with User relationships
     adultHorse = await prisma.horse.create({
       data: {
         name: 'Test Adult Horse',
         age: 4, // Eligible for training
         breedId: breed.id,
-        ownerId: testUser.id,        // Legacy User relationship
-        userId: testPlayer.id,       // Modern User relationship (for XP)
+        userId: testPlayer.id,       // User relationship (for XP and ownership)
         sex: 'Mare',
         dateOfBirth: new Date('2020-01-01'),
         healthStatus: 'Excellent',
@@ -127,7 +147,6 @@ describe('Training System Business Logic Tests', () => {
         name: 'Test Young Horse',
         age: 2, // Too young for training
         breedId: breed.id,
-        ownerId: testUser.id,
         userId: testPlayer.id,
         sex: 'Colt',
         dateOfBirth: new Date('2022-01-01'),
@@ -146,7 +165,6 @@ describe('Training System Business Logic Tests', () => {
         name: 'Test Trained Horse',
         age: 5,
         breedId: breed.id,
-        ownerId: testUser.id,
         userId: testPlayer.id,
         sex: 'Stallion',
         dateOfBirth: new Date('2019-01-01'),

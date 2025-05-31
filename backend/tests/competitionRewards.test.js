@@ -1,4 +1,39 @@
 
+/**
+ * 🧪 UNIT TEST: Competition Rewards System - Prize & Stat Gain Calculations
+ *
+ * This test validates the competition rewards system including prize distribution,
+ * stat gain calculations, and rider validation functionality.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Prize distribution: 50%/30%/20% split for 1st/2nd/3rd place
+ * - Stat gain chances: 10%/5%/3% for 1st/2nd/3rd place respectively
+ * - Discipline-specific stat targeting: Each discipline has 3 relevant stats
+ * - Random stat selection: Gains applied to discipline-relevant stats only
+ * - Entry fee calculations: Total fees = entry fee × number of entries
+ * - Rider validation: Horses must have valid rider objects for competition
+ * - Prize rounding: Proper handling of odd prize amounts
+ * - Edge cases: Zero prizes, zero entries, invalid placements
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. calculatePrizeDistribution() - Prize money allocation across top 3 places
+ * 2. getRelevantStats() - Discipline-specific stat mapping for 12+ disciplines
+ * 3. calculateStatGains() - Random stat increases based on placement probability
+ * 4. calculateEntryFees() - Total entry fee calculations for competitions
+ * 5. hasValidRider() - Rider object validation for competition eligibility
+ * 6. Edge case handling: Zero values, invalid inputs, boundary conditions
+ * 7. Random number mocking: Predictable testing of probability-based features
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Prize calculations, stat mappings, fee calculations, validation logic
+ * ✅ REAL: Business rule enforcement, edge case handling, data structure validation
+ * 🔧 MOCK: Math.random() only - for predictable testing of probability features
+ *
+ * 💡 TEST STRATEGY: Pure unit testing with minimal mocking to validate
+ *    mathematical calculations and business logic accuracy
+ */
+
+import { jest, describe, it, expect, afterEach } from '@jest/globals';
 import {
   calculatePrizeDistribution,
   getRelevantStats,
@@ -7,7 +42,7 @@ import {
   hasValidRider
 } from '../utils/competitionRewards.js';
 
-describe('Competition Rewards System', () => {
+describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations', () => {
 
   describe('calculatePrizeDistribution', () => {
     it('should calculate correct prize distribution for 1000 prize pool', () => {
@@ -222,14 +257,15 @@ describe('Competition Rewards System', () => {
       expect(hasValidRider(horse)).toBe(false);
     });
 
-    it('should return false for horse with empty object rider', () => {
+    it('should return true for horse with empty object rider', () => {
       const horse = {
         id: 1,
         name: 'TestHorse',
         rider: {}
       };
 
-      expect(hasValidRider(horse)).toBe(true); // Empty object is still an object
+      // Empty object is still a valid object - business logic may allow this
+      expect(hasValidRider(horse)).toBe(true);
     });
   });
 });

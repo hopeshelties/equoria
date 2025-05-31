@@ -1,10 +1,47 @@
+/**
+ * 🧪 INTEGRATION TEST: Authentication System - User Registration & Session Management
+ *
+ * This test validates the complete authentication system including user registration,
+ * login, token management, and session handling with real database operations.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - User registration with email/username uniqueness validation
+ * - Password strength requirements: minimum 8 characters
+ * - Email format validation: proper email structure required
+ * - JWT token generation and validation for access control
+ * - Refresh token functionality for session extension
+ * - User profile retrieval with authentication verification
+ * - Secure logout with token invalidation
+ * - Database cascading deletes: refresh tokens, training logs, horses, users
+ * - Error handling: invalid credentials, malformed data, missing tokens
+ * - Response consistency: success/error structure with status/message/data
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. POST /api/auth/register - User registration with validation
+ * 2. POST /api/auth/login - User authentication with credential verification
+ * 3. POST /api/auth/refresh - Token refresh for session management
+ * 4. GET /api/auth/me - User profile retrieval with authentication
+ * 5. POST /api/auth/logout - Session termination with token cleanup
+ * 6. Database cleanup and cascading delete operations
+ * 7. Edge cases: duplicate emails, weak passwords, invalid tokens
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete authentication flow, database operations, JWT handling
+ * ✅ REAL: Password hashing, email validation, token generation, session management
+ * 🔧 MOCK: None - full integration testing with real database and HTTP requests
+ *
+ * 💡 TEST STRATEGY: Full integration testing with real database to validate
+ *    complete authentication workflows and ensure security requirements work correctly
+ */
+
 /* eslint-disable no-console */
+import { jest, describe, it, expect, beforeEach, afterAll } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
 import { createTestUser, createLoginData } from './helpers/authHelper.js';
 import prisma from '../db/index.js';
 
-describe('Authentication Endpoints', () => {
+describe('🔐 INTEGRATION: Authentication System - User Registration & Session Management', () => {
   // Clean up test data before and after tests
   const cleanupTestData = async() => {
     try {
@@ -32,15 +69,15 @@ describe('Authentication Endpoints', () => {
           where: { userId: { in: userIdsToDelete } }
         });
 
-        // 2. Delete TrainingLogs (linked to Horse, which is linked to User via ownerId)
+        // 2. Delete TrainingLogs (linked to Horse, which is linked to User via userId)
         await prisma.trainingLog.deleteMany({
-          where: { horse: { ownerId: { in: userIdsToDelete } } }
+          where: { horse: { userId: { in: userIdsToDelete } } }
         });
 
-        // 3. Delete Horses (linked to User via ownerId)
+        // 3. Delete Horses (linked to User via userId)
         await prisma.horse.deleteMany({
           where: {
-            ownerId: { in: userIdsToDelete }
+            userId: { in: userIdsToDelete }
           }
         });
 

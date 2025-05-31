@@ -1,7 +1,43 @@
 
+/**
+ * 🧪 UNIT TEST: Competition Score Calculation - Scoring Algorithm Validation
+ *
+ * This test validates the competition scoring algorithm including stat calculations,
+ * trait bonuses, luck modifiers, and discipline-specific scoring logic.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Discipline-specific stat weighting: Each discipline uses 3 primary stats
+ * - Trait bonus application: +5 score bonus for matching discipline affinity traits
+ * - Luck modifier system: ±9% random variance applied to base scores
+ * - Score calculation formula: (stat1 + stat2 + stat3) + trait_bonus + luck_modifier
+ * - Input validation: Proper error handling for invalid horses and event types
+ * - Edge case handling: Missing stats default to 0, missing traits handled gracefully
+ * - Score rounding: All scores returned as integers
+ * - Trait matching logic: Only matching discipline traits provide bonuses
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. calculateCompetitionScore() - Complete scoring algorithm for all disciplines
+ * 2. Discipline stat mapping: Racing, Show Jumping, Dressage, Cross Country
+ * 3. Trait bonus application: +5 bonus for matching discipline_affinity traits
+ * 4. Luck modifier variance: ±9% random adjustment to base scores
+ * 5. Input validation: Error handling for null/invalid inputs
+ * 6. Edge cases: Missing stats, missing traits, unknown disciplines
+ * 7. Statistical validation: Trait advantages demonstrated over multiple runs
+ * 8. Deterministic testing: Controlled randomness for exact score verification
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Score calculations, stat mappings, trait logic, validation
+ * ✅ REAL: Business rule enforcement, edge case handling, mathematical operations
+ * 🔧 MOCK: Math.random() only - for predictable testing of luck modifiers
+ *
+ * 💡 TEST STRATEGY: Unit testing with controlled randomness to validate
+ *    scoring algorithm accuracy and trait advantage consistency
+ */
+
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { calculateCompetitionScore, getDisciplineStatWeights, validateHorseForCompetition } from '../utils/competitionScore.js';
 
-describe('Competition Score Calculation', () => {
+describe('🏆 UNIT: Competition Score Calculation - Scoring Algorithm Validation', () => {
 
   const createTestHorse = (stats = {}, traits = []) => ({
     id: 1,
@@ -14,7 +50,7 @@ describe('Competition Score Calculation', () => {
     balance: 55,
     coordination: 50,
     boldness: 50,
-    epigenetic_modifiers: {
+    epigeneticModifiers: {
       positive: traits,
       negative: [],
       hidden: []
@@ -126,14 +162,14 @@ describe('Competition Score Calculation', () => {
       expect(score).toBeLessThan(90);
     });
 
-    it('should handle missing epigenetic_modifiers gracefully', () => {
+    it('should handle missing epigeneticModifiers gracefully', () => {
       const horse = {
         id: 1,
         name: 'Test Horse',
         speed: 70,
         stamina: 60,
         focus: 50
-        // No epigenetic_modifiers field
+        // No epigeneticModifiers field
       };
 
       expect(() => calculateCompetitionScore(horse, 'Racing')).not.toThrow();
@@ -141,9 +177,9 @@ describe('Competition Score Calculation', () => {
       expect(typeof score).toBe('number');
     });
 
-    it('should handle null epigenetic_modifiers.positive gracefully', () => {
+    it('should handle null epigeneticModifiers.positive gracefully', () => {
       const horse = createTestHorse();
-      horse.epigenetic_modifiers.positive = null;
+      horse.epigeneticModifiers.positive = null;
 
       expect(() => calculateCompetitionScore(horse, 'Racing')).not.toThrow();
       const score = calculateCompetitionScore(horse, 'Racing');
@@ -380,7 +416,7 @@ describe('Competition Score Calculation', () => {
       expect(traitWins).toBeLessThanOrEqual(12); // Should win about 10 out of 20
     });
 
-    it('should handle horse missing epigenetic_modifiers without throwing error', () => {
+    it('should handle horse missing epigeneticModifiers without throwing error', () => {
       // Use jest.spyOn for more deterministic testing
       const mockRandom = jest.spyOn(Math, 'random');
 
@@ -390,7 +426,7 @@ describe('Competition Score Calculation', () => {
         speed: 70,
         stamina: 60,
         focus: 50
-        // No epigenetic_modifiers field
+        // No epigeneticModifiers field
       };
 
       const regularHorse = createTestHorse({ speed: 70, stamina: 60, focus: 50 });

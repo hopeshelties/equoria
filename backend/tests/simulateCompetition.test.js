@@ -1,9 +1,46 @@
+/**
+ * 🧪 UNIT TEST: Competition Simulation System - Horse Performance & Ranking
+ *
+ * This test validates the competition simulation engine's functionality for
+ * calculating horse performance scores and determining competition rankings.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Discipline-specific stat weighting (Racing: speed 50%, stamina 30%, focus 20%)
+ * - Health modifier effects: Excellent +5%, Very Good +3%, Good 0%, Fair -3%, Bad -5%
+ * - Rider modifier validation: bonus 0-10%, penalty 0-8%, combined effects
+ * - Trait affinity bonuses: +5 score for matching discipline traits
+ * - Training score additions: direct score enhancement from training
+ * - Tack bonuses: saddle and bridle equipment score improvements
+ * - Random luck modifier: ±9% variation for realistic competition outcomes
+ * - Placement assignment: 1st, 2nd, 3rd places, null for 4th+ places
+ * - Score ranking: highest scores get better placements
+ * - Error handling: missing stats default to 0, invalid inputs throw errors
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. getStatScore() - Discipline-specific weighted stat calculations
+ * 2. getHealthModifier() - Health status impact on performance
+ * 3. applyRiderModifiers() - Rider skill bonus/penalty applications
+ * 4. simulateCompetition() - Complete competition simulation with rankings
+ * 5. Input validation for all functions
+ * 6. Edge cases: missing fields, empty arrays, invalid data
+ * 7. Randomness verification: luck modifier creates score variation
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: All competition logic, scoring algorithms, ranking calculations, randomness
+ * ✅ REAL: Stat weighting, modifier applications, placement assignments, validation
+ * 🔧 MOCK: None - pure algorithmic testing with no external dependencies
+ *
+ * 💡 TEST STRATEGY: Pure unit testing with no mocks to validate complete
+ *    competition simulation algorithms and ensure realistic scoring outcomes
+ */
+
+import { jest, describe, it, expect } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 import { getStatScore } from '../utils/getStatScore.js';
 import { getHealthModifier } from '../utils/healthBonus.js';
 import { applyRiderModifiers } from '../utils/riderBonus.js';
 
-describe('Competition Simulation System', () => {
+describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking', () => {
 
   describe('getStatScore', () => {
     const testHorse = {
@@ -181,14 +218,14 @@ describe('Competition Simulation System', () => {
       for (let i = 0; i < totalRuns; i++) {
         const horses = [
           createTestHorse(1, 'TraitMatch', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: ['discipline_affinity_racing'], // Matches show discipline
               negative: [],
               hidden: []
             }
           }),
           createTestHorse(2, 'NoTraitMatch', {
-            epigenetic_modifiers: {
+            epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
               hidden: []

@@ -1,6 +1,43 @@
+/**
+ * 🧪 UNIT TEST: Epigenetic Traits System - Breeding & Environmental Trait Calculation
+ *
+ * This test validates the epigenetic traits system that determines how traits are
+ * inherited and expressed in foals based on parent genetics and environmental factors.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Trait inheritance: Foals inherit traits from both parents with probability-based selection
+ * - Environmental modifiers: Bond scores and stress levels affect trait expression
+ * - Positive trait enhancement: High bond scores increase positive trait probability
+ * - Negative trait suppression: High bond scores reduce negative trait inheritance
+ * - Stress impact: High stress increases negative traits and reduces positive expression
+ * - Hidden trait generation: Rare traits generated based on environmental conditions
+ * - Trait consistency: No contradictory traits (e.g., calm + nervous) in same foal
+ * - Input validation: Proper error handling for invalid breeding parameters
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. calculateEpigeneticTraits() - Complete trait inheritance and expression system
+ * 2. Input validation: Required parameters, data types, value ranges
+ * 3. Basic inheritance: Trait passing from dam and sire to offspring
+ * 4. Bond score effects: High bonding increases positive, reduces negative traits
+ * 5. Stress level effects: High stress increases negative, reduces positive traits
+ * 6. Hidden trait generation: Rare trait creation based on environmental factors
+ * 7. Complex scenarios: Mixed traits, optimal/poor conditions, empty parent traits
+ * 8. Trait consistency: Prevention of contradictory trait combinations
+ * 9. Deterministic behavior: Seed-based reproducible results for testing
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete trait calculation algorithms, probability systems, validation logic
+ * ✅ REAL: Environmental factor calculations, trait inheritance, consistency checking
+ * 🔧 MOCK: None - pure algorithmic testing with optional seed for deterministic results
+ *
+ * 💡 TEST STRATEGY: Statistical validation with multiple runs to verify probability-based
+ *    trait inheritance and environmental factor effects on breeding outcomes
+ */
+
+import { jest, describe, it, expect } from '@jest/globals';
 import { calculateEpigeneticTraits } from '../utils/epigeneticTraits.js';
 
-describe('calculateEpigeneticTraits', () => {
+describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait Calculation', () => {
   describe('Input Validation', () => {
     it('should throw error for missing required parameters', () => {
       expect(() => calculateEpigeneticTraits()).toThrow('Missing required breeding parameters');

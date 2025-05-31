@@ -1,4 +1,45 @@
+/**
+ * 🧪 UNIT TEST: Horse History Controller - Competition History Retrieval
+ *
+ * This test validates the horse history controller's functionality for retrieving
+ * and formatting horse competition history with comprehensive data processing.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Horse ID validation: positive integers only, reject negative/zero/non-numeric
+ * - Competition history retrieval with chronological ordering (newest first)
+ * - Data transformation: prizeWon → prize, statGains JSON parsing → statGain object
+ * - JSON parsing validation: handle malformed statGains gracefully with error logging
+ * - Empty history handling: return empty array with appropriate message
+ * - Large ID support: handle large horse ID numbers (999999+)
+ * - Database error handling: graceful error responses with logging
+ * - Response formatting: consistent success/error structure with data/message/success
+ * - Order preservation: maintain database query ordering in response
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. getHorseHistory() - Competition history retrieval with validation and formatting
+ * 2. Horse ID validation (positive integers, reject invalid formats)
+ * 3. JSON parsing for statGains field with error handling
+ * 4. Data transformation (field renaming, object parsing)
+ * 5. Database error handling with appropriate logging
+ * 6. Edge cases: empty results, malformed data, large IDs
+ * 7. Response consistency and message formatting
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Controller logic, validation rules, data transformation, JSON parsing
+ * ✅ REAL: Error handling, response formatting, field mapping, order preservation
+ * 🔧 MOCK: Result model database operations - external dependency
+ * 🔧 MOCK: Logger calls - external dependency for audit trails
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked database to focus on controller
+ *    business logic while ensuring predictable test outcomes for data processing
+ */
+
 import { jest, describe, beforeEach, expect, it } from '@jest/globals';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Mock the dependencies
 const mockGetResultsByHorse = jest.fn();
@@ -9,18 +50,18 @@ const mockLogger = {
 };
 
 // Mock the modules
-jest.unstable_mockModule('../models/resultModel.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => ({
   getResultsByHorse: mockGetResultsByHorse
 }));
 
-jest.unstable_mockModule('../utils/logger.js', () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
   default: mockLogger
 }));
 
 // Import the function to test after mocking
-const { getHorseHistory } = await import('../controllers/horseController.js');
+const { getHorseHistory } = await import(join(__dirname, '../controllers/horseController.js'));
 
-describe('Horse History Controller', () => {
+describe('📚 UNIT: Horse History Controller - Competition History Retrieval', () => {
   let req, res;
 
   beforeEach(() => {

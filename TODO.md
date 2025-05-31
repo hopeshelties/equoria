@@ -29,6 +29,17 @@ This file tracks current tasks and issues that need to be addressed in the Equor
   - [x] **xpLogModel.test.js**: Added XP event tracking and analytics documentation
   - [x] **groomSystem.test.js**: Added groom management documentation, fixed critical `playerId` → `userId` bug
   - [ ] **leaderboardController.test.js**: **CATASTROPHIC ISSUES** - Wrong architecture, 22+ ESLint errors, non-existent service layer
+  - [x] **simulateCompetition.test.js**: Added competition simulation documentation, fixed field naming (`epigenetic_modifiers` → `epigeneticModifiers`)
+  - [x] **horseHistory.test.js**: Added competition history documentation, fixed critical import path resolution issue
+  - [x] **auth.test.js**: Added authentication system documentation, fixed critical `ownerId` → `userId` bug
+  - [x] **competition.test.js**: Added statistical validation documentation, fixed field naming, **DISCOVERED GAME BALANCE BUG** (trait advantages inconsistent across disciplines)
+  - [x] **database.test.js**: Added infrastructure validation documentation, enhanced coverage (2 → 4 tests, 100% increase!)
+  - [x] **training.test.js**: Added integration testing documentation, fixed critical `ownerId` → `userId` field naming, **EXCELLENT INTEGRATION TESTING** (11/11 tests passing)
+  - [x] **competitionRewards.test.js**: Added prize & stat gain documentation, enhanced readability, **EXCELLENT UNIT TESTING** (25/25 tests passing)
+  - [x] **competitionScore.test.js**: Added scoring algorithm documentation, fixed field naming, **DISCOVERED CRITICAL GAME BUG** (trait bonuses completely broken - +0 instead of +5!)
+  - [x] **epigeneticTraits.test.js**: Added breeding system documentation, enhanced readability, **EXCELLENT UNIT TESTING** (22/22 tests passing)
+  - [x] **cronJobsIntegration.test.js**: Added cron job system documentation, fixed ESLint errors, **MOCKING ISSUES** (12/13 tests passing, demonstrates over-mocking risks)
+  - [x] **data-check.test.js**: Added live data validation documentation, enhanced readability, **DISCOVERED CRITICAL SCHEMA ISSUES** (incomplete migration: ownerId→userId, missing role field, broken relationships)
 - [ ] **Comprehensive Test Review** - Review remaining test files to ensure balanced mocking and real-world results
   - [ ] Identify over-mocked tests that lose touch with reality
   - [ ] Replace excessive mocking with integration tests, real databases, fakes, or contract testing
