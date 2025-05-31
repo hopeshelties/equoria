@@ -10,6 +10,13 @@ import logger from './logger.js';
  * Groom specialties and their bonding modifiers
  */
 export const GROOM_SPECIALTIES = {
+  foalCare: {
+    name: 'Foal Care Specialist',
+    description: 'Specialized in caring for young horses',
+    bondingModifier: 1.5,
+    stressReduction: 1.3,
+    preferredActivities: ['dailyCare', 'feeding', 'grooming']
+  },
   foal_care: {
     name: 'Foal Care Specialist',
     description: 'Specialized in caring for young horses',
@@ -22,21 +29,21 @@ export const GROOM_SPECIALTIES = {
     description: 'Well-rounded horse care experience',
     bondingModifier: 1.0,
     stressReduction: 1.0,
-    preferredActivities: ['daily_care', 'grooming', 'exercise']
+    preferredActivities: ['dailyCare', 'grooming', 'exercise']
   },
   training: {
     name: 'Training Assistant',
     description: 'Focused on training and exercise',
     bondingModifier: 1.2,
     stressReduction: 0.8,
-    preferredActivities: ['exercise', 'training', 'daily_care']
+    preferredActivities: ['exercise', 'training', 'dailyCare']
   },
   medical: {
     name: 'Veterinary Assistant',
     description: 'Medical care and health monitoring',
     bondingModifier: 0.9,
     stressReduction: 1.5,
-    preferredActivities: ['medical_check', 'daily_care', 'feeding']
+    preferredActivities: ['medical_check', 'dailyCare', 'feeding']
   }
 };
 
@@ -112,9 +119,9 @@ export const DEFAULT_GROOMS = [
     name: 'Sarah Johnson',
     speciality: 'foal_care',
     experience: 5,
-    skill_level: 'intermediate',
+    skillLevel: 'intermediate',
     personality: 'gentle',
-    hourly_rate: 18.0,
+    hourlyRate: 18.0,
     bio: 'Experienced foal care specialist with a gentle touch.',
     availability: { monday: true, tuesday: true, wednesday: true, thursday: true, friday: true, saturday: true, sunday: false }
   },
@@ -122,9 +129,9 @@ export const DEFAULT_GROOMS = [
     name: 'Mike Rodriguez',
     speciality: 'general',
     experience: 8,
-    skill_level: 'expert',
+    skillLevel: 'expert',
     personality: 'patient',
-    hourly_rate: 25.0,
+    hourlyRate: 25.0,
     bio: 'Veteran horse caretaker with extensive experience.',
     availability: { monday: true, tuesday: true, wednesday: true, thursday: true, friday: true, saturday: false, sunday: true }
   },
@@ -132,9 +139,9 @@ export const DEFAULT_GROOMS = [
     name: 'Emma Thompson',
     speciality: 'training',
     experience: 3,
-    skill_level: 'intermediate',
+    skillLevel: 'intermediate',
     personality: 'energetic',
-    hourly_rate: 20.0,
+    hourlyRate: 20.0,
     bio: 'Young trainer focused on exercise and development.',
     availability: { monday: true, tuesday: true, wednesday: false, thursday: true, friday: true, saturday: true, sunday: true }
   }
@@ -167,21 +174,21 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
     // Validate groom exists and is available
     const groom = await prisma.groom.findUnique({
       where: { id: groomId },
-      select: { 
-        id: true, 
-        name: true, 
-        speciality: true, 
-        skill_level: true, 
-        is_active: true,
+      select: {
+        id: true,
+        name: true,
+        speciality: true,
+        skillLevel: true,
+        isActive: true,
         availability: true
       }
     });
-    
+
     if (!groom) {
       throw new Error(`Groom with ID ${groomId} not found`);
     }
-    
-    if (!groom.is_active) {
+
+    if (!groom.isActive) {
       throw new Error(`Groom ${groom.name} is not currently active`);
     }
     
@@ -218,7 +225,7 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
       data: {
         foalId,
         groomId,
-        playerId,
+        userId: playerId,
         priority,
         notes,
         isDefault,
@@ -308,8 +315,8 @@ export async function getOrCreateDefaultGroom(playerId) {
     // Check if player already has grooms
     const existingGroom = await prisma.groom.findFirst({
       where: {
-        playerId,
-        is_active: true,
+        userId: playerId,
+        isActive: true,
         speciality: 'foal_care'
       }
     });
@@ -324,7 +331,7 @@ export async function getOrCreateDefaultGroom(playerId) {
     const newGroom = await prisma.groom.create({
       data: {
         ...defaultGroomData,
-        playerId
+        userId: playerId
       }
     });
     
@@ -339,6 +346,49 @@ export async function getOrCreateDefaultGroom(playerId) {
 }
 
 /**
+ * Record a groom interaction with a foal
+ * @param {number} foalId - ID of the foal
+ * @param {number} groomId - ID of the groom
+ * @param {string} interactionType - Type of interaction
+ * @param {number} duration - Duration in minutes
+ * @param {string} userId - ID of the user
+ * @param {string} notes - Optional notes
+ * @returns {Object} Interaction result
+ */
+export async function recordGroomInteraction(foalId, groomId, interactionType, duration, userId, notes = null) {
+  try {
+    logger.info(`[groomSystem.recordGroomInteraction] Recording interaction: Groom ${groomId} with Foal ${foalId}`);
+
+    // Create the interaction record
+    const interaction = await prisma.groomInteraction.create({
+      data: {
+        foalId,
+        groomId,
+        interactionType,
+        duration,
+        notes,
+        timestamp: new Date()
+      }
+    });
+
+    logger.info(`[groomSystem.recordGroomInteraction] Successfully recorded interaction ID ${interaction.id}`);
+
+    return {
+      success: true,
+      interaction,
+      message: `Groom interaction recorded successfully`
+    };
+
+  } catch (error) {
+    logger.error(`[groomSystem.recordGroomInteraction] Error: ${error.message}`);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+/**
  * Calculate bonding and stress changes from groom interaction
  * @param {Object} groom - Groom object
  * @param {Object} foal - Foal object
@@ -349,7 +399,7 @@ export async function getOrCreateDefaultGroom(playerId) {
 export function calculateGroomInteractionEffects(groom, foal, interactionType, duration) {
   try {
     const specialty = GROOM_SPECIALTIES[groom.speciality] || GROOM_SPECIALTIES.general;
-    const skillLevel = SKILL_LEVELS[groom.skill_level] || SKILL_LEVELS.intermediate;
+    const skillLevel = SKILL_LEVELS[groom.skillLevel] || SKILL_LEVELS.intermediate;
     const personality = PERSONALITY_TRAITS[groom.personality] || PERSONALITY_TRAITS.gentle;
     
     // Base bonding change (1-5 points per 30 minutes)
@@ -382,7 +432,7 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
     stressChange = Math.max(-10, Math.min(5, stressChange));
     
     // Calculate cost
-    const cost = (duration / 60) * groom.hourly_rate * skillLevel.costModifier;
+    const cost = (duration / 60) * groom.hourlyRate * skillLevel.costModifier;
     
     // Determine quality based on results
     let quality = 'good';

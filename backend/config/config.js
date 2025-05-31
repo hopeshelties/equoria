@@ -21,7 +21,7 @@ if (NODE_ENV === 'test') {
 const requiredVars = ['DATABASE_URL', 'PORT', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
 // const missingVars = requiredVars.filter(key => !process.env[key]); // Original check
 
-let problematicVars = [];
+const problematicVars = [];
 
 for (const key of requiredVars) {
   const value = process.env[key];

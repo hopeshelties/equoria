@@ -1,10 +1,8 @@
-/* eslint-disable no-unused-vars */
 import { getHorseById } from '../models/horseModel.js';
 import { saveResult, getResultsByShow } from '../models/resultModel.js';
 import { addXpToUser } from '../models/userModel.js';
 import { logXpEvent } from '../models/xpLogModel.js';
-import { simulateCompetition } from '../logic/simulateCompetition.js';
-import { calculateCompetitionScore } from '../utils/competitionScore.js';
+import { calculateCompetitionScore } from '../utils/competitionLogic.js';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
 import {
   calculatePrizeDistribution,
@@ -190,20 +188,17 @@ async function enterAndRunShow(horseIds, show) {
 
     // Step 3: Filter out horses that are not eligible or already entered
     const validHorses = [];
-    let skippedCount = 0;
 
     for (const horse of horses) {
       // Check if horse already entered this show
       if (previousEntries.includes(horse.id)) {
         logger.info(`[competitionController.enterAndRunShow] Horse ${horse.id} (${horse.name}) already entered this show, skipping`);
-        skippedCount++;
         continue;
       }
 
       // Check eligibility
       if (!isHorseEligibleForShow(horse, show, previousEntries)) {
         logger.info(`[competitionController.enterAndRunShow] Horse ${horse.id} (${horse.name}) is not eligible for this show, skipping`);
-        skippedCount++;
         continue;
       }
 
@@ -315,7 +310,7 @@ async function enterAndRunShow(horseIds, show) {
           try {
             // Get horse to find owner
             const horse = await getHorseById(simResult.horseId);
-            if (horse && horse.ownerId) {
+            if (horse && horse.userId) {
               let xpAmount = 0;
               switch (simResult.placement) {
               case '1st':
@@ -331,31 +326,29 @@ async function enterAndRunShow(horseIds, show) {
 
               if (xpAmount > 0) {
                 // Award XP using userModel.addXpToUser
-                const xpResult = await addXpToUser(horse.ownerId, xpAmount);
+                const xpResult = await addXpToUser(horse.userId, xpAmount);
 
                 // Log XP event for auditing
                 await logXpEvent({
-                  userId: horse.ownerId, // MODIFIED: Changed UserId to userId
+                  userId: horse.userId,
                   amount: xpAmount,
                   reason: `${simResult.placement} place with horse ${horse.name} in ${show.discipline}`
                 });
 
                 // Track XP event for summary
-                const xpEventData = { // Renamed to avoid conflict if xpEvent is defined elsewhere
-                  userId: horse.ownerId,
+                const xpEventData = {
+                  userId: horse.userId,
                   horseId: horse.id,
                   horseName: horse.name,
                   placement: simResult.placement,
                   xpAwarded: xpAmount,
-                  // MODIFIED: Use results from xpResult
                   leveledUp: xpResult.leveledUp,
                   newLevel: xpResult.currentLevel,
                   levelsGained: xpResult.levelsGained || 0
                 };
                 xpEvents.push(xpEventData);
 
-                // MODIFIED: Use results from xpResult for log message
-                logger.info(`[competitionController.enterAndRunShow] Awarded ${xpAmount} XP to user ${horse.ownerId} for ${simResult.placement} place${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.currentLevel}!` : ''}`);
+                logger.info(`[competitionController.enterAndRunShow] Awarded ${xpAmount} XP to user ${horse.userId} for ${simResult.placement} place${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.currentLevel}!` : ''}`);
               }
             }
           } catch (error) {

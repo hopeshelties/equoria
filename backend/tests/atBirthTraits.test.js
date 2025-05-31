@@ -140,8 +140,8 @@ describe('At-Birth Traits System', () => {
   describe('assessFeedQuality', () => {
     it('should return feed quality based on mare health status', async() => {
       const mare = {
-        health_status: 'Excellent',
-        total_earnings: 50000
+        healthStatus: 'Excellent',
+        totalEarnings: 50000
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mare);
@@ -151,7 +151,7 @@ describe('At-Birth Traits System', () => {
       expect(quality).toBeGreaterThan(80);
       expect(mockPrisma.horse.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
-        select: { health_status: true, total_earnings: true }
+        select: { healthStatus: true, totalEarnings: true }
       });
     });
 
@@ -165,8 +165,8 @@ describe('At-Birth Traits System', () => {
 
     it('should adjust quality based on earnings', async() => {
       const highEarningMare = {
-        health_status: 'Good',
-        total_earnings: 150000
+        healthStatus: 'Good',
+        totalEarnings: 150000
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(highEarningMare);
@@ -190,15 +190,15 @@ describe('At-Birth Traits System', () => {
 
     it('should get immediate parents', async() => {
       const horses = [
-        { id: 1, name: 'Horse1', sire_id: 3, dam_id: 4 },
-        { id: 2, name: 'Horse2', sire_id: 5, dam_id: 6 }
+        { id: 1, name: 'Horse1', sireId: 3, damId: 4 },
+        { id: 2, name: 'Horse2', sireId: 5, damId: 6 }
       ];
 
       const parents = [
-        { id: 3, name: 'Sire1', sire_id: null, dam_id: null },
-        { id: 4, name: 'Dam1', sire_id: null, dam_id: null },
-        { id: 5, name: 'Sire2', sire_id: null, dam_id: null },
-        { id: 6, name: 'Dam2', sire_id: null, dam_id: null }
+        { id: 3, name: 'Sire1', sireId: null, damId: null },
+        { id: 4, name: 'Dam1', sireId: null, damId: null },
+        { id: 5, name: 'Sire2', sireId: null, damId: null },
+        { id: 6, name: 'Dam2', sireId: null, damId: null }
       ];
 
       mockPrisma.horse.findMany
@@ -216,21 +216,21 @@ describe('At-Birth Traits System', () => {
   describe('detectInbreeding', () => {
     it('should detect no inbreeding when no common ancestors', async() => {
       const sireAncestors = [
-        { id: 10, name: 'SireGrandpa', sire_id: null, dam_id: null },
-        { id: 11, name: 'SireGrandma', sire_id: null, dam_id: null }
+        { id: 10, name: 'SireGrandpa', sireId: null, damId: null },
+        { id: 11, name: 'SireGrandma', sireId: null, damId: null }
       ];
 
       const damAncestors = [
-        { id: 20, name: 'DamGrandpa', sire_id: null, dam_id: null },
-        { id: 21, name: 'DamGrandma', sire_id: null, dam_id: null }
+        { id: 20, name: 'DamGrandpa', sireId: null, damId: null },
+        { id: 21, name: 'DamGrandma', sireId: null, damId: null }
       ];
 
       // Mock the recursive calls to getAncestors
       mockPrisma.horse.findMany
-        .mockResolvedValueOnce([{ id: 1, sire_id: 10, dam_id: 11 }]) // Sire's parents
+        .mockResolvedValueOnce([{ id: 1, sireId: 10, damId: 11 }]) // Sire's parents
         .mockResolvedValueOnce(sireAncestors) // Sire's ancestors
         .mockResolvedValueOnce([]) // No further sire ancestors
-        .mockResolvedValueOnce([{ id: 2, sire_id: 20, dam_id: 21 }]) // Dam's parents
+        .mockResolvedValueOnce([{ id: 2, sireId: 20, damId: 21 }]) // Dam's parents
         .mockResolvedValueOnce(damAncestors) // Dam's ancestors
         .mockResolvedValueOnce([]); // No further dam ancestors
 
@@ -242,15 +242,15 @@ describe('At-Birth Traits System', () => {
     });
 
     it('should detect inbreeding when common ancestors exist', async() => {
-      const commonAncestor = { id: 100, name: 'CommonAncestor', sire_id: null, dam_id: null };
+      const commonAncestor = { id: 100, name: 'CommonAncestor', sireId: null, damId: null };
 
       // Mock the recursive calls for getAncestors
       mockPrisma.horse.findMany
-        .mockResolvedValueOnce([{ id: 1, name: 'Sire', sire_id: 100, dam_id: 11 }]) // Sire's immediate parents
-        .mockResolvedValueOnce([commonAncestor, { id: 11, name: 'SireGrandma', sire_id: null, dam_id: null }]) // Sire's ancestors
+        .mockResolvedValueOnce([{ id: 1, name: 'Sire', sireId: 100, damId: 11 }]) // Sire's immediate parents
+        .mockResolvedValueOnce([commonAncestor, { id: 11, name: 'SireGrandma', sireId: null, damId: null }]) // Sire's ancestors
         .mockResolvedValueOnce([]) // No further sire ancestors
-        .mockResolvedValueOnce([{ id: 2, name: 'Dam', sire_id: 100, dam_id: 21 }]) // Dam's immediate parents
-        .mockResolvedValueOnce([commonAncestor, { id: 21, name: 'DamGrandma', sire_id: null, dam_id: null }]) // Dam's ancestors
+        .mockResolvedValueOnce([{ id: 2, name: 'Dam', sireId: 100, damId: 21 }]) // Dam's immediate parents
+        .mockResolvedValueOnce([commonAncestor, { id: 21, name: 'DamGrandma', sireId: null, damId: null }]) // Dam's ancestors
         .mockResolvedValueOnce([]); // No further dam ancestors
 
       const result = await detectInbreeding(1, 2);
@@ -279,7 +279,7 @@ describe('At-Birth Traits System', () => {
 
       // Mock getAncestors call
       mockPrisma.horse.findMany
-        .mockResolvedValueOnce([{ id: 1, sire_id: 10, dam_id: 11 }])
+        .mockResolvedValueOnce([{ id: 1, sireId: 10, damId: 11 }])
         .mockResolvedValueOnce(ancestors)
         .mockResolvedValueOnce([]);
 
@@ -311,9 +311,9 @@ describe('At-Birth Traits System', () => {
 
   describe('applyEpigeneticTraitsAtBirth', () => {
     const mockMare = {
-      stress_level: 25,
-      bond_score: 75,
-      health_status: 'Good'
+      stressLevel: 25,
+      bondScore: 75,
+      healthStatus: 'Good'
     };
 
     beforeEach(() => {
@@ -367,9 +367,9 @@ describe('At-Birth Traits System', () => {
       // Simplify the test by directly mocking the inbreeding analysis result
       // We'll test the inbreeding detection logic separately
       const mockMareWithInbreeding = {
-        stress_level: 25,
-        bond_score: 75,
-        health_status: 'Good'
+        stressLevel: 25,
+        bondScore: 75,
+        healthStatus: 'Good'
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mockMareWithInbreeding);
@@ -422,7 +422,7 @@ describe('At-Birth Traits System', () => {
       ];
 
       mockPrisma.horse.findMany
-        .mockResolvedValueOnce([{ id: 1, sire_id: 10, dam_id: 11 }])
+        .mockResolvedValueOnce([{ id: 1, sireId: 10, damId: 11 }])
         .mockResolvedValueOnce(ancestors)
         .mockResolvedValueOnce([]);
 
@@ -468,7 +468,7 @@ describe('At-Birth Traits System', () => {
 
       expect(mockPrisma.horse.findUnique).toHaveBeenCalledWith({
         where: { id: 2 },
-        select: { stress_level: true, bond_score: true, health_status: true }
+        select: { stressLevel: true, bondScore: true, healthStatus: true }
       });
     });
 

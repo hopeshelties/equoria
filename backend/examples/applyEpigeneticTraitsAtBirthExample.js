@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Example usage of applyEpigeneticTraitsAtBirth function
  * Demonstrates various breeding scenarios and trait assignments
@@ -95,24 +96,24 @@ const jumpingMare = {
 };
 
 const jumpingLineage = [
-  { 
-    id: 301, 
-    name: 'Jumper 1', 
+  {
+    id: 301,
+    name: 'Jumper 1',
     disciplineScores: { 'Show Jumping': 95, 'Dressage': 60 }
   },
-  { 
-    id: 302, 
-    name: 'Jumper 2', 
+  {
+    id: 302,
+    name: 'Jumper 2',
     disciplineScores: { 'Show Jumping': 88, 'Racing': 55 }
   },
-  { 
-    id: 303, 
-    name: 'Jumper 3', 
+  {
+    id: 303,
+    name: 'Jumper 3',
     disciplineScores: { 'Show Jumping': 92, 'Cross Country': 70 }
   },
-  { 
-    id: 304, 
-    name: 'Mixed Horse', 
+  {
+    id: 304,
+    name: 'Mixed Horse',
     disciplineScores: { 'Dressage': 85, 'Show Jumping': 65 }
   }
 ];

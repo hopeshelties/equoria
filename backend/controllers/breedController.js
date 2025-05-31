@@ -15,7 +15,7 @@ export async function createBreed(req, res, next) {
     // Prisma's `create` will fail if `name` is not unique due to `@unique` in schema
     // However, to provide a friendly error message, we can check first.
     const existingBreed = await prisma.breed.findUnique({
-      where: { name }, // Prisma is case-sensitive by default for unique checks on PostgreSQL
+      where: { name } // Prisma is case-sensitive by default for unique checks on PostgreSQL
     });
 
     if (existingBreed) {
@@ -34,8 +34,8 @@ export async function createBreed(req, res, next) {
     const newBreed = await prisma.breed.create({
       data: {
         name,
-        description,
-      },
+        description
+      }
     });
 
     logger.info(`Created new breed: ${newBreed.name} (ID: ${newBreed.id})`);
@@ -62,8 +62,8 @@ export async function getAllBreeds(req, res, next) {
   try {
     const breeds = await prisma.breed.findMany({
       orderBy: {
-        name: 'asc',
-      },
+        name: 'asc'
+      }
     });
 
     logger.info(`Retrieved ${breeds.length} breeds`);
@@ -91,7 +91,7 @@ export async function getBreedById(req, res, next) {
     }
 
     const breed = await prisma.breed.findUnique({
-      where: { id: breedId },
+      where: { id: breedId }
     });
 
     if (!breed) {

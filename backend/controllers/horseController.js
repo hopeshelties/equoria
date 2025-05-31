@@ -252,7 +252,7 @@ async function gatherLineage(sireId, damId, generations) {
           name: horse.name,
           discipline: primaryDiscipline,
           disciplineScores: horse.disciplineScores,
-          generation: generation,
+          generation,
           trait: horse.trait,
           temperament: horse.temperament
         });
@@ -401,7 +401,7 @@ export async function getHorseOverview(req, res) {
     try {
       const recentResult = await prisma.competitionResult.findFirst({
         where: {
-          horseId: horseId
+          horseId
         },
         orderBy: {
           runDate: 'desc'

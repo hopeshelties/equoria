@@ -47,7 +47,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     });
 
     it('should handle missing optional parameters', () => {
-      const mare = { stress_level: 30 };
+      const mare = { stressLevel: 30 };
       const result = applyEpigeneticTraitsAtBirth({ mare });
 
       expect(result).toHaveProperty('positive');
@@ -61,7 +61,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign resilient trait with low stress and premium feed', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.5); // Below 0.75 threshold
 
-      const mare = { stress_level: 15 };
+      const mare = { stressLevel: 15 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         feedQuality: 85,
@@ -74,7 +74,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign people_trusting trait with low stress and premium feed', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.4); // Below 0.60 threshold
 
-      const mare = { stress_level: 20 };
+      const mare = { stressLevel: 20 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         feedQuality: 80,
@@ -85,7 +85,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     });
 
     it('should not assign positive traits with high stress', () => {
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         feedQuality: 85,
@@ -97,7 +97,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     });
 
     it('should not assign positive traits with poor feed quality', () => {
-      const mare = { stress_level: 15 };
+      const mare = { stressLevel: 15 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         feedQuality: 60,
@@ -113,7 +113,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign fragile trait with high inbreeding', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.5); // Below 0.80 threshold for high inbreeding
 
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' }, // Same ancestor appears multiple times
@@ -135,7 +135,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign reactive trait with moderate inbreeding', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.3); // Below 0.40 threshold for moderate inbreeding
 
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
@@ -156,7 +156,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign low_immunity trait with inbreeding', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.2); // Below 0.35 threshold for moderate inbreeding
 
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
@@ -175,7 +175,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     });
 
     it('should not assign inbreeding traits without common ancestors', () => {
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, name: 'Horse 1' },
         { id: 2, name: 'Horse 2' },
@@ -200,7 +200,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign discipline affinity trait with 3+ ancestors in same discipline', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.5); // Below 0.70 threshold
 
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, discipline: 'Racing' },
         { id: 2, discipline: 'Racing' },
@@ -221,7 +221,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign legacy_talent trait with 4+ ancestors in same discipline', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.3); // Below 0.40 threshold
 
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, discipline: 'Show Jumping' },
         { id: 2, discipline: 'Show Jumping' },
@@ -244,7 +244,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should use disciplineScores when discipline field is not available', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.5); // Below 0.70 threshold
 
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, disciplineScores: { Racing: 85, Dressage: 60 } },
         { id: 2, disciplineScores: { Racing: 90, Jumping: 55 } },
@@ -263,7 +263,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     });
 
     it('should not assign discipline traits without sufficient specialization', () => {
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, discipline: 'Racing' },
         { id: 2, discipline: 'Dressage' },
@@ -287,7 +287,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign nervous trait with very high mare stress', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.3); // Below 0.40 threshold
 
-      const mare = { stress_level: 85 };
+      const mare = { stressLevel: 85 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
@@ -301,7 +301,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should assign low_immunity trait with poor nutrition', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.2); // Below 0.30 threshold
 
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
@@ -315,7 +315,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     it('should not duplicate traits', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.1); // Low value to trigger multiple conditions
 
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const lineage = [
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
@@ -337,7 +337,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
 
   describe('Return Value Structure', () => {
     it('should return object with positive and negative arrays', () => {
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
@@ -352,7 +352,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     });
 
     it('should handle empty lineage gracefully', () => {
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
@@ -365,7 +365,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
     });
 
     it('should handle null lineage gracefully', () => {
-      const mare = { stress_level: 50 };
+      const mare = { stressLevel: 50 };
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: null,

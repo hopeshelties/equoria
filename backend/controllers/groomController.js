@@ -3,9 +3,9 @@
  * Handles groom assignments, interactions, and management operations
  */
 
-import { 
-  assignGroomToFoal, 
-  ensureDefaultGroomAssignment, 
+import {
+  assignGroomToFoal,
+  ensureDefaultGroomAssignment,
   getOrCreateDefaultGroom,
   calculateGroomInteractionEffects,
   GROOM_SPECIALTIES,
@@ -24,9 +24,9 @@ export async function assignGroom(req, res) {
   try {
     const { foalId, groomId, priority = 1, notes } = req.body;
     const playerId = req.user?.id || 'default-player'; // TODO: Get from auth
-    
+
     logger.info(`[groomController.assignGroom] Assigning groom ${groomId} to foal ${foalId}`);
-    
+
     // Validate required fields
     if (!foalId || !groomId) {
       return res.status(400).json({
@@ -35,19 +35,19 @@ export async function assignGroom(req, res) {
         data: null
       });
     }
-    
+
     const result = await assignGroomToFoal(foalId, groomId, playerId, {
       priority,
       notes,
       isDefault: false
     });
-    
+
     res.status(200).json({
       success: true,
       message: result.message,
       data: result.assignment
     });
-    
+
   } catch (error) {
     logger.error(`[groomController.assignGroom] Error: ${error.message}`);
     res.status(500).json({
@@ -66,7 +66,7 @@ export async function ensureDefaultAssignment(req, res) {
   try {
     const { foalId } = req.params;
     const playerId = req.user?.id || 'default-player'; // TODO: Get from auth
-    
+
     const parsedFoalId = parseInt(foalId, 10);
     if (isNaN(parsedFoalId) || parsedFoalId <= 0) {
       return res.status(400).json({
@@ -75,11 +75,11 @@ export async function ensureDefaultAssignment(req, res) {
         data: null
       });
     }
-    
+
     logger.info(`[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`);
-    
+
     const result = await ensureDefaultGroomAssignment(parsedFoalId, playerId);
-    
+
     res.status(200).json({
       success: true,
       message: result.message,
@@ -89,7 +89,7 @@ export async function ensureDefaultAssignment(req, res) {
         isExisting: result.isExisting || false
       }
     });
-    
+
   } catch (error) {
     logger.error(`[groomController.ensureDefaultAssignment] Error: ${error.message}`);
     res.status(500).json({
@@ -107,7 +107,7 @@ export async function ensureDefaultAssignment(req, res) {
 export async function getFoalAssignments(req, res) {
   try {
     const { foalId } = req.params;
-    
+
     const parsedFoalId = parseInt(foalId, 10);
     if (isNaN(parsedFoalId) || parsedFoalId <= 0) {
       return res.status(400).json({
@@ -116,9 +116,9 @@ export async function getFoalAssignments(req, res) {
         data: null
       });
     }
-    
+
     logger.info(`[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`);
-    
+
     const assignments = await prisma.groomAssignment.findMany({
       where: { foalId: parsedFoalId },
       include: {
@@ -133,7 +133,7 @@ export async function getFoalAssignments(req, res) {
         { createdAt: 'desc' }
       ]
     });
-    
+
     res.status(200).json({
       success: true,
       message: `Retrieved ${assignments.length} assignments for foal`,
@@ -144,7 +144,7 @@ export async function getFoalAssignments(req, res) {
         totalAssignments: assignments.length
       }
     });
-    
+
   } catch (error) {
     logger.error(`[groomController.getFoalAssignments] Error: ${error.message}`);
     res.status(500).json({
@@ -161,17 +161,17 @@ export async function getFoalAssignments(req, res) {
  */
 export async function recordInteraction(req, res) {
   try {
-    const { 
-      foalId, 
-      groomId, 
-      interactionType, 
-      duration, 
+    const {
+      foalId,
+      groomId,
+      interactionType,
+      duration,
       notes,
-      assignmentId 
+      assignmentId
     } = req.body;
-    
+
     logger.info(`[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`);
-    
+
     // Validate required fields
     if (!foalId || !groomId || !interactionType || !duration) {
       return res.status(400).json({
@@ -180,21 +180,21 @@ export async function recordInteraction(req, res) {
         data: null
       });
     }
-    
+
     // Get groom and foal data
     const [groom, foal] = await Promise.all([
       prisma.groom.findUnique({ where: { id: groomId } }),
-      prisma.horse.findUnique({ 
+      prisma.horse.findUnique({
         where: { id: foalId },
-        select: { 
-          id: true, 
-          name: true, 
-          bond_score: true, 
-          stress_level: true 
+        select: {
+          id: true,
+          name: true,
+          bond_score: true,
+          stress_level: true
         }
       })
     ]);
-    
+
     if (!groom) {
       return res.status(404).json({
         success: false,
@@ -202,7 +202,7 @@ export async function recordInteraction(req, res) {
         data: null
       });
     }
-    
+
     if (!foal) {
       return res.status(404).json({
         success: false,
@@ -210,10 +210,10 @@ export async function recordInteraction(req, res) {
         data: null
       });
     }
-    
+
     // Calculate interaction effects
     const effects = calculateGroomInteractionEffects(groom, foal, interactionType, duration);
-    
+
     // Record the interaction
     const interaction = await prisma.groomInteraction.create({
       data: {
@@ -229,11 +229,11 @@ export async function recordInteraction(req, res) {
         notes
       }
     });
-    
+
     // Update foal's bond score and stress level
     const newBondScore = Math.max(0, Math.min(100, (foal.bond_score || 50) + effects.bondingChange));
     const newStressLevel = Math.max(0, Math.min(100, (foal.stress_level || 0) + effects.stressChange));
-    
+
     await prisma.horse.update({
       where: { id: foalId },
       data: {
@@ -241,9 +241,9 @@ export async function recordInteraction(req, res) {
         stress_level: newStressLevel
       }
     });
-    
+
     logger.info(`[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress`);
-    
+
     res.status(200).json({
       success: true,
       message: `${interactionType} interaction completed successfully`,
@@ -260,7 +260,7 @@ export async function recordInteraction(req, res) {
         }
       }
     });
-    
+
   } catch (error) {
     logger.error(`[groomController.recordInteraction] Error: ${error.message}`);
     res.status(500).json({
@@ -278,9 +278,9 @@ export async function recordInteraction(req, res) {
 export async function getPlayerGrooms(req, res) {
   try {
     const { playerId } = req.params;
-    
+
     logger.info(`[groomController.getPlayerGrooms] Getting grooms for player ${playerId}`);
-    
+
     const grooms = await prisma.groom.findMany({
       where: { playerId },
       include: {
@@ -305,7 +305,7 @@ export async function getPlayerGrooms(req, res) {
         { experience: 'desc' }
       ]
     });
-    
+
     res.status(200).json({
       success: true,
       message: `Retrieved ${grooms.length} grooms for player`,
@@ -316,7 +316,7 @@ export async function getPlayerGrooms(req, res) {
         totalGrooms: grooms.length
       }
     });
-    
+
   } catch (error) {
     logger.error(`[groomController.getPlayerGrooms] Error: ${error.message}`);
     res.status(500).json({
@@ -333,20 +333,20 @@ export async function getPlayerGrooms(req, res) {
  */
 export async function hireGroom(req, res) {
   try {
-    const { 
-      name, 
-      speciality, 
-      experience, 
-      skill_level, 
-      personality, 
+    const {
+      name,
+      speciality,
+      experience,
+      skill_level,
+      personality,
       hourly_rate,
       bio,
-      availability 
+      availability
     } = req.body;
     const playerId = req.user?.id || 'default-player'; // TODO: Get from auth
-    
+
     logger.info(`[groomController.hireGroom] Hiring new groom ${name} for player ${playerId}`);
-    
+
     // Validate required fields
     if (!name || !speciality || !skill_level || !personality) {
       return res.status(400).json({
@@ -355,7 +355,7 @@ export async function hireGroom(req, res) {
         data: null
       });
     }
-    
+
     // Validate speciality
     if (!GROOM_SPECIALTIES[speciality]) {
       return res.status(400).json({
@@ -364,7 +364,7 @@ export async function hireGroom(req, res) {
         data: null
       });
     }
-    
+
     // Validate skill level
     if (!SKILL_LEVELS[skill_level]) {
       return res.status(400).json({
@@ -373,7 +373,7 @@ export async function hireGroom(req, res) {
         data: null
       });
     }
-    
+
     // Validate personality
     if (!PERSONALITY_TRAITS[personality]) {
       return res.status(400).json({
@@ -382,7 +382,7 @@ export async function hireGroom(req, res) {
         data: null
       });
     }
-    
+
     const groom = await prisma.groom.create({
       data: {
         name,
@@ -396,15 +396,15 @@ export async function hireGroom(req, res) {
         playerId
       }
     });
-    
+
     logger.info(`[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`);
-    
+
     res.status(201).json({
       success: true,
       message: `Successfully hired ${groom.name}`,
       data: groom
     });
-    
+
   } catch (error) {
     logger.error(`[groomController.hireGroom] Error: ${error.message}`);
     res.status(500).json({
@@ -421,8 +421,8 @@ export async function hireGroom(req, res) {
  */
 export async function getGroomDefinitions(req, res) {
   try {
-    logger.info(`[groomController.getGroomDefinitions] Getting groom system definitions`);
-    
+    logger.info('[groomController.getGroomDefinitions] Getting groom system definitions');
+
     res.status(200).json({
       success: true,
       message: 'Retrieved groom system definitions',
@@ -433,7 +433,7 @@ export async function getGroomDefinitions(req, res) {
         defaultGrooms: DEFAULT_GROOMS
       }
     });
-    
+
   } catch (error) {
     logger.error(`[groomController.getGroomDefinitions] Error: ${error.message}`);
     res.status(500).json({

@@ -10,7 +10,7 @@ import logger from './logger.js';
 /**
  * Apply epigenetic traits at birth based on breeding conditions
  * @param {Object} params - Breeding parameters
- * @param {Object} params.mare - Mare object with stress_level and other properties
+ * @param {Object} params.mare - Mare object with stressLevel and other properties
  * @param {Array} params.lineage - Array of ancestor objects with discipline information
  * @param {number} params.feedQuality - Feed quality score (0-100)
  * @param {number} params.stressLevel - Mare's stress level (0-100)
@@ -30,7 +30,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
     }
 
     // Use provided stress level or mare's current stress level
-    const currentStressLevel = stressLevel !== undefined ? stressLevel : (mare.stress_level || 50);
+    const currentStressLevel = stressLevel !== undefined ? stressLevel : (mare.stressLevel || 50);
     const currentFeedQuality = feedQuality !== undefined ? feedQuality : 50;
 
     logger.info(`[applyEpigeneticTraitsAtBirth] Mare stress: ${currentStressLevel}, Feed quality: ${currentFeedQuality}`);
@@ -204,9 +204,9 @@ function analyzeDisciplineSpecialization(lineage) {
       disciplineCounts[ancestor.discipline] = (disciplineCounts[ancestor.discipline] || 0) + 1;
     }
 
-    // Check most_competed_discipline field (primary field for discipline specialization)
-    if (ancestor && ancestor.most_competed_discipline) {
-      disciplineCounts[ancestor.most_competed_discipline] = (disciplineCounts[ancestor.most_competed_discipline] || 0) + 1;
+    // Check mostCompetedDiscipline field (primary field for discipline specialization)
+    if (ancestor && ancestor.mostCompetedDiscipline) {
+      disciplineCounts[ancestor.mostCompetedDiscipline] = (disciplineCounts[ancestor.mostCompetedDiscipline] || 0) + 1;
     }
 
     // Also check disciplineScores for highest scoring discipline

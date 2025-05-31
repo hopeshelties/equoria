@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // Verification script to ensure tests use the correct database
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
@@ -33,7 +34,7 @@ try {
   await client.connect();
   const result = await client.query('SELECT current_database()');
   console.log('✅ Connected to database:', result.rows[0].current_database);
-  
+
   if (result.rows[0].current_database === 'equoria_test') {
     console.log('✅ Confirmed: Using test database');
   } else {
@@ -47,4 +48,4 @@ try {
   await client.end();
 }
 
-console.log('🎉 Test database configuration is correct!'); 
+console.log('🎉 Test database configuration is correct!');

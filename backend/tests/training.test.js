@@ -57,7 +57,7 @@ describe('Training System Business Logic Tests', () => {
       }
     });
 
-    await prisma.player.deleteMany({
+    await prisma.user.deleteMany({
       where: {
         email: 'training-test-player@example.com'
       }
@@ -80,15 +80,14 @@ describe('Training System Business Logic Tests', () => {
       }
     });
 
-    // Create a test Player (for XP system and playerId relationship)
-    testPlayer = await prisma.player.create({
+    // Create a test Player (for XP system and userId relationship)
+    testPlayer = await prisma.user.create({
       data: {
-        name: 'Training Test Player',
+        username: 'TrainingTestPlayer',
         email: 'training-test-player@example.com',
-        money: 1000,
-        level: 1,
-        xp: 0,
-        settings: { theme: 'light' }
+        firstName: 'Training',
+        lastName: 'Player',
+        password: 'hashedpassword'
       }
     });
 
@@ -110,12 +109,12 @@ describe('Training System Business Logic Tests', () => {
         age: 4, // Eligible for training
         breedId: breed.id,
         ownerId: testUser.id,        // Legacy User relationship
-        playerId: testPlayer.id,     // Modern Player relationship (for XP)
+        userId: testPlayer.id,       // Modern User relationship (for XP)
         sex: 'Mare',
-        date_of_birth: new Date('2020-01-01'),
-        health_status: 'Excellent',
+        dateOfBirth: new Date('2020-01-01'),
+        healthStatus: 'Excellent',
         disciplineScores: {}, // No previous training
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -129,12 +128,12 @@ describe('Training System Business Logic Tests', () => {
         age: 2, // Too young for training
         breedId: breed.id,
         ownerId: testUser.id,
-        playerId: testPlayer.id,
+        userId: testPlayer.id,
         sex: 'Colt',
-        date_of_birth: new Date('2022-01-01'),
-        health_status: 'Excellent',
+        dateOfBirth: new Date('2022-01-01'),
+        healthStatus: 'Excellent',
         disciplineScores: {},
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -148,14 +147,14 @@ describe('Training System Business Logic Tests', () => {
         age: 5,
         breedId: breed.id,
         ownerId: testUser.id,
-        playerId: testPlayer.id,
+        userId: testPlayer.id,
         sex: 'Stallion',
-        date_of_birth: new Date('2019-01-01'),
-        health_status: 'Excellent',
+        dateOfBirth: new Date('2019-01-01'),
+        healthStatus: 'Excellent',
         disciplineScores: {
           Racing: 10 // Has some previous training
         },
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -193,7 +192,7 @@ describe('Training System Business Logic Tests', () => {
       }
     });
 
-    await prisma.player.deleteMany({
+    await prisma.user.deleteMany({
       where: {
         email: 'training-test-player@example.com'
       }
@@ -272,12 +271,12 @@ describe('Training System Business Logic Tests', () => {
           age: 4,
           breedId: (await prisma.breed.findFirst()).id,
           ownerId: testUser.id,
-          playerId: testPlayer.id,
+          userId: testPlayer.id,
           sex: 'Mare',
-          date_of_birth: new Date('2020-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2020-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: {},
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []
@@ -332,12 +331,12 @@ describe('Training System Business Logic Tests', () => {
           age: 5,
           breedId: (await prisma.breed.findFirst()).id,
           ownerId: testUser.id,
-          playerId: testPlayer.id,
+          userId: testPlayer.id,
           sex: 'Stallion',
-          date_of_birth: new Date('2019-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2019-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: {},
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []
@@ -351,12 +350,12 @@ describe('Training System Business Logic Tests', () => {
           age: 6,
           breedId: (await prisma.breed.findFirst()).id,
           ownerId: testUser.id,
-          playerId: testPlayer.id,
+          userId: testPlayer.id,
           sex: 'Mare',
-          date_of_birth: new Date('2018-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2018-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: { 'Cross Country': 10 }, // Already has some training
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []
@@ -433,12 +432,12 @@ describe('Training System Business Logic Tests', () => {
           age: 6,
           breedId: (await prisma.breed.findFirst()).id,
           ownerId: testUser.id,
-          playerId: testPlayer.id,
+          userId: testPlayer.id,
           sex: 'Mare',
-          date_of_birth: new Date('2018-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2018-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: { Racing: 15 },
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []
@@ -487,11 +486,11 @@ describe('Training System Business Logic Tests', () => {
   describe('BUSINESS RULE: XP Award for Training', () => {
     it('AWARDS XP to horse owner (Player) when training succeeds', async() => {
       // Get initial player XP
-      const initialPlayer = await prisma.player.findUnique({
+      const initialPlayer = await prisma.user.findUnique({
         where: { id: testPlayer.id }
       });
-      const initialXP = initialPlayer.xp;
-      const initialLevel = initialPlayer.level;
+      const initialXP = initialPlayer.xp || 0;
+      const initialLevel = initialPlayer.level || 1;
 
       // Create a fresh horse for XP testing
       const xpTestHorse = await prisma.horse.create({
@@ -500,12 +499,12 @@ describe('Training System Business Logic Tests', () => {
           age: 4,
           breedId: (await prisma.breed.findFirst()).id,
           ownerId: testUser.id,
-          playerId: testPlayer.id,     // THIS is what matters for XP
+          userId: testPlayer.id,       // THIS is what matters for XP
           sex: 'Mare',
-          date_of_birth: new Date('2020-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2020-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: {},
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []
@@ -530,16 +529,16 @@ describe('Training System Business Logic Tests', () => {
       expect(updatedHorse.disciplineScores.Trail).toBeGreaterThanOrEqual(5);
 
       // VERIFY: Player received XP (base amount is 5 XP for training)
-      const finalPlayer = await prisma.player.findUnique({
+      const finalPlayer = await prisma.user.findUnique({
         where: { id: testPlayer.id }
       });
 
-      const xpGained = finalPlayer.xp - initialXP;
+      const xpGained = (finalPlayer.xp || 0) - initialXP;
       expect(xpGained).toBeGreaterThanOrEqual(5); // Base XP award for training
 
       // VERIFY: Level progression if applicable
-      if (finalPlayer.level > initialLevel) {
-        console.log(`🎉 Player leveled up from ${initialLevel} to ${finalPlayer.level}!`);
+      if ((finalPlayer.level || 1) > initialLevel) {
+        // Player leveled up - this is expected behavior
       }
 
       // Clean up
@@ -561,12 +560,12 @@ describe('Training System Business Logic Tests', () => {
           age: 5,
           breedId: (await prisma.breed.findFirst()).id,
           ownerId: testUser.id,
-          playerId: testPlayer.id,
+          userId: testPlayer.id,
           sex: 'Stallion',
-          date_of_birth: new Date('2019-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2019-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: {},
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []
@@ -656,12 +655,12 @@ describe('Training System Business Logic Tests', () => {
           age: 4,
           breedId: (await prisma.breed.findFirst()).id,
           ownerId: testUser.id,
-          playerId: testPlayer.id,
+          userId: testPlayer.id,
           sex: 'Mare',
-          date_of_birth: new Date('2020-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2020-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: {},
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []

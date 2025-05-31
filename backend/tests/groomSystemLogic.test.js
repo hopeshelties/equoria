@@ -16,22 +16,22 @@ describe('Groom System Logic Tests', () => {
     const mockGroom = {
       id: 1,
       name: 'Sarah Johnson',
-      speciality: 'foal_care',
-      skill_level: 'intermediate',
+      speciality: 'foalCare',
+      skillLevel: 'intermediate',
       personality: 'gentle',
       experience: 5,
-      hourly_rate: 18.0
+      hourlyRate: 18.0
     };
 
     const mockFoal = {
       id: 1,
       name: 'Test Foal',
-      bond_score: 50,
-      stress_level: 20
+      bondScore: 50,
+      stressLevel: 20
     };
 
     it('should calculate basic interaction effects', () => {
-      const effects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 60);
+      const effects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 60);
 
       expect(effects).toHaveProperty('bondingChange');
       expect(effects).toHaveProperty('stressChange');
@@ -55,11 +55,11 @@ describe('Groom System Logic Tests', () => {
     });
 
     it('should apply foal care specialty bonuses correctly', () => {
-      const foalCareGroom = { ...mockGroom, speciality: 'foal_care' };
+      const foalCareGroom = { ...mockGroom, speciality: 'foalCare' };
       const generalGroom = { ...mockGroom, speciality: 'general' };
 
-      const foalCareEffects = calculateGroomInteractionEffects(foalCareGroom, mockFoal, 'daily_care', 60);
-      const generalEffects = calculateGroomInteractionEffects(generalGroom, mockFoal, 'daily_care', 60);
+      const foalCareEffects = calculateGroomInteractionEffects(foalCareGroom, mockFoal, 'dailyCare', 60);
+      const generalEffects = calculateGroomInteractionEffects(generalGroom, mockFoal, 'dailyCare', 60);
 
       // Foal care specialist should have better bonding modifier
       expect(foalCareEffects.modifiers.specialty).toBe(1.5);
@@ -68,11 +68,11 @@ describe('Groom System Logic Tests', () => {
     });
 
     it('should apply skill level modifiers correctly', () => {
-      const expertGroom = { ...mockGroom, skill_level: 'expert' };
-      const noviceGroom = { ...mockGroom, skill_level: 'novice' };
+      const expertGroom = { ...mockGroom, skillLevel: 'expert' };
+      const noviceGroom = { ...mockGroom, skillLevel: 'novice' };
 
-      const expertEffects = calculateGroomInteractionEffects(expertGroom, mockFoal, 'daily_care', 60);
-      const noviceEffects = calculateGroomInteractionEffects(noviceGroom, mockFoal, 'daily_care', 60);
+      const expertEffects = calculateGroomInteractionEffects(expertGroom, mockFoal, 'dailyCare', 60);
+      const noviceEffects = calculateGroomInteractionEffects(noviceGroom, mockFoal, 'dailyCare', 60);
 
       // Expert should have better bonding modifier
       expect(expertEffects.modifiers.skillLevel).toBe(1.3);
@@ -87,8 +87,8 @@ describe('Groom System Logic Tests', () => {
       const gentleGroom = { ...mockGroom, personality: 'gentle' };
       const strictGroom = { ...mockGroom, personality: 'strict' };
 
-      const gentleEffects = calculateGroomInteractionEffects(gentleGroom, mockFoal, 'daily_care', 60);
-      const strictEffects = calculateGroomInteractionEffects(strictGroom, mockFoal, 'daily_care', 60);
+      const gentleEffects = calculateGroomInteractionEffects(gentleGroom, mockFoal, 'dailyCare', 60);
+      const strictEffects = calculateGroomInteractionEffects(strictGroom, mockFoal, 'dailyCare', 60);
 
       // Gentle should have better bonding modifier
       expect(gentleEffects.modifiers.personality).toBe(1.2);
@@ -100,8 +100,8 @@ describe('Groom System Logic Tests', () => {
       const experiencedGroom = { ...mockGroom, experience: 15 };
       const newGroom = { ...mockGroom, experience: 1 };
 
-      const experiencedEffects = calculateGroomInteractionEffects(experiencedGroom, mockFoal, 'daily_care', 60);
-      const newGroomEffects = calculateGroomInteractionEffects(newGroom, mockFoal, 'daily_care', 60);
+      const experiencedEffects = calculateGroomInteractionEffects(experiencedGroom, mockFoal, 'dailyCare', 60);
+      const newGroomEffects = calculateGroomInteractionEffects(newGroom, mockFoal, 'dailyCare', 60);
 
       // Experience bonus: +1 bonding per 5 years
       expect(experiencedEffects.modifiers.experience).toBe(3); // 15/5 = 3
@@ -110,13 +110,13 @@ describe('Groom System Logic Tests', () => {
     });
 
     it('should scale cost with duration and hourly rate', () => {
-      const shortEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 30);
-      const longEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 120);
+      const shortEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 30);
+      const longEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 120);
 
       // Longer duration should cost more
       expect(longEffects.cost).toBeGreaterThan(shortEffects.cost);
 
-      // Cost should be approximately hourly_rate * (duration/60) * skill_modifier
+      // Cost should be approximately hourlyRate * (duration/60) * skill_modifier
       const expectedShortCost = 18.0 * (30/60) * 1.0; // intermediate skill modifier = 1.0
       const expectedLongCost = 18.0 * (120/60) * 1.0;
 
@@ -125,7 +125,7 @@ describe('Groom System Logic Tests', () => {
     });
 
     it('should handle different interaction types', () => {
-      const dailyCareEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 60);
+      const dailyCareEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 60);
       const feedingEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'feeding', 60);
       const groomingEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'grooming', 60);
 
@@ -141,18 +141,18 @@ describe('Groom System Logic Tests', () => {
 
     it('should handle edge cases gracefully', () => {
       // Very short duration
-      const shortEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 5);
+      const shortEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 5);
       expect(shortEffects.bondingChange).toBeGreaterThanOrEqual(0);
       expect(shortEffects.cost).toBeGreaterThan(0);
 
       // Very long duration
-      const longEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 480);
+      const longEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 480);
       expect(longEffects.bondingChange).toBeLessThanOrEqual(10);
       expect(longEffects.cost).toBeGreaterThan(0);
 
       // High experience groom
-      const masterGroom = { ...mockGroom, experience: 20, skill_level: 'master' };
-      const masterEffects = calculateGroomInteractionEffects(masterGroom, mockFoal, 'daily_care', 60);
+      const masterGroom = { ...mockGroom, experience: 20, skillLevel: 'master' };
+      const masterEffects = calculateGroomInteractionEffects(masterGroom, mockFoal, 'dailyCare', 60);
       expect(masterEffects.modifiers.experience).toBe(4); // 20/5 = 4
       expect(masterEffects.modifiers.skillLevel).toBe(1.6);
     });
@@ -160,17 +160,17 @@ describe('Groom System Logic Tests', () => {
 
   describe('System Constants', () => {
     it('should have all required groom specialties', () => {
-      expect(GROOM_SPECIALTIES).toHaveProperty('foal_care');
+      expect(GROOM_SPECIALTIES).toHaveProperty('foalCare');
       expect(GROOM_SPECIALTIES).toHaveProperty('general');
       expect(GROOM_SPECIALTIES).toHaveProperty('training');
       expect(GROOM_SPECIALTIES).toHaveProperty('medical');
 
-      // Check foal_care specialty details
-      const foalCare = GROOM_SPECIALTIES.foal_care;
+      // Check foalCare specialty details
+      const foalCare = GROOM_SPECIALTIES.foalCare;
       expect(foalCare.name).toBe('Foal Care Specialist');
       expect(foalCare.bondingModifier).toBe(1.5);
       expect(foalCare.stressReduction).toBe(1.3);
-      expect(foalCare.preferredActivities).toContain('daily_care');
+      expect(foalCare.preferredActivities).toContain('dailyCare');
       expect(foalCare.preferredActivities).toContain('feeding');
       expect(foalCare.preferredActivities).toContain('grooming');
 
@@ -284,14 +284,14 @@ describe('Groom System Logic Tests', () => {
   describe('Modifier Calculations', () => {
     it('should combine modifiers correctly', () => {
       const testGroom = {
-        speciality: 'foal_care', // 1.5x bonding
-        skill_level: 'expert',   // 1.3x bonding
+        speciality: 'foalCare', // 1.5x bonding
+        skillLevel: 'expert',   // 1.3x bonding
         personality: 'gentle',   // 1.2x bonding
         experience: 10,          // +2 bonding (10/5)
-        hourly_rate: 25.0
+        hourlyRate: 25.0
       };
 
-      const effects = calculateGroomInteractionEffects(testGroom, { bond_score: 50 }, 'daily_care', 60);
+      const effects = calculateGroomInteractionEffects(testGroom, { bondScore: 50 }, 'dailyCare', 60);
 
       // Check individual modifiers
       expect(effects.modifiers.specialty).toBe(1.5);
@@ -307,14 +307,14 @@ describe('Groom System Logic Tests', () => {
     it('should handle invalid modifiers gracefully', () => {
       const invalidGroom = {
         speciality: 'invalid_specialty',
-        skill_level: 'invalid_level',
+        skillLevel: 'invalid_level',
         personality: 'invalid_personality',
         experience: 5,
-        hourly_rate: 18.0
+        hourlyRate: 18.0
       };
 
       // Should not throw error, should use defaults
-      const effects = calculateGroomInteractionEffects(invalidGroom, { bond_score: 50 }, 'daily_care', 60);
+      const effects = calculateGroomInteractionEffects(invalidGroom, { bondScore: 50 }, 'dailyCare', 60);
       
       expect(effects).toHaveProperty('bondingChange');
       expect(effects).toHaveProperty('stressChange');

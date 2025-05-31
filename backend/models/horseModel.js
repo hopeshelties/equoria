@@ -28,8 +28,8 @@ async function createHorse(horseData) {
       intelligence,
       personality,
       total_earnings,
-      sire_id,
-      dam_id,
+      sireId,
+      damId,
       stud_status,
       stud_fee,
       last_bred_date,
@@ -90,15 +90,15 @@ async function createHorse(horseData) {
     }
 
     // Apply at-birth traits if this is a newborn with parents
-    let epigeneticModifiers = horseData.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    let epigeneticModifiers = horseData.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
 
-    if (age === 0 && sire_id && dam_id) {
+    if (age === 0 && sireId && damId) {
       try {
-        logger.info(`[horseModel.createHorse] Applying at-birth traits for newborn with sire ${sire_id} and dam ${dam_id}`);
+        logger.info(`[horseModel.createHorse] Applying at-birth traits for newborn with sire ${sireId} and dam ${damId}`);
 
         const atBirthResult = await applyEpigeneticTraitsAtBirth({
-          sireId: sire_id,
-          damId: dam_id,
+          sireId: sireId,
+          damId: damId,
           mareStress: horseData.mareStress,
           feedQuality: horseData.feedQuality
         });
@@ -147,8 +147,8 @@ async function createHorse(horseData) {
         ...(intelligence !== undefined && { intelligence }),
         ...(personality && { personality }),
         ...(total_earnings !== undefined && { total_earnings }),
-        ...(sire_id && { sire_id }),
-        ...(dam_id && { dam_id }),
+        ...(sireId && { sireId }),
+        ...(damId && { damId }),
         ...(stud_status && { stud_status }),
         ...(stud_fee !== undefined && { stud_fee }),
         ...(last_bred_date && { last_bred_date: new Date(last_bred_date) }),
@@ -157,7 +157,7 @@ async function createHorse(horseData) {
         ...(health_status && { health_status }),
         ...(last_vetted_date && { last_vetted_date: new Date(last_vetted_date) }),
         ...(tack && { tack }),
-        epigenetic_modifiers: epigeneticModifiers
+        epigeneticModifiers: epigeneticModifiers
       },
       include: {
         breed: true,
@@ -403,7 +403,7 @@ async function getPositiveTraits(horseId) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
+        epigeneticModifiers: true
       }
     });
 
@@ -411,7 +411,7 @@ async function getPositiveTraits(horseId) {
       throw new Error(`Horse with ID ${horseId} not found`);
     }
 
-    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
     const positiveTraits = traits.positive || [];
 
     logger.info(`[horseModel.getPositiveTraits] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`);
@@ -449,7 +449,7 @@ async function hasTraitPresent(horseId, traitName) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
+        epigeneticModifiers: true
       }
     });
 
@@ -457,7 +457,7 @@ async function hasTraitPresent(horseId, traitName) {
       throw new Error(`Horse with ID ${horseId} not found`);
     }
 
-    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
 
     const isPositive = (traits.positive || []).includes(traitName);
     const isNegative = (traits.negative || []).includes(traitName);
@@ -511,7 +511,7 @@ async function addTraitSafely(horseId, traitName, category) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
+        epigeneticModifiers: true
       }
     });
 
@@ -520,7 +520,7 @@ async function addTraitSafely(horseId, traitName, category) {
     }
 
     // Get current traits and ensure proper structure
-    const currentTraits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const currentTraits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
     const updatedTraits = {
       positive: currentTraits.positive || [],
       negative: currentTraits.negative || [],
@@ -552,7 +552,7 @@ async function addTraitSafely(horseId, traitName, category) {
     const updatedHorse = await prisma.horse.update({
       where: { id: numericId },
       data: {
-        epigenetic_modifiers: updatedTraits
+        epigeneticModifiers: updatedTraits
       },
       include: {
         breed: true,
@@ -597,7 +597,7 @@ async function removeTraitSafely(horseId, traitName) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
+        epigeneticModifiers: true
       }
     });
 
@@ -606,7 +606,7 @@ async function removeTraitSafely(horseId, traitName) {
     }
 
     // Get current traits and ensure proper structure
-    const currentTraits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const currentTraits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
     const updatedTraits = {
       positive: (currentTraits.positive || []).filter(t => t !== traitName),
       negative: (currentTraits.negative || []).filter(t => t !== traitName),
@@ -626,7 +626,7 @@ async function removeTraitSafely(horseId, traitName) {
     const updatedHorse = await prisma.horse.update({
       where: { id: numericId },
       data: {
-        epigenetic_modifiers: updatedTraits
+        epigeneticModifiers: updatedTraits
       },
       include: {
         breed: true,
@@ -665,7 +665,7 @@ async function getAllTraits(horseId) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
+        epigeneticModifiers: true
       }
     });
 
@@ -673,7 +673,7 @@ async function getAllTraits(horseId) {
       throw new Error(`Horse with ID ${horseId} not found`);
     }
 
-    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
 
     // Ensure all categories exist and are arrays
     const result = {
@@ -722,7 +722,7 @@ async function hasTrait(horseId, traitName) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
+        epigeneticModifiers: true
       }
     });
 
@@ -730,7 +730,7 @@ async function hasTrait(horseId, traitName) {
       throw new Error(`Horse with ID ${horseId} not found`);
     }
 
-    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
 
     const hasPositive = (traits.positive || []).includes(traitName);
     const hasNegative = (traits.negative || []).includes(traitName);
@@ -768,7 +768,7 @@ async function getPositiveTraitsArray(horseId) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
+        epigeneticModifiers: true
       }
     });
 
@@ -776,7 +776,7 @@ async function getPositiveTraitsArray(horseId) {
       throw new Error(`Horse with ID ${horseId} not found`);
     }
 
-    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
     const positiveTraits = traits.positive || [];
 
     logger.info(`[horseModel.getPositiveTraitsArray] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`);
@@ -809,7 +809,7 @@ async function getNegativeTraitsArray(horseId) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
+        epigeneticModifiers: true
       }
     });
 
@@ -817,7 +817,7 @@ async function getNegativeTraitsArray(horseId) {
       throw new Error(`Horse with ID ${horseId} not found`);
     }
 
-    const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
+    const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
     const negativeTraits = traits.negative || [];
 
     logger.info(`[horseModel.getNegativeTraitsArray] Found ${negativeTraits.length} negative traits for horse ${horseId}: ${negativeTraits.join(', ')}`);

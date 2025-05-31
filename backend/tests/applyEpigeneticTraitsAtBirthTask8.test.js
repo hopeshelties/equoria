@@ -57,10 +57,10 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
     beforeEach(() => {
       // Mock mare with excellent conditions
       mockPrisma.horse.findUnique.mockResolvedValue({
-        stress_level: 15,
-        bond_score: 85,
-        health_status: 'Excellent',
-        total_earnings: 100000
+        stressLevel: 15,
+        bondScore: 85,
+        healthStatus: 'Excellent',
+        totalEarnings: 100000
       });
 
       // Mock empty lineage (no specialization or inbreeding)
@@ -162,9 +162,9 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
     beforeEach(() => {
       // Mock mare
       mockPrisma.horse.findUnique.mockResolvedValue({
-        stress_level: 30,
-        bond_score: 70,
-        health_status: 'Good'
+        stressLevel: 30,
+        bondScore: 70,
+        healthStatus: 'Good'
       });
 
       // Mock no competition results
@@ -176,26 +176,26 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
       jest.spyOn(Math, 'random').mockReturnValueOnce(0.3); // Below 0.60 probability
 
       // Mock inbreeding scenario - common ancestor appears in both lineages
-      const commonAncestor = { id: 100, name: 'CommonAncestor', sire_id: null, dam_id: null };
+      const commonAncestor = { id: 100, name: 'CommonAncestor', sireId: null, damId: null };
 
       // Mock the getAncestors calls for detectInbreeding
       mockPrisma.horse.findMany
         // First call: get sire (id: 1) for sire lineage
-        .mockResolvedValueOnce([{ id: 1, name: 'Sire', sire_id: 100, dam_id: 101 }])
+        .mockResolvedValueOnce([{ id: 1, name: 'Sire', sireId: 100, damId: 101 }])
         // Second call: get sire's parents
-        .mockResolvedValueOnce([commonAncestor, { id: 101, name: 'SireGrandma', sire_id: null, dam_id: null }])
+        .mockResolvedValueOnce([commonAncestor, { id: 101, name: 'SireGrandma', sireId: null, damId: null }])
         // Third call: no further sire ancestors
         .mockResolvedValueOnce([])
         // Fourth call: get dam (id: 2) for dam lineage
-        .mockResolvedValueOnce([{ id: 2, name: 'Dam', sire_id: 100, dam_id: 102 }])
+        .mockResolvedValueOnce([{ id: 2, name: 'Dam', sireId: 100, damId: 102 }])
         // Fifth call: get dam's parents (includes same common ancestor)
-        .mockResolvedValueOnce([commonAncestor, { id: 102, name: 'DamGrandma', sire_id: null, dam_id: null }])
+        .mockResolvedValueOnce([commonAncestor, { id: 102, name: 'DamGrandma', sireId: null, damId: null }])
         // Sixth call: no further dam ancestors
         .mockResolvedValueOnce([])
         // Seventh call: for lineage analysis - get both parents
         .mockResolvedValueOnce([
-          { id: 1, name: 'Sire', sire_id: 100, dam_id: 101 },
-          { id: 2, name: 'Dam', sire_id: 100, dam_id: 102 }
+          { id: 1, name: 'Sire', sireId: 100, damId: 101 },
+          { id: 2, name: 'Dam', sireId: 100, damId: 102 }
         ])
         // Eighth call: get all ancestors for lineage analysis
         .mockResolvedValueOnce([commonAncestor, { id: 101, name: 'SireGrandma' }, { id: 102, name: 'DamGrandma' }])
@@ -221,14 +221,14 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
       // Mock no inbreeding scenario
       mockPrisma.horse.findMany
         // Sire lineage
-        .mockResolvedValueOnce([{ id: 1, name: 'Sire', sire_id: 10, dam_id: 11 }])
+        .mockResolvedValueOnce([{ id: 1, name: 'Sire', sireId: 10, damId: 11 }])
         .mockResolvedValueOnce([
           { id: 10, name: 'SireGrandpa' },
           { id: 11, name: 'SireGrandma' }
         ])
         .mockResolvedValueOnce([])
         // Dam lineage
-        .mockResolvedValueOnce([{ id: 2, name: 'Dam', sire_id: 20, dam_id: 21 }])
+        .mockResolvedValueOnce([{ id: 2, name: 'Dam', sireId: 20, damId: 21 }])
         .mockResolvedValueOnce([
           { id: 20, name: 'DamGrandpa' },
           { id: 21, name: 'DamGrandma' }
@@ -252,10 +252,10 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
     beforeEach(() => {
       // Mock mare with poor conditions
       mockPrisma.horse.findUnique.mockResolvedValue({
-        stress_level: 80,
-        bond_score: 30,
-        health_status: 'Poor',
-        total_earnings: 1000
+        stressLevel: 80,
+        bondScore: 30,
+        healthStatus: 'Poor',
+        totalEarnings: 1000
       });
 
       // Mock empty lineage
@@ -316,9 +316,9 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
     beforeEach(() => {
       // Mock mare with moderate conditions
       mockPrisma.horse.findUnique.mockResolvedValue({
-        stress_level: 35,
-        bond_score: 70,
-        health_status: 'Good'
+        stressLevel: 35,
+        bondScore: 70,
+        healthStatus: 'Good'
       });
     });
 
@@ -343,7 +343,7 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
       ];
 
       mockPrisma.horse.findMany
-        .mockResolvedValueOnce([{ id: 1, sire_id: 10, dam_id: 11 }])
+        .mockResolvedValueOnce([{ id: 1, sireId: 10, damId: 11 }])
         .mockResolvedValueOnce(racingAncestors)
         .mockResolvedValueOnce([]);
 
@@ -376,7 +376,7 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
       ];
 
       mockPrisma.horse.findMany
-        .mockResolvedValueOnce([{ id: 1, sire_id: 10, dam_id: 11 }])
+        .mockResolvedValueOnce([{ id: 1, sireId: 10, damId: 11 }])
         .mockResolvedValueOnce([
           { id: 10, name: 'Ancestor1' },
           { id: 11, name: 'Ancestor2' }
@@ -422,10 +422,10 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
     beforeEach(() => {
       // Mock optimal mare conditions
       mockPrisma.horse.findUnique.mockResolvedValue({
-        stress_level: 10,
-        bond_score: 90,
-        health_status: 'Excellent',
-        total_earnings: 200000
+        stressLevel: 10,
+        bondScore: 90,
+        healthStatus: 'Excellent',
+        totalEarnings: 200000
       });
 
       // Mock empty lineage
@@ -534,9 +534,9 @@ describe('TASK 8: applyEpigeneticTraitsAtBirth() Tests', () => {
 
     it('should handle database errors gracefully in lineage analysis', async() => {
       mockPrisma.horse.findUnique.mockResolvedValue({
-        stress_level: 30,
-        bond_score: 70,
-        health_status: 'Good'
+        stressLevel: 30,
+        bondScore: 70,
+        healthStatus: 'Good'
       });
 
       // Mock database error in lineage analysis

@@ -62,12 +62,12 @@ describe('Foal Enrichment API Integration Tests', () => {
     mockPrisma.horse.findUnique.mockResolvedValue(testFoal);
     mockPrisma.foalTrainingHistory.create.mockResolvedValue({
       id: 'test-training-id',
-      horse_id: testFoal.id,
+      horseId: testFoal.id,
       day: 3,
       activity: 'Trailer Exposure',
       outcome: 'success',
-      bond_change: 5,
-      stress_change: 2,
+      bondChange: 5,
+      stressChange: 2,
       timestamp: new Date()
     });
   });
@@ -87,12 +87,12 @@ describe('Foal Enrichment API Integration Tests', () => {
     // Ensure foalTrainingHistory.create always returns a valid object
     mockPrisma.foalTrainingHistory.create.mockResolvedValue({
       id: 'test-training-id',
-      horse_id: testFoal.id,
+      horseId: testFoal.id,
       day: 3,
       activity: 'Test Activity',
       outcome: 'success',
-      bond_change: 5,
-      stress_change: 2,
+      bondChange: 5,
+      stressChange: 2,
       timestamp: new Date()
     });
   });
@@ -131,13 +131,13 @@ describe('Foal Enrichment API Integration Tests', () => {
       expect(response.body.data.updated_levels.stress_level).toBeLessThanOrEqual(100);
 
       // Verify changes are reported
-      expect(response.body.data.changes).toHaveProperty('bond_change');
-      expect(response.body.data.changes).toHaveProperty('stress_change');
+      expect(response.body.data.changes).toHaveProperty('bondChange');
+      expect(response.body.data.changes).toHaveProperty('stressChange');
 
       // Verify training record was created
       expect(mockPrisma.foalTrainingHistory.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          horse_id: testFoal.id,
+          horseId: testFoal.id,
           day: 3,
           activity: 'Trailer Exposure'
         })
@@ -314,12 +314,12 @@ describe('Foal Enrichment API Integration Tests', () => {
       // Setup mock for training record creation
       mockPrisma.foalTrainingHistory.create.mockResolvedValueOnce({
         id: 'test-training-record',
-        horse_id: testFoal.id,
+        horseId: testFoal.id,
         day: 1,
         activity: 'Feeding Assistance',
         outcome: 'success',
-        bond_change: 6,
-        stress_change: 1,
+        bondChange: 6,
+        stressChange: 1,
         timestamp: new Date()
       });
 
@@ -334,12 +334,12 @@ describe('Foal Enrichment API Integration Tests', () => {
       // Verify training record was created
       expect(mockPrisma.foalTrainingHistory.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          horse_id: testFoal.id,
+          horseId: testFoal.id,
           day: 1,
           activity: 'Feeding Assistance',
           outcome: expect.stringMatching(/success|excellent|challenging/),
-          bond_change: expect.any(Number),
-          stress_change: expect.any(Number)
+          bondChange: expect.any(Number),
+          stressChange: expect.any(Number)
         })
       });
     });

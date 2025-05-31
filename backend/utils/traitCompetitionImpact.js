@@ -345,11 +345,11 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
  * @returns {number} Diminishing factor (0.5 to 1.0)
  */
 function calculateDiminishingReturns(traitCount) {
-  if (traitCount <= 1) return 1.0;
-  if (traitCount === 2) return 0.95;
-  if (traitCount === 3) return 0.90;
-  if (traitCount === 4) return 0.85;
-  if (traitCount >= 5) return 0.80;
+  if (traitCount <= 1) {return 1.0;}
+  if (traitCount === 2) {return 0.95;}
+  if (traitCount === 3) {return 0.90;}
+  if (traitCount === 4) {return 0.85;}
+  if (traitCount >= 5) {return 0.80;}
   return 1.0;
 }
 

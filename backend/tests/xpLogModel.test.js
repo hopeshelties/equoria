@@ -32,7 +32,7 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 }));
 
 // Import the module after mocking
-const { logXpEvent, getPlayerXpEvents, getPlayerXpSummary, getRecentXpEvents } = await import(join(__dirname, '../models/xpLogModel.js'));
+const { logXpEvent, getUserXpEvents, getUserXpSummary, getRecentXpEvents } = await import(join(__dirname, '../models/xpLogModel.js'));
 
 describe('xpLogModel', () => {
   beforeEach(() => {
@@ -49,7 +49,7 @@ describe('xpLogModel', () => {
     it('should log XP event successfully', async () => {
       const mockXpEvent = {
         id: 1,
-        playerId: 'player-123',
+        userId: 'user-123',
         amount: 5,
         reason: 'Trained horse in Dressage',
         timestamp: new Date('2024-01-01T10:00:00Z')
@@ -58,14 +58,14 @@ describe('xpLogModel', () => {
       mockPrismaXpEvent.create.mockResolvedValue(mockXpEvent);
 
       const result = await logXpEvent({
-        playerId: 'player-123',
+        userId: 'user-123',
         amount: 5,
         reason: 'Trained horse in Dressage'
       });
 
       expect(mockPrismaXpEvent.create).toHaveBeenCalledWith({
         data: {
-          playerId: 'player-123',
+          userId: 'user-123',
           amount: 5,
           reason: 'Trained horse in Dressage'
         }
@@ -73,32 +73,32 @@ describe('xpLogModel', () => {
 
       expect(result).toEqual({
         id: 1,
-        playerId: 'player-123',
+        userId: 'user-123',
         amount: 5,
         reason: 'Trained horse in Dressage',
         timestamp: new Date('2024-01-01T10:00:00Z')
       });
 
-      expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.logXpEvent] Logging XP event: Player player-123, Amount: 5, Reason: Trained horse in Dressage');
+      expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.logXpEvent] Logging XP event: User user-123, Amount: 5, Reason: Trained horse in Dressage');
     });
 
     it('should validate required parameters', async () => {
-      // Test missing playerId
+      // Test missing userId
       await expect(logXpEvent({
         amount: 5,
         reason: 'Test reason'
-      })).rejects.toThrow('Player ID is required');
+      })).rejects.toThrow('User ID is required');
 
       // Test invalid amount
       await expect(logXpEvent({
-        playerId: 'player-123',
+        userId: 'user-123',
         amount: 'invalid',
         reason: 'Test reason'
       })).rejects.toThrow('Amount must be a number');
 
       // Test missing reason
       await expect(logXpEvent({
-        playerId: 'player-123',
+        userId: 'user-123',
         amount: 5
       })).rejects.toThrow('Reason is required and must be a string');
 
@@ -109,7 +109,7 @@ describe('xpLogModel', () => {
       mockPrismaXpEvent.create.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(logXpEvent({
-        playerId: 'player-123',
+        userId: 'user-123',
         amount: 5,
         reason: 'Test reason'
       })).rejects.toThrow('Database connection failed');
@@ -120,7 +120,7 @@ describe('xpLogModel', () => {
     it('should handle negative XP amounts', async () => {
       const mockXpEvent = {
         id: 2,
-        playerId: 'player-123',
+        userId: 'user-123',
         amount: -10,
         reason: 'XP penalty for rule violation',
         timestamp: new Date('2024-01-01T10:00:00Z')
@@ -129,7 +129,7 @@ describe('xpLogModel', () => {
       mockPrismaXpEvent.create.mockResolvedValue(mockXpEvent);
 
       const result = await logXpEvent({
-        playerId: 'player-123',
+        userId: 'user-123',
         amount: -10,
         reason: 'XP penalty for rule violation'
       });
@@ -137,7 +137,7 @@ describe('xpLogModel', () => {
       expect(result.amount).toBe(-10);
       expect(mockPrismaXpEvent.create).toHaveBeenCalledWith({
         data: {
-          playerId: 'player-123',
+          userId: 'user-123',
           amount: -10,
           reason: 'XP penalty for rule violation'
         }
@@ -145,19 +145,19 @@ describe('xpLogModel', () => {
     });
   });
 
-  describe('getPlayerXpEvents', () => {
-    it('should retrieve XP events for a player', async () => {
+  describe('getUserXpEvents', () => {
+    it('should retrieve XP events for a user', async () => {
       const mockEvents = [
         {
           id: 1,
-          playerId: 'player-123',
+          userId: 'user-123',
           amount: 20,
           reason: '1st place with horse Nova in Racing',
           timestamp: new Date('2024-01-01T12:00:00Z')
         },
         {
           id: 2,
-          playerId: 'player-123',
+          userId: 'user-123',
           amount: 5,
           reason: 'Trained horse in Dressage',
           timestamp: new Date('2024-01-01T10:00:00Z')
@@ -166,17 +166,17 @@ describe('xpLogModel', () => {
 
       mockPrismaXpEvent.findMany.mockResolvedValue(mockEvents);
 
-      const result = await getPlayerXpEvents('player-123');
+      const result = await getUserXpEvents('user-123');
 
       expect(mockPrismaXpEvent.findMany).toHaveBeenCalledWith({
-        where: { playerId: 'player-123' },
+        where: { userId: 'user-123' },
         orderBy: { timestamp: 'desc' },
         take: 50,
         skip: 0
       });
 
       expect(result).toEqual(mockEvents);
-      expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.getPlayerXpEvents] Getting XP events for player player-123, limit: 50, offset: 0');
+      expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.getUserXpEvents] Getting XP events for user user-123, limit: 50, offset: 0');
     });
 
     it('should handle date filters', async () => {
@@ -185,7 +185,7 @@ describe('xpLogModel', () => {
 
       mockPrismaXpEvent.findMany.mockResolvedValue([]);
 
-      await getPlayerXpEvents('player-123', {
+      await getUserXpEvents('user-123', {
         limit: 10,
         offset: 5,
         startDate,
@@ -194,7 +194,7 @@ describe('xpLogModel', () => {
 
       expect(mockPrismaXpEvent.findMany).toHaveBeenCalledWith({
         where: {
-          playerId: 'player-123',
+          userId: 'user-123',
           timestamp: {
             gte: startDate,
             lte: endDate
@@ -207,7 +207,7 @@ describe('xpLogModel', () => {
     });
   });
 
-  describe('getPlayerXpSummary', () => {
+  describe('getUserXpSummary', () => {
     it('should calculate XP summary correctly', async () => {
       const mockEvents = [
         { amount: 20 },
@@ -219,7 +219,7 @@ describe('xpLogModel', () => {
 
       mockPrismaXpEvent.findMany.mockResolvedValue(mockEvents);
 
-      const result = await getPlayerXpSummary('player-123');
+      const result = await getUserXpSummary('user-123');
 
       expect(result).toEqual({
         totalGained: 50, // 20 + 15 + 5 + 10
@@ -229,7 +229,7 @@ describe('xpLogModel', () => {
       });
 
       expect(mockPrismaXpEvent.findMany).toHaveBeenCalledWith({
-        where: { playerId: 'player-123' },
+        where: { userId: 'user-123' },
         select: { amount: true }
       });
     });
@@ -237,7 +237,7 @@ describe('xpLogModel', () => {
     it('should handle empty results', async () => {
       mockPrismaXpEvent.findMany.mockResolvedValue([]);
 
-      const result = await getPlayerXpSummary('player-123');
+      const result = await getUserXpSummary('user-123');
 
       expect(result).toEqual({
         totalGained: 0,
@@ -253,11 +253,11 @@ describe('xpLogModel', () => {
 
       mockPrismaXpEvent.findMany.mockResolvedValue([]);
 
-      await getPlayerXpSummary('player-123', startDate, endDate);
+      await getUserXpSummary('user-123', startDate, endDate);
 
       expect(mockPrismaXpEvent.findMany).toHaveBeenCalledWith({
         where: {
-          playerId: 'player-123',
+          userId: 'user-123',
           timestamp: {
             gte: startDate,
             lte: endDate
@@ -269,18 +269,18 @@ describe('xpLogModel', () => {
   });
 
   describe('getRecentXpEvents', () => {
-    it('should retrieve recent XP events across all players', async () => {
+    it('should retrieve recent XP events across all users', async () => {
       const mockEvents = [
         {
           id: 3,
-          playerId: 'player-456',
+          userId: 'user-456',
           amount: 15,
           reason: '2nd place with horse Star in Jumping',
           timestamp: new Date('2024-01-01T14:00:00Z')
         },
         {
           id: 2,
-          playerId: 'player-123',
+          userId: 'user-123',
           amount: 5,
           reason: 'Trained horse in Dressage',
           timestamp: new Date('2024-01-01T10:00:00Z')
@@ -294,7 +294,15 @@ describe('xpLogModel', () => {
       expect(mockPrismaXpEvent.findMany).toHaveBeenCalledWith({
         orderBy: { timestamp: 'desc' },
         take: 10,
-        skip: 0
+        skip: 0,
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true
+            }
+          }
+        }
       });
 
       expect(result).toEqual(mockEvents);
@@ -309,7 +317,15 @@ describe('xpLogModel', () => {
       expect(mockPrismaXpEvent.findMany).toHaveBeenCalledWith({
         orderBy: { timestamp: 'desc' },
         take: 100,
-        skip: 0
+        skip: 0,
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true
+            }
+          }
+        }
       });
     });
   });

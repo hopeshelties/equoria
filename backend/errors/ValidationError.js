@@ -7,7 +7,7 @@ import AppError from './AppError.js';
 class ValidationError extends AppError {
   constructor(message, field = null, value = null) {
     super(message, 400);
-    
+
     this.name = 'ValidationError';
     this.field = field;
     this.value = value;

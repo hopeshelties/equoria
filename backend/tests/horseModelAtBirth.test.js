@@ -61,9 +61,9 @@ describe('Horse Model At-Birth Traits Integration', () => {
       id: 1,
       name: 'Test Foal',
       age: 0,
-      sire_id: 10,
-      dam_id: 20,
-      epigenetic_modifiers: {
+      sireId: 10,
+      damId: 20,
+      epigeneticModifiers: {
         positive: ['hardy'],
         negative: [],
         hidden: []
@@ -76,8 +76,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
-        sire_id: 10,
-        dam_id: 20
+        sireId: 10,
+        damId: 20
       };
 
       const mockAtBirthResult = {
@@ -110,9 +110,9 @@ describe('Horse Model At-Birth Traits Integration', () => {
           name: 'Test Foal',
           age: 0,
           breedId: 1,
-          sire_id: 10,
-          dam_id: 20,
-          epigenetic_modifiers: {
+          sireId: 10,
+          damId: 20,
+          epigeneticModifiers: {
             positive: ['hardy'],
             negative: [],
             hidden: []
@@ -133,8 +133,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
-        sire_id: 10,
-        dam_id: 20,
+        sireId: 10,
+        damId: 20,
         mareStress: 15,
         feedQuality: 85
       };
@@ -155,7 +155,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockResolvedValue(mockAtBirthResult);
       mockPrisma.horse.create.mockResolvedValue({
         ...mockCreatedHorse,
-        epigenetic_modifiers: mockAtBirthResult.traits
+        epigeneticModifiers: mockAtBirthResult.traits
       });
 
       await createHorse(horseData);
@@ -173,9 +173,9 @@ describe('Horse Model At-Birth Traits Integration', () => {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
-        sire_id: 10,
-        dam_id: 20,
-        epigenetic_modifiers: {
+        sireId: 10,
+        damId: 20,
+        epigeneticModifiers: {
           positive: ['existing_trait'],
           negative: ['existing_negative'],
           hidden: []
@@ -198,7 +198,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
 
       expect(mockPrisma.horse.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: ['existing_trait', 'hardy'],
             negative: ['existing_negative'],
             hidden: ['hidden_trait']
@@ -213,8 +213,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
         name: 'Adult Horse',
         age: 5,
         breedId: 1,
-        sire_id: 10,
-        dam_id: 20
+        sireId: 10,
+        damId: 20
       };
 
       mockPrisma.horse.create.mockResolvedValue({
@@ -229,7 +229,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
 
       expect(mockPrisma.horse.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
+          epigeneticModifiers: { positive: [], negative: [], hidden: [] }
         }),
         include: expect.any(Object)
       });
@@ -245,8 +245,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
       mockPrisma.horse.create.mockResolvedValue({
         ...mockCreatedHorse,
         name: 'Foundling Horse',
-        sire_id: null,
-        dam_id: null
+        sireId: null,
+        damId: null
       });
 
       await createHorse(horseData);
@@ -259,8 +259,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
-        sire_id: 10,
-        dam_id: 20
+        sireId: 10,
+        damId: 20
       };
 
       mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockRejectedValue(new Error('Trait application failed'));
@@ -276,12 +276,12 @@ describe('Horse Model At-Birth Traits Integration', () => {
       );
     });
 
-    it('should handle missing sire_id gracefully', async() => {
+    it('should handle missing sireId gracefully', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
-        dam_id: 20
+        damId: 20
       };
 
       mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
@@ -291,12 +291,12 @@ describe('Horse Model At-Birth Traits Integration', () => {
       expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
     });
 
-    it('should handle missing dam_id gracefully', async() => {
+    it('should handle missing damId gracefully', async() => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
-        sire_id: 10
+        sireId: 10
       };
 
       mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
@@ -311,8 +311,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
-        sire_id: 10,
-        dam_id: 20
+        sireId: 10,
+        damId: 20
       };
 
       const mockAtBirthResult = {

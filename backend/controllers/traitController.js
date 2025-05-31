@@ -16,7 +16,7 @@ export async function discoverTraits(req, res) {
   try {
     const { horseId } = req.params;
     const { checkEnrichment = true, forceCheck = false } = req.body;
-    
+
     // Validate horse ID
     const parsedHorseId = parseInt(horseId, 10);
     if (isNaN(parsedHorseId) || parsedHorseId <= 0) {
@@ -26,15 +26,15 @@ export async function discoverTraits(req, res) {
         data: null
       });
     }
-    
+
     logger.info(`[traitController.discoverTraits] Triggering trait discovery for horse ${parsedHorseId}`);
-    
+
     // Check if horse exists
     const horse = await prisma.horse.findUnique({
       where: { id: parsedHorseId },
       select: { id: true, name: true }
     });
-    
+
     if (!horse) {
       return res.status(404).json({
         success: false,
@@ -42,18 +42,18 @@ export async function discoverTraits(req, res) {
         data: null
       });
     }
-    
+
     // Perform trait discovery
     const discoveryResult = await revealTraits(parsedHorseId, {
       checkEnrichment,
       forceCheck
     });
-    
+
     // Log discovery event
     if (discoveryResult.revealed.length > 0) {
       logger.info(`[traitController.discoverTraits] Discovered ${discoveryResult.revealed.length} traits for horse ${parsedHorseId} (${horse.name})`);
     }
-    
+
     res.status(200).json({
       success: true,
       message: discoveryResult.message,
@@ -63,7 +63,7 @@ export async function discoverTraits(req, res) {
         ...discoveryResult
       }
     });
-    
+
   } catch (error) {
     logger.error(`[traitController.discoverTraits] Error: ${error.message}`);
     res.status(500).json({
@@ -81,7 +81,7 @@ export async function discoverTraits(req, res) {
 export async function getHorseTraits(req, res) {
   try {
     const { horseId } = req.params;
-    
+
     // Validate horse ID
     const parsedHorseId = parseInt(horseId, 10);
     if (isNaN(parsedHorseId) || parsedHorseId <= 0) {
@@ -91,9 +91,9 @@ export async function getHorseTraits(req, res) {
         data: null
       });
     }
-    
+
     logger.info(`[traitController.getHorseTraits] Getting traits for horse ${parsedHorseId}`);
-    
+
     // Get horse with traits
     const horse = await prisma.horse.findUnique({
       where: { id: parsedHorseId },
@@ -106,7 +106,7 @@ export async function getHorseTraits(req, res) {
         age: true
       }
     });
-    
+
     if (!horse) {
       return res.status(404).json({
         success: false,
@@ -114,10 +114,10 @@ export async function getHorseTraits(req, res) {
         data: null
       });
     }
-    
+
     // Parse and enhance traits with definitions
     const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
-    
+
     const enhancedTraits = {
       positive: traits.positive?.map(trait => ({
         name: trait,
@@ -132,7 +132,7 @@ export async function getHorseTraits(req, res) {
         definition: getTraitDefinition(trait)
       })) || []
     };
-    
+
     res.status(200).json({
       success: true,
       message: `Retrieved traits for horse ${horse.name}`,
@@ -150,7 +150,7 @@ export async function getHorseTraits(req, res) {
         }
       }
     });
-    
+
   } catch (error) {
     logger.error(`[traitController.getHorseTraits] Error: ${error.message}`);
     res.status(500).json({
@@ -168,16 +168,16 @@ export async function getHorseTraits(req, res) {
 export async function getTraitDefinitions(req, res) {
   try {
     const { type } = req.query;
-    
+
     logger.info(`[traitController.getTraitDefinitions] Getting trait definitions${type ? ` for type: ${type}` : ''}`);
-    
+
     let traits;
     if (type && ['positive', 'negative'].includes(type)) {
       traits = getTraitsByType(type);
     } else {
       traits = getTraitsByType('all');
     }
-    
+
     // Enhance with full definitions
     const definitions = traits.reduce((acc, trait) => {
       const definition = getTraitDefinition(trait);
@@ -189,7 +189,7 @@ export async function getTraitDefinitions(req, res) {
       }
       return acc;
     }, {});
-    
+
     res.status(200).json({
       success: true,
       message: `Retrieved ${Object.keys(definitions).length} trait definitions`,
@@ -199,7 +199,7 @@ export async function getTraitDefinitions(req, res) {
         filter: type || 'all'
       }
     });
-    
+
   } catch (error) {
     logger.error(`[traitController.getTraitDefinitions] Error: ${error.message}`);
     res.status(500).json({
@@ -217,7 +217,7 @@ export async function getTraitDefinitions(req, res) {
 export async function getDiscoveryStatus(req, res) {
   try {
     const { horseId } = req.params;
-    
+
     // Validate horse ID
     const parsedHorseId = parseInt(horseId, 10);
     if (isNaN(parsedHorseId) || parsedHorseId <= 0) {
@@ -227,9 +227,9 @@ export async function getDiscoveryStatus(req, res) {
         data: null
       });
     }
-    
+
     logger.info(`[traitController.getDiscoveryStatus] Getting discovery status for horse ${parsedHorseId}`);
-    
+
     // Get horse data
     const horse = await prisma.horse.findUnique({
       where: { id: parsedHorseId },
@@ -240,7 +240,7 @@ export async function getDiscoveryStatus(req, res) {
         }
       }
     });
-    
+
     if (!horse) {
       return res.status(404).json({
         success: false,
@@ -248,16 +248,16 @@ export async function getDiscoveryStatus(req, res) {
         data: null
       });
     }
-    
+
     // Import discovery functions
     const { checkDiscoveryConditions, checkEnrichmentDiscoveries } = await import('../utils/traitDiscovery.js');
-    
+
     // Check current conditions
     const metConditions = await checkDiscoveryConditions(horse);
     const enrichmentConditions = checkEnrichmentDiscoveries(horse.foalActivities || []);
-    
+
     const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
-    
+
     res.status(200).json({
       success: true,
       message: `Discovery status for horse ${horse.name}`,
@@ -281,7 +281,7 @@ export async function getDiscoveryStatus(req, res) {
         canDiscover: (metConditions.length + enrichmentConditions.length) > 0 && (traits.hidden?.length || 0) > 0
       }
     });
-    
+
   } catch (error) {
     logger.error(`[traitController.getDiscoveryStatus] Error: ${error.message}`);
     res.status(500).json({
@@ -299,7 +299,7 @@ export async function getDiscoveryStatus(req, res) {
 export async function batchDiscoverTraits(req, res) {
   try {
     const { horseIds, checkEnrichment = true } = req.body;
-    
+
     // Validate input
     if (!Array.isArray(horseIds) || horseIds.length === 0) {
       return res.status(400).json({
@@ -308,7 +308,7 @@ export async function batchDiscoverTraits(req, res) {
         data: null
       });
     }
-    
+
     if (horseIds.length > 10) {
       return res.status(400).json({
         success: false,
@@ -316,12 +316,12 @@ export async function batchDiscoverTraits(req, res) {
         data: null
       });
     }
-    
+
     logger.info(`[traitController.batchDiscoverTraits] Processing batch discovery for ${horseIds.length} horses`);
-    
+
     const results = [];
     const errors = [];
-    
+
     // Process each horse
     for (const horseId of horseIds) {
       try {
@@ -330,21 +330,21 @@ export async function batchDiscoverTraits(req, res) {
           errors.push({ horseId, error: 'Invalid horse ID' });
           continue;
         }
-        
+
         const discoveryResult = await revealTraits(parsedHorseId, { checkEnrichment });
         results.push({
           horseId: parsedHorseId,
           ...discoveryResult
         });
-        
+
       } catch (error) {
         logger.error(`[traitController.batchDiscoverTraits] Error processing horse ${horseId}: ${error.message}`);
         errors.push({ horseId, error: error.message });
       }
     }
-    
+
     const totalRevealed = results.reduce((sum, result) => sum + (result.revealed?.length || 0), 0);
-    
+
     res.status(200).json({
       success: true,
       message: `Batch discovery completed. Revealed ${totalRevealed} traits across ${results.length} horses.`,
@@ -358,7 +358,7 @@ export async function batchDiscoverTraits(req, res) {
         }
       }
     });
-    
+
   } catch (error) {
     logger.error(`[traitController.batchDiscoverTraits] Error: ${error.message}`);
     res.status(500).json({

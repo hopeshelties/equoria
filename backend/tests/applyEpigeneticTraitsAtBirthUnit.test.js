@@ -41,7 +41,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Premium Mare',
-        stress_level: 15 // Low stress
+        stressLevel: 15 // Low stress
       };
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -62,7 +62,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Premium Mare',
-        stress_level: 20 // Low stress (at threshold)
+        stressLevel: 20 // Low stress (at threshold)
       };
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -85,7 +85,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Optimal Mare',
-        stress_level: 10 // Very low stress
+        stressLevel: 10 // Very low stress
       };
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -106,7 +106,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Stressed Mare',
-        stress_level: 50 // High stress
+        stressLevel: 50 // High stress
       };
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -126,7 +126,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Underfed Mare',
-        stress_level: 15 // Low stress
+        stressLevel: 15 // Low stress
       };
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -149,7 +149,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Inbred Mare',
-        stress_level: 50
+        stressLevel: 50
       };
 
       const lineage = [
@@ -177,7 +177,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Inbred Mare',
-        stress_level: 50
+        stressLevel: 50
       };
 
       const lineage = [
@@ -205,7 +205,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Inbred Mare',
-        stress_level: 50
+        stressLevel: 50
       };
 
       const lineage = [
@@ -235,7 +235,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Severely Inbred Mare',
-        stress_level: 50
+        stressLevel: 50
       };
 
       const lineage = [
@@ -264,7 +264,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Diverse Mare',
-        stress_level: 50
+        stressLevel: 50
       };
 
       const lineage = [
@@ -287,7 +287,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
     });
   });
 
-  describe('3+ ancestors with same most_competed_discipline → affinity + legacy_talent', () => {
+  describe('3+ ancestors with same mostCompetedDiscipline → affinity + legacy_talent', () => {
     it('should assign discipline_affinity_racing with 3+ racing ancestors', () => {
       // Mock random to ensure trait assignment (below 0.70 threshold)
       mockRandom.mockReturnValue(0.5);
@@ -295,14 +295,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Racing Mare',
-        stress_level: 30
+        stressLevel: 30
       };
 
       const lineage = [
-        { id: 601, name: 'Racing Champion 1', most_competed_discipline: 'Racing' },
-        { id: 602, name: 'Racing Champion 2', most_competed_discipline: 'Racing' },
-        { id: 603, name: 'Racing Champion 3', most_competed_discipline: 'Racing' }, // 3 racing ancestors
-        { id: 604, name: 'Dressage Horse', most_competed_discipline: 'Dressage' }
+        { id: 601, name: 'Racing Champion 1', mostCompetedDiscipline: 'Racing' },
+        { id: 602, name: 'Racing Champion 2', mostCompetedDiscipline: 'Racing' },
+        { id: 603, name: 'Racing Champion 3', mostCompetedDiscipline: 'Racing' }, // 3 racing ancestors
+        { id: 604, name: 'Dressage Horse', mostCompetedDiscipline: 'Dressage' }
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -324,15 +324,15 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Legacy Mare',
-        stress_level: 25
+        stressLevel: 25
       };
 
       const lineage = [
-        { id: 701, name: 'Show Jumper 1', most_competed_discipline: 'Show Jumping' },
-        { id: 702, name: 'Show Jumper 2', most_competed_discipline: 'Show Jumping' },
-        { id: 703, name: 'Show Jumper 3', most_competed_discipline: 'Show Jumping' },
-        { id: 704, name: 'Show Jumper 4', most_competed_discipline: 'Show Jumping' }, // 4 jumping ancestors
-        { id: 705, name: 'Racing Horse', most_competed_discipline: 'Racing' }
+        { id: 701, name: 'Show Jumper 1', mostCompetedDiscipline: 'Show Jumping' },
+        { id: 702, name: 'Show Jumper 2', mostCompetedDiscipline: 'Show Jumping' },
+        { id: 703, name: 'Show Jumper 3', mostCompetedDiscipline: 'Show Jumping' },
+        { id: 704, name: 'Show Jumper 4', mostCompetedDiscipline: 'Show Jumping' }, // 4 jumping ancestors
+        { id: 705, name: 'Racing Horse', mostCompetedDiscipline: 'Racing' }
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -352,15 +352,15 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Dressage Mare',
-        stress_level: 35
+        stressLevel: 35
       };
 
       const lineage = [
-        { id: 801, name: 'Dressage Master 1', most_competed_discipline: 'Dressage' },
-        { id: 802, name: 'Dressage Master 2', most_competed_discipline: 'Dressage' },
-        { id: 803, name: 'Dressage Master 3', most_competed_discipline: 'Dressage' }, // 3 dressage ancestors
-        { id: 804, name: 'Trail Horse', most_competed_discipline: 'Trail' },
-        { id: 805, name: 'Endurance Horse', most_competed_discipline: 'Endurance' }
+        { id: 801, name: 'Dressage Master 1', mostCompetedDiscipline: 'Dressage' },
+        { id: 802, name: 'Dressage Master 2', mostCompetedDiscipline: 'Dressage' },
+        { id: 803, name: 'Dressage Master 3', mostCompetedDiscipline: 'Dressage' }, // 3 dressage ancestors
+        { id: 804, name: 'Trail Horse', mostCompetedDiscipline: 'Trail' },
+        { id: 805, name: 'Endurance Horse', mostCompetedDiscipline: 'Endurance' }
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -379,14 +379,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Mixed Mare',
-        stress_level: 40
+        stressLevel: 40
       };
 
       const lineage = [
-        { id: 901, name: 'Racing Horse', most_competed_discipline: 'Racing' },
-        { id: 902, name: 'Dressage Horse', most_competed_discipline: 'Dressage' },
-        { id: 903, name: 'Show Jumper', most_competed_discipline: 'Show Jumping' },
-        { id: 904, name: 'Trail Horse', most_competed_discipline: 'Trail' } // All different disciplines
+        { id: 901, name: 'Racing Horse', mostCompetedDiscipline: 'Racing' },
+        { id: 902, name: 'Dressage Horse', mostCompetedDiscipline: 'Dressage' },
+        { id: 903, name: 'Show Jumper', mostCompetedDiscipline: 'Show Jumping' },
+        { id: 904, name: 'Trail Horse', mostCompetedDiscipline: 'Trail' } // All different disciplines
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -400,13 +400,13 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       expect(result.positive).not.toContain('legacy_talent');
     });
 
-    it('should handle ancestors without most_competed_discipline field', () => {
+    it('should handle ancestors without mostCompetedDiscipline field', () => {
       mockRandom.mockReturnValue(0.1); // Low random value
 
       const mare = {
         id: 1,
         name: 'Unknown Mare',
-        stress_level: 45
+        stressLevel: 45
       };
 
       const lineage = [
@@ -440,14 +440,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Test Mare',
-        stress_level: 15
+        stressLevel: 15
       };
 
       const lineage = [
-        { id: 1101, name: 'Racing Horse 1', most_competed_discipline: 'Racing' },
-        { id: 1102, name: 'Racing Horse 2', most_competed_discipline: 'Racing' },
-        { id: 1103, name: 'Racing Horse 3', most_competed_discipline: 'Racing' },
-        { id: 1104, name: 'Racing Horse 4', most_competed_discipline: 'Racing' }
+        { id: 1101, name: 'Racing Horse 1', mostCompetedDiscipline: 'Racing' },
+        { id: 1102, name: 'Racing Horse 2', mostCompetedDiscipline: 'Racing' },
+        { id: 1103, name: 'Racing Horse 3', mostCompetedDiscipline: 'Racing' },
+        { id: 1104, name: 'Racing Horse 4', mostCompetedDiscipline: 'Racing' }
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
@@ -472,14 +472,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Unlucky Mare',
-        stress_level: 10 // Optimal conditions
+        stressLevel: 10 // Optimal conditions
       };
 
       const lineage = [
-        { id: 1201, name: 'Racing Horse 1', most_competed_discipline: 'Racing' },
-        { id: 1202, name: 'Racing Horse 2', most_competed_discipline: 'Racing' },
-        { id: 1203, name: 'Racing Horse 3', most_competed_discipline: 'Racing' },
-        { id: 1204, name: 'Racing Horse 4', most_competed_discipline: 'Racing' }
+        { id: 1201, name: 'Racing Horse 1', mostCompetedDiscipline: 'Racing' },
+        { id: 1202, name: 'Racing Horse 2', mostCompetedDiscipline: 'Racing' },
+        { id: 1203, name: 'Racing Horse 3', mostCompetedDiscipline: 'Racing' },
+        { id: 1204, name: 'Racing Horse 4', mostCompetedDiscipline: 'Racing' }
       ];
 
       const result = applyEpigeneticTraitsAtBirth({

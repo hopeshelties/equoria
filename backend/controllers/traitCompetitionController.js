@@ -3,9 +3,13 @@
  * Handles trait-based competition analysis and impact calculations
  */
 
-import { calculateTraitCompetitionImpact, getAllTraitCompetitionEffects, hasSpecializedEffect } from '../utils/traitCompetitionImpact.js';
+import { calculateTraitCompetitionImpact, getAllTraitCompetitionEffects, hasSpecializedEffect as _hasSpecializedEffect } from '../utils/traitCompetitionImpact.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
+
+// TODO: Implement hasSpecializedEffect usage for enhanced trait analysis
+// This function will be used to provide more detailed trait specialization information
+// in future API endpoints for discipline-specific trait recommendations
 
 /**
  * Analyze trait impact for a specific horse and discipline
@@ -84,7 +88,7 @@ export async function analyzeHorseTraitImpact(req, res) {
           name: trait.name,
           type: trait.type,
           modifier: trait.modifier,
-          percentageEffect: (trait.modifier * 100).toFixed(2) + '%',
+          percentageEffect: `${(trait.modifier * 100).toFixed(2)}%`,
           isSpecialized: trait.isSpecialized,
           discipline: trait.discipline,
           description: trait.description
@@ -159,12 +163,12 @@ export async function compareTraitImpactAcrossDisciplines(req, res) {
     // Calculate impact for each discipline
     disciplines.forEach(discipline => {
       const traitImpact = calculateTraitCompetitionImpact(horse, discipline, baseScore);
-      
+
       comparisons.push({
         discipline,
         modifier: traitImpact.totalScoreModifier,
         adjustment: traitImpact.finalScoreAdjustment,
-        percentageEffect: (traitImpact.totalScoreModifier * 100).toFixed(2) + '%',
+        percentageEffect: `${(traitImpact.totalScoreModifier * 100).toFixed(2)}%`,
         specializedTraits: traitImpact.appliedTraits.filter(t => t.isSpecialized).length,
         totalTraits: traitImpact.appliedTraits.length,
         netEffect: traitImpact.totalScoreModifier > 0 ? 'positive' : traitImpact.totalScoreModifier < 0 ? 'negative' : 'neutral'
@@ -193,7 +197,7 @@ export async function compareTraitImpactAcrossDisciplines(req, res) {
           effect: worstDiscipline.percentageEffect,
           specializedTraits: worstDiscipline.specializedTraits
         },
-        averageEffect: (comparisons.reduce((sum, comp) => sum + comp.modifier, 0) / comparisons.length * 100).toFixed(2) + '%',
+        averageEffect: `${(comparisons.reduce((sum, comp) => sum + comp.modifier, 0) / comparisons.length * 100).toFixed(2)}%`,
         disciplinesWithBonuses: comparisons.filter(comp => comp.modifier > 0).length,
         disciplinesWithPenalties: comparisons.filter(comp => comp.modifier < 0).length
       }
@@ -243,7 +247,7 @@ export async function getTraitCompetitionEffects(req, res) {
         type: effect.type,
         general: {
           scoreModifier: effect.general.scoreModifier,
-          percentageEffect: (effect.general.scoreModifier * 100).toFixed(2) + '%',
+          percentageEffect: `${(effect.general.scoreModifier * 100).toFixed(2)}%`,
           description: effect.general.description
         },
         disciplines: {}
@@ -254,7 +258,7 @@ export async function getTraitCompetitionEffects(req, res) {
         Object.entries(effect.disciplines).forEach(([disciplineName, disciplineEffect]) => {
           traitInfo.disciplines[disciplineName] = {
             scoreModifier: disciplineEffect.scoreModifier,
-            percentageEffect: (disciplineEffect.scoreModifier * 100).toFixed(2) + '%',
+            percentageEffect: `${(disciplineEffect.scoreModifier * 100).toFixed(2)}%`,
             description: disciplineEffect.description,
             isSpecialized: true
           };

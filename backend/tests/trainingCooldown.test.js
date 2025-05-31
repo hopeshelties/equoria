@@ -55,8 +55,8 @@ describe('trainingCooldown', () => {
       age: 5,
       breedId: testBreed.id,
       sex: 'Mare',
-      date_of_birth: new Date('2019-01-01'),
-      health_status: 'Excellent',
+      dateOfBirth: new Date('2019-01-01'),
+      healthStatus: 'Excellent',
       trainingCooldown: null
     };
 

@@ -317,6 +317,7 @@ router.post('/refresh', [
  *         $ref: '#/components/responses/InternalError'
  */
 router.get('/profile', authenticateToken, authController.getProfile);
+router.get('/me', authenticateToken, authController.getProfile); // Alias for /profile
 
 /**
  * @swagger
@@ -405,5 +406,35 @@ router.put('/profile', [
     .withMessage('Username can only contain letters, numbers, and underscores'),
   handleValidationErrors
 ], authController.updateProfile);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     description: Logout the current authenticated user and invalidate refresh tokens
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 message:
+ *                   type: string
+ *                   example: "Logout successful"
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/logout', authenticateToken, authController.logout);
 
 export default router;

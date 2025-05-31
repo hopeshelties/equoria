@@ -20,7 +20,7 @@ export const handlePing = (req, res) => {
  * Health Check Controller
  * Comprehensive health check including database connectivity
  */
-export const handleHealthCheck = async (req, res) => {
+export const handleHealthCheck = async(req, res) => {
   const startTime = Date.now();
   const health = {
     status: 'healthy',

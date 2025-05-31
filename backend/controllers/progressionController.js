@@ -15,7 +15,7 @@ import { getUserById, addXpToUser } from '../models/userModel.js';
 export async function getUserProgression(req, res, next) {
   try {
     const { userId } = req.params;
-    
+
     if (!userId) {
       return res.status(400).json({
         success: false,
@@ -24,7 +24,7 @@ export async function getUserProgression(req, res, next) {
     }
 
     const user = await getUserById(userId);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -52,7 +52,7 @@ export async function getUserProgression(req, res, next) {
     };
 
     logger.info(`[progressionController.getUserProgression] Retrieved progression for user ${userId}`);
-    
+
     res.json({
       success: true,
       message: 'User progression retrieved successfully',
@@ -75,7 +75,7 @@ export async function awardXp(req, res, next) {
   try {
     const { userId } = req.params;
     const { amount, reason } = req.body;
-    
+
     if (!userId) {
       return res.status(400).json({
         success: false,
@@ -91,9 +91,9 @@ export async function awardXp(req, res, next) {
     }
 
     const result = await addXpToUser(userId, amount, reason);
-    
+
     logger.info(`[progressionController.awardXp] Awarded ${amount} XP to user ${userId}: ${reason || 'No reason provided'}`);
-    
+
     res.json({
       success: true,
       message: `Successfully awarded ${amount} XP`,
@@ -112,8 +112,8 @@ export async function awardXp(req, res, next) {
  * @returns {number} XP required for that level
  */
 function calculateXpForLevel(level) {
-  if (level <= 1) return 0;
-  
+  if (level <= 1) {return 0;}
+
   // Progressive XP requirement: level^2 * 100
   // Level 2: 400 XP, Level 3: 900 XP, Level 4: 1600 XP, etc.
   return Math.floor(Math.pow(level, 2) * 100);
@@ -125,8 +125,8 @@ function calculateXpForLevel(level) {
  * @returns {number} Current level based on XP
  */
 export function getLevelFromXp(xp) {
-  if (xp < 400) return 1;
-  
+  if (xp < 400) {return 1;}
+
   // Reverse calculation: level = sqrt(xp / 100)
   return Math.floor(Math.sqrt(xp / 100));
 }
@@ -139,19 +139,19 @@ export function getLevelFromXp(xp) {
 export async function checkLevelUp(userId) {
   try {
     const user = await getUserById(userId);
-    
+
     if (!user) {
       throw new Error('User not found');
     }
 
     const currentLevel = user.level;
     const calculatedLevel = getLevelFromXp(user.xp);
-    
+
     if (calculatedLevel > currentLevel) {
       const levelsGained = calculatedLevel - currentLevel;
-      
+
       logger.info(`[progressionController.checkLevelUp] User ${userId} leveled up! ${currentLevel} → ${calculatedLevel}`);
-      
+
       return {
         leveledUp: true,
         oldLevel: currentLevel,

@@ -19,7 +19,7 @@ export function handleValidationErrors(req, res, next) {
 
     return res.status(400).json({
       success: false,
-      message: 'Validation failed',
+      message: errorArray[0].msg, // Use the first error message
       errors: errorArray
     });
   }

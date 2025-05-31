@@ -6,12 +6,12 @@ import AppError from './AppError.js';
  */
 class NotFoundError extends AppError {
   constructor(resource = 'Resource', id = null) {
-    const message = id 
+    const message = id
       ? `${resource} with ID ${id} not found`
       : `${resource} not found`;
-    
+
     super(message, 404);
-    
+
     this.name = 'NotFoundError';
     this.resource = resource;
     this.resourceId = id;

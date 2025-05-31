@@ -114,9 +114,9 @@ describe('Cron Jobs Integration Tests', () => {
         name: 'Good Condition Foal',
         age: 0,
         breedId: testBreed.id,
-        bond_score: 85,
-        stress_level: 15,
-        epigenetic_modifiers: {
+        bondScore: 85,
+        stressLevel: 15,
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -137,7 +137,7 @@ describe('Cron Jobs Integration Tests', () => {
       // Mock updated foal after trait evaluation
       const updatedFoal = {
         ...foal,
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: ['resilient'],
           negative: [],
           hidden: []
@@ -150,7 +150,7 @@ describe('Cron Jobs Integration Tests', () => {
 
       expect(mockCronJobService.evaluateDailyFoalTraits).toHaveBeenCalled();
 
-      const traits = updatedFoal.epigenetic_modifiers;
+      const traits = updatedFoal.epigeneticModifiers;
       const totalTraits = (traits.positive?.length || 0) +
                          (traits.negative?.length || 0) +
                          (traits.hidden?.length || 0);
@@ -166,9 +166,9 @@ describe('Cron Jobs Integration Tests', () => {
         name: 'Poor Condition Foal',
         age: 0,
         breedId: testBreed.id,
-        bond_score: 25,
-        stress_level: 85,
-        epigenetic_modifiers: {
+        bondScore: 25,
+        stressLevel: 85,
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -189,7 +189,7 @@ describe('Cron Jobs Integration Tests', () => {
       // Mock updated foal after trait evaluation (might have negative traits)
       const updatedFoal = {
         ...foal,
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: ['nervous'],
           hidden: []
@@ -202,7 +202,7 @@ describe('Cron Jobs Integration Tests', () => {
 
       expect(mockCronJobService.evaluateDailyFoalTraits).toHaveBeenCalled();
 
-      const traits = updatedFoal.epigenetic_modifiers;
+      const traits = updatedFoal.epigeneticModifiers;
       const totalTraits = (traits.positive?.length || 0) +
                          (traits.negative?.length || 0) +
                          (traits.hidden?.length || 0);
@@ -218,9 +218,9 @@ describe('Cron Jobs Integration Tests', () => {
         name: 'Completed Development Foal',
         age: 1,
         breedId: testBreed.id,
-        bond_score: 75,
-        stress_level: 25,
-        epigenetic_modifiers: {
+        bondScore: 75,
+        stressLevel: 25,
+        epigeneticModifiers: {
           positive: ['resilient'],
           negative: [],
           hidden: []
@@ -228,7 +228,7 @@ describe('Cron Jobs Integration Tests', () => {
       };
       testFoals.push(foal);
 
-      const initialTraits = foal.epigenetic_modifiers;
+      const initialTraits = foal.epigeneticModifiers;
 
       // Setup mocks - foal should not be changed
       mockPrisma.horse.create.mockResolvedValueOnce(foal);
@@ -246,7 +246,7 @@ describe('Cron Jobs Integration Tests', () => {
 
       expect(mockCronJobService.evaluateDailyFoalTraits).toHaveBeenCalled();
       // Traits should remain unchanged for completed development
-      expect(foal.epigenetic_modifiers).toEqual(initialTraits);
+      expect(foal.epigeneticModifiers).toEqual(initialTraits);
     });
 
     it('should handle foals without development records', async() => {
@@ -256,9 +256,9 @@ describe('Cron Jobs Integration Tests', () => {
         name: 'No Development Record Foal',
         age: 0,
         breedId: testBreed.id,
-        bond_score: 60,
-        stress_level: 30,
-        epigenetic_modifiers: {
+        bondScore: 60,
+        stressLevel: 30,
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -284,9 +284,9 @@ describe('Cron Jobs Integration Tests', () => {
         name: 'Existing Traits Foal',
         age: 0,
         breedId: testBreed.id,
-        bond_score: 80,
-        stress_level: 20,
-        epigenetic_modifiers: {
+        bondScore: 80,
+        stressLevel: 20,
+        epigeneticModifiers: {
           positive: ['resilient'],
           negative: [],
           hidden: ['intelligent']
@@ -297,7 +297,7 @@ describe('Cron Jobs Integration Tests', () => {
       // Mock updated foal (should not have duplicates)
       const updatedFoal = {
         ...foal,
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: ['resilient', 'bold'], // Added new trait, no duplicates
           negative: [],
           hidden: ['intelligent']
@@ -320,7 +320,7 @@ describe('Cron Jobs Integration Tests', () => {
 
       expect(mockCronJobService.evaluateDailyFoalTraits).toHaveBeenCalled();
 
-      const traits = updatedFoal.epigenetic_modifiers;
+      const traits = updatedFoal.epigeneticModifiers;
       const allTraits = [
         ...(traits.positive || []),
         ...(traits.negative || []),
@@ -343,9 +343,9 @@ describe('Cron Jobs Integration Tests', () => {
         name: 'Multi Test Foal 1',
         age: 0,
         breedId: testBreed.id,
-        bond_score: 70,
-        stress_level: 30,
-        epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
+        bondScore: 70,
+        stressLevel: 30,
+        epigeneticModifiers: { positive: [], negative: [], hidden: [] }
       };
 
       const foal2 = {
@@ -353,9 +353,9 @@ describe('Cron Jobs Integration Tests', () => {
         name: 'Multi Test Foal 2',
         age: 0,
         breedId: testBreed.id,
-        bond_score: 40,
-        stress_level: 60,
-        epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
+        bondScore: 40,
+        stressLevel: 60,
+        epigeneticModifiers: { positive: [], negative: [], hidden: [] }
       };
 
       testFoals.push(foal1, foal2);
@@ -366,11 +366,11 @@ describe('Cron Jobs Integration Tests', () => {
       mockPrisma.foalDevelopment.createMany.mockResolvedValueOnce({ count: 2 });
       mockPrisma.horse.findUnique.mockResolvedValueOnce({
         ...foal1,
-        epigenetic_modifiers: { positive: ['bold'], negative: [], hidden: [] }
+        epigeneticModifiers: { positive: ['bold'], negative: [], hidden: [] }
       });
       mockPrisma.horse.findUnique.mockResolvedValueOnce({
         ...foal2,
-        epigenetic_modifiers: { positive: [], negative: ['nervous'], hidden: [] }
+        epigeneticModifiers: { positive: [], negative: ['nervous'], hidden: [] }
       });
 
       // Run trait evaluation
@@ -408,9 +408,9 @@ describe('Cron Jobs Integration Tests', () => {
           name: 'Development List Foal',
           age: 0,
           breedId: testBreed.id,
-          bond_score: 65,
-          stress_level: 35,
-          epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
+          bondScore: 65,
+          stressLevel: 35,
+          epigeneticModifiers: { positive: [], negative: [], hidden: [] }
         }
       ];
 
@@ -478,22 +478,22 @@ describe('Cron Jobs Integration Tests', () => {
       expect(mockCronJobService.evaluateDailyFoalTraits).toHaveBeenCalled();
     });
 
-    it('should handle missing epigenetic_modifiers field', async() => {
-      // Mock foal without epigenetic_modifiers
+    it('should handle missing epigeneticModifiers field', async() => {
+      // Mock foal without epigeneticModifiers
       const foal = {
         id: 9,
         name: 'Missing Modifiers Foal',
         age: 0,
         breedId: testBreed.id,
-        bond_score: 60,
-        stress_level: 40
-        // No epigenetic_modifiers field
+        bondScore: 60,
+        stressLevel: 40
+        // No epigeneticModifiers field
       };
 
       // Mock updated foal with initialized field
       const updatedFoal = {
         ...foal,
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -514,7 +514,7 @@ describe('Cron Jobs Integration Tests', () => {
       // Should handle missing field gracefully
       await expect(mockCronJobService.evaluateDailyFoalTraits()).resolves.not.toThrow();
 
-      expect(updatedFoal.epigenetic_modifiers).toBeDefined();
+      expect(updatedFoal.epigeneticModifiers).toBeDefined();
     });
   });
 });

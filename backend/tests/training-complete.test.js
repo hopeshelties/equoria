@@ -154,7 +154,7 @@ describe('Training System Complete Test', () => {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'mare',
-          health_status: 'Good'
+          healthStatus: 'Good'
         }
       }),
       prisma.horse.create({
@@ -164,7 +164,7 @@ describe('Training System Complete Test', () => {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'stallion',
-          health_status: 'Good'
+          healthStatus: 'Good'
         }
       }),
       prisma.horse.create({
@@ -174,7 +174,7 @@ describe('Training System Complete Test', () => {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'colt',
-          health_status: 'Good'
+          healthStatus: 'Good'
         }
       })
     ]);

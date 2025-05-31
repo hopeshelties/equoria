@@ -2,10 +2,10 @@
 
 /**
  * Foal Enrichment API Demonstration
- * 
+ *
  * This script demonstrates how to use the new POST /api/foals/{foalId}/enrichment endpoint
  * to complete enrichment activities for foals and track their bonding and stress levels.
- * 
+ *
  * Usage: node backend/examples/foalEnrichmentDemo.js
  */
 
@@ -21,15 +21,15 @@ const DEMO_FOAL_ID = 1; // You'll need to have a foal with this ID in your datab
 async function completeEnrichmentActivity(foalId, day, activity) {
   try {
     console.log(`\n🎯 Attempting to complete activity: "${activity}" on day ${day} for foal ${foalId}`);
-    
+
     const response = await fetch(`${API_BASE_URL}/api/foals/${foalId}/enrichment`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        day: day,
-        activity: activity
+        day,
+        activity
       })
     });
 
@@ -37,12 +37,12 @@ async function completeEnrichmentActivity(foalId, day, activity) {
 
     if (response.ok) {
       console.log(`✅ Success! ${data.message}`);
-      console.log(`   📊 Updated Levels:`);
+      console.log('   📊 Updated Levels:');
       console.log(`      🤝 Bond Score: ${data.data.updated_levels.bond_score} (${data.data.changes.bond_change >= 0 ? '+' : ''}${data.data.changes.bond_change})`);
       console.log(`      😰 Stress Level: ${data.data.updated_levels.stress_level} (${data.data.changes.stress_change >= 0 ? '+' : ''}${data.data.changes.stress_change})`);
       console.log(`   🎭 Outcome: ${data.data.activity.outcome}`);
       console.log(`   📝 Training Record ID: ${data.data.training_record_id}`);
-      
+
       return data.data;
     } else {
       console.log(`❌ Error: ${data.message}`);
@@ -63,7 +63,7 @@ async function completeEnrichmentActivity(foalId, day, activity) {
 async function runDemo() {
   console.log('🐴 Foal Enrichment API Demonstration');
   console.log('=====================================');
-  
+
   console.log(`\n📋 Testing with foal ID: ${DEMO_FOAL_ID}`);
   console.log('Note: Make sure you have a foal with this ID in your database (age 0 or 1)');
 
@@ -86,7 +86,7 @@ async function runDemo() {
   await completeEnrichmentActivity(DEMO_FOAL_ID, 0, 'Gentle Touch');
 
   console.log('\n🧪 Testing Error Scenarios:');
-  
+
   // Test 7: Invalid day (too high)
   await completeEnrichmentActivity(DEMO_FOAL_ID, 7, 'Trailer Exposure');
 
@@ -108,7 +108,7 @@ async function runDemo() {
   console.log('Day 4: Obstacle Introduction, Advanced Grooming, Training Games');
   console.log('Day 5: Confidence Building, New Experiences, Independence Practice');
   console.log('Day 6: Final Assessment, Graduation Ceremony, Future Planning');
-  
+
   console.log('\n🔧 API Endpoint Details:');
   console.log('POST /api/foals/{foalId}/enrichment');
   console.log('Request Body: { "day": 0-6, "activity": "Activity Name" }');
@@ -143,4 +143,4 @@ async function main() {
   }
 }
 
-main().catch(console.error); 
+main().catch(console.error);

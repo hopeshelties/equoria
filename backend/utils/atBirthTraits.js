@@ -236,8 +236,8 @@ async function getAncestors(horseIds, generations) {
       select: {
         id: true,
         name: true,
-        sire_id: true,
-        dam_id: true
+        sireId: true,
+        damId: true
       }
     });
 
@@ -245,11 +245,11 @@ async function getAncestors(horseIds, generations) {
     const nextGeneration = [];
 
     for (const horse of horses) {
-      if (horse.sire_id) {
-        nextGeneration.push(horse.sire_id);
+      if (horse.sireId) {
+        nextGeneration.push(horse.sireId);
       }
-      if (horse.dam_id) {
-        nextGeneration.push(horse.dam_id);
+      if (horse.damId) {
+        nextGeneration.push(horse.damId);
       }
     }
 
@@ -260,8 +260,8 @@ async function getAncestors(horseIds, generations) {
         select: {
           id: true,
           name: true,
-          sire_id: true,
-          dam_id: true
+          sireId: true,
+          damId: true
         }
       });
 
@@ -297,7 +297,7 @@ async function assessFeedQuality(mareId) {
 
     const mare = await prisma.horse.findUnique({
       where: { id: mareId },
-      select: { health_status: true, total_earnings: true }
+      select: { healthStatus: true, totalEarnings: true }
     });
 
     if (!mare) {
@@ -308,7 +308,7 @@ async function assessFeedQuality(mareId) {
     // Simulate feed quality based on health status and earnings (proxy for care quality)
     let feedQuality = 50; // Base quality
 
-    switch (mare.health_status) {
+    switch (mare.healthStatus) {
     case 'Excellent':
       feedQuality = 85;
       break;
@@ -326,7 +326,7 @@ async function assessFeedQuality(mareId) {
     }
 
     // Adjust based on earnings (higher earnings = better care)
-    const earnings = mare.total_earnings || 0;
+    const earnings = mare.totalEarnings || 0;
     if (earnings > 100000) {
       feedQuality += 15;
     } else if (earnings > 50000) {
@@ -370,14 +370,14 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
     // Get mare's current stress level
     const mare = await prisma.horse.findUnique({
       where: { id: damId },
-      select: { stress_level: true, bond_score: true, health_status: true }
+      select: { stressLevel: true, bondScore: true, healthStatus: true }
     });
 
     if (!mare) {
       throw new Error(`Mare with ID ${damId} not found`);
     }
 
-    const currentMareStress = mareStress !== undefined ? mareStress : (mare.stress_level || 50);
+    const currentMareStress = mareStress !== undefined ? mareStress : (mare.stressLevel || 50);
     const currentFeedQuality = feedQuality !== undefined ? feedQuality : await assessFeedQuality(damId);
 
     logger.info(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Mare stress: ${currentMareStress}, Feed quality: ${currentFeedQuality}`);

@@ -12,7 +12,7 @@ export const register = async(req, res, next) => {
   // eslint-disable-next-line no-console
   console.log('REGISTER BODY:', req.body); // TEMPORARY FOR DEBUGGING
   try {
-    const { username, email, password, firstName, lastName, role, money, level, xp, settings } = req.body; // Removed 'name' from destructuring, will use username or construct if needed
+    const { username, email, password, firstName, lastName, money, level, xp, settings } = req.body; // Removed 'name' and 'role' from destructuring
 
     // Validate input
     if (!username || !email || !password) {
@@ -56,8 +56,6 @@ export const register = async(req, res, next) => {
         password: hashedPassword,
         firstName: firstName || null, // Set to null if not provided
         lastName: lastName || null,   // Set to null if not provided
-        name: constructedName, // Use the constructed name
-        role: role || 'user', // Default role
         money: money === undefined ? 1000 : money, // Default starting money if not provided
         level: level === undefined ? 1 : level,    // Default starting level if not provided
         xp: xp === undefined ? 0 : xp,       // Default starting XP if not provided
@@ -79,7 +77,7 @@ export const register = async(req, res, next) => {
     });
 
     res.status(201).json({
-      success: true, // Changed from status: 'success'
+      status: 'success',
       message: 'User registered successfully',
       data: {
         user: {
@@ -88,7 +86,6 @@ export const register = async(req, res, next) => {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
-          role: user.role,
           money: user.money,
           level: user.level,
           xp: user.xp
@@ -141,14 +138,13 @@ export const login = async(req, res, next) => {
     });
 
     res.status(200).json({
-      success: true,
+      status: 'success',
       message: 'Login successful',
       data: {
         user: {
           id: user.id,
           username: user.username,
-          email: user.email,
-          role: user.role
+          email: user.email
         },
         token,
         refreshToken: refreshTokenValue
@@ -184,7 +180,7 @@ export const refreshToken = async(req, res, next) => {
     }
 
     try {
-      jwt.verify(providedRefreshToken, process.env.JWT_REFRESH_SECRET);
+      jwt.verify(providedRefreshToken, process.env.JWT_SECRET);
     } catch (jwtError) {
       logger.warn('[authController.refreshToken] JWT verification failed:', jwtError.message);
       throw new AppError('Invalid or expired refresh token', 401);
@@ -225,7 +221,6 @@ export const getProfile = async(req, res, next) => {
         email: true,
         firstName: true,
         lastName: true,
-        role: true,
         createdAt: true,
         updatedAt: true
       }
@@ -236,7 +231,7 @@ export const getProfile = async(req, res, next) => {
     }
 
     res.status(200).json({
-      success: true,
+      status: 'success',
       data: { user }
     });
   } catch (error) {
@@ -317,7 +312,7 @@ export const logout = async(req, res, next) => {
     }
 
     res.status(200).json({
-      success: true,
+      status: 'success',
       message: 'Logout successful'
     });
   } catch (error) {

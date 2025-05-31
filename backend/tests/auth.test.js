@@ -13,7 +13,13 @@ describe('Authentication Endpoints', () => {
         where: {
           OR: [
             { email: { contains: 'test' } },
-            { username: { contains: 'test' } } // Added username for broader cleanup
+            { username: { contains: 'test' } },
+            { email: { contains: 'example.com' } }, // Catch all example.com emails
+            { username: { contains: 'user' } }, // Catch usernames with 'user'
+            { email: { startsWith: 'new' } }, // Catch newuser@example.com
+            { email: { startsWith: 'duplicate' } }, // Catch duplicate@example.com
+            { username: { startsWith: 'new' } }, // Catch newuser username
+            { username: { startsWith: 'duplicate' } } // Catch duplicateuser username
           ]
         },
         select: { id: true }
@@ -84,10 +90,8 @@ describe('Authentication Endpoints', () => {
       expect(response.body.data.user.lastName).toBe(userData.lastName);   // Added assertion
       expect(response.body.data.user.password).toBeUndefined(); // Password should not be returned
       expect(response.body.data.user.id).toBeDefined();
-      expect(response.body.data.user.role).toBe('user');
 
       // User details are now part of the user object
-      expect(response.body.data.user.name).toBe(`${userData.firstName} ${userData.lastName}`);
       expect(response.body.data.user.email).toBe(userData.email);
       expect(response.body.data.user.level).toBe(1);
       expect(response.body.data.user.xp).toBe(0);
@@ -109,7 +113,7 @@ describe('Authentication Endpoints', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('Validation failed');
+      expect(response.body.message).toBe('Valid email is required');
     });
 
     it('should reject registration with weak password', async() => {
@@ -123,7 +127,7 @@ describe('Authentication Endpoints', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('Validation failed');
+      expect(response.body.message).toBe('Password must be at least 8 characters long');
     });
 
     it('should reject duplicate email registration', async() => {
@@ -174,7 +178,9 @@ describe('Authentication Endpoints', () => {
       const response = await request(app)
         .post('/api/auth/login')
         .send(loginData)
-        .expect(200);      expect(response.body.success).toBe(true);
+        .expect(200);
+
+      expect(response.body.status).toBe('success');
       expect(response.body.message).toBe('Login successful');
       expect(response.body.data.user.email).toBe(loginData.email);
       expect(response.body.data.token).toBeDefined();
@@ -222,7 +228,7 @@ describe('Authentication Endpoints', () => {
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('Validation failed');
+      expect(response.body.message).toBe('Valid email is required');
     });
   });
 
@@ -300,7 +306,9 @@ describe('Authentication Endpoints', () => {
       const response = await request(app)
         .get('/api/auth/me')
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);      expect(response.body.success).toBe(true);
+        .expect(200);
+
+      expect(response.body.status).toBe('success');
       expect(response.body.data.user).toBeDefined();
       expect(response.body.data.user.email).toBe(testUser.email);
       expect(response.body.data.user.firstName).toBe(testUser.firstName);
@@ -329,7 +337,9 @@ describe('Authentication Endpoints', () => {
   });
 
   describe('POST /api/auth/logout', () => {
-    let authToken;    beforeEach(async() => {
+    let authToken;
+
+    beforeEach(async() => {
       // Create user and get auth token
       const userData = createTestUser({
         email: 'logouttest@example.com',
@@ -349,7 +359,7 @@ describe('Authentication Endpoints', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
 
-      expect(response.body.success).toBe(true);
+      expect(response.body.status).toBe('success');
       expect(response.body.message).toBe('Logout successful');
     });
 

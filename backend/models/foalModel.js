@@ -22,7 +22,7 @@ async function getFoalDevelopment(foalId) {
       where: { id: parsedFoalId },
       include: {
         breed: true,
-        owner: true,
+        user: true,
         stable: true
       }
     });
@@ -49,8 +49,7 @@ async function getFoalDevelopment(foalId) {
           currentDay: 0,
           bondingLevel: 50,
           stressLevel: 20,
-          completedActivities: {},
-          activityLog: []
+          completedActivities: {}
         }
       });
     }
@@ -70,7 +69,7 @@ async function getFoalDevelopment(foalId) {
         name: foal.name,
         age: foal.age,
         breed: foal.breed?.name || 'Unknown',
-        owner: foal.owner?.name || 'Unknown'
+        owner: foal.user?.firstName || 'Unknown'
       },
       development: {
         currentDay: development.currentDay,

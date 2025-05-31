@@ -51,12 +51,12 @@ describe('Foal Enrichment API', () => {
 
     const mockTrainingRecord = {
       id: 'test-uuid-123',
-      horse_id: 1,
+      horseId: 1,
       day: 3,
       activity: 'Trailer Exposure',
       outcome: 'success',
-      bond_change: 4,
-      stress_change: 5
+      bondChange: 4,
+      stressChange: 5
     };
 
     it('should complete enrichment activity successfully', async () => {
@@ -100,12 +100,12 @@ describe('Foal Enrichment API', () => {
 
       expect(mockPrisma.foalTrainingHistory.create).toHaveBeenCalledWith({
         data: {
-          horse_id: 1,
+          horseId: 1,
           day: 3,
           activity: 'Trailer Exposure',
           outcome: expect.any(String),
-          bond_change: expect.any(Number),
-          stress_change: expect.any(Number)
+          bondChange: expect.any(Number),
+          stressChange: expect.any(Number)
         }
       });
     });

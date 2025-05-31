@@ -75,9 +75,9 @@ describe('Groom Assignment System', () => {
     const mockGroom = {
       id: 1,
       name: 'Sarah Johnson',
-      speciality: 'foal_care',
-      skill_level: 'intermediate',
-      is_active: true,
+      speciality: 'foalCare',
+      skillLevel: 'intermediate',
+      isActive: true,
       availability: { monday: true, tuesday: true }
     };
 
@@ -137,7 +137,7 @@ describe('Groom Assignment System', () => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue({
         ...mockGroom,
-        is_active: false
+        isActive: false
       });
 
       await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow('Groom Sarah Johnson is not currently active');
@@ -215,7 +215,7 @@ describe('Groom Assignment System', () => {
       mockPrisma.groom.create.mockResolvedValue({
         id: 1,
         name: 'Sarah Johnson',
-        speciality: 'foal_care',
+        speciality: 'foalCare',
         playerId: 'player-1'
       });
 
@@ -223,8 +223,8 @@ describe('Groom Assignment System', () => {
       mockPrisma.groom.findUnique.mockResolvedValue({
         id: 1,
         name: 'Sarah Johnson',
-        speciality: 'foal_care',
-        is_active: true
+        speciality: 'foalCare',
+        isActive: true
       });
       mockPrisma.groomAssignment.create.mockResolvedValue({
         id: 1,
@@ -244,22 +244,22 @@ describe('Groom Assignment System', () => {
     const mockGroom = {
       id: 1,
       name: 'Sarah Johnson',
-      speciality: 'foal_care',
-      skill_level: 'intermediate',
+      speciality: 'foalCare',
+      skillLevel: 'intermediate',
       personality: 'gentle',
       experience: 5,
-      hourly_rate: 18.0
+      hourlyRate: 18.0
     };
 
     const mockFoal = {
       id: 1,
       name: 'Test Foal',
-      bond_score: 50,
-      stress_level: 20
+      bondScore: 50,
+      stressLevel: 20
     };
 
     it('should calculate bonding and stress effects correctly', () => {
-      const effects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 60);
+      const effects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 60);
 
       expect(effects).toHaveProperty('bondingChange');
       expect(effects).toHaveProperty('stressChange');
@@ -276,21 +276,21 @@ describe('Groom Assignment System', () => {
     });
 
     it('should apply specialty modifiers correctly', () => {
-      const foalCareGroom = { ...mockGroom, speciality: 'foal_care' };
+      const foalCareGroom = { ...mockGroom, speciality: 'foalCare' };
       const generalGroom = { ...mockGroom, speciality: 'general' };
 
-      const foalCareEffects = calculateGroomInteractionEffects(foalCareGroom, mockFoal, 'daily_care', 60);
-      const generalEffects = calculateGroomInteractionEffects(generalGroom, mockFoal, 'daily_care', 60);
+      const foalCareEffects = calculateGroomInteractionEffects(foalCareGroom, mockFoal, 'dailyCare', 60);
+      const generalEffects = calculateGroomInteractionEffects(generalGroom, mockFoal, 'dailyCare', 60);
 
       expect(foalCareEffects.modifiers.specialty).toBeGreaterThan(generalEffects.modifiers.specialty);
     });
 
     it('should apply skill level modifiers correctly', () => {
-      const expertGroom = { ...mockGroom, skill_level: 'expert' };
-      const noviceGroom = { ...mockGroom, skill_level: 'novice' };
+      const expertGroom = { ...mockGroom, skillLevel: 'expert' };
+      const noviceGroom = { ...mockGroom, skillLevel: 'novice' };
 
-      const expertEffects = calculateGroomInteractionEffects(expertGroom, mockFoal, 'daily_care', 60);
-      const noviceEffects = calculateGroomInteractionEffects(noviceGroom, mockFoal, 'daily_care', 60);
+      const expertEffects = calculateGroomInteractionEffects(expertGroom, mockFoal, 'dailyCare', 60);
+      const noviceEffects = calculateGroomInteractionEffects(noviceGroom, mockFoal, 'dailyCare', 60);
 
       expect(expertEffects.modifiers.skillLevel).toBeGreaterThan(noviceEffects.modifiers.skillLevel);
       expect(expertEffects.cost).toBeGreaterThan(noviceEffects.cost);
@@ -300,15 +300,15 @@ describe('Groom Assignment System', () => {
       const experiencedGroom = { ...mockGroom, experience: 15 };
       const newGroom = { ...mockGroom, experience: 1 };
 
-      const experiencedEffects = calculateGroomInteractionEffects(experiencedGroom, mockFoal, 'daily_care', 60);
-      const newGroomEffects = calculateGroomInteractionEffects(newGroom, mockFoal, 'daily_care', 60);
+      const experiencedEffects = calculateGroomInteractionEffects(experiencedGroom, mockFoal, 'dailyCare', 60);
+      const newGroomEffects = calculateGroomInteractionEffects(newGroom, mockFoal, 'dailyCare', 60);
 
       expect(experiencedEffects.modifiers.experience).toBeGreaterThan(newGroomEffects.modifiers.experience);
     });
 
     it('should scale effects with duration', () => {
-      const shortEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 30);
-      const longEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'daily_care', 120);
+      const shortEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 30);
+      const longEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'dailyCare', 120);
 
       expect(longEffects.cost).toBeGreaterThan(shortEffects.cost);
     });
@@ -373,13 +373,13 @@ describe('Groom Assignment System', () => {
         id: 1,
         name: 'Invalid Groom',
         speciality: 'invalid_specialty',
-        skill_level: 'invalid_level',
+        skillLevel: 'invalid_level',
         personality: 'invalid_personality',
         experience: 5,
-        hourly_rate: 18.0
+        hourlyRate: 18.0
       };
 
-      const effects = calculateGroomInteractionEffects(invalidGroom, { id: 1, bond_score: 50 }, 'daily_care', 60);
+      const effects = calculateGroomInteractionEffects(invalidGroom, { id: 1, bondScore: 50 }, 'dailyCare', 60);
 
       expect(effects).toHaveProperty('bondingChange');
       expect(effects).toHaveProperty('stressChange');

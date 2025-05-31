@@ -13,7 +13,7 @@ export const authenticateToken = (req, res, next) => {
 
     if (!token) {
       logger.warn(`[auth] Missing token for ${req.method} ${req.path} from ${req.ip}`);
-      throw new AppError('Access token required', 401);
+      throw new AppError('Access token is required', 401);
     }
 
     const secret = process.env.JWT_SECRET;
@@ -29,7 +29,7 @@ export const authenticateToken = (req, res, next) => {
         if (err.name === 'TokenExpiredError') {
           throw new AppError('Token expired', 401);
         } else if (err.name === 'JsonWebTokenError') {
-          throw new AppError('Invalid token', 401);
+          throw new AppError('Invalid or expired token', 401);
         } else {
           throw new AppError('Token verification failed', 401);
         }
@@ -142,7 +142,13 @@ export const generateToken = (payload, expiresIn = '24h') => {
  * Generate Refresh Token
  */
 export const generateRefreshToken = (payload) => {
-  return generateToken(payload, '7d');
+  // Add timestamp and random component to ensure uniqueness
+  const uniquePayload = {
+    ...payload,
+    timestamp: Date.now(),
+    random: Math.random().toString(36).substring(2)
+  };
+  return generateToken(uniquePayload, '7d');
 };
 
 // Export authenticateToken as the default export for backward compatibility
