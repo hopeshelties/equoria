@@ -17,13 +17,13 @@ const TRAIT_COMPETITION_EFFECTS = {
     general: {
       scoreModifier: 0.03, // +3% to final score
       stressResistance: 0.15, // 15% less stress impact
-      description: 'Maintains performance under pressure'
+      description: 'Maintains performance under pressure',
     },
     disciplines: {
       'Cross Country': { scoreModifier: 0.05, description: 'Excellent endurance for long courses' },
-      'Endurance': { scoreModifier: 0.06, description: 'Superior stamina for distance events' },
-      'Racing': { scoreModifier: 0.04, description: 'Consistent performance in competitive racing' }
-    }
+      Endurance: { scoreModifier: 0.06, description: 'Superior stamina for distance events' },
+      Racing: { scoreModifier: 0.04, description: 'Consistent performance in competitive racing' },
+    },
   },
 
   bold: {
@@ -31,14 +31,14 @@ const TRAIT_COMPETITION_EFFECTS = {
     type: 'positive',
     general: {
       scoreModifier: 0.04, // +4% to final score
-      adaptability: 0.20, // 20% better adaptation to new environments
-      description: 'Confident performance in challenging situations'
+      adaptability: 0.2, // 20% better adaptation to new environments
+      description: 'Confident performance in challenging situations',
     },
     disciplines: {
       'Show Jumping': { scoreModifier: 0.06, description: 'Fearless approach to obstacles' },
       'Cross Country': { scoreModifier: 0.05, description: 'Brave navigation of varied terrain' },
-      'Eventing': { scoreModifier: 0.05, description: 'Confident in multi-phase competitions' }
-    }
+      Eventing: { scoreModifier: 0.05, description: 'Confident in multi-phase competitions' },
+    },
   },
 
   intelligent: {
@@ -47,13 +47,13 @@ const TRAIT_COMPETITION_EFFECTS = {
     general: {
       scoreModifier: 0.03, // +3% to final score
       learningBonus: 0.25, // 25% faster skill acquisition
-      description: 'Quick to understand and respond to rider cues'
+      description: 'Quick to understand and respond to rider cues',
     },
     disciplines: {
-      'Dressage': { scoreModifier: 0.06, description: 'Exceptional precision in complex movements' },
-      'Reining': { scoreModifier: 0.05, description: 'Masters intricate patterns quickly' },
-      'Eventing': { scoreModifier: 0.04, description: 'Adapts well to varied challenges' }
-    }
+      Dressage: { scoreModifier: 0.06, description: 'Exceptional precision in complex movements' },
+      Reining: { scoreModifier: 0.05, description: 'Masters intricate patterns quickly' },
+      Eventing: { scoreModifier: 0.04, description: 'Adapts well to varied challenges' },
+    },
   },
 
   calm: {
@@ -61,14 +61,14 @@ const TRAIT_COMPETITION_EFFECTS = {
     type: 'positive',
     general: {
       scoreModifier: 0.025, // +2.5% to final score
-      focusBonus: 0.20, // 20% better focus under pressure
-      description: 'Maintains composure in stressful situations'
+      focusBonus: 0.2, // 20% better focus under pressure
+      description: 'Maintains composure in stressful situations',
     },
     disciplines: {
-      'Dressage': { scoreModifier: 0.05, description: 'Perfect composure for precise movements' },
-      'Driving': { scoreModifier: 0.04, description: 'Steady performance in harness work' },
-      'Trail': { scoreModifier: 0.04, description: 'Unflappable on challenging trails' }
-    }
+      Dressage: { scoreModifier: 0.05, description: 'Perfect composure for precise movements' },
+      Driving: { scoreModifier: 0.04, description: 'Steady performance in harness work' },
+      Trail: { scoreModifier: 0.04, description: 'Unflappable on challenging trails' },
+    },
   },
 
   athletic: {
@@ -77,13 +77,13 @@ const TRAIT_COMPETITION_EFFECTS = {
     general: {
       scoreModifier: 0.05, // +5% to final score
       physicalBonus: 0.15, // 15% boost to physical performance
-      description: 'Superior physical capabilities and movement quality'
+      description: 'Superior physical capabilities and movement quality',
     },
     disciplines: {
-      'Racing': { scoreModifier: 0.07, description: 'Exceptional speed and agility' },
+      Racing: { scoreModifier: 0.07, description: 'Exceptional speed and agility' },
       'Show Jumping': { scoreModifier: 0.06, description: 'Powerful and precise jumping ability' },
-      'Cross Country': { scoreModifier: 0.06, description: 'Outstanding athletic performance' }
-    }
+      'Cross Country': { scoreModifier: 0.06, description: 'Outstanding athletic performance' },
+    },
   },
 
   trainability_boost: {
@@ -91,14 +91,14 @@ const TRAIT_COMPETITION_EFFECTS = {
     type: 'positive',
     general: {
       scoreModifier: 0.04, // +4% to final score
-      consistencyBonus: 0.30, // 30% more consistent performance
-      description: 'Exceptional responsiveness to training and rider aids'
+      consistencyBonus: 0.3, // 30% more consistent performance
+      description: 'Exceptional responsiveness to training and rider aids',
     },
     disciplines: {
-      'Dressage': { scoreModifier: 0.07, description: 'Masters complex movements with ease' },
-      'Reining': { scoreModifier: 0.06, description: 'Executes precise patterns flawlessly' },
-      'Driving': { scoreModifier: 0.05, description: 'Responds perfectly to driving cues' }
-    }
+      Dressage: { scoreModifier: 0.07, description: 'Masters complex movements with ease' },
+      Reining: { scoreModifier: 0.06, description: 'Executes precise patterns flawlessly' },
+      Driving: { scoreModifier: 0.05, description: 'Responds perfectly to driving cues' },
+    },
   },
 
   legendary_bloodline: {
@@ -107,13 +107,13 @@ const TRAIT_COMPETITION_EFFECTS = {
     general: {
       scoreModifier: 0.08, // +8% to final score
       prestigeBonus: 0.25, // 25% bonus to all performance aspects
-      description: 'Exceptional heritage provides superior competitive edge'
+      description: 'Exceptional heritage provides superior competitive edge',
     },
     disciplines: {
-      'Racing': { scoreModifier: 0.10, description: 'Elite racing genetics' },
-      'Dressage': { scoreModifier: 0.10, description: 'Noble bearing and exceptional movement' },
-      'Show Jumping': { scoreModifier: 0.10, description: 'Championship bloodlines show' }
-    }
+      Racing: { scoreModifier: 0.1, description: 'Elite racing genetics' },
+      Dressage: { scoreModifier: 0.1, description: 'Noble bearing and exceptional movement' },
+      'Show Jumping': { scoreModifier: 0.1, description: 'Championship bloodlines show' },
+    },
   },
 
   weather_immunity: {
@@ -121,14 +121,14 @@ const TRAIT_COMPETITION_EFFECTS = {
     type: 'positive',
     general: {
       scoreModifier: 0.02, // +2% to final score
-      environmentalBonus: 0.40, // 40% resistance to weather effects
-      description: 'Unaffected by adverse weather conditions'
+      environmentalBonus: 0.4, // 40% resistance to weather effects
+      description: 'Unaffected by adverse weather conditions',
     },
     disciplines: {
       'Cross Country': { scoreModifier: 0.05, description: 'Performs consistently in all weather' },
-      'Endurance': { scoreModifier: 0.04, description: 'Weather conditions don\'t affect stamina' },
-      'Trail': { scoreModifier: 0.03, description: 'Reliable in outdoor conditions' }
-    }
+      Endurance: { scoreModifier: 0.04, description: "Weather conditions don't affect stamina" },
+      Trail: { scoreModifier: 0.03, description: 'Reliable in outdoor conditions' },
+    },
   },
 
   night_vision: {
@@ -136,13 +136,13 @@ const TRAIT_COMPETITION_EFFECTS = {
     type: 'positive',
     general: {
       scoreModifier: 0.015, // +1.5% to final score
-      lowLightBonus: 0.50, // 50% better performance in low light
-      description: 'Enhanced performance in low-light conditions'
+      lowLightBonus: 0.5, // 50% better performance in low light
+      description: 'Enhanced performance in low-light conditions',
     },
     disciplines: {
-      'Trail': { scoreModifier: 0.04, description: 'Confident navigation in dim conditions' },
-      'Endurance': { scoreModifier: 0.03, description: 'Maintains pace during dawn/dusk' }
-    }
+      Trail: { scoreModifier: 0.04, description: 'Confident navigation in dim conditions' },
+      Endurance: { scoreModifier: 0.03, description: 'Maintains pace during dawn/dusk' },
+    },
   },
 
   // Negative traits
@@ -152,13 +152,13 @@ const TRAIT_COMPETITION_EFFECTS = {
     general: {
       scoreModifier: -0.04, // -4% to final score
       stressPenalty: 0.25, // 25% more affected by stress
-      description: 'Easily startled and stressed in competitive environments'
+      description: 'Easily startled and stressed in competitive environments',
     },
     disciplines: {
       'Show Jumping': { scoreModifier: -0.05, description: 'Hesitant at obstacles, may refuse' },
       'Cross Country': { scoreModifier: -0.06, description: 'Spooked by unfamiliar terrain' },
-      'Racing': { scoreModifier: -0.05, description: 'Affected by crowd noise and excitement' }
-    }
+      Racing: { scoreModifier: -0.05, description: 'Affected by crowd noise and excitement' },
+    },
   },
 
   stubborn: {
@@ -166,14 +166,14 @@ const TRAIT_COMPETITION_EFFECTS = {
     type: 'negative',
     general: {
       scoreModifier: -0.03, // -3% to final score
-      responsivenessPenalty: 0.20, // 20% slower response to aids
-      description: 'Resistant to rider cues and direction changes'
+      responsivenessPenalty: 0.2, // 20% slower response to aids
+      description: 'Resistant to rider cues and direction changes',
     },
     disciplines: {
-      'Dressage': { scoreModifier: -0.06, description: 'Resists precise movements and transitions' },
-      'Reining': { scoreModifier: -0.05, description: 'Reluctant to perform quick pattern changes' },
-      'Driving': { scoreModifier: -0.04, description: 'Slow to respond to driving commands' }
-    }
+      Dressage: { scoreModifier: -0.06, description: 'Resists precise movements and transitions' },
+      Reining: { scoreModifier: -0.05, description: 'Reluctant to perform quick pattern changes' },
+      Driving: { scoreModifier: -0.04, description: 'Slow to respond to driving commands' },
+    },
   },
 
   fragile: {
@@ -181,14 +181,14 @@ const TRAIT_COMPETITION_EFFECTS = {
     type: 'negative',
     general: {
       scoreModifier: -0.035, // -3.5% to final score
-      injuryRisk: 0.30, // 30% higher injury risk
-      description: 'Higher risk of injury and performance inconsistency'
+      injuryRisk: 0.3, // 30% higher injury risk
+      description: 'Higher risk of injury and performance inconsistency',
     },
     disciplines: {
       'Cross Country': { scoreModifier: -0.08, description: 'High risk on demanding terrain' },
       'Show Jumping': { scoreModifier: -0.06, description: 'Vulnerable to jumping strain' },
-      'Racing': { scoreModifier: -0.05, description: 'May not handle racing intensity' }
-    }
+      Racing: { scoreModifier: -0.05, description: 'May not handle racing intensity' },
+    },
   },
 
   aggressive: {
@@ -197,13 +197,13 @@ const TRAIT_COMPETITION_EFFECTS = {
     general: {
       scoreModifier: -0.045, // -4.5% to final score
       controlPenalty: 0.35, // 35% harder to control
-      description: 'Difficult to manage and may act unpredictably'
+      description: 'Difficult to manage and may act unpredictably',
     },
     disciplines: {
-      'Dressage': { scoreModifier: -0.08, description: 'Disrupts harmony and precision' },
-      'Driving': { scoreModifier: -0.07, description: 'Dangerous in harness work' },
-      'Trail': { scoreModifier: -0.06, description: 'May react aggressively to obstacles' }
-    }
+      Dressage: { scoreModifier: -0.08, description: 'Disrupts harmony and precision' },
+      Driving: { scoreModifier: -0.07, description: 'Dangerous in harness work' },
+      Trail: { scoreModifier: -0.06, description: 'May react aggressively to obstacles' },
+    },
   },
 
   lazy: {
@@ -212,14 +212,14 @@ const TRAIT_COMPETITION_EFFECTS = {
     general: {
       scoreModifier: -0.03, // -3% to final score
       motivationPenalty: 0.25, // 25% less motivated performance
-      description: 'Lacks drive and requires constant encouragement'
+      description: 'Lacks drive and requires constant encouragement',
     },
     disciplines: {
-      'Racing': { scoreModifier: -0.06, description: 'Lacks competitive drive' },
-      'Endurance': { scoreModifier: -0.05, description: 'Gives up when tired' },
-      'Cross Country': { scoreModifier: -0.04, description: 'Loses motivation on long courses' }
-    }
-  }
+      Racing: { scoreModifier: -0.06, description: 'Lacks competitive drive' },
+      Endurance: { scoreModifier: -0.05, description: 'Gives up when tired' },
+      'Cross Country': { scoreModifier: -0.04, description: 'Loses motivation on long courses' },
+    },
+  },
 };
 
 /**
@@ -231,7 +231,9 @@ const TRAIT_COMPETITION_EFFECTS = {
  */
 export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
   try {
-    logger.debug(`[traitCompetitionImpact] Calculating trait impact for horse ${horse.id} in ${discipline}`);
+    logger.debug(
+      `[traitCompetitionImpact] Calculating trait impact for horse ${horse.id} in ${discipline}`
+    );
 
     // Initialize results
     const result = {
@@ -244,8 +246,8 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
         positiveTraits: 0,
         negativeTraits: 0,
         disciplineSpecific: 0,
-        generalEffects: 0
-      }
+        generalEffects: 0,
+      },
     };
 
     // Get horse traits
@@ -295,7 +297,7 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
           modifier: traitModifier,
           description: effectDescription,
           isSpecialized,
-          discipline: isSpecialized ? discipline : 'general'
+          discipline: isSpecialized ? discipline : 'general',
         };
 
         result.appliedTraits.push(traitApplication);
@@ -321,10 +323,11 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
     // Calculate final score adjustment
     result.finalScoreAdjustment = baseScore * result.totalScoreModifier;
 
-    logger.info(`[traitCompetitionImpact] Horse ${horse.id}: ${result.appliedTraits.length} traits applied, ${(result.totalScoreModifier * 100).toFixed(1)}% modifier, ${result.finalScoreAdjustment.toFixed(1)} point adjustment`);
+    logger.info(
+      `[traitCompetitionImpact] Horse ${horse.id}: ${result.appliedTraits.length} traits applied, ${(result.totalScoreModifier * 100).toFixed(1)}% modifier, ${result.finalScoreAdjustment.toFixed(1)} point adjustment`
+    );
 
     return result;
-
   } catch (error) {
     logger.error(`[traitCompetitionImpact] Error calculating trait impact: ${error.message}`);
     return {
@@ -333,7 +336,7 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
       traitBonuses: [],
       traitPenalties: [],
       finalScoreAdjustment: 0,
-      details: { positiveTraits: 0, negativeTraits: 0, disciplineSpecific: 0, generalEffects: 0 }
+      details: { positiveTraits: 0, negativeTraits: 0, disciplineSpecific: 0, generalEffects: 0 },
     };
   }
 }
@@ -345,11 +348,21 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
  * @returns {number} Diminishing factor (0.5 to 1.0)
  */
 function calculateDiminishingReturns(traitCount) {
-  if (traitCount <= 1) {return 1.0;}
-  if (traitCount === 2) {return 0.95;}
-  if (traitCount === 3) {return 0.90;}
-  if (traitCount === 4) {return 0.85;}
-  if (traitCount >= 5) {return 0.80;}
+  if (traitCount <= 1) {
+    return 1.0;
+  }
+  if (traitCount === 2) {
+    return 0.95;
+  }
+  if (traitCount === 3) {
+    return 0.9;
+  }
+  if (traitCount === 4) {
+    return 0.85;
+  }
+  if (traitCount >= 5) {
+    return 0.8;
+  }
   return 1.0;
 }
 

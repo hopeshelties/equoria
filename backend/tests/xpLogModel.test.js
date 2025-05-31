@@ -45,30 +45,32 @@ const __dirname = dirname(__filename);
 const mockPrismaXpEvent = {
   create: jest.fn(),
   findMany: jest.fn(),
-  findUnique: jest.fn()
+  findUnique: jest.fn(),
 };
 
 const mockPrisma = {
-  xpEvent: mockPrismaXpEvent
+  xpEvent: mockPrismaXpEvent,
 };
 
 // Mock logger
 const mockLogger = {
   info: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn()
+  error: jest.fn(),
 };
 
 jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
-  default: mockPrisma
+  default: mockPrisma,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the module after mocking
-const { logXpEvent, getUserXpEvents, getUserXpSummary, getRecentXpEvents } = await import(join(__dirname, '../models/xpLogModel.js'));
+const { logXpEvent, getUserXpEvents, getUserXpSummary, getRecentXpEvents } = await import(
+  join(__dirname, '../models/xpLogModel.js')
+);
 
 describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
   beforeEach(() => {
@@ -82,13 +84,13 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
   });
 
   describe('logXpEvent', () => {
-    it('should log XP event successfully', async() => {
+    it('should log XP event successfully', async () => {
       const mockXpEvent = {
         id: 1,
         userId: 'user-123',
         amount: 5,
         reason: 'Trained horse in Dressage',
-        timestamp: new Date('2024-01-01T10:00:00Z')
+        timestamp: new Date('2024-01-01T10:00:00Z'),
       };
 
       mockPrismaXpEvent.create.mockResolvedValue(mockXpEvent);
@@ -96,15 +98,15 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
       const result = await logXpEvent({
         userId: 'user-123',
         amount: 5,
-        reason: 'Trained horse in Dressage'
+        reason: 'Trained horse in Dressage',
       });
 
       expect(mockPrismaXpEvent.create).toHaveBeenCalledWith({
         data: {
           userId: 'user-123',
           amount: 5,
-          reason: 'Trained horse in Dressage'
-        }
+          reason: 'Trained horse in Dressage',
+        },
       });
 
       expect(result).toEqual({
@@ -112,54 +114,66 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
         userId: 'user-123',
         amount: 5,
         reason: 'Trained horse in Dressage',
-        timestamp: new Date('2024-01-01T10:00:00Z')
+        timestamp: new Date('2024-01-01T10:00:00Z'),
       });
 
-      expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.logXpEvent] Logging XP event: User user-123, Amount: 5, Reason: Trained horse in Dressage');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        '[xpLogModel.logXpEvent] Logging XP event: User user-123, Amount: 5, Reason: Trained horse in Dressage'
+      );
     });
 
-    it('should validate required parameters', async() => {
+    it('should validate required parameters', async () => {
       // Test missing userId
-      await expect(logXpEvent({
-        amount: 5,
-        reason: 'Test reason'
-      })).rejects.toThrow('User ID is required');
+      await expect(
+        logXpEvent({
+          amount: 5,
+          reason: 'Test reason',
+        })
+      ).rejects.toThrow('User ID is required');
 
       // Test invalid amount
-      await expect(logXpEvent({
-        userId: 'user-123',
-        amount: 'invalid',
-        reason: 'Test reason'
-      })).rejects.toThrow('Amount must be a number');
+      await expect(
+        logXpEvent({
+          userId: 'user-123',
+          amount: 'invalid',
+          reason: 'Test reason',
+        })
+      ).rejects.toThrow('Amount must be a number');
 
       // Test missing reason
-      await expect(logXpEvent({
-        userId: 'user-123',
-        amount: 5
-      })).rejects.toThrow('Reason is required and must be a string');
+      await expect(
+        logXpEvent({
+          userId: 'user-123',
+          amount: 5,
+        })
+      ).rejects.toThrow('Reason is required and must be a string');
 
       expect(mockPrismaXpEvent.create).not.toHaveBeenCalled();
     });
 
-    it('should handle database errors', async() => {
+    it('should handle database errors', async () => {
       mockPrismaXpEvent.create.mockRejectedValue(new Error('Database connection failed'));
 
-      await expect(logXpEvent({
-        userId: 'user-123',
-        amount: 5,
-        reason: 'Test reason'
-      })).rejects.toThrow('Database connection failed');
+      await expect(
+        logXpEvent({
+          userId: 'user-123',
+          amount: 5,
+          reason: 'Test reason',
+        })
+      ).rejects.toThrow('Database connection failed');
 
-      expect(mockLogger.error).toHaveBeenCalledWith('[xpLogModel.logXpEvent] Error logging XP event: Database connection failed');
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '[xpLogModel.logXpEvent] Error logging XP event: Database connection failed'
+      );
     });
 
-    it('should handle negative XP amounts', async() => {
+    it('should handle negative XP amounts', async () => {
       const mockXpEvent = {
         id: 2,
         userId: 'user-123',
         amount: -10,
         reason: 'XP penalty for rule violation',
-        timestamp: new Date('2024-01-01T10:00:00Z')
+        timestamp: new Date('2024-01-01T10:00:00Z'),
       };
 
       mockPrismaXpEvent.create.mockResolvedValue(mockXpEvent);
@@ -167,7 +181,7 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
       const result = await logXpEvent({
         userId: 'user-123',
         amount: -10,
-        reason: 'XP penalty for rule violation'
+        reason: 'XP penalty for rule violation',
       });
 
       expect(result.amount).toBe(-10);
@@ -175,29 +189,29 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
         data: {
           userId: 'user-123',
           amount: -10,
-          reason: 'XP penalty for rule violation'
-        }
+          reason: 'XP penalty for rule violation',
+        },
       });
     });
   });
 
   describe('getUserXpEvents', () => {
-    it('should retrieve XP events for a user', async() => {
+    it('should retrieve XP events for a user', async () => {
       const mockEvents = [
         {
           id: 1,
           userId: 'user-123',
           amount: 20,
           reason: '1st place with horse Nova in Racing',
-          timestamp: new Date('2024-01-01T12:00:00Z')
+          timestamp: new Date('2024-01-01T12:00:00Z'),
         },
         {
           id: 2,
           userId: 'user-123',
           amount: 5,
           reason: 'Trained horse in Dressage',
-          timestamp: new Date('2024-01-01T10:00:00Z')
-        }
+          timestamp: new Date('2024-01-01T10:00:00Z'),
+        },
       ];
 
       mockPrismaXpEvent.findMany.mockResolvedValue(mockEvents);
@@ -208,14 +222,16 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
         where: { userId: 'user-123' },
         orderBy: { timestamp: 'desc' },
         take: 50,
-        skip: 0
+        skip: 0,
       });
 
       expect(result).toEqual(mockEvents);
-      expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.getUserXpEvents] Getting XP events for user user-123, limit: 50, offset: 0');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        '[xpLogModel.getUserXpEvents] Getting XP events for user user-123, limit: 50, offset: 0'
+      );
     });
 
-    it('should handle date filters', async() => {
+    it('should handle date filters', async () => {
       const startDate = new Date('2024-01-01T00:00:00Z');
       const endDate = new Date('2024-01-02T00:00:00Z');
 
@@ -225,7 +241,7 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
         limit: 10,
         offset: 5,
         startDate,
-        endDate
+        endDate,
       });
 
       expect(mockPrismaXpEvent.findMany).toHaveBeenCalledWith({
@@ -233,24 +249,24 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
           userId: 'user-123',
           timestamp: {
             gte: startDate,
-            lte: endDate
-          }
+            lte: endDate,
+          },
         },
         orderBy: { timestamp: 'desc' },
         take: 10,
-        skip: 5
+        skip: 5,
       });
     });
   });
 
   describe('getUserXpSummary', () => {
-    it('should calculate XP summary correctly', async() => {
+    it('should calculate XP summary correctly', async () => {
       const mockEvents = [
         { amount: 20 },
         { amount: 15 },
         { amount: 5 },
         { amount: -5 },
-        { amount: 10 }
+        { amount: 10 },
       ];
 
       mockPrismaXpEvent.findMany.mockResolvedValue(mockEvents);
@@ -259,18 +275,18 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
 
       expect(result).toEqual({
         totalGained: 50, // 20 + 15 + 5 + 10
-        totalLost: 5,    // abs(-5)
-        netTotal: 45,    // 20 + 15 + 5 - 5 + 10
-        totalEvents: 5
+        totalLost: 5, // abs(-5)
+        netTotal: 45, // 20 + 15 + 5 - 5 + 10
+        totalEvents: 5,
       });
 
       expect(mockPrismaXpEvent.findMany).toHaveBeenCalledWith({
         where: { userId: 'user-123' },
-        select: { amount: true }
+        select: { amount: true },
       });
     });
 
-    it('should handle empty results', async() => {
+    it('should handle empty results', async () => {
       mockPrismaXpEvent.findMany.mockResolvedValue([]);
 
       const result = await getUserXpSummary('user-123');
@@ -279,11 +295,11 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
         totalGained: 0,
         totalLost: 0,
         netTotal: 0,
-        totalEvents: 0
+        totalEvents: 0,
       });
     });
 
-    it('should handle date filters in summary', async() => {
+    it('should handle date filters in summary', async () => {
       const startDate = new Date('2024-01-01T00:00:00Z');
       const endDate = new Date('2024-01-02T00:00:00Z');
 
@@ -296,31 +312,31 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
           userId: 'user-123',
           timestamp: {
             gte: startDate,
-            lte: endDate
-          }
+            lte: endDate,
+          },
         },
-        select: { amount: true }
+        select: { amount: true },
       });
     });
   });
 
   describe('getRecentXpEvents', () => {
-    it('should retrieve recent XP events across all users', async() => {
+    it('should retrieve recent XP events across all users', async () => {
       const mockEvents = [
         {
           id: 3,
           userId: 'user-456',
           amount: 15,
           reason: '2nd place with horse Star in Jumping',
-          timestamp: new Date('2024-01-01T14:00:00Z')
+          timestamp: new Date('2024-01-01T14:00:00Z'),
         },
         {
           id: 2,
           userId: 'user-123',
           amount: 5,
           reason: 'Trained horse in Dressage',
-          timestamp: new Date('2024-01-01T10:00:00Z')
-        }
+          timestamp: new Date('2024-01-01T10:00:00Z'),
+        },
       ];
 
       mockPrismaXpEvent.findMany.mockResolvedValue(mockEvents);
@@ -335,17 +351,19 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
           user: {
             select: {
               id: true,
-              username: true
-            }
-          }
-        }
+              username: true,
+            },
+          },
+        },
       });
 
       expect(result).toEqual(mockEvents);
-      expect(mockLogger.info).toHaveBeenCalledWith('[xpLogModel.getRecentXpEvents] Getting recent XP events, limit: 10, offset: 0');
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        '[xpLogModel.getRecentXpEvents] Getting recent XP events, limit: 10, offset: 0'
+      );
     });
 
-    it('should use default options', async() => {
+    it('should use default options', async () => {
       mockPrismaXpEvent.findMany.mockResolvedValue([]);
 
       await getRecentXpEvents();
@@ -358,10 +376,10 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
           user: {
             select: {
               id: true,
-              username: true
-            }
-          }
-        }
+              username: true,
+            },
+          },
+        },
       });
     });
   });

@@ -20,7 +20,7 @@ async function createUser(userData) {
         username,
         email: email.toLowerCase(),
         password,
-        ...rest
+        ...rest,
       },
       select: {
         id: true,
@@ -30,8 +30,8 @@ async function createUser(userData) {
         level: true,
         xp: true,
         money: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     logger.info(`[createUser] User created: ${newUser.username}`);
@@ -48,7 +48,9 @@ async function createUser(userData) {
 
 async function getUserById(id) {
   try {
-    if (!id) {throw new Error('User ID is required.');}
+    if (!id) {
+      throw new Error('User ID is required.');
+    }
     return await prisma.user.findUnique({ where: { id } });
   } catch (error) {
     logger.error(`[getUserById] Error: ${error.message}`);
@@ -58,12 +60,14 @@ async function getUserById(id) {
 
 async function getUserWithHorses(id) {
   try {
-    if (!id) {throw new Error('User ID is required.');}
+    if (!id) {
+      throw new Error('User ID is required.');
+    }
     return await prisma.user.findUnique({
       where: { id },
       include: {
-        horses: { include: { breed: true, stable: true } }
-      }
+        horses: { include: { breed: true, stable: true } },
+      },
     });
   } catch (error) {
     logger.error(`[getUserWithHorses] Error: ${error.message}`);
@@ -73,9 +77,11 @@ async function getUserWithHorses(id) {
 
 async function getUserByEmail(email) {
   try {
-    if (!email) {throw new Error('Email required.');}
+    if (!email) {
+      throw new Error('Email required.');
+    }
     return await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
+      where: { email: email.toLowerCase() },
     });
   } catch (error) {
     logger.error(`[getUserByEmail] Error: ${error.message}`);
@@ -85,13 +91,15 @@ async function getUserByEmail(email) {
 
 async function updateUser(id, updateData) {
   try {
-    if (!id) {throw new Error('User ID is required.');}
+    if (!id) {
+      throw new Error('User ID is required.');
+    }
     delete updateData.id;
     delete updateData.createdAt;
 
     return await prisma.user.update({
       where: { id },
-      data: updateData
+      data: updateData,
     });
   } catch (error) {
     logger.error(`[updateUser] Error: ${error.message}`);
@@ -101,7 +109,9 @@ async function updateUser(id, updateData) {
 
 async function deleteUser(id) {
   try {
-    if (!id) {throw new Error('User ID is required.');}
+    if (!id) {
+      throw new Error('User ID is required.');
+    }
     return await prisma.user.delete({ where: { id } });
   } catch (error) {
     logger.error(`[deleteUser] Error: ${error.message}`);
@@ -111,13 +121,17 @@ async function deleteUser(id) {
 
 async function addXpToUser(userId, amount) {
   try {
-    if (!userId) {throw new Error('User ID is required.');}
+    if (!userId) {
+      throw new Error('User ID is required.');
+    }
     if (typeof amount !== 'number' || amount <= 0) {
       throw new Error('XP amount must be a positive number.');
     }
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {throw new Error('User not found.');}
+    if (!user) {
+      throw new Error('User not found.');
+    }
 
     let { xp, level } = user;
     let leveledUp = false;
@@ -133,7 +147,7 @@ async function addXpToUser(userId, amount) {
 
     const updated = await prisma.user.update({
       where: { id: userId },
-      data: { xp, level }
+      data: { xp, level },
     });
 
     return {
@@ -142,7 +156,7 @@ async function addXpToUser(userId, amount) {
       currentLevel: updated.level,
       leveledUp,
       levelsGained,
-      xpGained: amount
+      xpGained: amount,
     };
   } catch (error) {
     logger.error(`[addXpToUser] Error: ${error.message}`);
@@ -152,7 +166,7 @@ async function addXpToUser(userId, amount) {
       currentXP: null,
       currentLevel: null,
       leveledUp: false,
-      levelsGained: 0
+      levelsGained: 0,
     };
   }
 }
@@ -160,7 +174,9 @@ async function addXpToUser(userId, amount) {
 async function getUserProgress(userId) {
   try {
     const user = await getUserById(userId);
-    if (!user) {throw new Error('User not found.');}
+    if (!user) {
+      throw new Error('User not found.');
+    }
 
     const threshold = xpThreshold(user.level + 1);
     return {
@@ -168,7 +184,7 @@ async function getUserProgress(userId) {
       level: user.level,
       xp: user.xp,
       xpToNextLevel: threshold - user.xp,
-      xpForNextLevel: threshold
+      xpForNextLevel: threshold,
     };
   } catch (error) {
     throw new DatabaseError(`Progress fetch failed: ${error.message}`);
@@ -177,13 +193,17 @@ async function getUserProgress(userId) {
 
 async function getUserStats(userId) {
   try {
-    if (!userId) {throw new Error('User ID is required.');}
+    if (!userId) {
+      throw new Error('User ID is required.');
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { horses: true }
+      include: { horses: true },
     });
-    if (!user) {return null;}
+    if (!user) {
+      return null;
+    }
 
     const horses = user.horses || [];
     const horseCount = horses.length;
@@ -202,7 +222,7 @@ async function getUserStats(userId) {
       level: user.level,
       xp: user.xp,
       horseCount,
-      averageHorseAge: avgHorseAge
+      averageHorseAge: avgHorseAge,
     };
   } catch (error) {
     throw new DatabaseError(`Stats fetch failed: ${error.message}`);
@@ -222,7 +242,7 @@ async function checkAndLevelUpUser(userId) {
     ...user,
     leveledUp: false,
     levelsGained: 0,
-    message: 'Deprecated: use addXpToUser.'
+    message: 'Deprecated: use addXpToUser.',
   };
 }
 
@@ -238,5 +258,5 @@ export {
   getUserProgress,
   getUserStats,
   addUserXp,
-  checkAndLevelUpUser
+  checkAndLevelUpUser,
 };

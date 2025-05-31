@@ -42,72 +42,72 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
   let authToken;
   let testHorse;
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     // Clean up any existing test data
     await prisma.trainingLog.deleteMany({
       where: {
         horse: {
           user: {
-            email: 'progress-test@example.com'
-          }
-        }
-      }
+            email: 'progress-test@example.com',
+          },
+        },
+      },
     });
     await prisma.horse.deleteMany({
       where: {
         user: {
-          email: 'progress-test@example.com'
-        }
-      }
+          email: 'progress-test@example.com',
+        },
+      },
     });
     await prisma.xpEvent.deleteMany({
       where: {
         user: {
-          email: 'progress-test@example.com'
-        }
-      }
+          email: 'progress-test@example.com',
+        },
+      },
     });
     await prisma.user.deleteMany({
       where: {
-        email: 'progress-test@example.com'
-      }
+        email: 'progress-test@example.com',
+      },
     });
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Clean up test data
     await prisma.trainingLog.deleteMany({
       where: {
         horse: {
           user: {
-            email: 'progress-test@example.com'
-          }
-        }
-      }
+            email: 'progress-test@example.com',
+          },
+        },
+      },
     });
     await prisma.horse.deleteMany({
       where: {
         user: {
-          email: 'progress-test@example.com'
-        }
-      }
+          email: 'progress-test@example.com',
+        },
+      },
     });
     await prisma.xpEvent.deleteMany({
       where: {
         user: {
-          email: 'progress-test@example.com'
-        }
-      }
+          email: 'progress-test@example.com',
+        },
+      },
     });
     await prisma.user.deleteMany({
       where: {
-        email: 'progress-test@example.com'
-      }
+        email: 'progress-test@example.com',
+      },
     });
   });
 
   describe('🔐 STEP 1: User Setup & Initial Progress State', () => {
-    it('should create user and establish initial progress state', async() => {
+    it('should create user and establish initial progress state', async () => {
       // STEP 1: Register user
       const registerResponse = await request(app)
         .post('/api/auth/register')
@@ -119,7 +119,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
           password: 'TestPassword123',
           money: 5000,
           xp: 0,
-          level: 1
+          level: 1,
         })
         .expect(201);
 
@@ -131,7 +131,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
         .post('/api/auth/login')
         .send({
           email: 'progress-test@example.com',
-          password: 'TestPassword123'
+          password: 'TestPassword123',
         })
         .expect(200);
 
@@ -143,7 +143,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
       expect(testUser.xp).toBe(0);
     });
 
-    it('should return correct initial progress data via API', async() => {
+    it('should return correct initial progress data via API', async () => {
       const response = await request(app)
         .get(`/api/user/${testUser.id}/progress`)
         .set('Authorization', `Bearer ${authToken}`)
@@ -159,13 +159,13 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
         xpForNextLevel: 200, // Level 2 threshold
         xpForCurrentLevel: 0, // Level 1 threshold (0 XP)
         progressPercentage: 0,
-        totalEarnings: 5000
+        totalEarnings: 5000,
       });
     });
   });
 
   describe('🐎 STEP 2: Horse Creation for Training Integration', () => {
-    it('should create training-eligible horse', async() => {
+    it('should create training-eligible horse', async () => {
       const breed = await prisma.breed.findFirst();
 
       // Calculate age from dateOfBirth for proper horse creation
@@ -187,9 +187,9 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
           epigeneticModifiers: {
             positive: ['athletic', 'focused'],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       // Verify horse was created with correct age for training eligibility
@@ -199,14 +199,14 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
   });
 
   describe('🏋️ STEP 3: XP Gain Through Training & Progress Updates', () => {
-    it('should gain XP from training and update progress correctly', async() => {
+    it('should gain XP from training and update progress correctly', async () => {
       // STEP 1: Train horse to gain XP (real business logic)
       const trainingResponse = await request(app)
         .post('/api/training/train')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: testHorse.id,
-          discipline: 'Racing'
+          discipline: 'Racing',
         })
         .expect(200);
 
@@ -227,18 +227,19 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
         xpForNextLevel: 200,
         xpForCurrentLevel: 0,
         progressPercentage: 3, // 5/200 * 100 = 2.5% rounded to 3%
-        totalEarnings: 5000
+        totalEarnings: 5000,
       });
     });
 
-    it('should handle multiple training sessions and XP accumulation', async() => {
+    it('should handle multiple training sessions and XP accumulation', async () => {
       // STEP 1: Train a reasonable number of times (simulating moderate activity)
       // With hundreds of shows planned, we don't want to make leveling too easy
-      for (let i = 0; i < 10; i++) { // 10 * 5 = 50 XP total (55 XP accumulated)
+      for (let i = 0; i < 10; i++) {
+        // 10 * 5 = 50 XP total (55 XP accumulated)
         // Update previous training log to be in the past
         const lastLog = await prisma.trainingLog.findFirst({
           where: { horseId: testHorse.id },
-          orderBy: { trainedAt: 'desc' }
+          orderBy: { trainedAt: 'desc' },
         });
 
         if (lastLog) {
@@ -246,7 +247,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
           pastDate.setDate(pastDate.getDate() - 8);
           await prisma.trainingLog.update({
             where: { id: lastLog.id },
-            data: { trainedAt: pastDate }
+            data: { trainedAt: pastDate },
           });
         }
 
@@ -257,7 +258,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
           .set('Authorization', `Bearer ${authToken}`)
           .send({
             horseId: testHorse.id,
-            discipline
+            discipline,
           })
           .expect(200);
       }
@@ -276,18 +277,18 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
   });
 
   describe('🎯 STEP 4: Level-Up Detection & Multi-Level Progression', () => {
-    it('should level up when reaching XP threshold', async() => {
+    it('should level up when reaching XP threshold', async () => {
       // STEP 1: Simulate reaching level-up threshold (like after many competitions)
       // Manually set user to 195 XP to test level-up with one more training session
       await prisma.user.update({
         where: { id: testUser.id },
-        data: { xp: 195, level: 1 }
+        data: { xp: 195, level: 1 },
       });
 
       // STEP 2: One more training to trigger level-up (195 + 5 = 200 XP)
       const lastLog = await prisma.trainingLog.findFirst({
         where: { horseId: testHorse.id },
-        orderBy: { trainedAt: 'desc' }
+        orderBy: { trainedAt: 'desc' },
       });
 
       if (lastLog) {
@@ -295,7 +296,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
         pastDate.setDate(pastDate.getDate() - 8);
         await prisma.trainingLog.update({
           where: { id: lastLog.id },
-          data: { trainedAt: pastDate }
+          data: { trainedAt: pastDate },
         });
       }
 
@@ -304,7 +305,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: testHorse.id,
-          discipline: 'Cross Country'
+          discipline: 'Cross Country',
         })
         .expect(200);
 
@@ -325,11 +326,11 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
         xpForNextLevel: 300, // Level 3 requires 300 XP total
         xpForCurrentLevel: 200, // Level 2 required 200 XP total
         progressPercentage: 0, // 0/200 progress toward level 3
-        totalEarnings: 5000
+        totalEarnings: 5000,
       });
     });
 
-    it('should handle multiple level gains in single XP award', async() => {
+    it('should handle multiple level gains in single XP award', async () => {
       // STEP 1: Manually award large XP amount to test multi-level progression
       // Simulate earning lots of XP from competitions (like hundreds of shows)
       // Current: 200 XP (Level 2), Award: 150 XP = 350 XP total
@@ -337,7 +338,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
       // So 350 XP should be Level 3 (300-399 XP range)
       await prisma.user.update({
         where: { id: testUser.id },
-        data: { xp: 350, level: 3 } // Simulate the addXpToUser logic
+        data: { xp: 350, level: 3 }, // Simulate the addXpToUser logic
       });
 
       // STEP 2: Verify multi-level progression
@@ -355,13 +356,13 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
         xpForNextLevel: 400,
         xpForCurrentLevel: 300, // Level 3 threshold
         progressPercentage: 50, // 50/100 * 100 = 50% progress toward level 4
-        totalEarnings: 5000
+        totalEarnings: 5000,
       });
     });
   });
 
   describe('📊 STEP 5: Dashboard Data Integration', () => {
-    it('should return comprehensive dashboard data with progress integration', async() => {
+    it('should return comprehensive dashboard data with progress integration', async () => {
       const dashboardResponse = await request(app)
         .get(`/api/user/dashboard/${testUser.id}`)
         .set('Authorization', `Bearer ${authToken}`)
@@ -374,26 +375,26 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
           username: testUser.username,
           level: 3,
           xp: 350, // Updated to match our manual setting
-          money: 5000
+          money: 5000,
         },
         horses: {
           total: 1,
-          trainable: expect.any(Number)
+          trainable: expect.any(Number),
         },
         shows: {
           upcomingEntries: 0,
-          nextShowRuns: []
+          nextShowRuns: [],
         },
         activity: {
           lastTrained: expect.any(String), // Training is now working correctly
-          lastShowPlaced: null
-        }
+          lastShowPlaced: null,
+        },
       });
     });
   });
 
   describe('🔍 STEP 6: API Consistency & Edge Cases', () => {
-    it('should handle invalid user ID gracefully', async() => {
+    it('should handle invalid user ID gracefully', async () => {
       const response = await request(app)
         .get('/api/user/999999/progress')
         .set('Authorization', `Bearer ${authToken}`)
@@ -403,7 +404,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
       expect(response.body.message).toContain('Validation failed');
     });
 
-    it('should validate user ID format', async() => {
+    it('should validate user ID format', async () => {
       const response = await request(app)
         .get('/api/user/invalid/progress')
         .set('Authorization', `Bearer ${authToken}`)
@@ -413,21 +414,19 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
       expect(response.body.message).toContain('Validation failed');
     });
 
-    it('should require authentication for progress endpoints', async() => {
-      const response = await request(app)
-        .get(`/api/user/${testUser.id}/progress`)
-        .expect(401);
+    it('should require authentication for progress endpoints', async () => {
+      const response = await request(app).get(`/api/user/${testUser.id}/progress`).expect(401);
 
       expect(response.body.success).toBe(false);
     });
   });
 
   describe('🎊 STEP 7: End-to-End Progress Validation', () => {
-    it('should validate complete progress tracking integrity', async() => {
+    it('should validate complete progress tracking integrity', async () => {
       // STEP 1: Verify final user state
       const finalUser = await prisma.user.findUnique({
         where: { id: testUser.id },
-        include: { xpEvents: true }
+        include: { xpEvents: true },
       });
 
       expect(finalUser.level).toBe(3);
@@ -454,11 +453,11 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
       expect(progressData.progressPercentage).toBe(50); // 50/100 * 100
     });
 
-    it('should validate all business rules were enforced throughout progression', async() => {
+    it('should validate all business rules were enforced throughout progression', async () => {
       // STEP 1: Verify training cooldown was respected
       const trainingLogs = await prisma.trainingLog.findMany({
         where: { horseId: testHorse.id },
-        orderBy: { trainedAt: 'asc' }
+        orderBy: { trainedAt: 'asc' },
       });
 
       // Training may have failed due to horse issues, so logs might be 0
@@ -466,7 +465,7 @@ describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () 
 
       // STEP 2: Verify final user state matches our manual progression
       const finalUser = await prisma.user.findUnique({
-        where: { id: testUser.id }
+        where: { id: testUser.id },
       });
 
       // Level 3 should require 300 XP, user has 350 XP

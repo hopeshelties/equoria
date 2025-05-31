@@ -4,7 +4,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  Animated,
+} from 'react-native';
 
 /**
  * TraitDiscoveryNotification Component
@@ -15,12 +22,12 @@ import { View, Text, TouchableOpacity, Modal, ScrollView, Animated } from 'react
  * @param {Function} props.onViewDetails - Callback when view details is pressed
  * @param {string} props.horseName - Name of the horse
  */
-const TraitDiscoveryNotification = ({ 
-  discovery, 
-  visible, 
-  onClose, 
+const TraitDiscoveryNotification = ({
+  discovery,
+  visible,
+  onClose,
   onViewDetails,
-  horseName = 'Your Horse'
+  horseName = 'Your Horse',
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
@@ -66,40 +73,50 @@ const TraitDiscoveryNotification = ({
   // Get trait type icon
   const getTraitIcon = (trait) => {
     if (!trait.definition) return '🧬';
-    
+
     switch (trait.definition.type) {
-      case 'positive': return '✨';
-      case 'negative': return '⚠️';
-      default: return '🧬';
+      case 'positive':
+        return '✨';
+      case 'negative':
+        return '⚠️';
+      default:
+        return '🧬';
     }
   };
 
   // Get trait type color
   const getTraitColor = (trait) => {
     if (!trait.definition) return 'text-gray-600';
-    
+
     switch (trait.definition.type) {
-      case 'positive': return 'text-green-600';
-      case 'negative': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'positive':
+        return 'text-green-600';
+      case 'negative':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
   // Get rarity badge color
   const getRarityColor = (rarity) => {
     switch (rarity) {
-      case 'legendary': return 'bg-purple-100 text-purple-800';
-      case 'rare': return 'bg-blue-100 text-blue-800';
-      case 'common': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'legendary':
+        return 'bg-purple-100 text-purple-800';
+      case 'rare':
+        return 'bg-blue-100 text-blue-800';
+      case 'common':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const NotificationContent = () => (
-    <Animated.View 
+    <Animated.View
       style={{
         opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }]
+        transform: [{ translateY: slideAnim }],
       }}
       className="bg-white rounded-lg shadow-lg border border-gray-200 mx-4 my-2"
     >
@@ -112,12 +129,10 @@ const TraitDiscoveryNotification = ({
               <Text className="text-white font-bold text-lg">
                 {hasTraits ? 'Traits Discovered!' : 'Discovery Check'}
               </Text>
-              <Text className="text-white opacity-90 text-sm">
-                {horseName}
-              </Text>
+              <Text className="text-white opacity-90 text-sm">{horseName}</Text>
             </View>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={onClose}
             className="bg-white bg-opacity-20 rounded-full w-8 h-8 items-center justify-center"
           >
@@ -132,25 +147,33 @@ const TraitDiscoveryNotification = ({
           <>
             {/* Discovered Traits */}
             <Text className="text-gray-800 font-semibold mb-3">
-              Discovered {revealed.length} new trait{revealed.length > 1 ? 's' : ''}:
+              Discovered {revealed.length} new trait
+              {revealed.length > 1 ? 's' : ''}:
             </Text>
-            
+
             <View className="space-y-2 mb-4">
               {revealed.map((trait, index) => (
-                <View 
+                <View
                   key={`${trait.trait}-${index}`}
                   className="bg-gray-50 rounded-lg p-3 border border-gray-200"
                 >
                   <View className="flex-row items-center justify-between">
                     <View className="flex-row items-center flex-1">
-                      <Text className="text-xl mr-2">{getTraitIcon(trait)}</Text>
+                      <Text className="text-xl mr-2">
+                        {getTraitIcon(trait)}
+                      </Text>
                       <View className="flex-1">
-                        <Text className={`font-semibold ${getTraitColor(trait)}`}>
-                          {trait.definition?.name || trait.trait.replace(/_/g, ' ')}
+                        <Text
+                          className={`font-semibold ${getTraitColor(trait)}`}
+                        >
+                          {trait.definition?.name ||
+                            trait.trait.replace(/_/g, ' ')}
                         </Text>
                         {trait.definition?.rarity && (
                           <View className="flex-row items-center mt-1">
-                            <View className={`px-2 py-1 rounded-full ${getRarityColor(trait.definition.rarity)}`}>
+                            <View
+                              className={`px-2 py-1 rounded-full ${getRarityColor(trait.definition.rarity)}`}
+                            >
                               <Text className="text-xs font-medium">
                                 {trait.definition.rarity}
                               </Text>
@@ -160,7 +183,7 @@ const TraitDiscoveryNotification = ({
                       </View>
                     </View>
                   </View>
-                  
+
                   {trait.discoveryReason && (
                     <Text className="text-gray-600 text-sm mt-2 italic">
                       Discovered through: {trait.discoveryReason}
@@ -178,7 +201,8 @@ const TraitDiscoveryNotification = ({
             </Text>
             {conditions.length > 0 && (
               <Text className="text-gray-600 text-sm mt-2">
-                {conditions.length} discovery condition{conditions.length > 1 ? 's' : ''} met
+                {conditions.length} discovery condition
+                {conditions.length > 1 ? 's' : ''} met
               </Text>
             )}
           </View>
@@ -199,7 +223,7 @@ const TraitDiscoveryNotification = ({
               </Text>
             </TouchableOpacity>
           )}
-          
+
           <TouchableOpacity
             onPress={onClose}
             className={`${hasTraits ? 'flex-1' : 'w-full'} bg-gray-500 rounded-lg py-3 px-4`}
@@ -227,16 +251,14 @@ const TraitDiscoveryNotification = ({
             <Text className="text-white font-bold text-xl">
               Discovery Details
             </Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowDetails(false)}
               className="bg-white bg-opacity-20 rounded-full w-10 h-10 items-center justify-center"
             >
               <Text className="text-white font-bold text-lg">×</Text>
             </TouchableOpacity>
           </View>
-          <Text className="text-white opacity-90 mt-1">
-            {horseName}
-          </Text>
+          <Text className="text-white opacity-90 mt-1">{horseName}</Text>
         </View>
 
         <ScrollView className="flex-1 p-4">
@@ -246,20 +268,25 @@ const TraitDiscoveryNotification = ({
               <Text className="text-lg font-bold text-gray-800 mb-4">
                 Discovered Traits
               </Text>
-              
+
               {revealed.map((trait, index) => (
-                <View 
+                <View
                   key={`detail-${trait.trait}-${index}`}
                   className="bg-gray-50 rounded-lg p-4 mb-3 border border-gray-200"
                 >
                   <View className="flex-row items-center mb-3">
                     <Text className="text-2xl mr-3">{getTraitIcon(trait)}</Text>
                     <View className="flex-1">
-                      <Text className={`font-bold text-lg ${getTraitColor(trait)}`}>
-                        {trait.definition?.name || trait.trait.replace(/_/g, ' ')}
+                      <Text
+                        className={`font-bold text-lg ${getTraitColor(trait)}`}
+                      >
+                        {trait.definition?.name ||
+                          trait.trait.replace(/_/g, ' ')}
                       </Text>
                       {trait.definition?.rarity && (
-                        <View className={`self-start px-2 py-1 rounded-full mt-1 ${getRarityColor(trait.definition.rarity)}`}>
+                        <View
+                          className={`self-start px-2 py-1 rounded-full mt-1 ${getRarityColor(trait.definition.rarity)}`}
+                        >
                           <Text className="text-xs font-medium">
                             {trait.definition.rarity}
                           </Text>
@@ -267,13 +294,13 @@ const TraitDiscoveryNotification = ({
                       )}
                     </View>
                   </View>
-                  
+
                   {trait.definition?.description && (
                     <Text className="text-gray-700 mb-2">
                       {trait.definition.description}
                     </Text>
                   )}
-                  
+
                   {trait.discoveryReason && (
                     <View className="bg-blue-50 rounded p-2 mt-2">
                       <Text className="text-blue-800 text-sm font-medium">
@@ -295,9 +322,9 @@ const TraitDiscoveryNotification = ({
               <Text className="text-lg font-bold text-gray-800 mb-4">
                 Discovery Conditions Met
               </Text>
-              
+
               {conditions.map((condition, index) => (
-                <View 
+                <View
                   key={`condition-${index}`}
                   className="bg-green-50 rounded-lg p-3 mb-2 border border-green-200"
                 >
@@ -318,9 +345,7 @@ const TraitDiscoveryNotification = ({
               <Text className="text-purple-800 font-medium mb-1">
                 Discovery Summary
               </Text>
-              <Text className="text-purple-700">
-                {message}
-              </Text>
+              <Text className="text-purple-700">{message}</Text>
             </View>
           )}
         </ScrollView>

@@ -4,12 +4,12 @@ import {
   corsOptions,
   createRateLimiter,
   helmetConfig,
-  createSecurityMiddleware
+  createSecurityMiddleware,
 } from '../../middleware/security.js';
 
 // Simple mock for logger
 const mockLogger = {
-  warn: () => {}
+  warn: () => {},
 };
 
 describe('Security Middleware', () => {
@@ -20,7 +20,7 @@ describe('Security Middleware', () => {
   });
 
   describe('CORS Configuration', () => {
-    it('should allow requests from localhost:3000', (done) => {
+    it('should allow requests from localhost:3000', done => {
       corsOptions.origin('http://localhost:3000', (err, allowed) => {
         expect(err).toBeNull();
         expect(allowed).toBe(true);
@@ -28,7 +28,7 @@ describe('Security Middleware', () => {
       });
     });
 
-    it('should allow requests from localhost:3001', (done) => {
+    it('should allow requests from localhost:3001', done => {
       corsOptions.origin('http://localhost:3001', (err, allowed) => {
         expect(err).toBeNull();
         expect(allowed).toBe(true);
@@ -36,7 +36,7 @@ describe('Security Middleware', () => {
       });
     });
 
-    it('should allow requests with no origin', (done) => {
+    it('should allow requests with no origin', done => {
       corsOptions.origin(undefined, (err, allowed) => {
         expect(err).toBeNull();
         expect(allowed).toBe(true);
@@ -44,7 +44,7 @@ describe('Security Middleware', () => {
       });
     });
 
-    it('should block requests from unauthorized origins', (done) => {
+    it('should block requests from unauthorized origins', done => {
       corsOptions.origin('http://malicious-site.com', (err, allowed) => {
         expect(err).toBeInstanceOf(Error);
         expect(err.message).toBe('Not allowed by CORS');
@@ -53,7 +53,7 @@ describe('Security Middleware', () => {
       });
     });
 
-    it('should allow origins from environment variable', (done) => {
+    it('should allow origins from environment variable', done => {
       const originalEnv = process.env.ALLOWED_ORIGINS;
       process.env.ALLOWED_ORIGINS = 'https://example.com,https://app.example.com';
 
@@ -81,7 +81,7 @@ describe('Security Middleware', () => {
       expect(typeof limiter).toBe('function');
     });
 
-    it('should limit requests when threshold is exceeded', async() => {
+    it('should limit requests when threshold is exceeded', async () => {
       const limiter = createRateLimiter(60000, 2); // Very low limit for testing
 
       app.use(limiter);
@@ -90,24 +90,18 @@ describe('Security Middleware', () => {
       });
 
       // First request should succeed
-      await request(app)
-        .get('/test')
-        .expect(200);
+      await request(app).get('/test').expect(200);
 
       // Second request should succeed
-      await request(app)
-        .get('/test')
-        .expect(200);
+      await request(app).get('/test').expect(200);
 
       // Third request should be rate limited
-      const response = await request(app)
-        .get('/test')
-        .expect(429);
+      const response = await request(app).get('/test').expect(429);
 
       expect(response.body).toEqual({
         success: false,
         error: 'Too many requests from this IP, please try again later.',
-        retryAfter: 60
+        retryAfter: 60,
       });
     });
   });
@@ -115,15 +109,15 @@ describe('Security Middleware', () => {
   describe('Helmet Configuration', () => {
     it('should have proper CSP directives', () => {
       expect(helmetConfig.contentSecurityPolicy.directives).toEqual({
-        defaultSrc: ['\'self\''],
-        styleSrc: ['\'self\'', '\'unsafe-inline\''],
-        scriptSrc: ['\'self\''],
-        imgSrc: ['\'self\'', 'data:', 'https:'],
-        connectSrc: ['\'self\''],
-        fontSrc: ['\'self\''],
-        objectSrc: ['\'none\''],
-        mediaSrc: ['\'self\''],
-        frameSrc: ['\'none\'']
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
       });
     });
 
@@ -131,7 +125,7 @@ describe('Security Middleware', () => {
       expect(helmetConfig.hsts).toEqual({
         maxAge: 31536000,
         includeSubDomains: true,
-        preload: true
+        preload: true,
       });
     });
 
@@ -152,7 +146,7 @@ describe('Security Middleware', () => {
       });
     });
 
-    it('should apply security headers through helmet', async() => {
+    it('should apply security headers through helmet', async () => {
       const middleware = createSecurityMiddleware();
 
       app.use(middleware);
@@ -160,9 +154,7 @@ describe('Security Middleware', () => {
         res.json({ success: true });
       });
 
-      const response = await request(app)
-        .get('/test')
-        .expect(200);
+      const response = await request(app).get('/test').expect(200);
 
       // Check for security headers
       expect(response.headers['x-content-type-options']).toBe('nosniff');

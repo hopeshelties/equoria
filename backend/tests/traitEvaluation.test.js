@@ -9,12 +9,12 @@ const __dirname = dirname(__filename);
 const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
-  warn: jest.fn()
+  warn: jest.fn(),
 };
 
 // Mock the logger import
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the functions after mocking
@@ -23,7 +23,7 @@ const {
   getTraitDefinition,
   getAllTraitDefinitions,
   TRAIT_DEFINITIONS,
-  TRAIT_CONFLICTS
+  TRAIT_CONFLICTS,
 } = await import(join(__dirname, '../utils/traitEvaluation.js'));
 
 describe('Trait Evaluation System', () => {
@@ -43,16 +43,16 @@ describe('Trait Evaluation System', () => {
       name: 'Test Foal',
       age: 0,
       bond_score: 75,
-      stress_level: 20
+      stress_level: 20,
     };
 
     const mockCurrentTraits = {
       positive: [],
       negative: [],
-      hidden: []
+      hidden: [],
     };
 
-    it('should evaluate traits for a foal with good bonding and low stress', async() => {
+    it('should evaluate traits for a foal with good bonding and low stress', async () => {
       // Mock Math.random to ensure trait revelation
       Math.random.mockReturnValue(0.1); // Low value to trigger trait revelation
 
@@ -66,7 +66,7 @@ describe('Trait Evaluation System', () => {
       expect(Array.isArray(result.hidden)).toBe(true);
     });
 
-    it('should not reveal traits that do not meet age requirements', async() => {
+    it('should not reveal traits that do not meet age requirements', async () => {
       const youngFoal = { ...mockFoal };
       Math.random.mockReturnValue(0.1);
 
@@ -82,7 +82,7 @@ describe('Trait Evaluation System', () => {
       });
     });
 
-    it('should not reveal traits that do not meet bonding requirements', async() => {
+    it('should not reveal traits that do not meet bonding requirements', async () => {
       const lowBondFoal = { ...mockFoal, bond_score: 30 };
       Math.random.mockReturnValue(0.1);
 
@@ -97,7 +97,7 @@ describe('Trait Evaluation System', () => {
       });
     });
 
-    it('should not reveal traits that do not meet stress requirements', async() => {
+    it('should not reveal traits that do not meet stress requirements', async () => {
       const highStressFoal = { ...mockFoal, stress_level: 90 };
       Math.random.mockReturnValue(0.1);
 
@@ -112,11 +112,11 @@ describe('Trait Evaluation System', () => {
       });
     });
 
-    it('should not reveal duplicate traits', async() => {
+    it('should not reveal duplicate traits', async () => {
       const existingTraits = {
         positive: ['resilient'],
         negative: ['nervous'],
-        hidden: ['intelligent']
+        hidden: ['intelligent'],
       };
 
       Math.random.mockReturnValue(0.1);
@@ -130,11 +130,11 @@ describe('Trait Evaluation System', () => {
       expect(allNewTraits).not.toContain('intelligent');
     });
 
-    it('should respect trait conflicts', async() => {
+    it('should respect trait conflicts', async () => {
       const existingTraits = {
         positive: ['calm'],
         negative: [],
-        hidden: []
+        hidden: [],
       };
 
       Math.random.mockReturnValue(0.1);
@@ -150,13 +150,13 @@ describe('Trait Evaluation System', () => {
       });
     });
 
-    it('should handle foals with null bond_score and stress_level', async() => {
+    it('should handle foals with null bond_score and stress_level', async () => {
       const foalWithNulls = {
         id: 1,
         name: 'Test Foal',
         age: 0,
         bond_score: null,
-        stress_level: null
+        stress_level: null,
       };
 
       Math.random.mockReturnValue(0.1);
@@ -168,7 +168,7 @@ describe('Trait Evaluation System', () => {
       expect(result).toHaveProperty('hidden');
     });
 
-    it('should use development age for young foals', async() => {
+    it('should use development age for young foals', async () => {
       const newbornFoal = { ...mockFoal, age: 0 };
       Math.random.mockReturnValue(0.1);
 
@@ -180,7 +180,7 @@ describe('Trait Evaluation System', () => {
       );
     });
 
-    it('should not reveal traits when random chance is too high', async() => {
+    it('should not reveal traits when random chance is too high', async () => {
       Math.random.mockReturnValue(0.9); // High value to prevent trait revelation
 
       const result = evaluateTraitRevelation(mockFoal, mockCurrentTraits, 6);

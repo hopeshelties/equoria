@@ -17,7 +17,7 @@ export const DAILY_CARE_ROUTINES = {
     duration: 45, // minutes
     description: 'Morning feeding, grooming, and health check',
     timeOfDay: 'morning',
-    priority: 1
+    priority: 1,
   },
   feeding: {
     name: 'Feeding',
@@ -25,7 +25,7 @@ export const DAILY_CARE_ROUTINES = {
     duration: 20,
     description: 'Regular feeding routine',
     timeOfDay: 'multiple',
-    priority: 2
+    priority: 2,
   },
   grooming: {
     name: 'Grooming',
@@ -33,7 +33,7 @@ export const DAILY_CARE_ROUTINES = {
     duration: 30,
     description: 'Brushing and basic grooming',
     timeOfDay: 'afternoon',
-    priority: 3
+    priority: 3,
   },
   exercise: {
     name: 'Exercise',
@@ -41,7 +41,7 @@ export const DAILY_CARE_ROUTINES = {
     duration: 60,
     description: 'Light exercise and movement',
     timeOfDay: 'afternoon',
-    priority: 4
+    priority: 4,
   },
   evening_care: {
     name: 'Evening Care',
@@ -49,8 +49,8 @@ export const DAILY_CARE_ROUTINES = {
     duration: 30,
     description: 'Evening check-up and settling',
     timeOfDay: 'evening',
-    priority: 5
-  }
+    priority: 5,
+  },
 };
 
 /**
@@ -63,16 +63,18 @@ export async function runDailyCareAutomation(options = {}) {
     const {
       dryRun = false,
       specificFoalId = null,
-      routineTypes = Object.keys(DAILY_CARE_ROUTINES)
+      routineTypes = Object.keys(DAILY_CARE_ROUTINES),
     } = options;
 
-    logger.info(`[dailyCareAutomation.runDailyCareAutomation] Starting daily care automation${dryRun ? ' (DRY RUN)' : ''}`);
+    logger.info(
+      `[dailyCareAutomation.runDailyCareAutomation] Starting daily care automation${dryRun ? ' (DRY RUN)' : ''}`
+    );
 
     // Get all active groom assignments
     const assignments = await prisma.groomAssignment.findMany({
       where: {
         isActive: true,
-        ...(specificFoalId && { foalId: specificFoalId })
+        ...(specificFoalId && { foalId: specificFoalId }),
       },
       include: {
         groom: true,
@@ -82,14 +84,11 @@ export async function runDailyCareAutomation(options = {}) {
             name: true,
             bond_score: true,
             stress_level: true,
-            age: true
-          }
-        }
+            age: true,
+          },
+        },
       },
-      orderBy: [
-        { priority: 'asc' },
-        { createdAt: 'asc' }
-      ]
+      orderBy: [{ priority: 'asc' }, { createdAt: 'asc' }],
     });
 
     if (assignments.length === 0) {
@@ -98,7 +97,7 @@ export async function runDailyCareAutomation(options = {}) {
         success: true,
         processed: 0,
         interactions: [],
-        message: 'No active groom assignments found'
+        message: 'No active groom assignments found',
       };
     }
 
@@ -115,14 +114,22 @@ export async function runDailyCareAutomation(options = {}) {
         }
 
         // Check if daily care already completed today
-        const existingCareToday = await checkExistingCareToday(assignment.foalId, assignment.groomId);
+        const existingCareToday = await checkExistingCareToday(
+          assignment.foalId,
+          assignment.groomId
+        );
         if (existingCareToday.hasCompleteCare) {
-          logger.debug(`[dailyCareAutomation] Daily care already completed for foal ${assignment.foal.name}`);
+          logger.debug(
+            `[dailyCareAutomation] Daily care already completed for foal ${assignment.foal.name}`
+          );
           continue;
         }
 
         // Determine which routines to perform
-        const routinesToPerform = determineRoutinesToPerform(routineTypes, existingCareToday.completedRoutines);
+        const routinesToPerform = determineRoutinesToPerform(
+          routineTypes,
+          existingCareToday.completedRoutines
+        );
 
         if (routinesToPerform.length === 0) {
           logger.debug(`[dailyCareAutomation] No routines needed for foal ${assignment.foal.name}`);
@@ -152,18 +159,19 @@ export async function runDailyCareAutomation(options = {}) {
               groomName: assignment.groom.name,
               routine: routine.name,
               effects,
-              dryRun: true
+              dryRun: true,
             });
           }
         }
-
       } catch (error) {
-        logger.error(`[dailyCareAutomation] Error processing assignment ${assignment.id}: ${error.message}`);
+        logger.error(
+          `[dailyCareAutomation] Error processing assignment ${assignment.id}: ${error.message}`
+        );
         errors.push({
           assignmentId: assignment.id,
           foalName: assignment.foal.name,
           groomName: assignment.groom.name,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -172,7 +180,9 @@ export async function runDailyCareAutomation(options = {}) {
     const totalBondingGain = results.reduce((sum, r) => sum + (r.effects?.bondingChange || 0), 0);
     const totalCost = results.reduce((sum, r) => sum + (r.effects?.cost || 0), 0);
 
-    logger.info(`[dailyCareAutomation.runDailyCareAutomation] Completed: ${totalInteractions} interactions, ${totalBondingGain} total bonding gain, $${totalCost.toFixed(2)} total cost`);
+    logger.info(
+      `[dailyCareAutomation.runDailyCareAutomation] Completed: ${totalInteractions} interactions, ${totalBondingGain} total bonding gain, $${totalCost.toFixed(2)} total cost`
+    );
 
     return {
       success: true,
@@ -183,11 +193,10 @@ export async function runDailyCareAutomation(options = {}) {
         totalInteractions,
         totalBondingGain,
         totalCost: Math.round(totalCost * 100) / 100,
-        errorCount: errors.length
+        errorCount: errors.length,
       },
-      message: `Daily care automation completed: ${totalInteractions} interactions performed`
+      message: `Daily care automation completed: ${totalInteractions} interactions performed`,
     };
-
   } catch (error) {
     logger.error(`[dailyCareAutomation.runDailyCareAutomation] Error: ${error.message}`);
     throw error;
@@ -222,23 +231,31 @@ async function performAutomaticCare(assignment, routine) {
         stressChange: effects.stressChange,
         quality: effects.quality,
         cost: effects.cost,
-        notes: `Automatic ${routine.name} - ${routine.description}`
-      }
+        notes: `Automatic ${routine.name} - ${routine.description}`,
+      },
     });
 
     // Update foal's bond score and stress level
-    const newBondScore = Math.max(0, Math.min(100, (assignment.foal.bond_score || 50) + effects.bondingChange));
-    const newStressLevel = Math.max(0, Math.min(100, (assignment.foal.stress_level || 0) + effects.stressChange));
+    const newBondScore = Math.max(
+      0,
+      Math.min(100, (assignment.foal.bond_score || 50) + effects.bondingChange)
+    );
+    const newStressLevel = Math.max(
+      0,
+      Math.min(100, (assignment.foal.stress_level || 0) + effects.stressChange)
+    );
 
     await prisma.horse.update({
       where: { id: assignment.foalId },
       data: {
         bond_score: newBondScore,
-        stress_level: newStressLevel
-      }
+        stress_level: newStressLevel,
+      },
     });
 
-    logger.debug(`[dailyCareAutomation.performAutomaticCare] ${routine.name} completed for ${assignment.foal.name}: +${effects.bondingChange} bonding, ${effects.stressChange} stress`);
+    logger.debug(
+      `[dailyCareAutomation.performAutomaticCare] ${routine.name} completed for ${assignment.foal.name}: +${effects.bondingChange} bonding, ${effects.stressChange} stress`
+    );
 
     return {
       foalId: assignment.foalId,
@@ -252,10 +269,9 @@ async function performAutomaticCare(assignment, routine) {
         previousBondScore: assignment.foal.bond_score,
         newBondScore,
         previousStressLevel: assignment.foal.stress_level,
-        newStressLevel
-      }
+        newStressLevel,
+      },
     };
-
   } catch (error) {
     logger.error(`[dailyCareAutomation.performAutomaticCare] Error: ${error.message}`);
     throw error;
@@ -280,9 +296,10 @@ function isGroomAvailableToday(groom) {
     // Check availability (default to true if not specified)
     const availability = groom.availability || {};
     return availability[todayName] !== false;
-
   } catch (error) {
-    logger.warn(`[dailyCareAutomation.isGroomAvailableToday] Error checking availability: ${error.message}`);
+    logger.warn(
+      `[dailyCareAutomation.isGroomAvailableToday] Error checking availability: ${error.message}`
+    );
     return true; // Default to available if error
   }
 }
@@ -305,12 +322,12 @@ async function checkExistingCareToday(foalId, groomId) {
         groomId,
         timestamp: {
           gte: startOfDay,
-          lt: endOfDay
-        }
+          lt: endOfDay,
+        },
       },
       select: {
-        interactionType: true
-      }
+        interactionType: true,
+      },
     });
 
     const completedRoutines = todaysInteractions.map(i => i.interactionType);
@@ -323,15 +340,14 @@ async function checkExistingCareToday(foalId, groomId) {
     return {
       hasCompleteCare,
       completedRoutines: uniqueRoutines,
-      totalInteractions: todaysInteractions.length
+      totalInteractions: todaysInteractions.length,
     };
-
   } catch (error) {
     logger.error(`[dailyCareAutomation.checkExistingCareToday] Error: ${error.message}`);
     return {
       hasCompleteCare: false,
       completedRoutines: [],
-      totalInteractions: 0
+      totalInteractions: 0,
     };
   }
 }
@@ -345,7 +361,9 @@ async function checkExistingCareToday(foalId, groomId) {
 function determineRoutinesToPerform(requestedRoutines, completedRoutines) {
   return requestedRoutines.filter(routineType => {
     const routine = DAILY_CARE_ROUTINES[routineType];
-    if (!routine) {return false;}
+    if (!routine) {
+      return false;
+    }
 
     // Don't repeat routines already completed today
     return !completedRoutines.includes(routine.interactionType);
@@ -364,12 +382,12 @@ export function scheduleDailyCareAutomation(schedule = '0 8,14,20 * * *') {
     schedule,
     description: 'Daily care automation at 8 AM, 2 PM, and 8 PM',
     enabled: true,
-    handler: runDailyCareAutomation
+    handler: runDailyCareAutomation,
   };
 }
 
 export default {
   runDailyCareAutomation,
   DAILY_CARE_ROUTINES,
-  scheduleDailyCareAutomation
+  scheduleDailyCareAutomation,
 };

@@ -38,22 +38,22 @@ const options = {
       `,
       contact: {
         name: 'Equoria Development Team',
-        email: 'dev@equoria.com'
+        email: 'dev@equoria.com',
       },
       license: {
         name: 'MIT',
-        url: 'https://opensource.org/licenses/MIT'
-      }
+        url: 'https://opensource.org/licenses/MIT',
+      },
     },
     servers: [
       {
         url: 'http://localhost:3000',
-        description: 'Development server'
+        description: 'Development server',
       },
       {
         url: 'https://api.equoria.com',
-        description: 'Production server'
-      }
+        description: 'Production server',
+      },
     ],
     components: {
       schemas: {
@@ -63,17 +63,17 @@ const options = {
           properties: {
             success: {
               type: 'boolean',
-              example: false
+              example: false,
             },
             error: {
               type: 'string',
-              example: 'Error message'
+              example: 'Error message',
             },
             stack: {
               type: 'string',
-              description: 'Stack trace (development only)'
-            }
-          }
+              description: 'Stack trace (development only)',
+            },
+          },
         },
         ValidationError: {
           type: 'object',
@@ -81,11 +81,11 @@ const options = {
           properties: {
             success: {
               type: 'boolean',
-              example: false
+              example: false,
             },
             message: {
               type: 'string',
-              example: 'Validation failed'
+              example: 'Validation failed',
             },
             errors: {
               type: 'array',
@@ -94,11 +94,11 @@ const options = {
                 properties: {
                   field: { type: 'string' },
                   message: { type: 'string' },
-                  value: { type: 'string' }
-                }
-              }
-            }
-          }
+                  value: { type: 'string' },
+                },
+              },
+            },
+          },
         },
         Breed: {
           type: 'object',
@@ -107,29 +107,29 @@ const options = {
             id: {
               type: 'integer',
               description: 'Unique breed identifier',
-              example: 1
+              example: 1,
             },
             name: {
               type: 'string',
               description: 'Breed name',
-              example: 'Arabian'
+              example: 'Arabian',
             },
             description: {
               type: 'string',
               description: 'Breed description',
-              example: 'Known for endurance and intelligence'
+              example: 'Known for endurance and intelligence',
             },
             createdAt: {
               type: 'string',
               format: 'date-time',
-              description: 'Creation timestamp'
+              description: 'Creation timestamp',
             },
             updatedAt: {
               type: 'string',
               format: 'date-time',
-              description: 'Last update timestamp'
-            }
-          }
+              description: 'Last update timestamp',
+            },
+          },
         },
         Horse: {
           type: 'object',
@@ -138,17 +138,17 @@ const options = {
             id: {
               type: 'string',
               format: 'uuid',
-              description: 'Unique horse identifier'
+              description: 'Unique horse identifier',
             },
             name: {
               type: 'string',
               description: 'Horse name',
-              example: 'Thunder'
+              example: 'Thunder',
             },
             breedId: {
               type: 'integer',
               description: 'Breed identifier',
-              example: 1
+              example: 1,
             },
             stats: {
               type: 'object',
@@ -163,10 +163,10 @@ const options = {
                 boldness: { type: 'integer', minimum: 1, maximum: 100 },
                 flexibility: { type: 'integer', minimum: 1, maximum: 100 },
                 obedience: { type: 'integer', minimum: 1, maximum: 100 },
-                focus: { type: 'integer', minimum: 1, maximum: 100 }
-              }
-            }
-          }
+                focus: { type: 'integer', minimum: 1, maximum: 100 },
+              },
+            },
+          },
         },
         Competition: {
           type: 'object',
@@ -174,97 +174,93 @@ const options = {
             id: {
               type: 'string',
               format: 'uuid',
-              description: 'Competition identifier'
+              description: 'Competition identifier',
             },
             name: {
               type: 'string',
               description: 'Competition name',
-              example: 'Spring Championship'
+              example: 'Spring Championship',
             },
             discipline: {
               type: 'string',
               enum: ['dressage', 'jumping', 'racing', 'eventing'],
-              description: 'Competition discipline'
+              description: 'Competition discipline',
             },
             entryFee: {
               type: 'number',
               description: 'Entry fee amount',
-              example: 100
+              example: 100,
             },
             prizes: {
               type: 'array',
               description: 'Prize distribution',
               items: {
-                type: 'number'
-              }
-            }
-          }
-        }
+                type: 'number',
+              },
+            },
+          },
+        },
       },
       responses: {
         BadRequest: {
           description: 'Bad Request',
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/ValidationError' }
-            }
-          }
+              schema: { $ref: '#/components/schemas/ValidationError' },
+            },
+          },
         },
         NotFound: {
           description: 'Resource not found',
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/Error' }
-            }
-          }
+              schema: { $ref: '#/components/schemas/Error' },
+            },
+          },
         },
         InternalError: {
           description: 'Internal server error',
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/Error' }
-            }
-          }
+              schema: { $ref: '#/components/schemas/Error' },
+            },
+          },
         },
         TooManyRequests: {
           description: 'Rate limit exceeded',
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/Error' }
-            }
-          }
+              schema: { $ref: '#/components/schemas/Error' },
+            },
+          },
         },
         Unauthorized: {
           description: 'Unauthorized - Authentication required',
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/Error' }
-            }
-          }
+              schema: { $ref: '#/components/schemas/Error' },
+            },
+          },
         },
         Forbidden: {
           description: 'Forbidden - Insufficient permissions',
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/Error' }
-            }
-          }
-        }
+              schema: { $ref: '#/components/schemas/Error' },
+            },
+          },
+        },
       },
       securitySchemes: {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT'
-        }
-      }
-    }
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   },
-  apis: [
-    './routes/*.js',
-    './controllers/*.js',
-    './docs/api/*.yaml'
-  ]
+  apis: ['./routes/*.js', './controllers/*.js', './docs/api/*.yaml'],
 };
 
 const specs = swaggerJSDoc(options);

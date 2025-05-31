@@ -1,6 +1,11 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
-import { revealTraits, batchRevealTraits, getDiscoveryProgress, DISCOVERY_CONDITIONS } from '../utils/traitDiscovery.js';
+import {
+  revealTraits,
+  batchRevealTraits,
+  getDiscoveryProgress,
+  DISCOVERY_CONDITIONS,
+} from '../utils/traitDiscovery.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -10,19 +15,20 @@ const router = express.Router();
  * Trigger trait discovery for multiple foals
  * NOTE: This route must come BEFORE /discover/:foalId to avoid route conflicts
  */
-router.post('/discover/batch',
+router.post(
+  '/discover/batch',
   [
     body('foalIds')
       .isArray({ min: 1 })
       .withMessage('foalIds must be a non-empty array')
-      .custom((foalIds) => {
+      .custom(foalIds => {
         if (!foalIds.every(id => Number.isInteger(Number(id)) && Number(id) > 0)) {
           throw new Error('All foal IDs must be positive integers');
         }
         return true;
-      })
+      }),
   ],
-  async(req, res) => {
+  async (req, res) => {
     try {
       // Check for validation errors
       const errors = validationResult(req);
@@ -30,12 +36,14 @@ router.post('/discover/batch',
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
       const { foalIds } = req.body;
-      logger.info(`[traitDiscoveryRoutes] POST /discover/batch - Processing ${foalIds.length} foals`);
+      logger.info(
+        `[traitDiscoveryRoutes] POST /discover/batch - Processing ${foalIds.length} foals`
+      );
 
       const results = await batchRevealTraits(foalIds);
 
@@ -43,7 +51,7 @@ router.post('/discover/batch',
         totalFoals: foalIds.length,
         successfulDiscoveries: results.filter(r => !r.error).length,
         failedDiscoveries: results.filter(r => r.error).length,
-        totalTraitsRevealed: results.reduce((sum, r) => sum + (r.traitsRevealed?.length || 0), 0)
+        totalTraitsRevealed: results.reduce((sum, r) => sum + (r.traitsRevealed?.length || 0), 0),
       };
 
       res.json({
@@ -51,15 +59,14 @@ router.post('/discover/batch',
         message: `Batch discovery completed for ${foalIds.length} foals`,
         data: {
           results,
-          summary
-        }
+          summary,
+        },
       });
-
     } catch (error) {
       logger.error(`[traitDiscoveryRoutes] POST /discover/batch error: ${error.message}`);
       res.status(500).json({
         success: false,
-        message: 'Internal server error during batch trait discovery'
+        message: 'Internal server error during batch trait discovery',
       });
     }
   }
@@ -69,11 +76,10 @@ router.post('/discover/batch',
  * POST /api/traits/discover/:foalId
  * Trigger trait discovery for a specific foal
  */
-router.post('/discover/:foalId',
-  [
-    param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')
-  ],
-  async(req, res) => {
+router.post(
+  '/discover/:foalId',
+  [param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')],
+  async (req, res) => {
     try {
       // Check for validation errors
       const errors = validationResult(req);
@@ -81,20 +87,23 @@ router.post('/discover/:foalId',
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
       const { foalId } = req.params;
-      logger.info(`[traitDiscoveryRoutes] POST /discover/${foalId} - Manual trait discovery triggered`);
+      logger.info(
+        `[traitDiscoveryRoutes] POST /discover/${foalId} - Manual trait discovery triggered`
+      );
 
       const discoveryResults = await revealTraits(foalId);
 
       res.json({
         success: true,
-        message: discoveryResults.traitsRevealed.length > 0
-          ? `Discovered ${discoveryResults.traitsRevealed.length} new traits!`
-          : 'No new traits discovered at this time',
+        message:
+          discoveryResults.traitsRevealed.length > 0
+            ? `Discovered ${discoveryResults.traitsRevealed.length} new traits!`
+            : 'No new traits discovered at this time',
         data: {
           foalId: discoveryResults.foalId,
           foalName: discoveryResults.foalName,
@@ -105,31 +114,32 @@ router.post('/discover/:foalId',
             totalConditionsMet: discoveryResults.conditionsMet.length,
             totalTraitsRevealed: discoveryResults.traitsRevealed.length,
             hiddenBefore: discoveryResults.totalHiddenBefore,
-            hiddenAfter: discoveryResults.totalHiddenAfter
-          }
-        }
+            hiddenAfter: discoveryResults.totalHiddenAfter,
+          },
+        },
       });
-
     } catch (error) {
-      logger.error(`[traitDiscoveryRoutes] POST /discover/${req.params.foalId} error: ${error.message}`);
+      logger.error(
+        `[traitDiscoveryRoutes] POST /discover/${req.params.foalId} error: ${error.message}`
+      );
 
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
-          message: error.message
+          message: error.message,
         });
       }
 
       if (error.message.includes('not a foal')) {
         return res.status(400).json({
           success: false,
-          message: error.message
+          message: error.message,
         });
       }
 
       res.status(500).json({
         success: false,
-        message: 'Internal server error during trait discovery'
+        message: 'Internal server error during trait discovery',
       });
     }
   }
@@ -139,11 +149,10 @@ router.post('/discover/:foalId',
  * GET /api/traits/progress/:foalId
  * Get trait discovery progress for a foal
  */
-router.get('/progress/:foalId',
-  [
-    param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')
-  ],
-  async(req, res) => {
+router.get(
+  '/progress/:foalId',
+  [param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')],
+  async (req, res) => {
     try {
       // Check for validation errors
       const errors = validationResult(req);
@@ -151,7 +160,7 @@ router.get('/progress/:foalId',
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
@@ -162,22 +171,23 @@ router.get('/progress/:foalId',
 
       res.json({
         success: true,
-        data: progress
+        data: progress,
       });
-
     } catch (error) {
-      logger.error(`[traitDiscoveryRoutes] GET /progress/${req.params.foalId} error: ${error.message}`);
+      logger.error(
+        `[traitDiscoveryRoutes] GET /progress/${req.params.foalId} error: ${error.message}`
+      );
 
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
-          message: error.message
+          message: error.message,
         });
       }
 
       res.status(500).json({
         success: false,
-        message: 'Internal server error while getting discovery progress'
+        message: 'Internal server error while getting discovery progress',
       });
     }
   }
@@ -187,7 +197,7 @@ router.get('/progress/:foalId',
  * GET /api/traits/conditions
  * Get all available discovery conditions and their requirements
  */
-router.get('/conditions', async(req, res) => {
+router.get('/conditions', async (req, res) => {
   try {
     logger.info('[traitDiscoveryRoutes] GET /conditions - Getting discovery conditions');
 
@@ -196,7 +206,7 @@ router.get('/conditions', async(req, res) => {
       name: condition.name,
       description: condition.description,
       revealableTraits: condition.revealableTraits,
-      category: categorizeCondition(key)
+      category: categorizeCondition(key),
     }));
 
     res.json({
@@ -208,16 +218,15 @@ router.get('/conditions', async(req, res) => {
           bonding: conditions.filter(c => c.category === 'bonding').length,
           stress: conditions.filter(c => c.category === 'stress').length,
           activities: conditions.filter(c => c.category === 'activities').length,
-          milestones: conditions.filter(c => c.category === 'milestones').length
-        }
-      }
+          milestones: conditions.filter(c => c.category === 'milestones').length,
+        },
+      },
     });
-
   } catch (error) {
     logger.error(`[traitDiscoveryRoutes] GET /conditions error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Internal server error while getting discovery conditions'
+      message: 'Internal server error while getting discovery conditions',
     });
   }
 });
@@ -226,11 +235,10 @@ router.get('/conditions', async(req, res) => {
  * POST /api/traits/check-conditions/:foalId
  * Check which conditions a foal currently meets (without triggering discovery)
  */
-router.post('/check-conditions/:foalId',
-  [
-    param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')
-  ],
-  async(req, res) => {
+router.post(
+  '/check-conditions/:foalId',
+  [param('foalId').isInt({ min: 1 }).withMessage('Foal ID must be a positive integer')],
+  async (req, res) => {
     try {
       // Check for validation errors
       const errors = validationResult(req);
@@ -238,12 +246,14 @@ router.post('/check-conditions/:foalId',
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
       const { foalId } = req.params;
-      logger.info(`[traitDiscoveryRoutes] POST /check-conditions/${foalId} - Checking conditions without discovery`);
+      logger.info(
+        `[traitDiscoveryRoutes] POST /check-conditions/${foalId} - Checking conditions without discovery`
+      );
 
       // Get progress which includes condition checking
       const progress = await getDiscoveryProgress(foalId);
@@ -255,7 +265,7 @@ router.post('/check-conditions/:foalId',
         description: condition.description,
         met: condition.met,
         progress: condition.progress,
-        revealableTraits: condition.revealableTraits
+        revealableTraits: condition.revealableTraits,
       }));
 
       res.json({
@@ -271,24 +281,25 @@ router.post('/check-conditions/:foalId',
             averageProgress: Math.round(
               conditionStatus.reduce((sum, c) => sum + c.progress, 0) / conditionStatus.length
             ),
-            hiddenTraitsRemaining: progress.hiddenTraitsCount
-          }
-        }
+            hiddenTraitsRemaining: progress.hiddenTraitsCount,
+          },
+        },
       });
-
     } catch (error) {
-      logger.error(`[traitDiscoveryRoutes] POST /check-conditions/${req.params.foalId} error: ${error.message}`);
+      logger.error(
+        `[traitDiscoveryRoutes] POST /check-conditions/${req.params.foalId} error: ${error.message}`
+      );
 
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
-          message: error.message
+          message: error.message,
         });
       }
 
       res.status(500).json({
         success: false,
-        message: 'Internal server error while checking conditions'
+        message: 'Internal server error while checking conditions',
       });
     }
   }

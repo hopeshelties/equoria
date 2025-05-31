@@ -16,51 +16,54 @@ The Trait Discovery System is a comprehensive feature that reveals hidden horse 
 
 ### Bonding-Based Discoveries
 
-| Condition | Requirement | Priority | Description |
-|-----------|-------------|----------|-------------|
-| `HIGH_BOND` | Bond score ≥ 80 | High | Strong bond formed with horse |
-| `EXCELLENT_BOND` | Bond score ≥ 95 | Legendary | Exceptional bond achieved |
-| `MATURE_BOND` | Age ≥ 2 AND Bond score ≥ 70 | Medium | Mature relationship developed |
+| Condition        | Requirement                 | Priority  | Description                   |
+| ---------------- | --------------------------- | --------- | ----------------------------- |
+| `HIGH_BOND`      | Bond score ≥ 80             | High      | Strong bond formed with horse |
+| `EXCELLENT_BOND` | Bond score ≥ 95             | Legendary | Exceptional bond achieved     |
+| `MATURE_BOND`    | Age ≥ 2 AND Bond score ≥ 70 | Medium    | Mature relationship developed |
 
 ### Stress-Based Discoveries
 
-| Condition | Requirement | Priority | Description |
-|-----------|-------------|----------|-------------|
-| `LOW_STRESS` | Stress level ≤ 20 | Medium | Stress levels minimized |
-| `MINIMAL_STRESS` | Stress level ≤ 5 | High | Perfect stress management |
+| Condition        | Requirement       | Priority | Description               |
+| ---------------- | ----------------- | -------- | ------------------------- |
+| `LOW_STRESS`     | Stress level ≤ 20 | Medium   | Stress levels minimized   |
+| `MINIMAL_STRESS` | Stress level ≤ 5  | High     | Perfect stress management |
 
 ### Combined Conditions
 
-| Condition | Requirement | Priority | Description |
-|-----------|-------------|----------|-------------|
+| Condition      | Requirement                           | Priority  | Description                      |
+| -------------- | ------------------------------------- | --------- | -------------------------------- |
 | `PERFECT_CARE` | Bond score ≥ 80 AND Stress level ≤ 20 | Legendary | Perfect care conditions achieved |
 
 ### Training-Based Discoveries
 
-| Condition | Requirement | Priority | Description |
-|-----------|-------------|----------|-------------|
-| `CONSISTENT_TRAINING` | ≥5 training sessions in last 7 days | Medium | Consistent training regimen maintained |
+| Condition             | Requirement                         | Priority | Description                            |
+| --------------------- | ----------------------------------- | -------- | -------------------------------------- |
+| `CONSISTENT_TRAINING` | ≥5 training sessions in last 7 days | Medium   | Consistent training regimen maintained |
 
 ### Enrichment-Based Discoveries
 
-| Discovery | Activities Required | Min Count | Priority | Description |
-|-----------|-------------------|-----------|----------|-------------|
-| `SOCIALIZATION_COMPLETE` | social_interaction, group_play | 3 | Medium | Socialization activities completed |
-| `MENTAL_STIMULATION_COMPLETE` | puzzle_feeding, obstacle_course | 2 | High | Mental stimulation activities completed |
-| `PHYSICAL_DEVELOPMENT_COMPLETE` | free_exercise, controlled_movement | 4 | Medium | Physical development activities completed |
-| `ALL_ENRICHMENT_COMPLETE` | All activity types | 6 | Legendary | All enrichment activities completed |
+| Discovery                       | Activities Required                | Min Count | Priority  | Description                               |
+| ------------------------------- | ---------------------------------- | --------- | --------- | ----------------------------------------- |
+| `SOCIALIZATION_COMPLETE`        | social_interaction, group_play     | 3         | Medium    | Socialization activities completed        |
+| `MENTAL_STIMULATION_COMPLETE`   | puzzle_feeding, obstacle_course    | 2         | High      | Mental stimulation activities completed   |
+| `PHYSICAL_DEVELOPMENT_COMPLETE` | free_exercise, controlled_movement | 4         | Medium    | Physical development activities completed |
+| `ALL_ENRICHMENT_COMPLETE`       | All activity types                 | 6         | Legendary | All enrichment activities completed       |
 
 ## API Endpoints
 
 ### Core Discovery Endpoints
 
 #### `POST /api/traits/discover/:horseId`
+
 Trigger trait discovery for a specific horse.
 
 **Parameters:**
+
 - `horseId` (path): Horse ID (integer)
 
 **Body:**
+
 ```json
 {
   "checkEnrichment": true,
@@ -69,6 +72,7 @@ Trigger trait discovery for a specific horse.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -93,9 +97,11 @@ Trigger trait discovery for a specific horse.
 ```
 
 #### `GET /api/traits/horse/:horseId`
+
 Get all traits for a specific horse.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -120,9 +126,11 @@ Get all traits for a specific horse.
 ```
 
 #### `GET /api/traits/discovery-status/:horseId`
+
 Get discovery status and conditions for a horse.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -149,9 +157,11 @@ Get discovery status and conditions for a horse.
 ```
 
 #### `POST /api/traits/batch-discover`
+
 Trigger discovery for multiple horses (max 10).
 
 **Body:**
+
 ```json
 {
   "horseIds": [123, 456, 789],
@@ -160,9 +170,11 @@ Trigger discovery for multiple horses (max 10).
 ```
 
 #### `GET /api/traits/definitions`
+
 Get all trait definitions with optional filtering.
 
 **Query Parameters:**
+
 - `type` (optional): Filter by type (`positive`, `negative`, `all`)
 
 ## Frontend Integration
@@ -173,24 +185,19 @@ Get all trait definitions with optional filtering.
 import { useTraitDiscovery } from '../hooks/useTraitDiscovery';
 
 function HorseProfile({ horseId }) {
-  const {
-    discoveryStatus,
-    discoverTraits,
-    isDiscovering,
-    canDiscover,
-    lastDiscovery
-  } = useTraitDiscovery(horseId, {
-    autoCheck: true,
-    checkInterval: 30000,
-    enableRealTime: true
-  });
+  const { discoveryStatus, discoverTraits, isDiscovering, canDiscover, lastDiscovery } =
+    useTraitDiscovery(horseId, {
+      autoCheck: true,
+      checkInterval: 30000,
+      enableRealTime: true,
+    });
 
   const handleDiscovery = async () => {
     const result = await discoverTraits({
       checkEnrichment: true,
-      forceCheck: false
+      forceCheck: false,
     });
-    
+
     if (result && result.revealed.length > 0) {
       // Show discovery notification
       setShowNotification(true);
@@ -204,7 +211,7 @@ function HorseProfile({ horseId }) {
           {isDiscovering ? 'Discovering...' : 'Discover Traits'}
         </button>
       )}
-      
+
       {lastDiscovery && (
         <TraitDiscoveryNotification
           discovery={lastDiscovery}
@@ -227,9 +234,9 @@ import TraitDiscoveryNotification from '../components/TraitDiscoveryNotification
   discovery={discoveryResult}
   visible={showNotification}
   onClose={() => setShowNotification(false)}
-  onViewDetails={(discovery) => showDetailsModal(discovery)}
-  horseName="Thunder"
-/>
+  onViewDetails={discovery => showDetailsModal(discovery)}
+  horseName='Thunder'
+/>;
 ```
 
 ## Automatic Discovery
@@ -240,23 +247,34 @@ The system includes automatic discovery middleware that triggers trait checks af
 
 ```javascript
 // In foal routes - enrichment activities
-router.post('/:foalId/enrichment', [
-  // validation...
-], enrichmentDiscoveryMiddleware(), async (req, res) => {
-  // enrichment logic...
-});
+router.post(
+  '/:foalId/enrichment',
+  [
+    // validation...
+  ],
+  enrichmentDiscoveryMiddleware(),
+  async (req, res) => {
+    // enrichment logic...
+  }
+);
 
 // In training routes - training completion
-router.post('/train', [
-  // validation...
-], trainingDiscoveryMiddleware(), async (req, res) => {
-  // training logic...
-});
+router.post(
+  '/train',
+  [
+    // validation...
+  ],
+  trainingDiscoveryMiddleware(),
+  async (req, res) => {
+    // training logic...
+  }
+);
 ```
 
 ### Discovery Triggers
 
 Automatic discovery is triggered after:
+
 - Enrichment activity completion
 - Training session completion
 - Bond score changes
@@ -283,14 +301,17 @@ Traits are revealed based on condition priority and trait rarity:
 ## Testing
 
 ### Unit Tests
+
 - `backend/tests/traitDiscovery.test.js` - Core discovery logic
 - Covers all discovery conditions and edge cases
 
 ### Integration Tests
+
 - `backend/tests/integration/traitRoutes.test.js` - API endpoints
 - Full end-to-end testing of all routes
 
 ### Test Coverage
+
 - ✅ Discovery condition evaluation
 - ✅ Trait revelation logic
 - ✅ API endpoint validation

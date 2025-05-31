@@ -4,7 +4,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 
 /**
  * TraitCompetitionAnalysis Component
@@ -14,11 +20,11 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'rea
  * @param {string} props.selectedDiscipline - Currently selected discipline
  * @param {Function} props.onDisciplineChange - Callback when discipline changes
  */
-const TraitCompetitionAnalysis = ({ 
-  horseId, 
-  horseName, 
+const TraitCompetitionAnalysis = ({
+  horseId,
+  horseName,
   selectedDiscipline = 'Show Jumping',
-  onDisciplineChange 
+  onDisciplineChange,
 }) => {
   const [analysis, setAnalysis] = useState(null);
   const [comparison, setComparison] = useState(null);
@@ -27,8 +33,15 @@ const TraitCompetitionAnalysis = ({
   const [activeTab, setActiveTab] = useState('analysis');
 
   const disciplines = [
-    'Dressage', 'Show Jumping', 'Cross Country', 'Racing', 
-    'Endurance', 'Reining', 'Driving', 'Trail', 'Eventing'
+    'Dressage',
+    'Show Jumping',
+    'Cross Country',
+    'Racing',
+    'Endurance',
+    'Reining',
+    'Driving',
+    'Trail',
+    'Eventing',
   ];
 
   // Fetch trait impact analysis for specific discipline
@@ -40,7 +53,7 @@ const TraitCompetitionAnalysis = ({
       const response = await fetch(
         `/api/traits/competition-impact/${horseId}?discipline=${encodeURIComponent(discipline)}`
       );
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch trait analysis');
       }
@@ -64,8 +77,10 @@ const TraitCompetitionAnalysis = ({
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/traits/competition-comparison/${horseId}`);
-      
+      const response = await fetch(
+        `/api/traits/competition-comparison/${horseId}`
+      );
+
       if (!response.ok) {
         throw new Error('Failed to fetch trait comparison');
       }
@@ -141,9 +156,13 @@ const TraitCompetitionAnalysis = ({
                     : 'bg-white border-gray-300'
                 }`}
               >
-                <Text className={`text-sm font-medium ${
-                  selectedDiscipline === discipline ? 'text-white' : 'text-gray-700'
-                }`}>
+                <Text
+                  className={`text-sm font-medium ${
+                    selectedDiscipline === discipline
+                      ? 'text-white'
+                      : 'text-gray-700'
+                  }`}
+                >
                   {discipline}
                 </Text>
               </TouchableOpacity>
@@ -160,27 +179,37 @@ const TraitCompetitionAnalysis = ({
             <Text className="text-lg font-bold text-gray-800 mb-3">
               Competition Impact Summary
             </Text>
-            
+
             <View className="flex-row justify-between items-center mb-2">
               <Text className="text-gray-600">Overall Effect:</Text>
-              <Text className={`font-semibold ${getEffectColor(null, analysis.analysis.traitModifier)}`}>
+              <Text
+                className={`font-semibold ${getEffectColor(null, analysis.analysis.traitModifier)}`}
+              >
                 {analysis.analysis.percentageChange}%
               </Text>
             </View>
-            
+
             <View className="flex-row justify-between items-center mb-2">
               <Text className="text-gray-600">Score Adjustment:</Text>
-              <Text className={`font-semibold ${getEffectColor(null, analysis.analysis.scoreAdjustment)}`}>
-                {analysis.analysis.scoreAdjustment > 0 ? '+' : ''}{analysis.analysis.scoreAdjustment.toFixed(1)} points
+              <Text
+                className={`font-semibold ${getEffectColor(null, analysis.analysis.scoreAdjustment)}`}
+              >
+                {analysis.analysis.scoreAdjustment > 0 ? '+' : ''}
+                {analysis.analysis.scoreAdjustment.toFixed(1)} points
               </Text>
             </View>
-            
+
             <View className="flex-row justify-between items-center">
               <Text className="text-gray-600">Net Effect:</Text>
               <View className="flex-row items-center">
-                <Text className="mr-1">{getEffectIcon(null, analysis.analysis.traitModifier)}</Text>
-                <Text className={`font-semibold ${getEffectColor(null, analysis.analysis.traitModifier)}`}>
-                  {analysis.summary.netEffect.charAt(0).toUpperCase() + analysis.summary.netEffect.slice(1)}
+                <Text className="mr-1">
+                  {getEffectIcon(null, analysis.analysis.traitModifier)}
+                </Text>
+                <Text
+                  className={`font-semibold ${getEffectColor(null, analysis.analysis.traitModifier)}`}
+                >
+                  {analysis.summary.netEffect.charAt(0).toUpperCase() +
+                    analysis.summary.netEffect.slice(1)}
                 </Text>
               </View>
             </View>
@@ -192,12 +221,14 @@ const TraitCompetitionAnalysis = ({
               <Text className="text-lg font-bold text-gray-800 mb-3">
                 Trait Effects ({analysis.traits.total} traits)
               </Text>
-              
+
               {analysis.traits.details.map((trait, index) => (
                 <View key={index} className="mb-3 last:mb-0">
                   <View className="flex-row items-center justify-between mb-1">
                     <View className="flex-row items-center flex-1">
-                      <Text className="mr-2">{getEffectIcon(trait.type, trait.modifier)}</Text>
+                      <Text className="mr-2">
+                        {getEffectIcon(trait.type, trait.modifier)}
+                      </Text>
                       <Text className="font-semibold text-gray-800 flex-1">
                         {trait.name}
                       </Text>
@@ -209,7 +240,9 @@ const TraitCompetitionAnalysis = ({
                         </View>
                       )}
                     </View>
-                    <Text className={`font-bold ${getEffectColor(trait.type, trait.modifier)}`}>
+                    <Text
+                      className={`font-bold ${getEffectColor(trait.type, trait.modifier)}`}
+                    >
                       {trait.percentageEffect}
                     </Text>
                   </View>
@@ -224,10 +257,13 @@ const TraitCompetitionAnalysis = ({
           {/* No Traits Message */}
           {analysis.traits.total === 0 && (
             <View className="bg-gray-50 rounded-lg p-6 text-center">
-              <Text className="text-gray-600 text-lg mb-2">No Visible Traits</Text>
+              <Text className="text-gray-600 text-lg mb-2">
+                No Visible Traits
+              </Text>
               <Text className="text-gray-500">
-                This horse has no visible traits that affect competition performance.
-                Hidden traits may be discovered through bonding and training.
+                This horse has no visible traits that affect competition
+                performance. Hidden traits may be discovered through bonding and
+                training.
               </Text>
             </View>
           )}
@@ -245,28 +281,27 @@ const TraitCompetitionAnalysis = ({
             <Text className="text-lg font-bold text-gray-800 mb-3">
               Discipline Recommendations
             </Text>
-            
+
             <View className="mb-3">
               <Text className="text-green-600 font-semibold mb-1">
                 🏆 Best Discipline: {comparison.summary.bestDiscipline.name}
               </Text>
               <Text className="text-gray-600 text-sm">
                 {comparison.summary.bestDiscipline.effect} impact
-                {comparison.summary.bestDiscipline.specializedTraits > 0 && 
-                  ` (${comparison.summary.bestDiscipline.specializedTraits} specialized traits)`
-                }
+                {comparison.summary.bestDiscipline.specializedTraits > 0 &&
+                  ` (${comparison.summary.bestDiscipline.specializedTraits} specialized traits)`}
               </Text>
             </View>
-            
+
             <View>
               <Text className="text-red-600 font-semibold mb-1">
-                ⚠️ Challenging Discipline: {comparison.summary.worstDiscipline.name}
+                ⚠️ Challenging Discipline:{' '}
+                {comparison.summary.worstDiscipline.name}
               </Text>
               <Text className="text-gray-600 text-sm">
                 {comparison.summary.worstDiscipline.effect} impact
-                {comparison.summary.worstDiscipline.specializedTraits > 0 && 
-                  ` (${comparison.summary.worstDiscipline.specializedTraits} specialized traits)`
-                }
+                {comparison.summary.worstDiscipline.specializedTraits > 0 &&
+                  ` (${comparison.summary.worstDiscipline.specializedTraits} specialized traits)`}
               </Text>
             </View>
           </View>
@@ -276,7 +311,7 @@ const TraitCompetitionAnalysis = ({
             <Text className="text-lg font-bold text-gray-800 mb-3">
               All Disciplines
             </Text>
-            
+
             {comparison.comparison.map((disc, index) => (
               <TouchableOpacity
                 key={disc.discipline}
@@ -291,12 +326,15 @@ const TraitCompetitionAnalysis = ({
                     {disc.discipline}
                   </Text>
                   <Text className="text-gray-600 text-sm">
-                    {disc.specializedTraits > 0 && `${disc.specializedTraits} specialized traits`}
+                    {disc.specializedTraits > 0 &&
+                      `${disc.specializedTraits} specialized traits`}
                   </Text>
                 </View>
-                
+
                 <View className="items-end">
-                  <Text className={`font-bold ${getEffectColor(null, disc.modifier)}`}>
+                  <Text
+                    className={`font-bold ${getEffectColor(null, disc.modifier)}`}
+                  >
                     {disc.percentageEffect}
                   </Text>
                   <Text className="text-gray-500 text-xs">
@@ -312,19 +350,21 @@ const TraitCompetitionAnalysis = ({
             <Text className="text-lg font-bold text-gray-800 mb-3">
               Statistics
             </Text>
-            
+
             <View className="flex-row justify-between mb-2">
               <Text className="text-gray-600">Average Effect:</Text>
-              <Text className="font-semibold">{comparison.summary.averageEffect}</Text>
+              <Text className="font-semibold">
+                {comparison.summary.averageEffect}
+              </Text>
             </View>
-            
+
             <View className="flex-row justify-between mb-2">
               <Text className="text-gray-600">Favorable Disciplines:</Text>
               <Text className="font-semibold text-green-600">
                 {comparison.summary.disciplinesWithBonuses}
               </Text>
             </View>
-            
+
             <View className="flex-row justify-between">
               <Text className="text-gray-600">Challenging Disciplines:</Text>
               <Text className="font-semibold text-red-600">
@@ -352,7 +392,11 @@ const TraitCompetitionAnalysis = ({
         <Text className="text-red-800 font-medium mb-2">Analysis Error</Text>
         <Text className="text-red-700 mb-3">{error}</Text>
         <TouchableOpacity
-          onPress={() => activeTab === 'analysis' ? fetchAnalysis(selectedDiscipline) : fetchComparison()}
+          onPress={() =>
+            activeTab === 'analysis'
+              ? fetchAnalysis(selectedDiscipline)
+              : fetchComparison()
+          }
           className="bg-red-500 rounded-lg py-2 px-4 self-start"
         >
           <Text className="text-white font-medium">Retry</Text>
@@ -368,9 +412,7 @@ const TraitCompetitionAnalysis = ({
         <Text className="text-xl font-bold text-gray-800">
           Trait Competition Analysis
         </Text>
-        <Text className="text-gray-600">
-          {horseName}
-        </Text>
+        <Text className="text-gray-600">{horseName}</Text>
       </View>
 
       {/* Tab Selector */}
@@ -381,22 +423,26 @@ const TraitCompetitionAnalysis = ({
             activeTab === 'analysis' ? 'bg-white shadow-sm' : ''
           }`}
         >
-          <Text className={`text-center font-medium ${
-            activeTab === 'analysis' ? 'text-blue-600' : 'text-gray-600'
-          }`}>
+          <Text
+            className={`text-center font-medium ${
+              activeTab === 'analysis' ? 'text-blue-600' : 'text-gray-600'
+            }`}
+          >
             Discipline Analysis
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           onPress={() => setActiveTab('comparison')}
           className={`flex-1 py-2 px-4 rounded-md ${
             activeTab === 'comparison' ? 'bg-white shadow-sm' : ''
           }`}
         >
-          <Text className={`text-center font-medium ${
-            activeTab === 'comparison' ? 'text-blue-600' : 'text-gray-600'
-          }`}>
+          <Text
+            className={`text-center font-medium ${
+              activeTab === 'comparison' ? 'text-blue-600' : 'text-gray-600'
+            }`}
+          >
             Compare All
           </Text>
         </TouchableOpacity>

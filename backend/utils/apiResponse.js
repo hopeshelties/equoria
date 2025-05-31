@@ -7,8 +7,12 @@ export class ApiResponse {
   constructor(success, message, data = null, meta = null) {
     this.success = success;
     this.message = message;
-    if (data !== null) {this.data = data;}
-    if (meta !== null) {this.meta = meta;}
+    if (data !== null) {
+      this.data = data;
+    }
+    if (meta !== null) {
+      this.meta = meta;
+    }
     this.timestamp = new Date().toISOString();
   }
 
@@ -47,7 +51,7 @@ export class ApiResponse {
   static validationError(message = 'Validation failed', errors = []) {
     return new ApiResponse(false, message, null, {
       statusCode: 400,
-      validationErrors: errors
+      validationErrors: errors,
     });
   }
 
@@ -64,8 +68,8 @@ export class ApiResponse {
         total: pagination.total,
         totalPages: Math.ceil(pagination.total / pagination.limit),
         hasNext: pagination.page < Math.ceil(pagination.total / pagination.limit),
-        hasPrev: pagination.page > 1
-      }
+        hasPrev: pagination.page > 1,
+      },
     };
     return new ApiResponse(true, message, data, meta);
   }

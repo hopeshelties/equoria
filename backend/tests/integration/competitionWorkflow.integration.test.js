@@ -38,7 +38,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
   let testShow;
   let competitionResult;
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     // Clean up any existing test data
     await cleanupTestData();
 
@@ -46,7 +46,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
     jest.spyOn(Math, 'random').mockReturnValue(0.7); // Good performance
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Restore mocks
     jest.restoreAllMocks();
 
@@ -59,27 +59,27 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
     try {
       // Delete in correct order to respect foreign key constraints
       await prisma.competitionResult.deleteMany({
-        where: { horse: { name: { startsWith: 'Competition Integration' } } }
+        where: { horse: { name: { startsWith: 'Competition Integration' } } },
       });
 
       await prisma.show.deleteMany({
-        where: { name: { startsWith: 'Integration Test' } }
+        where: { name: { startsWith: 'Integration Test' } },
       });
 
       await prisma.trainingLog.deleteMany({
-        where: { horse: { name: { startsWith: 'Competition Integration' } } }
+        where: { horse: { name: { startsWith: 'Competition Integration' } } },
       });
 
       await prisma.xpEvent.deleteMany({
-        where: { user: { email: 'competition-integration@example.com' } }
+        where: { user: { email: 'competition-integration@example.com' } },
       });
 
       await prisma.horse.deleteMany({
-        where: { name: { startsWith: 'Competition Integration' } }
+        where: { name: { startsWith: 'Competition Integration' } },
       });
 
       await prisma.user.deleteMany({
-        where: { email: 'competition-integration@example.com' }
+        where: { email: 'competition-integration@example.com' },
       });
     } catch (error) {
       // Cleanup errors can be ignored in tests
@@ -87,7 +87,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
   }
 
   describe('🔐 STEP 1: User & Horse Setup', () => {
-    it('should create user and prepare competition-ready horse', async() => {
+    it('should create user and prepare competition-ready horse', async () => {
       // Create user
       const userData = {
         username: 'competitionuser',
@@ -97,24 +97,23 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
         password: 'TestPassword123',
         money: 15000,
         xp: 100,
-        level: 2
+        level: 2,
       };
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201);
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201);
 
       testUser = response.body.data.user;
       authToken = response.body.data.token;
 
       // Create breed if needed
-      const breed = await prisma.breed.findFirst() || await prisma.breed.create({
-        data: {
-          name: 'Competition Integration Breed',
-          description: 'Test breed for competition integration'
-        }
-      });
+      const breed =
+        (await prisma.breed.findFirst()) ||
+        (await prisma.breed.create({
+          data: {
+            name: 'Competition Integration Breed',
+            description: 'Test breed for competition integration',
+          },
+        }));
 
       // Create competition-ready horse
       competitionHorse = await prisma.horse.create({
@@ -131,14 +130,14 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
             Racing: 75,
             Dressage: 68,
             'Show Jumping': 82,
-            'Cross Country': 70
+            'Cross Country': 70,
           },
           epigeneticModifiers: {
             positive: ['fast', 'athletic', 'focused', 'brave', 'resilient', 'people_trusting'],
             negative: [],
-            hidden: ['champion_heart']
-          }
-        }
+            hidden: ['champion_heart'],
+          },
+        },
       });
 
       expect(competitionHorse.disciplineScores.Racing).toBe(75);
@@ -147,7 +146,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
   });
 
   describe('🏟️ STEP 2: Competition Setup & Show Creation', () => {
-    it('should create competition show with proper configuration', async() => {
+    it('should create competition show with proper configuration', async () => {
       testShow = await prisma.show.create({
         data: {
           name: 'Integration Test Championship',
@@ -156,15 +155,15 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
           entryFee: 500,
           prize: 10000,
           levelMin: 1, // Minimum level requirement
-          levelMax: 10 // Maximum level requirement
-        }
+          levelMax: 10, // Maximum level requirement
+        },
       });
 
       // Add custom requirements for testing (not in schema, but used in business logic)
       testShow.requirements = {
         minAge: 3,
         minDisciplineScore: 50,
-        healthStatus: 'Good'
+        healthStatus: 'Good',
       };
 
       expect(testShow.discipline).toBe('Racing');
@@ -174,7 +173,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
   });
 
   describe('📝 STEP 3: Competition Entry & Validation', () => {
-    it('should validate horse meets competition requirements using API', async() => {
+    it('should validate horse meets competition requirements using API', async () => {
       // Test the eligibility API endpoint
       const response = await request(app)
         .get(`/api/competition/eligibility/${competitionHorse.id}/${testShow.discipline}`)
@@ -199,7 +198,9 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       expect(horse.age).toBeGreaterThanOrEqual(show.requirements.minAge);
 
       // Discipline score requirement
-      expect(horse.disciplineScores[show.discipline]).toBeGreaterThanOrEqual(show.requirements.minDisciplineScore);
+      expect(horse.disciplineScores[show.discipline]).toBeGreaterThanOrEqual(
+        show.requirements.minDisciplineScore
+      );
 
       // Health requirement
       expect(horse.healthStatus).toBe('Excellent'); // Exceeds 'Good' requirement
@@ -209,14 +210,14 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       expect(user.money).toBeGreaterThanOrEqual(show.entryFee);
     });
 
-    it('should successfully enter horse in competition using API endpoint', async() => {
+    it('should successfully enter horse in competition using API endpoint', async () => {
       // Test the new competition entry API endpoint
       const response = await request(app)
         .post('/api/competition/enter')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: competitionHorse.id,
-          showId: testShow.id
+          showId: testShow.id,
         })
         .expect(201);
 
@@ -234,8 +235,8 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       const entry = await prisma.competitionResult.findFirst({
         where: {
           horseId: competitionHorse.id,
-          showId: testShow.id
-        }
+          showId: testShow.id,
+        },
       });
       expect(entry).toBeTruthy();
       expect(entry.placement).toBeNull(); // Not yet executed
@@ -243,7 +244,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
   });
 
   describe('🏁 STEP 4: Competition Execution & Scoring', () => {
-    it('should execute competition and calculate results', async() => {
+    it('should execute competition and calculate results', async () => {
       // Import competition logic (real business logic)
       const { calculateCompetitionScore } = await import('../../utils/competitionLogic.js');
 
@@ -271,8 +272,8 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
           showName: show.name,
           score: competitionScore,
           placement: '1', // Will be calculated based on all entries
-          prizeWon: show.prize * 0.5 // 50% for first place
-        }
+          prizeWon: show.prize * 0.5, // 50% for first place
+        },
       });
 
       expect(Number(competitionResult.score)).toBe(competitionScore);
@@ -281,9 +282,9 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
   });
 
   describe('💰 STEP 5: Prize Distribution & XP Awards', () => {
-    it('should award prize money and XP for competition performance', async() => {
+    it('should award prize money and XP for competition performance', async () => {
       const initialUser = await prisma.user.findUnique({
-        where: { id: testUser.id }
+        where: { id: testUser.id },
       });
       const initialMoney = initialUser.money;
       const initialXP = initialUser.xp;
@@ -293,8 +294,8 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       const updatedUser = await prisma.user.update({
         where: { id: testUser.id },
         data: {
-          money: { increment: prizeAmount }
-        }
+          money: { increment: prizeAmount },
+        },
       });
 
       expect(updatedUser.money).toBe(initialMoney + prizeAmount);
@@ -307,23 +308,23 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
           userId: testUser.id,
           amount: xpAmount,
           reason: `Competition: ${testShow.name} - Placement: ${competitionResult.placement}`,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       await prisma.user.update({
         where: { id: testUser.id },
         data: {
-          xp: { increment: xpAmount }
-        }
+          xp: { increment: xpAmount },
+        },
       });
 
       // VERIFY: XP event logged
       const xpEvent = await prisma.xpEvent.findFirst({
         where: {
           userId: testUser.id,
-          reason: { contains: 'Competition' }
-        }
+          reason: { contains: 'Competition' },
+        },
       });
 
       expect(xpEvent).toBeTruthy();
@@ -331,14 +332,14 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
 
       // VERIFY: User XP increased
       const finalUser = await prisma.user.findUnique({
-        where: { id: testUser.id }
+        where: { id: testUser.id },
       });
       expect(finalUser.xp).toBe(initialXP + xpAmount);
     });
   });
 
   describe('📊 STEP 6: Leaderboard & Rankings', () => {
-    it('should update leaderboards with competition results using API', async() => {
+    it('should update leaderboards with competition results using API', async () => {
       // Test the new leaderboard API endpoint
       const response = await request(app)
         .get('/api/leaderboard/competition?metric=wins&limit=10')
@@ -353,14 +354,14 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       expect(response.body.data.pagination).toHaveProperty('offset');
     });
 
-    it('should track historical performance', async() => {
+    it('should track historical performance', async () => {
       // Get horse competition history
       const competitionHistory = await prisma.competitionResult.findMany({
         where: { horseId: competitionHorse.id },
         include: {
-          show: true
+          show: true,
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       });
 
       expect(competitionHistory).toHaveLength(1);
@@ -368,22 +369,27 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       expect(Number(competitionHistory[0].score)).toBe(Number(competitionResult.score));
 
       // VERIFY: Performance statistics
-      const avgScore = competitionHistory.reduce((sum, result) => sum + result.score, 0) / competitionHistory.length;
+      const avgScore =
+        competitionHistory.reduce((sum, result) => sum + result.score, 0) /
+        competitionHistory.length;
       expect(avgScore).toBe(Number(competitionResult.score));
 
-      const totalPrizeWon = competitionHistory.reduce((sum, result) => sum + Number(result.prizeWon), 0);
+      const totalPrizeWon = competitionHistory.reduce(
+        (sum, result) => sum + Number(result.prizeWon),
+        0
+      );
       expect(totalPrizeWon).toBe(Number(competitionResult.prizeWon));
     });
   });
 
   describe('🎯 STEP 7: Performance Impact on Horse Value', () => {
-    it('should increase horse value based on competition success', async() => {
+    it('should increase horse value based on competition success', async () => {
       // Competition success should affect horse's perceived value
       const horseWithResults = await prisma.horse.findUnique({
         where: { id: competitionHorse.id },
         include: {
-          competitionResults: true
-        }
+          competitionResults: true,
+        },
       });
 
       expect(horseWithResults.competitionResults).toHaveLength(1);
@@ -391,7 +397,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       // Calculate estimated value based on performance
       const baseValue = 10000; // Base horse value
       const performanceBonus = horseWithResults.competitionResults.reduce((sum, result) => {
-        return sum + (result.score * 100); // $100 per score point
+        return sum + result.score * 100; // $100 per score point
       }, 0);
 
       const estimatedValue = baseValue + performanceBonus;
@@ -404,9 +410,9 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
   });
 
   describe('🏆 STEP 8: Multi-Discipline Competition Readiness', () => {
-    it('should validate horse can compete in multiple disciplines', async() => {
+    it('should validate horse can compete in multiple disciplines', async () => {
       const horse = await prisma.horse.findUnique({
-        where: { id: competitionHorse.id }
+        where: { id: competitionHorse.id },
       });
 
       // Check all disciplines where horse meets minimum requirements
@@ -431,7 +437,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
   });
 
   describe('🎊 STEP 9: End-to-End Competition Workflow Validation', () => {
-    it('should validate complete competition workflow integrity', async() => {
+    it('should validate complete competition workflow integrity', async () => {
       // VERIFY: Complete competition workflow from entry to results
       const finalUser = await prisma.user.findUnique({
         where: { id: testUser.id },
@@ -439,12 +445,12 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
           horses: {
             include: {
               competitionResults: {
-                include: { show: true }
-              }
-            }
+                include: { show: true },
+              },
+            },
           },
-          xpEvents: true
-        }
+          xpEvents: true,
+        },
       });
 
       // User progression
@@ -457,23 +463,23 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       expect(Number(horse.competitionResults[0].placement)).toBe(1);
 
       // XP events include competition
-      const competitionXP = finalUser.xpEvents.find(event =>
-        event.reason.includes('Competition')
-      );
+      const competitionXP = finalUser.xpEvents.find(event => event.reason.includes('Competition'));
       expect(competitionXP).toBeTruthy();
 
       // Show status updated
       const finalShow = await prisma.show.findUnique({
-        where: { id: testShow.id }
+        where: { id: testShow.id },
       });
       expect(finalShow.name).toBe(testShow.name);
       // Note: Show model doesn't have currentEntries field in schema
     });
 
-    it('should validate all business rules enforced throughout competition', async() => {
+    it('should validate all business rules enforced throughout competition', async () => {
       // Entry requirements enforced
       expect(competitionHorse.age).toBeGreaterThanOrEqual(testShow.requirements.minAge);
-      expect(competitionHorse.disciplineScores[testShow.discipline]).toBeGreaterThanOrEqual(testShow.requirements.minDisciplineScore);
+      expect(competitionHorse.disciplineScores[testShow.discipline]).toBeGreaterThanOrEqual(
+        testShow.requirements.minDisciplineScore
+      );
 
       // Financial transactions accurate
       const user = await prisma.user.findUnique({ where: { id: testUser.id } });

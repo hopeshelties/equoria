@@ -52,24 +52,24 @@ jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
       findUnique: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
-      delete: jest.fn()
+      delete: jest.fn(),
     },
     breed: {
       create: jest.fn(),
-      delete: jest.fn()
+      delete: jest.fn(),
     },
     foalDevelopment: {
       create: jest.fn(),
       createMany: jest.fn(),
       findMany: jest.fn(),
       delete: jest.fn(),
-      deleteMany: jest.fn()
+      deleteMany: jest.fn(),
     },
     foalTrainingHistory: {
-      deleteMany: jest.fn()
+      deleteMany: jest.fn(),
     },
-    $disconnect: jest.fn()
-  }
+    $disconnect: jest.fn(),
+  },
 }));
 
 // Mock the cron job service
@@ -79,8 +79,8 @@ jest.unstable_mockModule(join(__dirname, '../services/cronJobs.js'), () => ({
     start: jest.fn(),
     evaluateDailyFoalTraits: jest.fn(),
     manualTraitEvaluation: jest.fn(),
-    getStatus: jest.fn()
-  }
+    getStatus: jest.fn(),
+  },
 }));
 
 // Now import the app and the mocked modules
@@ -92,12 +92,12 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
   let testBreed;
   let testFoals = [];
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     // Mock test breed
     testBreed = {
       id: 1,
       name: 'Test Breed for Cron Jobs',
-      description: 'Test breed for cron job testing'
+      description: 'Test breed for cron job testing',
     };
 
     // Setup default mock responses
@@ -112,10 +112,10 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         {
           name: 'dailyTraitEvaluation',
           running: true,
-          nextRun: new Date()
-        }
+          nextRun: new Date(),
+        },
       ],
-      totalJobs: 1
+      totalJobs: 1,
     });
   });
 
@@ -135,17 +135,17 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         {
           name: 'dailyTraitEvaluation',
           running: true,
-          nextRun: new Date()
-        }
+          nextRun: new Date(),
+        },
       ],
-      totalJobs: 1
+      totalJobs: 1,
     });
     mockCronJobService.start.mockResolvedValue();
     mockCronJobService.stop.mockResolvedValue();
   });
 
   describe('Daily Trait Evaluation', () => {
-    it('should evaluate traits for foals with good bonding and low stress', async() => {
+    it('should evaluate traits for foals with good bonding and low stress', async () => {
       // Mock test foal with good conditions
       const foal = {
         id: 1,
@@ -157,8 +157,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
       testFoals.push(foal);
 
@@ -169,7 +169,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         foalId: foal.id,
         currentDay: 3,
         bondingLevel: 85,
-        stressLevel: 15
+        stressLevel: 15,
       });
 
       // Mock updated foal after trait evaluation
@@ -178,8 +178,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: ['resilient'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
       mockPrisma.horse.findUnique.mockResolvedValueOnce(updatedFoal);
 
@@ -189,15 +189,16 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       expect(mockCronJobService.evaluateDailyFoalTraits).toHaveBeenCalled();
 
       const traits = updatedFoal.epigeneticModifiers;
-      const totalTraits = (traits.positive?.length || 0) +
-                         (traits.negative?.length || 0) +
-                         (traits.hidden?.length || 0);
+      const totalTraits =
+        (traits.positive?.length || 0) +
+        (traits.negative?.length || 0) +
+        (traits.hidden?.length || 0);
 
       // With good conditions, should have a chance to reveal positive traits
       expect(totalTraits).toBeGreaterThanOrEqual(0);
     });
 
-    it('should evaluate traits for foals with poor bonding and high stress', async() => {
+    it('should evaluate traits for foals with poor bonding and high stress', async () => {
       // Mock test foal with poor conditions
       const foal = {
         id: 2,
@@ -209,8 +210,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
       testFoals.push(foal);
 
@@ -221,7 +222,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         foalId: foal.id,
         currentDay: 4,
         bondingLevel: 25,
-        stressLevel: 85
+        stressLevel: 85,
       });
 
       // Mock updated foal after trait evaluation (might have negative traits)
@@ -230,8 +231,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: [],
           negative: ['nervous'],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
       mockPrisma.horse.findUnique.mockResolvedValueOnce(updatedFoal);
 
@@ -241,15 +242,16 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       expect(mockCronJobService.evaluateDailyFoalTraits).toHaveBeenCalled();
 
       const traits = updatedFoal.epigeneticModifiers;
-      const totalTraits = (traits.positive?.length || 0) +
-                         (traits.negative?.length || 0) +
-                         (traits.hidden?.length || 0);
+      const totalTraits =
+        (traits.positive?.length || 0) +
+        (traits.negative?.length || 0) +
+        (traits.hidden?.length || 0);
 
       // With poor conditions, might reveal negative traits
       expect(totalTraits).toBeGreaterThanOrEqual(0);
     });
 
-    it('should not evaluate foals that have completed development', async() => {
+    it('should not evaluate foals that have completed development', async () => {
       // Mock test foal that has completed development
       const foal = {
         id: 3,
@@ -261,8 +263,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: ['resilient'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
       testFoals.push(foal);
 
@@ -275,7 +277,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         foalId: foal.id,
         currentDay: 7, // Completed development
         bondingLevel: 75,
-        stressLevel: 25
+        stressLevel: 25,
       });
       mockPrisma.horse.findUnique.mockResolvedValueOnce(foal); // No changes
 
@@ -287,7 +289,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       expect(foal.epigeneticModifiers).toEqual(initialTraits);
     });
 
-    it('should handle foals without development records', async() => {
+    it('should handle foals without development records', async () => {
       // Mock test foal without development record
       const foal = {
         id: 4,
@@ -299,8 +301,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
       testFoals.push(foal);
 
@@ -315,7 +317,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       expect(foal).toBeDefined();
     });
 
-    it('should not reveal duplicate traits', async() => {
+    it('should not reveal duplicate traits', async () => {
       // Mock test foal with existing traits
       const foal = {
         id: 5,
@@ -327,8 +329,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: ['resilient'],
           negative: [],
-          hidden: ['intelligent']
-        }
+          hidden: ['intelligent'],
+        },
       };
       testFoals.push(foal);
 
@@ -338,8 +340,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: ['resilient', 'bold'], // Added new trait, no duplicates
           negative: [],
-          hidden: ['intelligent']
-        }
+          hidden: ['intelligent'],
+        },
       };
 
       // Setup mocks
@@ -349,7 +351,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         foalId: foal.id,
         currentDay: 5,
         bondingLevel: 80,
-        stressLevel: 20
+        stressLevel: 20,
       });
       mockPrisma.horse.findUnique.mockResolvedValueOnce(updatedFoal);
 
@@ -362,7 +364,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       const allTraits = [
         ...(traits.positive || []),
         ...(traits.negative || []),
-        ...(traits.hidden || [])
+        ...(traits.hidden || []),
       ];
 
       // Should not have duplicates
@@ -374,7 +376,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       expect(traits.hidden).toContain('intelligent');
     });
 
-    it('should handle multiple foals in single evaluation', async() => {
+    it('should handle multiple foals in single evaluation', async () => {
       // Mock multiple test foals
       const foal1 = {
         id: 6,
@@ -383,7 +385,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         breedId: testBreed.id,
         bondScore: 70,
         stressLevel: 30,
-        epigeneticModifiers: { positive: [], negative: [], hidden: [] }
+        epigeneticModifiers: { positive: [], negative: [], hidden: [] },
       };
 
       const foal2 = {
@@ -393,7 +395,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         breedId: testBreed.id,
         bondScore: 40,
         stressLevel: 60,
-        epigeneticModifiers: { positive: [], negative: [], hidden: [] }
+        epigeneticModifiers: { positive: [], negative: [], hidden: [] },
       };
 
       testFoals.push(foal1, foal2);
@@ -404,11 +406,11 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       mockPrisma.foalDevelopment.createMany.mockResolvedValueOnce({ count: 2 });
       mockPrisma.horse.findUnique.mockResolvedValueOnce({
         ...foal1,
-        epigeneticModifiers: { positive: ['bold'], negative: [], hidden: [] }
+        epigeneticModifiers: { positive: ['bold'], negative: [], hidden: [] },
       });
       mockPrisma.horse.findUnique.mockResolvedValueOnce({
         ...foal2,
-        epigeneticModifiers: { positive: [], negative: ['nervous'], hidden: [] }
+        epigeneticModifiers: { positive: [], negative: ['nervous'], hidden: [] },
       });
 
       // Run trait evaluation
@@ -419,26 +421,22 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
   });
 
   describe('Admin API Endpoints', () => {
-    it('should get cron job status', async() => {
-      const response = await request(app)
-        .get('/api/admin/cron/status')
-        .expect(200);
+    it('should get cron job status', async () => {
+      const response = await request(app).get('/api/admin/cron/status').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body).toHaveProperty('data');
       // The data might be empty due to mocking, but the endpoint should respond successfully
     });
 
-    it('should manually trigger trait evaluation', async() => {
-      const response = await request(app)
-        .post('/api/admin/traits/evaluate')
-        .expect(200);
+    it('should manually trigger trait evaluation', async () => {
+      const response = await request(app).post('/api/admin/traits/evaluate').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.message).toContain('completed successfully');
     });
 
-    it('should get foals in development', async() => {
+    it('should get foals in development', async () => {
       // Mock foals in development
       const mockFoals = [
         {
@@ -448,16 +446,14 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
           breedId: testBreed.id,
           bondScore: 65,
           stressLevel: 35,
-          epigeneticModifiers: { positive: [], negative: [], hidden: [] }
-        }
+          epigeneticModifiers: { positive: [], negative: [], hidden: [] },
+        },
       ];
 
       // Setup mock for the API endpoint
       mockPrisma.horse.findMany.mockResolvedValueOnce(mockFoals);
 
-      const response = await request(app)
-        .get('/api/admin/foals/development')
-        .expect(200);
+      const response = await request(app).get('/api/admin/foals/development').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('foals');
@@ -465,10 +461,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       expect(Array.isArray(response.body.data.foals)).toBe(true);
     });
 
-    it('should get trait definitions', async() => {
-      const response = await request(app)
-        .get('/api/admin/traits/definitions')
-        .expect(200);
+    it('should get trait definitions', async () => {
+      const response = await request(app).get('/api/admin/traits/definitions').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('positive');
@@ -487,19 +481,15 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       });
     });
 
-    it('should start and stop cron job service', async() => {
+    it('should start and stop cron job service', async () => {
       // Test starting service
-      const startResponse = await request(app)
-        .post('/api/admin/cron/start')
-        .expect(200);
+      const startResponse = await request(app).post('/api/admin/cron/start').expect(200);
 
       expect(startResponse.body.success).toBe(true);
       expect(startResponse.body.message).toContain('started successfully');
 
       // Test stopping service
-      const stopResponse = await request(app)
-        .post('/api/admin/cron/stop')
-        .expect(200);
+      const stopResponse = await request(app).post('/api/admin/cron/stop').expect(200);
 
       expect(stopResponse.body.success).toBe(true);
       expect(stopResponse.body.message).toContain('stopped successfully');
@@ -507,7 +497,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
   });
 
   describe('Error Handling', () => {
-    it('should handle database errors gracefully', async() => {
+    it('should handle database errors gracefully', async () => {
       // Mock database error scenario
       mockCronJobService.evaluateDailyFoalTraits.mockResolvedValueOnce();
 
@@ -516,7 +506,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
       expect(mockCronJobService.evaluateDailyFoalTraits).toHaveBeenCalled();
     });
 
-    it('should handle missing epigeneticModifiers field', async() => {
+    it('should handle missing epigeneticModifiers field', async () => {
       // Mock foal without epigeneticModifiers
       const foal = {
         id: 9,
@@ -524,7 +514,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         age: 0,
         breedId: testBreed.id,
         bondScore: 60,
-        stressLevel: 40
+        stressLevel: 40,
         // No epigeneticModifiers field
       };
 
@@ -534,8 +524,8 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       // Setup mocks
@@ -545,7 +535,7 @@ describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin
         foalId: foal.id,
         currentDay: 2,
         bondingLevel: 60,
-        stressLevel: 40
+        stressLevel: 40,
       });
       mockPrisma.horse.findUnique.mockResolvedValueOnce(updatedFoal);
 

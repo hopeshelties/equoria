@@ -37,14 +37,14 @@ const TRAIT_DEFINITIONS = {
   weather_immunity: { type: 'positive', rarity: 'rare', conflicts: [] },
   fire_resistance: { type: 'positive', rarity: 'rare', conflicts: [] },
   water_phobia: { type: 'negative', rarity: 'rare', conflicts: [] },
-  night_vision: { type: 'positive', rarity: 'rare', conflicts: [] }
+  night_vision: { type: 'positive', rarity: 'rare', conflicts: [] },
 };
 
 // Environmental trait pools that can emerge based on conditions
 const ENVIRONMENTAL_TRAITS = {
   positive: ['resilient', 'calm', 'intelligent'],
   negative: ['nervous', 'fragile', 'lazy'],
-  rare: ['weather_immunity', 'night_vision', 'legendary_bloodline']
+  rare: ['weather_immunity', 'night_vision', 'legendary_bloodline'],
 };
 
 /**
@@ -60,8 +60,12 @@ function validateInput(params) {
   const { damTraits, sireTraits, damBondScore, damStressLevel } = params;
 
   // Check required parameters
-  if (damTraits === undefined || sireTraits === undefined ||
-      damBondScore === undefined || damStressLevel === undefined) {
+  if (
+    damTraits === undefined ||
+    sireTraits === undefined ||
+    damBondScore === undefined ||
+    damStressLevel === undefined
+  ) {
     throw new Error('Missing required breeding parameters');
   }
 
@@ -91,21 +95,23 @@ function validateInput(params) {
  */
 function calculateInheritanceProbability(trait, bondScore, stressLevel, rng) {
   const traitDef = TRAIT_DEFINITIONS[trait];
-  if (!traitDef) {return 0.3;} // Default for unknown traits
+  if (!traitDef) {
+    return 0.3;
+  } // Default for unknown traits
 
   let baseProbability = 0.4; // Base 40% chance
 
   // Adjust for trait rarity
   switch (traitDef.rarity) {
-  case 'common':
-    baseProbability = 0.5;
-    break;
-  case 'rare':
-    baseProbability = 0.15;
-    break;
-  case 'legendary':
-    baseProbability = 0.05;
-    break;
+    case 'common':
+      baseProbability = 0.5;
+      break;
+    case 'rare':
+      baseProbability = 0.15;
+      break;
+    case 'legendary':
+      baseProbability = 0.05;
+      break;
   }
 
   // Environmental modifiers
@@ -135,7 +141,9 @@ function traitsConflict(trait1, trait2) {
   const def1 = TRAIT_DEFINITIONS[trait1];
   const def2 = TRAIT_DEFINITIONS[trait2];
 
-  if (!def1 || !def2) {return false;}
+  if (!def1 || !def2) {
+    return false;
+  }
 
   return def1.conflicts.includes(trait2) || def2.conflicts.includes(trait1);
 }
@@ -215,17 +223,25 @@ function generateEnvironmentalTraits(bondScore, stressLevel, rng) {
  */
 function determineTraitVisibility(trait, bondScore, stressLevel, rng) {
   const traitDef = TRAIT_DEFINITIONS[trait];
-  if (!traitDef) {return 'positive';} // Default for unknown traits
+  if (!traitDef) {
+    return 'positive';
+  } // Default for unknown traits
 
   // Rare and legendary traits are usually hidden
-  if (traitDef.rarity === 'rare' && rng.next() < 0.7) {return 'hidden';}
-  if (traitDef.rarity === 'legendary' && rng.next() < 0.9) {return 'hidden';}
+  if (traitDef.rarity === 'rare' && rng.next() < 0.7) {
+    return 'hidden';
+  }
+  if (traitDef.rarity === 'legendary' && rng.next() < 0.9) {
+    return 'hidden';
+  }
 
   // Environmental factors affect visibility
   const visibilityFactor = (bondScore - stressLevel) / 200; // -0.5 to 0.5
 
   // Poor conditions increase chance of traits being hidden
-  if (visibilityFactor < -0.2 && rng.next() < 0.3) {return 'hidden';}
+  if (visibilityFactor < -0.2 && rng.next() < 0.3) {
+    return 'hidden';
+  }
 
   // Return trait's natural type
   return traitDef.type;
@@ -271,7 +287,7 @@ export function calculateEpigeneticTraits(params) {
     ...inheritedTraits,
     ...environmentalTraits.positive,
     ...environmentalTraits.negative,
-    ...environmentalTraits.rare
+    ...environmentalTraits.rare,
   ];
 
   // Remove conflicting traits
@@ -317,7 +333,9 @@ export function getTraitDefinition(trait) {
 export function getTraitsByType(type = 'all') {
   const traits = Object.keys(TRAIT_DEFINITIONS);
 
-  if (type === 'all') {return traits;}
+  if (type === 'all') {
+    return traits;
+  }
 
   return traits.filter(trait => TRAIT_DEFINITIONS[trait].type === type);
 }

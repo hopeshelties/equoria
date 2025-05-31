@@ -15,6 +15,7 @@ The Groom Assignment System is a comprehensive feature that allows players to as
 ## Database Schema
 
 ### Groom Model
+
 ```sql
 model Groom {
   id          Int      @id @default(autoincrement())
@@ -43,6 +44,7 @@ model Groom {
 ```
 
 ### GroomAssignment Model
+
 ```sql
 model GroomAssignment {
   id          Int      @id @default(autoincrement())
@@ -70,6 +72,7 @@ model GroomAssignment {
 ```
 
 ### GroomInteraction Model
+
 ```sql
 model GroomInteraction {
   id              Int      @id @default(autoincrement())
@@ -100,9 +103,11 @@ model GroomInteraction {
 ### Core Assignment Endpoints
 
 #### `POST /api/grooms/assign`
+
 Assign a groom to a foal.
 
 **Request Body:**
+
 ```json
 {
   "foalId": 123,
@@ -113,15 +118,19 @@ Assign a groom to a foal.
 ```
 
 #### `POST /api/grooms/ensure-default/:foalId`
+
 Ensure a foal has a default groom assignment.
 
 #### `GET /api/grooms/assignments/:foalId`
+
 Get all assignments for a specific foal.
 
 #### `POST /api/grooms/interact`
+
 Record a groom interaction with a foal.
 
 **Request Body:**
+
 ```json
 {
   "foalId": 123,
@@ -133,54 +142,57 @@ Record a groom interaction with a foal.
 ```
 
 #### `GET /api/grooms/player/:playerId`
+
 Get all grooms for a player.
 
 #### `POST /api/grooms/hire`
+
 Hire a new groom for a player.
 
 #### `GET /api/grooms/definitions`
+
 Get groom system definitions (specialties, skill levels, personalities).
 
 ## Groom System Mechanics
 
 ### Specialties and Modifiers
 
-| Specialty | Bonding Modifier | Stress Reduction | Preferred Activities |
-|-----------|------------------|------------------|---------------------|
-| **Foal Care** | 1.5x | 1.3x | daily_care, feeding, grooming |
-| **General** | 1.0x | 1.0x | daily_care, grooming, exercise |
-| **Training** | 1.2x | 0.8x | exercise, training, daily_care |
-| **Medical** | 0.9x | 1.5x | medical_check, daily_care, feeding |
+| Specialty     | Bonding Modifier | Stress Reduction | Preferred Activities               |
+| ------------- | ---------------- | ---------------- | ---------------------------------- |
+| **Foal Care** | 1.5x             | 1.3x             | daily_care, feeding, grooming      |
+| **General**   | 1.0x             | 1.0x             | daily_care, grooming, exercise     |
+| **Training**  | 1.2x             | 0.8x             | exercise, training, daily_care     |
+| **Medical**   | 0.9x             | 1.5x             | medical_check, daily_care, feeding |
 
 ### Skill Levels and Effects
 
-| Skill Level | Bonding Modifier | Cost Modifier | Error Chance | Description |
-|-------------|------------------|---------------|--------------|-------------|
-| **Novice** | 0.8x | 0.7x | 15% | New to horse care |
-| **Intermediate** | 1.0x | 1.0x | 8% | Experienced caretaker |
-| **Expert** | 1.3x | 1.5x | 3% | Highly skilled professional |
-| **Master** | 1.6x | 2.0x | 1% | Elite horse care specialist |
+| Skill Level      | Bonding Modifier | Cost Modifier | Error Chance | Description                 |
+| ---------------- | ---------------- | ------------- | ------------ | --------------------------- |
+| **Novice**       | 0.8x             | 0.7x          | 15%          | New to horse care           |
+| **Intermediate** | 1.0x             | 1.0x          | 8%           | Experienced caretaker       |
+| **Expert**       | 1.3x             | 1.5x          | 3%           | Highly skilled professional |
+| **Master**       | 1.6x             | 2.0x          | 1%           | Elite horse care specialist |
 
 ### Personality Traits
 
-| Personality | Bonding Modifier | Stress Reduction | Description |
-|-------------|------------------|------------------|-------------|
-| **Gentle** | 1.2x | 1.4x | Calm and patient approach |
-| **Energetic** | 1.1x | 0.9x | Active and enthusiastic |
-| **Patient** | 1.3x | 1.2x | Takes time with each horse |
-| **Strict** | 0.9x | 0.8x | Disciplined and structured |
+| Personality   | Bonding Modifier | Stress Reduction | Description                |
+| ------------- | ---------------- | ---------------- | -------------------------- |
+| **Gentle**    | 1.2x             | 1.4x             | Calm and patient approach  |
+| **Energetic** | 1.1x             | 0.9x             | Active and enthusiastic    |
+| **Patient**   | 1.3x             | 1.2x             | Takes time with each horse |
+| **Strict**    | 0.9x             | 0.8x             | Disciplined and structured |
 
 ## Daily Care Automation
 
 ### Routine Types
 
-| Routine | Duration | Time of Day | Priority | Description |
-|---------|----------|-------------|----------|-------------|
-| **Morning Care** | 45 min | Morning | 1 | Feeding, grooming, health check |
-| **Feeding** | 20 min | Multiple | 2 | Regular feeding routine |
-| **Grooming** | 30 min | Afternoon | 3 | Brushing and basic grooming |
-| **Exercise** | 60 min | Afternoon | 4 | Light exercise and movement |
-| **Evening Care** | 30 min | Evening | 5 | Evening check-up and settling |
+| Routine          | Duration | Time of Day | Priority | Description                     |
+| ---------------- | -------- | ----------- | -------- | ------------------------------- |
+| **Morning Care** | 45 min   | Morning     | 1        | Feeding, grooming, health check |
+| **Feeding**      | 20 min   | Multiple    | 2        | Regular feeding routine         |
+| **Grooming**     | 30 min   | Afternoon   | 3        | Brushing and basic grooming     |
+| **Exercise**     | 60 min   | Afternoon   | 4        | Light exercise and movement     |
+| **Evening Care** | 30 min   | Evening     | 5        | Evening check-up and settling   |
 
 ### Automation Features
 
@@ -204,11 +216,11 @@ function FoalCareScreen({ foalId, playerId }) {
     assignGroom,
     ensureDefaultAssignment,
     recordInteraction,
-    getActiveAssignment
+    getActiveAssignment,
   } = useGroomManagement(playerId);
 
   const activeAssignment = getActiveAssignment(foalId);
-  
+
   // Component logic...
 }
 ```
@@ -223,7 +235,7 @@ import GroomAssignmentManager from '../components/GroomAssignmentManager';
   foalName={foal.name}
   playerId={player.id}
   onAssignmentChange={() => refreshFoalData()}
-/>
+/>;
 ```
 
 ## Default Groom Profiles
@@ -231,12 +243,14 @@ import GroomAssignmentManager from '../components/GroomAssignmentManager';
 The system includes three default groom profiles that are automatically created for players:
 
 1. **Sarah Johnson** - Foal Care Specialist
+
    - Speciality: foal_care
    - Skill Level: intermediate
    - Personality: gentle
    - Rate: $18/hour
 
 2. **Mike Rodriguez** - General Caretaker
+
    - Speciality: general
    - Skill Level: expert
    - Personality: patient
@@ -251,11 +265,13 @@ The system includes three default groom profiles that are automatically created 
 ## Integration Points
 
 ### Automatic Assignment
+
 - **Foal Development Route**: Automatically ensures default groom assignment when foal development is accessed
 - **Enrichment Activities**: Triggers trait discovery after groom interactions
 - **Daily Care**: Automated daily routines maintain foal bonding and reduce stress
 
 ### Real-time Updates
+
 - **WebSocket Support**: Ready for real-time notifications of groom interactions
 - **State Management**: React hooks provide real-time state updates
 - **Cost Tracking**: Automatic cost calculation and player balance updates

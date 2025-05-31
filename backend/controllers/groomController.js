@@ -10,7 +10,7 @@ import {
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
   PERSONALITY_TRAITS,
-  DEFAULT_GROOMS
+  DEFAULT_GROOMS,
 } from '../utils/groomSystem.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
@@ -31,28 +31,27 @@ export async function assignGroom(req, res) {
       return res.status(400).json({
         success: false,
         message: 'foalId and groomId are required',
-        data: null
+        data: null,
       });
     }
 
     const result = await assignGroomToFoal(foalId, groomId, playerId, {
       priority,
       notes,
-      isDefault: false
+      isDefault: false,
     });
 
     res.status(200).json({
       success: true,
       message: result.message,
-      data: result.assignment
+      data: result.assignment,
     });
-
   } catch (error) {
     logger.error(`[groomController.assignGroom] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to assign groom',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -71,11 +70,13 @@ export async function ensureDefaultAssignment(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Invalid foal ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     }
 
-    logger.info(`[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`);
+    logger.info(
+      `[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`
+    );
 
     const result = await ensureDefaultGroomAssignment(parsedFoalId, playerId);
 
@@ -85,16 +86,15 @@ export async function ensureDefaultAssignment(req, res) {
       data: {
         assignment: result.assignment,
         isNew: result.isNew || false,
-        isExisting: result.isExisting || false
-      }
+        isExisting: result.isExisting || false,
+      },
     });
-
   } catch (error) {
     logger.error(`[groomController.ensureDefaultAssignment] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to ensure default assignment',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -112,25 +112,23 @@ export async function getFoalAssignments(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Invalid foal ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     }
 
-    logger.info(`[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`);
+    logger.info(
+      `[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`
+    );
 
     const assignments = await prisma.groomAssignment.findMany({
       where: { foalId: parsedFoalId },
       include: {
         groom: true,
         foal: {
-          select: { id: true, name: true, bond_score: true, stress_level: true }
-        }
+          select: { id: true, name: true, bond_score: true, stress_level: true },
+        },
       },
-      orderBy: [
-        { isActive: 'desc' },
-        { priority: 'asc' },
-        { createdAt: 'desc' }
-      ]
+      orderBy: [{ isActive: 'desc' }, { priority: 'asc' }, { createdAt: 'desc' }],
     });
 
     res.status(200).json({
@@ -140,16 +138,15 @@ export async function getFoalAssignments(req, res) {
         foalId: parsedFoalId,
         assignments,
         activeAssignments: assignments.filter(a => a.isActive),
-        totalAssignments: assignments.length
-      }
+        totalAssignments: assignments.length,
+      },
     });
-
   } catch (error) {
     logger.error(`[groomController.getFoalAssignments] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve foal assignments',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -160,23 +157,18 @@ export async function getFoalAssignments(req, res) {
  */
 export async function recordInteraction(req, res) {
   try {
-    const {
-      foalId,
-      groomId,
-      interactionType,
-      duration,
-      notes,
-      assignmentId
-    } = req.body;
+    const { foalId, groomId, interactionType, duration, notes, assignmentId } = req.body;
 
-    logger.info(`[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`);
+    logger.info(
+      `[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`
+    );
 
     // Validate required fields
     if (!foalId || !groomId || !interactionType || !duration) {
       return res.status(400).json({
         success: false,
         message: 'foalId, groomId, interactionType, and duration are required',
-        data: null
+        data: null,
       });
     }
 
@@ -189,16 +181,16 @@ export async function recordInteraction(req, res) {
           id: true,
           name: true,
           bond_score: true,
-          stress_level: true
-        }
-      })
+          stress_level: true,
+        },
+      }),
     ]);
 
     if (!groom) {
       return res.status(404).json({
         success: false,
         message: 'Groom not found',
-        data: null
+        data: null,
       });
     }
 
@@ -206,7 +198,7 @@ export async function recordInteraction(req, res) {
       return res.status(404).json({
         success: false,
         message: 'Foal not found',
-        data: null
+        data: null,
       });
     }
 
@@ -225,23 +217,31 @@ export async function recordInteraction(req, res) {
         stressChange: effects.stressChange,
         quality: effects.quality,
         cost: effects.cost,
-        notes
-      }
+        notes,
+      },
     });
 
     // Update foal's bond score and stress level
-    const newBondScore = Math.max(0, Math.min(100, (foal.bond_score || 50) + effects.bondingChange));
-    const newStressLevel = Math.max(0, Math.min(100, (foal.stress_level || 0) + effects.stressChange));
+    const newBondScore = Math.max(
+      0,
+      Math.min(100, (foal.bond_score || 50) + effects.bondingChange)
+    );
+    const newStressLevel = Math.max(
+      0,
+      Math.min(100, (foal.stress_level || 0) + effects.stressChange)
+    );
 
     await prisma.horse.update({
       where: { id: foalId },
       data: {
         bond_score: newBondScore,
-        stress_level: newStressLevel
-      }
+        stress_level: newStressLevel,
+      },
     });
 
-    logger.info(`[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress`);
+    logger.info(
+      `[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress`
+    );
 
     res.status(200).json({
       success: true,
@@ -255,17 +255,16 @@ export async function recordInteraction(req, res) {
           previousStressLevel: foal.stress_level,
           newStressLevel,
           bondingChange: effects.bondingChange,
-          stressChange: effects.stressChange
-        }
-      }
+          stressChange: effects.stressChange,
+        },
+      },
     });
-
   } catch (error) {
     logger.error(`[groomController.recordInteraction] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to record interaction',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -287,22 +286,18 @@ export async function getPlayerGrooms(req, res) {
           where: { isActive: true },
           include: {
             foal: {
-              select: { id: true, name: true }
-            }
-          }
+              select: { id: true, name: true },
+            },
+          },
         },
         _count: {
           select: {
             assignments: true,
-            interactions: true
-          }
-        }
+            interactions: true,
+          },
+        },
       },
-      orderBy: [
-        { is_active: 'desc' },
-        { skill_level: 'desc' },
-        { experience: 'desc' }
-      ]
+      orderBy: [{ is_active: 'desc' }, { skill_level: 'desc' }, { experience: 'desc' }],
     });
 
     res.status(200).json({
@@ -312,16 +307,15 @@ export async function getPlayerGrooms(req, res) {
         playerId,
         grooms,
         activeGrooms: grooms.filter(g => g.is_active),
-        totalGrooms: grooms.length
-      }
+        totalGrooms: grooms.length,
+      },
     });
-
   } catch (error) {
     logger.error(`[groomController.getPlayerGrooms] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve player grooms',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -340,7 +334,7 @@ export async function hireGroom(req, res) {
       personality,
       hourly_rate,
       bio,
-      availability
+      availability,
     } = req.body;
     const playerId = req.user?.id || 'default-player'; // TODO: Get from auth
 
@@ -351,7 +345,7 @@ export async function hireGroom(req, res) {
       return res.status(400).json({
         success: false,
         message: 'name, speciality, skill_level, and personality are required',
-        data: null
+        data: null,
       });
     }
 
@@ -360,7 +354,7 @@ export async function hireGroom(req, res) {
       return res.status(400).json({
         success: false,
         message: `Invalid speciality. Must be one of: ${Object.keys(GROOM_SPECIALTIES).join(', ')}`,
-        data: null
+        data: null,
       });
     }
 
@@ -369,7 +363,7 @@ export async function hireGroom(req, res) {
       return res.status(400).json({
         success: false,
         message: `Invalid skill level. Must be one of: ${Object.keys(SKILL_LEVELS).join(', ')}`,
-        data: null
+        data: null,
       });
     }
 
@@ -378,7 +372,7 @@ export async function hireGroom(req, res) {
       return res.status(400).json({
         success: false,
         message: `Invalid personality. Must be one of: ${Object.keys(PERSONALITY_TRAITS).join(', ')}`,
-        data: null
+        data: null,
       });
     }
 
@@ -392,24 +386,25 @@ export async function hireGroom(req, res) {
         hourly_rate: hourly_rate || SKILL_LEVELS[skill_level].costModifier * 15.0,
         bio,
         availability: availability || {},
-        playerId
-      }
+        playerId,
+      },
     });
 
-    logger.info(`[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`);
+    logger.info(
+      `[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`
+    );
 
     res.status(201).json({
       success: true,
       message: `Successfully hired ${groom.name}`,
-      data: groom
+      data: groom,
     });
-
   } catch (error) {
     logger.error(`[groomController.hireGroom] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to hire groom',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -429,16 +424,15 @@ export async function getGroomDefinitions(_req, res) {
         specialties: GROOM_SPECIALTIES,
         skillLevels: SKILL_LEVELS,
         personalities: PERSONALITY_TRAITS,
-        defaultGrooms: DEFAULT_GROOMS
-      }
+        defaultGrooms: DEFAULT_GROOMS,
+      },
     });
-
   } catch (error) {
     logger.error(`[groomController.getGroomDefinitions] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve definitions',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }

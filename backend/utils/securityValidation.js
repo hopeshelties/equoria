@@ -43,7 +43,15 @@ export const validateHorseData = (horseData, isUpdate = false) => {
   }
 
   // Stat validation (prevent stat hacking)
-  const statFields = ['precision', 'strength', 'speed', 'agility', 'endurance', 'intelligence', 'personality'];
+  const statFields = [
+    'precision',
+    'strength',
+    'speed',
+    'agility',
+    'endurance',
+    'intelligence',
+    'personality',
+  ];
   for (const stat of statFields) {
     if (sanitized[stat] !== undefined) {
       const value = parseInt(sanitized[stat]);
@@ -170,7 +178,7 @@ export const validatePlayerData = (playerData, isUpdate = false) => {
 /**
  * Validates breeding data to prevent exploit breeding
  */
-export const validateBreedingData = (breedingData) => {
+export const validateBreedingData = breedingData => {
   const errors = [];
   const sanitized = { ...breedingData };
 
@@ -215,7 +223,7 @@ export const validateBreedingData = (breedingData) => {
 /**
  * Validates training data to prevent training exploits
  */
-export const validateTrainingData = (trainingData) => {
+export const validateTrainingData = trainingData => {
   const errors = [];
   const sanitized = { ...trainingData };
 
@@ -241,7 +249,15 @@ export const validateTrainingData = (trainingData) => {
   }
 
   // Prevent direct stat modification in training requests
-  const protectedFields = ['precision', 'strength', 'speed', 'agility', 'endurance', 'intelligence', 'personality'];
+  const protectedFields = [
+    'precision',
+    'strength',
+    'speed',
+    'agility',
+    'endurance',
+    'intelligence',
+    'personality',
+  ];
   for (const field of protectedFields) {
     if (sanitized[field] !== undefined) {
       delete sanitized[field];
@@ -255,7 +271,7 @@ export const validateTrainingData = (trainingData) => {
 /**
  * Validates transaction data to prevent financial exploits
  */
-export const validateTransactionData = (transactionData) => {
+export const validateTransactionData = transactionData => {
   const errors = [];
   const sanitized = { ...transactionData };
 
@@ -274,7 +290,15 @@ export const validateTransactionData = (transactionData) => {
   if (!sanitized.type) {
     errors.push('Transaction type is required');
   } else {
-    const validTypes = ['purchase', 'sale', 'transfer', 'breeding_fee', 'training_fee', 'competition_entry', 'prize'];
+    const validTypes = [
+      'purchase',
+      'sale',
+      'transfer',
+      'breeding_fee',
+      'training_fee',
+      'competition_entry',
+      'prize',
+    ];
     if (!validTypes.includes(sanitized.type)) {
       errors.push('Invalid transaction type');
     }
@@ -296,7 +320,7 @@ export const validateTransactionData = (transactionData) => {
 /**
  * Generates secure hash for data integrity verification
  */
-export const generateDataHash = (data) => {
+export const generateDataHash = data => {
   const dataString = JSON.stringify(data, Object.keys(data).sort());
   return crypto.createHash('sha256').update(dataString).digest('hex');
 };
@@ -312,8 +336,10 @@ export const verifyDataIntegrity = (data, expectedHash) => {
 /**
  * Sanitizes input to prevent XSS and injection attacks
  */
-export const sanitizeInput = (input) => {
-  if (typeof input !== 'string') {return input;}
+export const sanitizeInput = input => {
+  if (typeof input !== 'string') {
+    return input;
+  }
 
   return input
     .trim()
@@ -365,7 +391,7 @@ export const validateRateLimit = (userId, operation, maxRequests = 10, windowMs 
 /**
  * Validates file uploads to prevent malicious files
  */
-export const validateFileUpload = (file) => {
+export const validateFileUpload = file => {
   const errors = [];
 
   if (!file) {
@@ -405,5 +431,5 @@ export default {
   sanitizeInput,
   validateId,
   validateRateLimit,
-  validateFileUpload
+  validateFileUpload,
 };

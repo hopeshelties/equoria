@@ -7,11 +7,12 @@ This document describes the database schema migration that adds bonding and stre
 **Migration Name:** `add_horse_bonding_and_foal_training_history`  
 **Date:** 2025-05-25  
 **Version:** 1.0  
-**Type:** Schema Enhancement  
+**Type:** Schema Enhancement
 
 ### Changes Made
 
 1. **Horse Table Enhancements**
+
    - Added `bond_score` column (INTEGER, default 50, range 0-100)
    - Added `stress_level` column (INTEGER, default 0, range 0-100)
 
@@ -24,16 +25,19 @@ This document describes the database schema migration that adds bonding and stre
 ## Files Included
 
 ### 1. Prisma Migration
+
 - **Location:** `packages/database/prisma/migrations/20250525184836_add_horse_bonding_and_foal_training_history/migration.sql`
 - **Type:** Auto-generated Prisma migration
 - **Usage:** Applied automatically via `npx prisma migrate dev`
 
 ### 2. Manual SQL Migration
+
 - **Location:** `packages/database/migrations/add_horse_bonding_and_training_history.sql`
 - **Type:** Comprehensive SQL script with validation
 - **Features:** Idempotent, includes constraints, comments, and verification
 
 ### 3. Rollback Script
+
 - **Location:** `packages/database/migrations/rollback_horse_bonding_and_training_history.sql`
 - **Type:** Complete rollback with verification
 - **Features:** Safe cleanup, comprehensive verification, detailed logging
@@ -48,10 +52,10 @@ ALTER TABLE "Horse" ADD COLUMN "bond_score" INTEGER DEFAULT 50;
 ALTER TABLE "Horse" ADD COLUMN "stress_level" INTEGER DEFAULT 0;
 
 -- Constraints (in manual migration only)
-ALTER TABLE "Horse" ADD CONSTRAINT "Horse_bond_score_check" 
+ALTER TABLE "Horse" ADD CONSTRAINT "Horse_bond_score_check"
 CHECK ("bond_score" >= 0 AND "bond_score" <= 100);
 
-ALTER TABLE "Horse" ADD CONSTRAINT "Horse_stress_level_check" 
+ALTER TABLE "Horse" ADD CONSTRAINT "Horse_stress_level_check"
 CHECK ("stress_level" >= 0 AND "stress_level" <= 100);
 ```
 
@@ -89,12 +93,14 @@ CREATE INDEX "foal_training_history_horse_id_day_idx" ON "foal_training_history"
 ### Applying the Migration
 
 #### Option 1: Prisma Migration (Recommended)
+
 ```bash
 cd packages/database
 npx prisma migrate dev --name add_horse_bonding_and_foal_training_history
 ```
 
 #### Option 2: Manual SQL Migration
+
 ```bash
 # Connect to your PostgreSQL database
 psql -h localhost -U your_username -d equoria
@@ -107,31 +113,33 @@ psql -h localhost -U your_username -d equoria
 
 ```sql
 -- Check if columns were added
-SELECT column_name, data_type, column_default 
-FROM information_schema.columns 
-WHERE table_name = 'Horse' 
+SELECT column_name, data_type, column_default
+FROM information_schema.columns
+WHERE table_name = 'Horse'
 AND column_name IN ('bond_score', 'stress_level');
 
 -- Check if table was created
-SELECT table_name 
-FROM information_schema.tables 
+SELECT table_name
+FROM information_schema.tables
 WHERE table_name = 'foal_training_history';
 
 -- Check indexes
-SELECT indexname 
-FROM pg_indexes 
+SELECT indexname
+FROM pg_indexes
 WHERE tablename = 'foal_training_history';
 ```
 
 ### Rolling Back the Migration
 
 #### Option 1: Prisma Rollback
+
 ```bash
 cd packages/database
 npx prisma migrate reset  # WARNING: This resets the entire database
 ```
 
 #### Option 2: Manual Rollback
+
 ```bash
 # Connect to your PostgreSQL database
 psql -h localhost -U your_username -d equoria
@@ -153,8 +161,8 @@ export async function updateHorseBonding(horseId, bondScore, stressLevel) {
     where: { id: horseId },
     data: {
       bond_score: bondScore,
-      stress_level: stressLevel
-    }
+      stress_level: stressLevel,
+    },
   });
 }
 
@@ -166,8 +174,8 @@ export async function createFoalTrainingRecord(data) {
       activity: data.activity,
       outcome: data.outcome,
       bond_change: data.bondChange,
-      stress_change: data.stressChange
-    }
+      stress_change: data.stressChange,
+    },
   });
 }
 ```
@@ -182,8 +190,8 @@ interface Horse {
   id: number;
   name: string;
   age: number;
-  bond_score?: number;      // New field
-  stress_level?: number;    // New field
+  bond_score?: number; // New field
+  stress_level?: number; // New field
   // ... other fields
 }
 
@@ -214,7 +222,7 @@ router.put('/horses/:id/bonding', async (req, res) => {
 router.get('/horses/:id/training-history', async (req, res) => {
   const history = await prisma.foalTrainingHistory.findMany({
     where: { horse_id: parseInt(req.params.id) },
-    orderBy: { timestamp: 'desc' }
+    orderBy: { timestamp: 'desc' },
   });
   res.json(history);
 });
@@ -247,11 +255,11 @@ The migration creates several indexes to optimize common queries:
 
 ```sql
 -- Efficient queries enabled by indexes
-SELECT * FROM foal_training_history 
-WHERE horse_id = 123 
+SELECT * FROM foal_training_history
+WHERE horse_id = 123
 ORDER BY timestamp DESC;
 
-SELECT * FROM foal_training_history 
+SELECT * FROM foal_training_history
 WHERE horse_id = 123 AND day = 3;
 ```
 
@@ -293,7 +301,7 @@ VALUES (1, 0, 'Gentle Touch', 'excellent', 5, -2);
 
 ```sql
 -- Verify constraints work
-INSERT INTO "Horse" (name, age, "breedId", bond_score) 
+INSERT INTO "Horse" (name, age, "breedId", bond_score)
 VALUES ('Invalid Horse', 2, 1, 150); -- Should fail
 
 -- Verify foreign key constraint
@@ -306,9 +314,11 @@ VALUES (99999, 0, 'Test', 'Test'); -- Should fail
 ### Common Issues
 
 1. **Migration fails due to existing data**
+
    - Solution: Ensure all existing horses have valid data before migration
 
 2. **Constraint violations**
+
    - Solution: Check data ranges before inserting new records
 
 3. **Performance issues**
@@ -318,18 +328,18 @@ VALUES (99999, 0, 'Test', 'Test'); -- Should fail
 
 ```sql
 -- Check migration status
-SELECT * FROM information_schema.columns 
-WHERE table_name = 'Horse' 
+SELECT * FROM information_schema.columns
+WHERE table_name = 'Horse'
 AND column_name IN ('bond_score', 'stress_level');
 
 -- Check constraints
-SELECT constraint_name, check_clause 
-FROM information_schema.check_constraints 
+SELECT constraint_name, check_clause
+FROM information_schema.check_constraints
 WHERE constraint_name LIKE '%Horse%';
 
 -- Check foreign keys
-SELECT constraint_name, table_name, column_name 
-FROM information_schema.key_column_usage 
+SELECT constraint_name, table_name, column_name
+FROM information_schema.key_column_usage
 WHERE constraint_name LIKE '%foal_training_history%';
 ```
 
@@ -344,4 +354,4 @@ This migration successfully adds comprehensive bonding and stress tracking capab
 - ✅ **Comprehensive documentation**
 - ✅ **Integration guidelines**
 
-The migration is production-ready and provides a solid foundation for the epigenetic traits system and foal development mechanics. 
+The migration is production-ready and provides a solid foundation for the epigenetic traits system and foal development mechanics.

@@ -18,20 +18,20 @@ jest.unstable_mockModule(join(__dirname, '../../db/index.js'), () => ({
       findUnique: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
-      deleteMany: jest.fn()
+      deleteMany: jest.fn(),
     },
     competitionResult: {
       findFirst: jest.fn(),
       create: jest.fn(),
-      deleteMany: jest.fn()
+      deleteMany: jest.fn(),
     },
     trainingLog: {
       findFirst: jest.fn(),
       create: jest.fn(),
-      deleteMany: jest.fn()
+      deleteMany: jest.fn(),
     },
-    $disconnect: jest.fn()
-  }
+    $disconnect: jest.fn(),
+  },
 }));
 
 // Mock the trainingModel
@@ -39,7 +39,7 @@ jest.unstable_mockModule(join(__dirname, '../../models/trainingModel.js'), () =>
   getAnyRecentTraining: jest.fn(),
   getHorseAge: jest.fn(),
   getLastTrainingDate: jest.fn(),
-  logTrainingSession: jest.fn()
+  logTrainingSession: jest.fn(),
 }));
 
 // Now import the app and the mocked modules
@@ -61,29 +61,29 @@ describe('Horse Overview Integration Tests', () => {
       age: 5,
       trait: 'Dressage',
       disciplineScores: {
-        'Dressage': 25,
-        'Show Jumping': 10
+        Dressage: 25,
+        'Show Jumping': 10,
       },
       total_earnings: 2200,
       tack: {
         saddleBonus: 5,
-        bridleBonus: 3
+        bridleBonus: 3,
       },
       rider: {
         name: 'Jenna Black',
         bonusPercent: 0.08,
-        penaltyPercent: 0
-      }
+        penaltyPercent: 0,
+      },
     };
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Clean up mocks
     jest.clearAllMocks();
   });
 
   describe('GET /api/horses/:id/overview', () => {
-    it('should return complete horse overview data successfully', async() => {
+    it('should return complete horse overview data successfully', async () => {
       // Mock horse data
       mockPrisma.horse.findUnique.mockResolvedValue(testHorse);
 
@@ -96,13 +96,11 @@ describe('Horse Overview Integration Tests', () => {
       const mockCompetitionResult = {
         showName: 'Summer Invitational',
         placement: '1st',
-        runDate: new Date('2025-06-01')
+        runDate: new Date('2025-06-01'),
       };
       mockPrisma.competitionResult.findFirst.mockResolvedValue(mockCompetitionResult);
 
-      const response = await request(app)
-        .get('/api/horses/1/overview')
-        .expect(200);
+      const response = await request(app).get('/api/horses/1/overview').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('Horse overview retrieved successfully');
@@ -117,8 +115,8 @@ describe('Horse Overview Integration Tests', () => {
 
       // Verify discipline scores
       expect(data.disciplineScores).toEqual({
-        'Dressage': 25,
-        'Show Jumping': 10
+        Dressage: 25,
+        'Show Jumping': 10,
       });
 
       // Verify next training date (should be null since 7 days have passed)
@@ -131,58 +129,52 @@ describe('Horse Overview Integration Tests', () => {
       expect(data.lastShowResult).toEqual({
         showName: 'Summer Invitational',
         placement: '1st',
-        runDate: '2025-06-01T00:00:00.000Z'
+        runDate: '2025-06-01T00:00:00.000Z',
       });
 
       // Verify rider info
       expect(data.rider).toEqual({
         name: 'Jenna Black',
         bonusPercent: 0.08,
-        penaltyPercent: 0
+        penaltyPercent: 0,
       });
 
       // Verify tack info
       expect(data.tack).toEqual({
         saddleBonus: 5,
-        bridleBonus: 3
+        bridleBonus: 3,
       });
     });
 
-    it('should return 404 for non-existent horse', async() => {
+    it('should return 404 for non-existent horse', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
-      const response = await request(app)
-        .get('/api/horses/99999/overview')
-        .expect(404);
+      const response = await request(app).get('/api/horses/99999/overview').expect(404);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Horse not found');
     });
 
-    it('should return validation error for invalid horse ID', async() => {
-      const response = await request(app)
-        .get('/api/horses/invalid/overview')
-        .expect(400);
+    it('should return validation error for invalid horse ID', async () => {
+      const response = await request(app).get('/api/horses/invalid/overview').expect(400);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should handle horse with no training history gracefully', async() => {
+    it('should handle horse with no training history gracefully', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(testHorse);
       getAnyRecentTraining.mockResolvedValue(null);
       mockPrisma.competitionResult.findFirst.mockResolvedValue(null);
 
-      const response = await request(app)
-        .get('/api/horses/1/overview')
-        .expect(200);
+      const response = await request(app).get('/api/horses/1/overview').expect(200);
 
       const { data } = response.body;
       expect(data.nextTrainingDate).toBeNull();
       expect(data.lastShowResult).toBeNull();
     });
 
-    it('should calculate next training date correctly when horse has recent training', async() => {
+    it('should calculate next training date correctly when horse has recent training', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(testHorse);
 
       // Mock recent training (3 days ago, so next training in 4 days)
@@ -195,15 +187,13 @@ describe('Horse Overview Integration Tests', () => {
 
       mockPrisma.competitionResult.findFirst.mockResolvedValue(null);
 
-      const response = await request(app)
-        .get('/api/horses/1/overview')
-        .expect(200);
+      const response = await request(app).get('/api/horses/1/overview').expect(200);
 
       const { data } = response.body;
       expect(new Date(data.nextTrainingDate)).toEqual(expectedNextTraining);
     });
 
-    it('should handle missing optional fields gracefully', async() => {
+    it('should handle missing optional fields gracefully', async () => {
       const minimalHorse = {
         id: 1,
         name: 'Minimal Horse',
@@ -212,16 +202,14 @@ describe('Horse Overview Integration Tests', () => {
         disciplineScores: null,
         total_earnings: 0,
         tack: null,
-        rider: null
+        rider: null,
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(minimalHorse);
       getAnyRecentTraining.mockResolvedValue(null);
       mockPrisma.competitionResult.findFirst.mockResolvedValue(null);
 
-      const response = await request(app)
-        .get('/api/horses/1/overview')
-        .expect(200);
+      const response = await request(app).get('/api/horses/1/overview').expect(200);
 
       const { data } = response.body;
       expect(data.name).toBe('Minimal Horse');

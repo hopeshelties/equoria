@@ -27,24 +27,28 @@ epigenetic_modifiers Json? @default("{\"positive\": [], \"negative\": [], \"hidd
 ### Positive Traits
 
 #### Hardy
+
 - **Description**: Strong constitution from excellent mare care
 - **Conditions**: Mare stress ≤ 20, Feed quality ≥ 80
 - **Probability**: 25%
 - **Effects**: Improved health and resilience
 
 #### Well Bred
+
 - **Description**: Benefits from careful breeding selection
 - **Conditions**: Mare stress ≤ 30, Feed quality ≥ 70, No inbreeding
 - **Probability**: 20%
 - **Effects**: Balanced genetic advantages
 
 #### Specialized Lineage
+
 - **Description**: Genetic advantage in family discipline specialty
 - **Conditions**: Discipline specialization detected, Mare stress ≤ 40
 - **Probability**: 30%
 - **Effects**: Bonus in specialized discipline
 
 #### Premium Care
+
 - **Description**: Exceptional prenatal care benefits
 - **Conditions**: Mare stress ≤ 10, Feed quality ≥ 90
 - **Probability**: 15%
@@ -53,24 +57,28 @@ epigenetic_modifiers Json? @default("{\"positive\": [], \"negative\": [], \"hidd
 ### Negative Traits
 
 #### Weak Constitution
+
 - **Description**: Poor health from inadequate mare care
 - **Conditions**: Mare stress ≥ 70, Feed quality ≤ 40
 - **Probability**: 35%
 - **Effects**: Reduced health and performance
 
 #### Inbred
+
 - **Description**: Genetic complications from close breeding
 - **Conditions**: Inbreeding detected within 3 generations
 - **Probability**: 60%
 - **Effects**: Various genetic penalties
 
 #### Stressed Lineage
+
 - **Description**: Inherited stress sensitivity
 - **Conditions**: Mare stress ≥ 60
 - **Probability**: 25%
 - **Effects**: Higher stress susceptibility
 
 #### Poor Nutrition
+
 - **Description**: Developmental issues from inadequate feeding
 - **Conditions**: Feed quality ≤ 30
 - **Probability**: 40%
@@ -122,6 +130,7 @@ const feedQuality = await assessFeedQuality(mareId);
 ### Automatic Application
 
 The system automatically applies traits when creating horses with:
+
 - Age = 0 (newborn)
 - Both sire_id and dam_id present
 
@@ -132,8 +141,8 @@ const horseData = {
   breedId: 1,
   sire_id: 10,
   dam_id: 20,
-  mareStress: 25,      // Optional override
-  feedQuality: 75      // Optional override
+  mareStress: 25, // Optional override
+  feedQuality: 75, // Optional override
 };
 
 const horse = await createHorse(horseData);
@@ -149,7 +158,7 @@ const breedingData = {
   sireId: 10,
   damId: 20,
   mareStress: 15,
-  feedQuality: 85
+  feedQuality: 85,
 };
 
 const result = await applyEpigeneticTraitsAtBirth(breedingData);
@@ -159,11 +168,13 @@ const result = await applyEpigeneticTraitsAtBirth(breedingData);
 ## Trait Visibility
 
 ### Immediate Visibility
+
 - Most positive traits are visible at birth
 - Negative traits appear as warnings
 - Some traits may be hidden initially
 
 ### Hidden Traits
+
 - 30% chance to hide traits when >2 total traits
 - Hidden traits can be revealed through foal development
 - Maintains mystery and discovery elements
@@ -171,11 +182,13 @@ const result = await applyEpigeneticTraitsAtBirth(breedingData);
 ## Error Handling
 
 ### Graceful Degradation
+
 - Continues horse creation even if trait application fails
 - Logs errors for debugging
 - Provides default empty traits on failure
 
 ### Validation
+
 - Requires both sire and dam IDs
 - Validates mare existence
 - Handles missing data gracefully
@@ -183,18 +196,21 @@ const result = await applyEpigeneticTraitsAtBirth(breedingData);
 ## Testing
 
 ### Unit Tests
+
 - Trait condition evaluation
 - Lineage analysis logic
 - Inbreeding detection
 - Feed quality assessment
 
 ### Integration Tests
+
 - Horse creation with traits
 - Database interactions
 - Error scenarios
 - Edge cases
 
 ### Test Coverage
+
 ```bash
 npm test -- tests/atBirthTraits.test.js
 npm test -- tests/horseModelAtBirth.test.js
@@ -203,11 +219,13 @@ npm test -- tests/horseModelAtBirth.test.js
 ## Performance Considerations
 
 ### Database Queries
+
 - Optimized ancestor retrieval
 - Efficient competition history lookup
 - Minimal database calls
 
 ### Caching Opportunities
+
 - Lineage analysis results
 - Feed quality assessments
 - Trait definitions
@@ -215,6 +233,7 @@ npm test -- tests/horseModelAtBirth.test.js
 ## Future Enhancements
 
 ### Planned Features
+
 1. **Advanced Feed System Integration**
 2. **Seasonal Breeding Effects**
 3. **Bloodline Tracking**
@@ -222,6 +241,7 @@ npm test -- tests/horseModelAtBirth.test.js
 5. **Breeding Recommendations**
 
 ### Configuration Options
+
 - Trait probability adjustments
 - Condition threshold tuning
 - Custom trait definitions
@@ -230,15 +250,17 @@ npm test -- tests/horseModelAtBirth.test.js
 ## API Endpoints
 
 ### Admin Routes
+
 ```javascript
 // Get trait definitions
-GET /api/admin/traits/definitions
+GET / api / admin / traits / definitions;
 
 // Manual trait application
-POST /api/admin/traits/apply-at-birth
+POST / api / admin / traits / apply - at - birth;
 ```
 
 ### Breeding Routes
+
 ```javascript
 // Analyze breeding compatibility
 POST /api/breeding/analyze
@@ -251,12 +273,14 @@ POST /api/breeding/analyze
 ## Monitoring and Logging
 
 ### Key Metrics
+
 - Trait application rates
 - Inbreeding detection frequency
 - Feed quality distributions
 - Lineage specialization patterns
 
 ### Log Events
+
 - Trait applications
 - Breeding analysis results
 - Error conditions
@@ -265,6 +289,7 @@ POST /api/breeding/analyze
 ## Best Practices
 
 ### Breeding Strategy
+
 1. Monitor mare stress levels
 2. Invest in quality feed
 3. Avoid close inbreeding
@@ -272,6 +297,7 @@ POST /api/breeding/analyze
 5. Track trait inheritance patterns
 
 ### Development Guidelines
+
 1. Test trait conditions thoroughly
 2. Handle edge cases gracefully
 3. Log important events
@@ -281,12 +307,14 @@ POST /api/breeding/analyze
 ## Troubleshooting
 
 ### Common Issues
+
 1. **No traits applied**: Check age = 0 and parent IDs
 2. **Unexpected traits**: Verify breeding conditions
 3. **Performance issues**: Review database queries
 4. **Missing lineage**: Check ancestor data completeness
 
 ### Debug Commands
+
 ```bash
 # Test trait application
 node examples/atBirthTraitsExample.js

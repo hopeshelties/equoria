@@ -20,11 +20,16 @@ async function main() {
       if (!user.username) {
         try {
           if (typeof user.email !== 'string' || !user.email.includes('@')) {
-            throw new Error(`User email (${JSON.stringify(user.email)}) is not a string or does not contain '@'.`);
+            throw new Error(
+              `User email (${JSON.stringify(user.email)}) is not a string or does not contain '@'.`
+            );
           }
           const usernameBase = user.email.split('@')[0];
-          if (!usernameBase) { // Handles cases like "@domain.com" or an empty email part
-            throw new Error(`Username base derived from email (${JSON.stringify(user.email)}) is empty.`);
+          if (!usernameBase) {
+            // Handles cases like "@domain.com" or an empty email part
+            throw new Error(
+              `Username base derived from email (${JSON.stringify(user.email)}) is empty.`
+            );
           }
 
           let username = usernameBase;
@@ -36,8 +41,8 @@ async function main() {
             const existingUser = await prisma.user.findFirst({
               where: {
                 username,
-                NOT: { id: user.id }
-              }
+                NOT: { id: user.id },
+              },
             });
 
             if (!existingUser) {
@@ -80,9 +85,9 @@ async function main() {
           if (user.name && typeof user.name !== 'string') {
             throw new Error(`User name (${JSON.stringify(user.name)}) is not a string.`);
           }
-          updates.lastName = user.name ?
-            (user.name.split(' ').slice(1).join(' ').trim() || 'User') : // Ensure 'User' if rest of name is empty
-            `User_${user.id}`; // Fallback with consistent prefix
+          updates.lastName = user.name
+            ? user.name.split(' ').slice(1).join(' ').trim() || 'User' // Ensure 'User' if rest of name is empty
+            : `User_${user.id}`; // Fallback with consistent prefix
           // If user.name was a single word or empty string, (slice(1).join(' ').trim() || 'User') handles it.
           // If user.name was null/undefined, ternary handles it.
         } catch (error) {
@@ -96,7 +101,7 @@ async function main() {
       if (Object.keys(updates).length > 0) {
         await prisma.user.update({
           where: { id: user.id },
-          data: updates
+          data: updates,
         });
 
         // console.log(`Updated user ID ${user.id} (email: ${user.email || 'N/A'}) with fields: ${Object.keys(updates).join(', ')}`);
@@ -109,7 +114,7 @@ async function main() {
   }
 }
 
-main().catch(async(_error) => {
+main().catch(async _error => {
   // console.error('Migration failed:', _error);
   await prisma.$disconnect();
   process.exit(1);

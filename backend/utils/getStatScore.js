@@ -30,16 +30,18 @@ function getStatScore(horse, discipline) {
   const tertiaryValue = horse[tertiaryStat] || 0;
 
   // Validate stat values are numbers
-  if (typeof primaryValue !== 'number' || typeof secondaryValue !== 'number' || typeof tertiaryValue !== 'number') {
+  if (
+    typeof primaryValue !== 'number' ||
+    typeof secondaryValue !== 'number' ||
+    typeof tertiaryValue !== 'number'
+  ) {
     throw new Error('Horse stat values must be numbers');
   }
 
   // Calculate weighted score: 50% + 30% + 20%
-  const baseScore = (primaryValue * 0.5) + (secondaryValue * 0.3) + (tertiaryValue * 0.2);
+  const baseScore = primaryValue * 0.5 + secondaryValue * 0.3 + tertiaryValue * 0.2;
 
   return baseScore;
 }
 
-export {
-  getStatScore
-};
+export { getStatScore };

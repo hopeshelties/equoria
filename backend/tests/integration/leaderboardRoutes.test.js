@@ -3,7 +3,6 @@
  * Tests for leaderboard API endpoints integration with the database
  */
 
-
 import request from 'supertest';
 import express from 'express';
 import jwt from 'jsonwebtoken';
@@ -15,46 +14,47 @@ const mockPrisma = {
     findUnique: jest.fn(),
     count: jest.fn(),
     aggregate: jest.fn(),
-    findFirst: jest.fn()
+    findFirst: jest.fn(),
   },
-  user: { // Added user for consistency with other tests, might be needed by controller
+  user: {
+    // Added user for consistency with other tests, might be needed by controller
     findMany: jest.fn(),
     findUnique: jest.fn(),
     count: jest.fn(),
     aggregate: jest.fn(),
-    findFirst: jest.fn()
+    findFirst: jest.fn(),
   },
   horse: {
     findMany: jest.fn(),
     count: jest.fn(),
     aggregate: jest.fn(),
     groupBy: jest.fn(),
-    findFirst: jest.fn()
+    findFirst: jest.fn(),
   },
   competitionResult: {
     findMany: jest.fn(),
     count: jest.fn(),
     aggregate: jest.fn(),
-    groupBy: jest.fn()
+    groupBy: jest.fn(),
   },
   xpEvent: {
     findMany: jest.fn(),
     aggregate: jest.fn(),
-    groupBy: jest.fn()
+    groupBy: jest.fn(),
   },
   breed: {
-    findMany: jest.fn()
+    findMany: jest.fn(),
   },
   show: {
-    count: jest.fn()
+    count: jest.fn(),
   },
-  $disconnect: jest.fn()
+  $disconnect: jest.fn(),
 };
 
 // We need to mock dependencies before importing the controller
 jest.unstable_mockModule('../../db/index.js', () => ({
   __esModule: true,
-  default: mockPrisma
+  default: mockPrisma,
 }));
 
 // Mock logger
@@ -64,8 +64,8 @@ jest.mock('../../utils/logger.js', () => ({
     info: jest.fn(),
     error: jest.fn(),
     warn: jest.fn(),
-    debug: jest.fn()
-  }
+    debug: jest.fn(),
+  },
 }));
 
 // Now import controller after mocks are set up
@@ -76,7 +76,7 @@ import {
   getTopHorsesByPerformance,
   getTopPlayersByHorseEarnings,
   getRecentWinners,
-  getLeaderboardStats
+  getLeaderboardStats,
 } from '../../controllers/leaderboardController.js';
 
 // Create a test express app
@@ -120,15 +120,13 @@ describe('Leaderboard Routes Integration Tests', () => {
       email: 'leaderboard@test.com',
       level: 8,
       xp: 75,
-      money: 12000
+      money: 12000,
     };
 
     // Generate auth token for test player
-    testToken = jwt.sign(
-      { id: testPlayer.id, email: testPlayer.email },
-      config.jwtSecret,
-      { expiresIn: '1h' }
-    );
+    testToken = jwt.sign({ id: testPlayer.id, email: testPlayer.email }, config.jwtSecret, {
+      expiresIn: '1h',
+    });
 
     // Set up mock data
     mockPlayers = [
@@ -137,22 +135,22 @@ describe('Leaderboard Routes Integration Tests', () => {
         name: 'Top Player 1',
         level: 15,
         xp: 50,
-        money: 25000
+        money: 25000,
       },
       {
         id: 'player-id-2',
         name: 'Top Player 2',
         level: 14,
         xp: 90,
-        money: 18000
+        money: 18000,
       },
       {
         id: 'player-id-3',
         name: 'Top Player 3',
         level: 14,
         xp: 30,
-        money: 21500
-      }
+        money: 21500,
+      },
     ];
 
     mockHorses = [
@@ -161,22 +159,22 @@ describe('Leaderboard Routes Integration Tests', () => {
         name: 'Champion',
         total_earnings: 45000,
         breed: { name: 'Thoroughbred' },
-        player: { id: 'player-id-1', name: 'Top Player 1' }
+        player: { id: 'player-id-1', name: 'Top Player 1' },
       },
       {
         id: 2,
         name: 'Silver Star',
         total_earnings: 37500,
         breed: { name: 'Arabian' },
-        player: { id: 'player-id-2', name: 'Top Player 2' }
+        player: { id: 'player-id-2', name: 'Top Player 2' },
       },
       {
         id: 3,
         name: 'Gold Rush',
         total_earnings: 32000,
         breed: { name: 'Andalusian' },
-        player: { id: 'player-id-3', name: 'Top Player 3' }
-      }
+        player: { id: 'player-id-3', name: 'Top Player 3' },
+      },
     ];
 
     mockCompetitionResults = [
@@ -192,8 +190,8 @@ describe('Leaderboard Routes Integration Tests', () => {
           id: 1,
           name: 'Champion',
           breed: { name: 'Thoroughbred' },
-          player: { id: 'player-id-1', name: 'Top Player 1' }
-        }
+          player: { id: 'player-id-1', name: 'Top Player 1' },
+        },
       },
       {
         id: 2,
@@ -207,8 +205,8 @@ describe('Leaderboard Routes Integration Tests', () => {
           id: 2,
           name: 'Silver Star',
           breed: { name: 'Arabian' },
-          player: { id: 'player-id-2', name: 'Top Player 2' }
-        }
+          player: { id: 'player-id-2', name: 'Top Player 2' },
+        },
       },
       {
         id: 3,
@@ -222,19 +220,19 @@ describe('Leaderboard Routes Integration Tests', () => {
           id: 3,
           name: 'Gold Rush',
           breed: { name: 'Andalusian' },
-          player: { id: 'player-id-3', name: 'Top Player 3' }
-        }
-      }
+          player: { id: 'player-id-3', name: 'Top Player 3' },
+        },
+      },
     ];
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Clean up mocks
     jest.clearAllMocks();
   });
 
   describe('GET /api/leaderboard/players/level', () => {
-    it('should return top players by level', async() => {
+    it('should return top players by level', async () => {
       // Set up mock response
       mockPrisma.user.findMany.mockResolvedValue(mockPlayers);
 
@@ -257,21 +255,16 @@ describe('Leaderboard Routes Integration Tests', () => {
           name: true,
           level: true,
           xp: true,
-          money: true
+          money: true,
         },
-        orderBy: [
-          { level: 'desc' },
-          { xp: 'desc' }
-        ],
+        orderBy: [{ level: 'desc' }, { xp: 'desc' }],
         take: 10,
-        skip: 0
+        skip: 0,
       });
     });
 
-    it('should handle unauthorized access', async() => {
-      const response = await request(app)
-        .get('/api/leaderboard/players/level')
-        .expect(401);
+    it('should handle unauthorized access', async () => {
+      const response = await request(app).get('/api/leaderboard/players/level').expect(401);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('No auth token provided');
@@ -279,7 +272,7 @@ describe('Leaderboard Routes Integration Tests', () => {
   });
 
   describe('GET /api/leaderboard/horses/earnings', () => {
-    it('should return top horses by earnings', async() => {
+    it('should return top horses by earnings', async () => {
       // Set up mock response
       mockPrisma.horse.findMany.mockResolvedValue(mockHorses);
 
@@ -302,32 +295,32 @@ describe('Leaderboard Routes Integration Tests', () => {
           total_earnings: true,
           breed: {
             select: {
-              name: true
-            }
+              name: true,
+            },
           },
           player: {
             select: {
               id: true,
-              name: true
-            }
-          }
+              name: true,
+            },
+          },
         },
         where: {
           total_earnings: {
-            gt: 0
-          }
+            gt: 0,
+          },
         },
         orderBy: {
-          total_earnings: 'desc'
+          total_earnings: 'desc',
         },
         take: 10,
-        skip: 0
+        skip: 0,
       });
     });
   });
 
   describe('GET /api/leaderboard/recent-winners', () => {
-    it('should return recent competition winners', async() => {
+    it('should return recent competition winners', async () => {
       // Set up mock response
       mockPrisma.competitionResult.findMany.mockResolvedValue(mockCompetitionResults);
 
@@ -345,7 +338,7 @@ describe('Leaderboard Routes Integration Tests', () => {
       // Verify database was called with correct parameters
       expect(mockPrisma.competitionResult.findMany).toHaveBeenCalledWith({
         where: {
-          placement: '1st'
+          placement: '1st',
         },
         select: {
           id: true,
@@ -360,26 +353,26 @@ describe('Leaderboard Routes Integration Tests', () => {
               name: true,
               breed: {
                 select: {
-                  name: true
-                }
+                  name: true,
+                },
               },
               player: {
                 select: {
                   id: true,
-                  name: true
-                }
-              }
-            }
-          }
+                  name: true,
+                },
+              },
+            },
+          },
         },
         orderBy: {
-          runDate: 'desc'
+          runDate: 'desc',
         },
-        take: 20
+        take: 20,
       });
     });
 
-    it('should filter by discipline', async() => {
+    it('should filter by discipline', async () => {
       // Set up mock response for filtered data
       const filteredResults = [mockCompetitionResults[0]];
       mockPrisma.competitionResult.findMany.mockResolvedValue(filteredResults);
@@ -399,15 +392,15 @@ describe('Leaderboard Routes Integration Tests', () => {
         expect.objectContaining({
           where: {
             placement: '1st',
-            discipline: 'Dressage'
-          }
+            discipline: 'Dressage',
+          },
         })
       );
     });
   });
 
   describe('GET /api/leaderboard/stats', () => {
-    it('should return comprehensive leaderboard statistics', async() => {
+    it('should return comprehensive leaderboard statistics', async () => {
       // Set up mock stats
       const mockStats = {
         playerCount: 120,
@@ -415,20 +408,20 @@ describe('Leaderboard Routes Integration Tests', () => {
         showCount: 75,
         totalEarnings: 2500000,
         totalXp: 850000,
-        avgLevel: 9.2
+        avgLevel: 9.2,
       };
 
       mockPrisma.user.count.mockResolvedValue(mockStats.playerCount);
       mockPrisma.horse.count.mockResolvedValue(mockStats.horseCount);
       mockPrisma.show.count.mockResolvedValue(mockStats.showCount);
       mockPrisma.horse.aggregate.mockResolvedValue({
-        _sum: { total_earnings: mockStats.totalEarnings }
+        _sum: { total_earnings: mockStats.totalEarnings },
       });
       mockPrisma.xpEvent.aggregate.mockResolvedValue({
-        _sum: { amount: mockStats.totalXp }
+        _sum: { amount: mockStats.totalXp },
       });
       mockPrisma.user.aggregate.mockResolvedValue({
-        _avg: { level: mockStats.avgLevel }
+        _avg: { level: mockStats.avgLevel },
       });
 
       // Mock top performers
@@ -440,7 +433,7 @@ describe('Leaderboard Routes Integration Tests', () => {
       mockPrisma.competitionResult.groupBy.mockResolvedValue([
         { discipline: 'Dressage', _count: { discipline: 30 } },
         { discipline: 'Show Jumping', _count: { discipline: 25 } },
-        { discipline: 'Racing', _count: { discipline: 20 } }
+        { discipline: 'Racing', _count: { discipline: 20 } },
       ]);
 
       const response = await request(app)

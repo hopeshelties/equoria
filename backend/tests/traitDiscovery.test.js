@@ -14,7 +14,7 @@ describe('Trait Discovery System', () => {
     const mockHorse = {
       bondScore: 85,
       stressLevel: 15,
-      age: 1
+      age: 1,
     };
 
     // Test high bond condition
@@ -35,19 +35,19 @@ describe('Trait Discovery System', () => {
       { activityType: 'social_interaction' },
       { activityType: 'social_interaction' },
       { activityType: 'group_play' },
-      { activityType: 'puzzle_feeding' }
+      { activityType: 'puzzle_feeding' },
     ];
 
     // Count social activities
-    const socialCount = activities.filter(a =>
-      a.activityType === 'social_interaction' || a.activityType === 'group_play'
+    const socialCount = activities.filter(
+      a => a.activityType === 'social_interaction' || a.activityType === 'group_play'
     ).length;
 
     expect(socialCount).toBe(3);
 
     // Count mental stimulation activities
-    const mentalCount = activities.filter(a =>
-      a.activityType === 'puzzle_feeding' || a.activityType === 'obstacle_course'
+    const mentalCount = activities.filter(
+      a => a.activityType === 'puzzle_feeding' || a.activityType === 'obstacle_course'
     ).length;
 
     expect(mentalCount).toBe(1);
@@ -68,5 +68,3 @@ describe('Trait Discovery System', () => {
     expect(traitTypes).toContain('negative');
   });
 });
-
-

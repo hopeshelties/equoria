@@ -46,7 +46,7 @@ import AppError from '../errors/AppError.js';
  * @param {Object} res - Express response object
  * @param {Function} next - Express next middleware function
  */
-export const getUserProgressAPI = async(req, res, next) => {
+export const getUserProgressAPI = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = id; // UUID string, no parsing needed
@@ -56,7 +56,9 @@ export const getUserProgressAPI = async(req, res, next) => {
       return next(new AppError('User ID is required', 400));
     }
 
-    logger.info(`[userController.getUserProgressAPI] Getting comprehensive progress for user ${userId}`);
+    logger.info(
+      `[userController.getUserProgressAPI] Getting comprehensive progress for user ${userId}`
+    );
 
     // Use userModel.getUserProgress for consistent XP calculations
     const progressData = await getUserProgress(userId);
@@ -64,7 +66,7 @@ export const getUserProgressAPI = async(req, res, next) => {
     // Get additional user data for complete response
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, username: true, money: true }
+      select: { id: true, username: true, money: true },
     });
 
     if (!user) {
@@ -90,19 +92,22 @@ export const getUserProgressAPI = async(req, res, next) => {
       xpForNextLevel: progressData.xpForNextLevel,
       xpForCurrentLevel,
       progressPercentage: Math.max(0, Math.min(100, progressPercentage)),
-      totalEarnings: user.money
+      totalEarnings: user.money,
     };
 
-    logger.info(`[userController.getUserProgressAPI] Successfully retrieved progress for user ${user.username} (Level ${progressData.level}, XP: ${progressData.xp}/${progressData.xpForNextLevel}, ${progressPercentage}% progress)`);
+    logger.info(
+      `[userController.getUserProgressAPI] Successfully retrieved progress for user ${user.username} (Level ${progressData.level}, XP: ${progressData.xp}/${progressData.xpForNextLevel}, ${progressPercentage}% progress)`
+    );
 
     res.json({
       success: true,
       message: 'User progress retrieved successfully',
-      data: completeProgressData
+      data: completeProgressData,
     });
-
   } catch (error) {
-    logger.error(`[userController.getUserProgressAPI] Error getting user progress: ${error.message}`);
+    logger.error(
+      `[userController.getUserProgressAPI] Error getting user progress: ${error.message}`
+    );
     next(error); // Pass to global error handler
   }
 };
@@ -116,7 +121,7 @@ export const getUserProgressAPI = async(req, res, next) => {
  * @param {Object} res - Express response object
  * @param {Function} next - Express next middleware function
  */
-export const getDashboardData = async(req, res, next) => {
+export const getDashboardData = async (req, res, next) => {
   const { userId } = req.params; // UUID string, no parsing needed
 
   if (!userId) {
@@ -127,7 +132,7 @@ export const getDashboardData = async(req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, username: true, level: true, xp: true, money: true }
+      select: { id: true, username: true, level: true, xp: true, money: true },
     });
 
     if (!user) {
@@ -137,16 +142,21 @@ export const getDashboardData = async(req, res, next) => {
 
     // Get horse counts
     const totalHorses = await prisma.horse.count({
-      where: { userId }
+      where: { userId },
     });
 
     // Get trainable horses count
     let trainableHorsesCount = 0;
     try {
       const trainableHorsesResult = await getTrainableHorses(userId);
-      trainableHorsesCount = Array.isArray(trainableHorsesResult) ? trainableHorsesResult.length : 0;
+      trainableHorsesCount = Array.isArray(trainableHorsesResult)
+        ? trainableHorsesResult.length
+        : 0;
     } catch (error) {
-      logger.error(`[userController.getDashboardData] Error getting trainable horses for user ${userId}: ${error.message}`, { error });
+      logger.error(
+        `[userController.getDashboardData] Error getting trainable horses for user ${userId}: ${error.message}`,
+        { error }
+      );
       // Not critical, proceed with 0, but log error.
     }
 
@@ -154,25 +164,25 @@ export const getDashboardData = async(req, res, next) => {
     const upcomingShows = await prisma.show.findMany({
       where: {
         runDate: {
-          gt: new Date()
-        }
+          gt: new Date(),
+        },
       },
       orderBy: {
-        runDate: 'asc'
+        runDate: 'asc',
       },
-      take: 5
+      take: 5,
     });
 
     // Count upcoming entries (shows user's horses are entered in)
     const upcomingEntries = await prisma.competitionResult.count({
       where: {
         horse: {
-          userId
+          userId,
         },
         runDate: {
-          gt: new Date()
-        }
-      }
+          gt: new Date(),
+        },
+      },
     });
 
     const nextShowRuns = upcomingShows.slice(0, 2).map(show => show.runDate);
@@ -182,16 +192,18 @@ export const getDashboardData = async(req, res, next) => {
       const recentTraining = await prisma.trainingLog.findFirst({
         where: {
           horse: {
-            userId
-          }
+            userId,
+          },
         },
         orderBy: {
-          trainedAt: 'desc'
-        }
+          trainedAt: 'desc',
+        },
       });
       lastTrained = recentTraining?.trainedAt || null;
     } catch (error) {
-      logger.warn(`[userController.getDashboardData] Error getting recent training for user ${userId}: ${error.message}`);
+      logger.warn(
+        `[userController.getDashboardData] Error getting recent training for user ${userId}: ${error.message}`
+      );
     }
 
     let lastShowPlaced = null;
@@ -199,33 +211,35 @@ export const getDashboardData = async(req, res, next) => {
       const recentPlacement = await prisma.competitionResult.findFirst({
         where: {
           horse: {
-            userId
+            userId,
           },
           placement: {
-            in: ['1st', '2nd', '3rd']
-          }
+            in: ['1st', '2nd', '3rd'],
+          },
         },
         include: {
           horse: {
             select: {
-              name: true
-            }
-          }
+              name: true,
+            },
+          },
         },
         orderBy: {
-          runDate: 'desc'
-        }
+          runDate: 'desc',
+        },
       });
 
       if (recentPlacement) {
         lastShowPlaced = {
           horseName: recentPlacement.horse.name,
           placement: recentPlacement.placement,
-          show: recentPlacement.showName
+          show: recentPlacement.showName,
         };
       }
     } catch (error) {
-      logger.warn(`[userController.getDashboardData] Error getting recent placement for user ${userId}: ${error.message}`);
+      logger.warn(
+        `[userController.getDashboardData] Error getting recent placement for user ${userId}: ${error.message}`
+      );
     }
 
     const dashboardData = {
@@ -234,32 +248,36 @@ export const getDashboardData = async(req, res, next) => {
         username: user.username,
         level: user.level,
         xp: user.xp,
-        money: user.money
+        money: user.money,
       },
       horses: {
         total: totalHorses,
-        trainable: trainableHorsesCount
+        trainable: trainableHorsesCount,
       },
       shows: {
         upcomingEntries,
-        nextShowRuns
+        nextShowRuns,
       },
       activity: {
         lastTrained,
-        lastShowPlaced
-      }
+        lastShowPlaced,
+      },
     };
 
-    logger.info(`[userController.getDashboardData] Successfully retrieved dashboard data for user ${user.name} (${totalHorses} horses, ${trainableHorsesCount} trainable)`);
+    logger.info(
+      `[userController.getDashboardData] Successfully retrieved dashboard data for user ${user.name} (${totalHorses} horses, ${trainableHorsesCount} trainable)`
+    );
 
     res.status(200).json({
       success: true,
       message: 'Dashboard data retrieved successfully',
-      data: dashboardData
+      data: dashboardData,
     });
-
   } catch (error) {
-    logger.error(`[userController.getDashboardData] Error getting dashboard data for user ${userId}: ${error.message}`, { stack: error.stack });
+    logger.error(
+      `[userController.getDashboardData] Error getting dashboard data for user ${userId}: ${error.message}`,
+      { stack: error.stack }
+    );
     next(error);
   }
 };

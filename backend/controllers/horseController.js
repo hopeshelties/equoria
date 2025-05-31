@@ -20,7 +20,7 @@ export async function getHorseHistory(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Invalid horse ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     }
 
@@ -37,24 +37,25 @@ export async function getHorseHistory(req, res) {
       prize: result.prizeWon,
       statGain: result.statGains ? JSON.parse(result.statGains) : null,
       runDate: result.runDate,
-      createdAt: result.createdAt
+      createdAt: result.createdAt,
     }));
 
-    logger.info(`[horseController.getHorseHistory] Retrieved ${history.length} competition results for horse ${horseId}`);
+    logger.info(
+      `[horseController.getHorseHistory] Retrieved ${history.length} competition results for horse ${horseId}`
+    );
 
     res.status(200).json({
       success: true,
       message: `Found ${history.length} competition results for horse ${horseId}`,
-      data: history
+      data: history,
     });
-
   } catch (error) {
     logger.error('[horseController.getHorseHistory] Error retrieving horse history: %o', error);
 
     res.status(500).json({
       success: false,
       message: 'Internal server error while retrieving horse history',
-      data: null
+      data: null,
     });
   }
 }
@@ -75,31 +76,30 @@ export async function createFoal(req, res) {
       ownerId,
       playerId,
       stableId,
-      health_status = 'Good'
+      health_status = 'Good',
     } = req.body;
 
-    logger.info(`[horseController.createFoal] Creating foal: ${name} with sire ${sire_id} and dam ${dam_id}`);
+    logger.info(
+      `[horseController.createFoal] Creating foal: ${name} with sire ${sire_id} and dam ${dam_id}`
+    );
 
     // Validate required fields
     if (!name || !breedId || !sire_id || !dam_id) {
       return res.status(400).json({
         success: false,
         message: 'Name, breedId, sire_id, and dam_id are required for foal creation',
-        data: null
+        data: null,
       });
     }
 
     // Validate that sire and dam exist
-    const [sire, dam] = await Promise.all([
-      getHorseById(sire_id),
-      getHorseById(dam_id)
-    ]);
+    const [sire, dam] = await Promise.all([getHorseById(sire_id), getHorseById(dam_id)]);
 
     if (!sire) {
       return res.status(404).json({
         success: false,
         message: `Sire with ID ${sire_id} not found`,
-        data: null
+        data: null,
       });
     }
 
@@ -107,7 +107,7 @@ export async function createFoal(req, res) {
       return res.status(404).json({
         success: false,
         message: `Dam with ID ${dam_id} not found`,
-        data: null
+        data: null,
       });
     }
 
@@ -117,7 +117,7 @@ export async function createFoal(req, res) {
       name: dam.name,
       stress_level: dam.stress_level || 50,
       bond_score: dam.bond_score || 50,
-      health_status: dam.health_status || 'Good'
+      health_status: dam.health_status || 'Good',
     };
 
     // Gather lineage up to 3 generations
@@ -129,17 +129,21 @@ export async function createFoal(req, res) {
     // Extract stress level from mare
     const stressLevel = mare.stress_level;
 
-    logger.info(`[horseController.createFoal] Mare stress: ${stressLevel}, Feed quality: ${feedQuality}, Lineage count: ${lineage.length}`);
+    logger.info(
+      `[horseController.createFoal] Mare stress: ${stressLevel}, Feed quality: ${feedQuality}, Lineage count: ${lineage.length}`
+    );
 
     // Apply epigenetic traits at birth
     const epigeneticTraits = applyEpigeneticTraitsAtBirth({
       mare,
       lineage,
       feedQuality,
-      stressLevel
+      stressLevel,
     });
 
-    logger.info(`[horseController.createFoal] Applied epigenetic traits: ${JSON.stringify(epigeneticTraits)}`);
+    logger.info(
+      `[horseController.createFoal] Applied epigenetic traits: ${JSON.stringify(epigeneticTraits)}`
+    );
 
     // Prepare horse data for creation
     const horseData = {
@@ -157,14 +161,16 @@ export async function createFoal(req, res) {
       epigenetic_modifiers: {
         positive: epigeneticTraits.positive || [],
         negative: epigeneticTraits.negative || [],
-        hidden: [] // Hidden traits are revealed later through trait discovery
-      }
+        hidden: [], // Hidden traits are revealed later through trait discovery
+      },
     };
 
     // Create the foal
     const newFoal = await createHorse(horseData);
 
-    logger.info(`[horseController.createFoal] Successfully created foal: ${newFoal.name} (ID: ${newFoal.id})`);
+    logger.info(
+      `[horseController.createFoal] Successfully created foal: ${newFoal.name} (ID: ${newFoal.id})`
+    );
 
     res.status(201).json({
       success: true,
@@ -177,18 +183,17 @@ export async function createFoal(req, res) {
           feedQuality,
           lineageCount: lineage.length,
           sire: { id: sire.id, name: sire.name },
-          dam: { id: dam.id, name: dam.name }
-        }
-      }
+          dam: { id: dam.id, name: dam.name },
+        },
+      },
     });
-
   } catch (error) {
     logger.error(`[horseController.createFoal] Error creating foal: ${error.message}`);
 
     res.status(500).json({
       success: false,
       message: 'Internal server error during foal creation',
-      data: null
+      data: null,
     });
   }
 }
@@ -202,10 +207,15 @@ export async function createFoal(req, res) {
  */
 async function gatherLineage(sireId, damId, generations) {
   try {
-    logger.info(`[horseController.gatherLineage] Gathering lineage for sire ${sireId} and dam ${damId}, ${generations} generations`);
+    logger.info(
+      `[horseController.gatherLineage] Gathering lineage for sire ${sireId} and dam ${damId}, ${generations} generations`
+    );
 
     const ancestors = [];
-    const toProcess = [{ id: sireId, generation: 0 }, { id: damId, generation: 0 }];
+    const toProcess = [
+      { id: sireId, generation: 0 },
+      { id: damId, generation: 0 },
+    ];
     const processed = new Set();
 
     while (toProcess.length > 0) {
@@ -229,8 +239,8 @@ async function gatherLineage(sireId, damId, generations) {
           disciplineScores: true,
           // Include any discipline-related fields
           trait: true,
-          temperament: true
-        }
+          temperament: true,
+        },
       });
 
       if (horse) {
@@ -254,7 +264,7 @@ async function gatherLineage(sireId, damId, generations) {
           disciplineScores: horse.disciplineScores,
           generation,
           trait: horse.trait,
-          temperament: horse.temperament
+          temperament: horse.temperament,
         });
 
         // Add parents to processing queue for next generation
@@ -269,7 +279,6 @@ async function gatherLineage(sireId, damId, generations) {
 
     logger.info(`[horseController.gatherLineage] Gathered ${ancestors.length} ancestors`);
     return ancestors;
-
   } catch (error) {
     logger.error(`[horseController.gatherLineage] Error gathering lineage: ${error.message}`);
     return [];
@@ -287,23 +296,23 @@ function assessFeedQualityFromMare(mare) {
 
     // Assess based on health status
     switch (mare.health_status) {
-    case 'Excellent':
-      feedQuality = 90;
-      break;
-    case 'Good':
-      feedQuality = 75;
-      break;
-    case 'Fair':
-      feedQuality = 55;
-      break;
-    case 'Poor':
-      feedQuality = 30;
-      break;
-    case 'Critical':
-      feedQuality = 15;
-      break;
-    default:
-      feedQuality = 50;
+      case 'Excellent':
+        feedQuality = 90;
+        break;
+      case 'Good':
+        feedQuality = 75;
+        break;
+      case 'Fair':
+        feedQuality = 55;
+        break;
+      case 'Poor':
+        feedQuality = 30;
+        break;
+      case 'Critical':
+        feedQuality = 15;
+        break;
+      default:
+        feedQuality = 50;
     }
 
     // Adjust based on bond score (higher bond = better care)
@@ -320,12 +329,15 @@ function assessFeedQualityFromMare(mare) {
     feedQuality = Math.min(feedQuality, 100);
     feedQuality = Math.max(feedQuality, 0);
 
-    logger.info(`[horseController.assessFeedQualityFromMare] Mare ${mare.name} feed quality: ${feedQuality} (health: ${mare.health_status}, bond: ${bondScore})`);
+    logger.info(
+      `[horseController.assessFeedQualityFromMare] Mare ${mare.name} feed quality: ${feedQuality} (health: ${mare.health_status}, bond: ${bondScore})`
+    );
 
     return feedQuality;
-
   } catch (error) {
-    logger.error(`[horseController.assessFeedQualityFromMare] Error assessing feed quality: ${error.message}`);
+    logger.error(
+      `[horseController.assessFeedQualityFromMare] Error assessing feed quality: ${error.message}`
+    );
     return 50; // Default on error
   }
 }
@@ -347,7 +359,7 @@ export async function getHorseOverview(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Invalid horse ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     }
 
@@ -364,8 +376,8 @@ export async function getHorseOverview(req, res) {
         disciplineScores: true,
         total_earnings: true,
         tack: true,
-        rider: true
-      }
+        rider: true,
+      },
     });
 
     if (!horse) {
@@ -373,7 +385,7 @@ export async function getHorseOverview(req, res) {
       return res.status(404).json({
         success: false,
         message: 'Horse not found',
-        data: null
+        data: null,
       });
     }
 
@@ -392,7 +404,9 @@ export async function getHorseOverview(req, res) {
         }
       }
     } catch (error) {
-      logger.warn(`[horseController.getHorseOverview] Error calculating next training date: ${error.message}`);
+      logger.warn(
+        `[horseController.getHorseOverview] Error calculating next training date: ${error.message}`
+      );
       // Continue with null next training date
     }
 
@@ -401,27 +415,29 @@ export async function getHorseOverview(req, res) {
     try {
       const recentResult = await prisma.competitionResult.findFirst({
         where: {
-          horseId
+          horseId,
         },
         orderBy: {
-          runDate: 'desc'
+          runDate: 'desc',
         },
         select: {
           showName: true,
           placement: true,
-          runDate: true
-        }
+          runDate: true,
+        },
       });
 
       if (recentResult) {
         lastShowResult = {
           showName: recentResult.showName,
           placement: recentResult.placement,
-          runDate: recentResult.runDate.toISOString()
+          runDate: recentResult.runDate.toISOString(),
         };
       }
     } catch (error) {
-      logger.warn(`[horseController.getHorseOverview] Error getting last show result: ${error.message}`);
+      logger.warn(
+        `[horseController.getHorseOverview] Error getting last show result: ${error.message}`
+      );
       // Continue with null last show result
     }
 
@@ -436,24 +452,27 @@ export async function getHorseOverview(req, res) {
       earnings: horse.total_earnings || 0,
       lastShowResult,
       rider: horse.rider,
-      tack: horse.tack || {}
+      tack: horse.tack || {},
     };
 
-    logger.info(`[horseController.getHorseOverview] Successfully retrieved overview for horse ${horse.name} (ID: ${horseId})`);
+    logger.info(
+      `[horseController.getHorseOverview] Successfully retrieved overview for horse ${horse.name} (ID: ${horseId})`
+    );
 
     res.status(200).json({
       success: true,
       message: 'Horse overview retrieved successfully',
-      data: overviewData
+      data: overviewData,
     });
-
   } catch (error) {
-    logger.error(`[horseController.getHorseOverview] Error getting horse overview: ${error.message}`);
+    logger.error(
+      `[horseController.getHorseOverview] Error getting horse overview: ${error.message}`
+    );
 
     res.status(500).json({
       success: false,
       message: 'Internal server error while retrieving horse overview',
-      data: null
+      data: null,
     });
   }
 }

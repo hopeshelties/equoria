@@ -25,7 +25,7 @@ async function saveResult(resultData) {
     runDate,
     showName,
     prizeWon = 0,
-    statGains = null
+    statGains = null,
   } = resultData;
 
   // Validate required fields
@@ -72,21 +72,22 @@ async function saveResult(resultData) {
         runDate: new Date(runDate),
         showName,
         prizeWon: parseFloat(prizeWon),
-        statGains: statGains ? JSON.stringify(statGains) : null
+        statGains: statGains ? JSON.stringify(statGains) : null,
       },
       include: {
         horse: {
           include: {
-            breed: true
-          }
+            breed: true,
+          },
         },
-        show: true
-      }
+        show: true,
+      },
     });
 
-    logger.info(`[resultModel.saveResult] Successfully saved result for horse ${horseId} in show ${showId} with score ${score}`);
+    logger.info(
+      `[resultModel.saveResult] Successfully saved result for horse ${horseId} in show ${showId} with score ${score}`
+    );
     return result;
-
   } catch (error) {
     logger.error('[resultModel.saveResult] Database error: %o', error);
     throw new Error(`Database error in saveResult: ${error.message}`);
@@ -111,17 +112,18 @@ async function getResultsByHorse(horseId) {
       include: {
         horse: {
           include: {
-            breed: true
-          }
+            breed: true,
+          },
         },
-        show: true
+        show: true,
       },
-      orderBy: { runDate: 'desc' }
+      orderBy: { runDate: 'desc' },
     });
 
-    logger.info(`[resultModel.getResultsByHorse] Found ${results.length} results for horse ${numericId}`);
+    logger.info(
+      `[resultModel.getResultsByHorse] Found ${results.length} results for horse ${numericId}`
+    );
     return results;
-
   } catch (error) {
     logger.error('[resultModel.getResultsByHorse] Database error: %o', error);
     throw new Error(`Database error in getResultsByHorse: ${error.message}`);
@@ -146,17 +148,18 @@ async function getResultsByShow(showId) {
       include: {
         horse: {
           include: {
-            breed: true
-          }
+            breed: true,
+          },
         },
-        show: true
+        show: true,
       },
-      orderBy: { score: 'desc' }
+      orderBy: { score: 'desc' },
     });
 
-    logger.info(`[resultModel.getResultsByShow] Found ${results.length} results for show ${numericId}`);
+    logger.info(
+      `[resultModel.getResultsByShow] Found ${results.length} results for show ${numericId}`
+    );
     return results;
-
   } catch (error) {
     logger.error('[resultModel.getResultsByShow] Database error: %o', error);
     throw new Error(`Database error in getResultsByShow: ${error.message}`);
@@ -181,11 +184,11 @@ async function getResultById(resultId) {
       include: {
         horse: {
           include: {
-            breed: true
-          }
+            breed: true,
+          },
         },
-        show: true
-      }
+        show: true,
+      },
     });
 
     if (result) {
@@ -193,7 +196,6 @@ async function getResultById(resultId) {
     }
 
     return result; // Returns null if not found
-
   } catch (error) {
     logger.error('[resultModel.getResultById] Database error: %o', error);
     throw new Error(`Database error in getResultById: ${error.message}`);
@@ -221,8 +223,8 @@ async function getResultsByUser(userId, options = {}) {
 
     const whereClause = {
       horse: {
-        userId
-      }
+        userId,
+      },
     };
 
     if (discipline) {
@@ -234,23 +236,26 @@ async function getResultsByUser(userId, options = {}) {
       include: {
         horse: {
           include: {
-            breed: true
-          }
+            breed: true,
+          },
         },
-        show: true
+        show: true,
       },
       orderBy: {
-        runDate: 'desc'
+        runDate: 'desc',
       },
       take: Math.min(limit, 100),
-      skip: Math.max(offset, 0)
+      skip: Math.max(offset, 0),
     });
 
-    logger.info(`[resultModel.getResultsByUser] Retrieved ${results.length} results for user ${userId}`);
+    logger.info(
+      `[resultModel.getResultsByUser] Retrieved ${results.length} results for user ${userId}`
+    );
     return results;
-
   } catch (error) {
-    logger.error(`[resultModel.getResultsByUser] Error getting results for user ${userId}: ${error.message}`);
+    logger.error(
+      `[resultModel.getResultsByUser] Error getting results for user ${userId}: ${error.message}`
+    );
     throw error;
   }
 }
@@ -261,5 +266,5 @@ export {
   getResultsByHorse,
   getResultsByShow,
   getResultById,
-  getResultsByUser
+  getResultsByUser,
 };

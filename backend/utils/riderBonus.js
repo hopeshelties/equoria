@@ -11,7 +11,7 @@ function applyRiderModifiers(score, bonusPercent = 0, penaltyPercent = 0) {
     throw new Error('Score must be a non-negative number');
   }
 
-  if (typeof bonusPercent !== 'number' || bonusPercent < 0 || bonusPercent > 0.10) {
+  if (typeof bonusPercent !== 'number' || bonusPercent < 0 || bonusPercent > 0.1) {
     throw new Error('Bonus percent must be between 0 and 0.10 (10%)');
   }
 
@@ -23,6 +23,4 @@ function applyRiderModifiers(score, bonusPercent = 0, penaltyPercent = 0) {
   return score * (1 + bonusPercent - penaltyPercent);
 }
 
-export {
-  applyRiderModifiers
-};
+export { applyRiderModifiers };

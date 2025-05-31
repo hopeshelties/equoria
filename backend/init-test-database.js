@@ -28,7 +28,7 @@ async function initTestDatabase() {
     console.log(`Using schema: ${schemaPath}`);
     console.log(`Executing Prisma commands in: ${packagesDatabaseDir}`);
 
-    const prismaCommand = async(command) => {
+    const prismaCommand = async command => {
       return execAsync(command, { cwd: packagesDatabaseDir });
     };
 
@@ -40,7 +40,9 @@ async function initTestDatabase() {
     // 2. Apply migrations to test database
     console.log('Applying migrations to test database...');
     try {
-      await prismaCommand(`npx prisma migrate dev --name init_test_db --create-only --schema="${schemaPath}"`);
+      await prismaCommand(
+        `npx prisma migrate dev --name init_test_db --create-only --schema="${schemaPath}"`
+      );
       console.log('Migration creation step completed.');
     } catch (err) {
       console.warn('Migration creation step may have failed, continuing with reset:', err.message);

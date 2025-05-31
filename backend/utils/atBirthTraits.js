@@ -17,9 +17,9 @@ const AT_BIRTH_TRAITS = {
       description: 'Strong constitution from excellent mare care',
       conditions: {
         mareStressMax: 20,
-        feedQualityMin: 80
+        feedQualityMin: 80,
       },
-      probability: 0.25
+      probability: 0.25,
     },
     well_bred: {
       name: 'Well Bred',
@@ -27,28 +27,28 @@ const AT_BIRTH_TRAITS = {
       conditions: {
         mareStressMax: 30,
         feedQualityMin: 70,
-        noInbreeding: true
+        noInbreeding: true,
       },
-      probability: 0.20
+      probability: 0.2,
     },
     specialized_lineage: {
       name: 'Specialized Lineage',
       description: 'Genetic advantage in family discipline specialty',
       conditions: {
         disciplineSpecialization: true,
-        mareStressMax: 40
+        mareStressMax: 40,
       },
-      probability: 0.30
+      probability: 0.3,
     },
     premium_care: {
       name: 'Premium Care',
       description: 'Exceptional prenatal care benefits',
       conditions: {
         mareStressMax: 10,
-        feedQualityMin: 90
+        feedQualityMin: 90,
       },
-      probability: 0.15
-    }
+      probability: 0.15,
+    },
   },
 
   // Negative traits from poor breeding conditions
@@ -58,35 +58,35 @@ const AT_BIRTH_TRAITS = {
       description: 'Poor health from inadequate mare care',
       conditions: {
         mareStressMin: 70,
-        feedQualityMax: 40
+        feedQualityMax: 40,
       },
-      probability: 0.35
+      probability: 0.35,
     },
     inbred: {
       name: 'Inbred',
       description: 'Genetic complications from close breeding',
       conditions: {
-        inbreedingDetected: true
+        inbreedingDetected: true,
       },
-      probability: 0.60
+      probability: 0.6,
     },
     stressed_lineage: {
       name: 'Stressed Lineage',
       description: 'Inherited stress sensitivity',
       conditions: {
-        mareStressMin: 60
+        mareStressMin: 60,
       },
-      probability: 0.25
+      probability: 0.25,
     },
     poor_nutrition: {
       name: 'Poor Nutrition',
       description: 'Developmental issues from inadequate feeding',
       conditions: {
-        feedQualityMax: 30
+        feedQualityMax: 30,
       },
-      probability: 0.40
-    }
-  }
+      probability: 0.4,
+    },
+  },
 };
 
 /**
@@ -97,7 +97,9 @@ const AT_BIRTH_TRAITS = {
  */
 async function analyzeLineage(sireId, damId) {
   try {
-    logger.info(`[atBirthTraits.analyzeLineage] Analyzing lineage for sire ${sireId} and dam ${damId}`);
+    logger.info(
+      `[atBirthTraits.analyzeLineage] Analyzing lineage for sire ${sireId} and dam ${damId}`
+    );
 
     // Get ancestors up to 3 generations
     const ancestors = await getAncestors([sireId, damId], 3);
@@ -110,7 +112,7 @@ async function analyzeLineage(sireId, damId) {
       // Get competition results for this ancestor
       const results = await prisma.competitionResult.findMany({
         where: { horseId: ancestor.id },
-        select: { discipline: true, placement: true }
+        select: { discipline: true, placement: true },
       });
 
       for (const result of results) {
@@ -137,9 +139,13 @@ async function analyzeLineage(sireId, damId) {
       }
     }
 
-    logger.info(`[atBirthTraits.analyzeLineage] Found ${ancestors.length} ancestors, ${totalCompetitions} competitions`);
+    logger.info(
+      `[atBirthTraits.analyzeLineage] Found ${ancestors.length} ancestors, ${totalCompetitions} competitions`
+    );
     if (specializedDiscipline) {
-      logger.info(`[atBirthTraits.analyzeLineage] Specialized discipline detected: ${specializedDiscipline} (${(maxSpecialization * 100).toFixed(1)}%)`);
+      logger.info(
+        `[atBirthTraits.analyzeLineage] Specialized discipline detected: ${specializedDiscipline} (${(maxSpecialization * 100).toFixed(1)}%)`
+      );
     }
 
     return {
@@ -147,9 +153,8 @@ async function analyzeLineage(sireId, damId) {
       disciplineSpecialization: specializedDiscipline !== null,
       specializedDiscipline,
       specializationStrength: maxSpecialization,
-      totalCompetitions
+      totalCompetitions,
     };
-
   } catch (error) {
     logger.error(`[atBirthTraits.analyzeLineage] Error: ${error.message}`);
     return {
@@ -157,7 +162,7 @@ async function analyzeLineage(sireId, damId) {
       disciplineSpecialization: false,
       specializedDiscipline: null,
       specializationStrength: 0,
-      totalCompetitions: 0
+      totalCompetitions: 0,
     };
   }
 }
@@ -170,7 +175,9 @@ async function analyzeLineage(sireId, damId) {
  */
 async function detectInbreeding(sireId, damId) {
   try {
-    logger.info(`[atBirthTraits.detectInbreeding] Checking for inbreeding between sire ${sireId} and dam ${damId}`);
+    logger.info(
+      `[atBirthTraits.detectInbreeding] Checking for inbreeding between sire ${sireId} and dam ${damId}`
+    );
 
     // Get ancestors for both parents up to 3 generations
     const sireAncestors = await getAncestors([sireId], 3);
@@ -184,18 +191,24 @@ async function detectInbreeding(sireId, damId) {
     const commonAncestors = [];
     for (const ancestorId of sireAncestorIds) {
       if (damAncestorIds.has(ancestorId)) {
-        const ancestor = sireAncestors.find(a => a.id === ancestorId) ||
-                        damAncestors.find(a => a.id === ancestorId);
+        const ancestor =
+          sireAncestors.find(a => a.id === ancestorId) ||
+          damAncestors.find(a => a.id === ancestorId);
         commonAncestors.push(ancestor);
       }
     }
 
     const inbreedingDetected = commonAncestors.length > 0;
-    const inbreedingCoefficient = commonAncestors.length / Math.max(sireAncestors.length, damAncestors.length);
+    const inbreedingCoefficient =
+      commonAncestors.length / Math.max(sireAncestors.length, damAncestors.length);
 
-    logger.info(`[atBirthTraits.detectInbreeding] Inbreeding ${inbreedingDetected ? 'detected' : 'not detected'}`);
+    logger.info(
+      `[atBirthTraits.detectInbreeding] Inbreeding ${inbreedingDetected ? 'detected' : 'not detected'}`
+    );
     if (inbreedingDetected) {
-      logger.info(`[atBirthTraits.detectInbreeding] Common ancestors: ${commonAncestors.map(a => a.name).join(', ')}`);
+      logger.info(
+        `[atBirthTraits.detectInbreeding] Common ancestors: ${commonAncestors.map(a => a.name).join(', ')}`
+      );
     }
 
     return {
@@ -203,9 +216,8 @@ async function detectInbreeding(sireId, damId) {
       commonAncestors,
       inbreedingCoefficient,
       sireAncestorCount: sireAncestors.length,
-      damAncestorCount: damAncestors.length
+      damAncestorCount: damAncestors.length,
     };
-
   } catch (error) {
     logger.error(`[atBirthTraits.detectInbreeding] Error: ${error.message}`);
     return {
@@ -213,7 +225,7 @@ async function detectInbreeding(sireId, damId) {
       commonAncestors: [],
       inbreedingCoefficient: 0,
       sireAncestorCount: 0,
-      damAncestorCount: 0
+      damAncestorCount: 0,
     };
   }
 }
@@ -237,8 +249,8 @@ async function getAncestors(horseIds, generations) {
         id: true,
         name: true,
         sireId: true,
-        damId: true
-      }
+        damId: true,
+      },
     });
 
     const ancestors = [];
@@ -261,8 +273,8 @@ async function getAncestors(horseIds, generations) {
           id: true,
           name: true,
           sireId: true,
-          damId: true
-        }
+          damId: true,
+        },
       });
 
       ancestors.push(...parents);
@@ -273,12 +285,11 @@ async function getAncestors(horseIds, generations) {
     }
 
     // Remove duplicates
-    const uniqueAncestors = ancestors.filter((ancestor, index, self) =>
-      index === self.findIndex(a => a.id === ancestor.id)
+    const uniqueAncestors = ancestors.filter(
+      (ancestor, index, self) => index === self.findIndex(a => a.id === ancestor.id)
     );
 
     return uniqueAncestors;
-
   } catch (error) {
     logger.error(`[atBirthTraits.getAncestors] Error: ${error.message}`);
     return [];
@@ -297,7 +308,7 @@ async function assessFeedQuality(mareId) {
 
     const mare = await prisma.horse.findUnique({
       where: { id: mareId },
-      select: { healthStatus: true, totalEarnings: true }
+      select: { healthStatus: true, totalEarnings: true },
     });
 
     if (!mare) {
@@ -309,20 +320,20 @@ async function assessFeedQuality(mareId) {
     let feedQuality = 50; // Base quality
 
     switch (mare.healthStatus) {
-    case 'Excellent':
-      feedQuality = 85;
-      break;
-    case 'Good':
-      feedQuality = 70;
-      break;
-    case 'Fair':
-      feedQuality = 55;
-      break;
-    case 'Poor':
-      feedQuality = 30;
-      break;
-    default:
-      feedQuality = 50;
+      case 'Excellent':
+        feedQuality = 85;
+        break;
+      case 'Good':
+        feedQuality = 70;
+        break;
+      case 'Fair':
+        feedQuality = 55;
+        break;
+      case 'Poor':
+        feedQuality = 30;
+        break;
+      default:
+        feedQuality = 50;
     }
 
     // Adjust based on earnings (higher earnings = better care)
@@ -340,7 +351,6 @@ async function assessFeedQuality(mareId) {
 
     logger.info(`[atBirthTraits.assessFeedQuality] Mare ${mareId} feed quality: ${feedQuality}`);
     return feedQuality;
-
   } catch (error) {
     logger.error(`[atBirthTraits.assessFeedQuality] Error: ${error.message}`);
     return 50; // Default on error
@@ -360,7 +370,9 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
   try {
     const { sireId, damId, mareStress, feedQuality } = breedingData;
 
-    logger.info(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Applying at-birth traits for sire ${sireId} and dam ${damId}`);
+    logger.info(
+      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applying at-birth traits for sire ${sireId} and dam ${damId}`
+    );
 
     // Validate required parameters
     if (!sireId || !damId) {
@@ -370,17 +382,20 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
     // Get mare's current stress level
     const mare = await prisma.horse.findUnique({
       where: { id: damId },
-      select: { stressLevel: true, bondScore: true, healthStatus: true }
+      select: { stressLevel: true, bondScore: true, healthStatus: true },
     });
 
     if (!mare) {
       throw new Error(`Mare with ID ${damId} not found`);
     }
 
-    const currentMareStress = mareStress !== undefined ? mareStress : (mare.stressLevel || 50);
-    const currentFeedQuality = feedQuality !== undefined ? feedQuality : await assessFeedQuality(damId);
+    const currentMareStress = mareStress !== undefined ? mareStress : mare.stressLevel || 50;
+    const currentFeedQuality =
+      feedQuality !== undefined ? feedQuality : await assessFeedQuality(damId);
 
-    logger.info(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Mare stress: ${currentMareStress}, Feed quality: ${currentFeedQuality}`);
+    logger.info(
+      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Mare stress: ${currentMareStress}, Feed quality: ${currentFeedQuality}`
+    );
 
     // Analyze lineage for specialization
     const lineageAnalysis = await analyzeLineage(sireId, damId);
@@ -394,10 +409,12 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
       feedQuality: currentFeedQuality,
       disciplineSpecialization: lineageAnalysis.disciplineSpecialization,
       inbreedingDetected: inbreedingAnalysis.inbreedingDetected,
-      noInbreeding: !inbreedingAnalysis.inbreedingDetected
+      noInbreeding: !inbreedingAnalysis.inbreedingDetected,
     };
 
-    logger.info(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Breeding conditions: ${JSON.stringify(conditions)}`);
+    logger.info(
+      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Breeding conditions: ${JSON.stringify(conditions)}`
+    );
 
     // Evaluate traits
     const appliedTraits = { positive: [], negative: [], hidden: [] };
@@ -407,7 +424,9 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
       if (evaluateTraitConditions(traitDef.conditions, conditions)) {
         if (Math.random() < traitDef.probability) {
           appliedTraits.positive.push(traitKey);
-          logger.info(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Applied positive trait: ${traitKey}`);
+          logger.info(
+            `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applied positive trait: ${traitKey}`
+          );
         }
       }
     }
@@ -417,7 +436,9 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
       if (evaluateTraitConditions(traitDef.conditions, conditions)) {
         if (Math.random() < traitDef.probability) {
           appliedTraits.negative.push(traitKey);
-          logger.info(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Applied negative trait: ${traitKey}`);
+          logger.info(
+            `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applied negative trait: ${traitKey}`
+          );
         }
       }
     }
@@ -437,20 +458,23 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
       }
 
       appliedTraits.hidden.push(hiddenTrait);
-      logger.info(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Moved trait to hidden: ${hiddenTrait}`);
+      logger.info(
+        `[atBirthTraits.applyEpigeneticTraitsAtBirth] Moved trait to hidden: ${hiddenTrait}`
+      );
     }
 
-    logger.info(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Final traits: ${JSON.stringify(appliedTraits)}`);
+    logger.info(
+      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Final traits: ${JSON.stringify(appliedTraits)}`
+    );
 
     return {
       traits: appliedTraits,
       breedingAnalysis: {
         lineage: lineageAnalysis,
         inbreeding: inbreedingAnalysis,
-        conditions
-      }
+        conditions,
+      },
     };
-
   } catch (error) {
     logger.error(`[atBirthTraits.applyEpigeneticTraitsAtBirth] Error: ${error.message}`);
     throw error;
@@ -466,29 +490,43 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
 function evaluateTraitConditions(traitConditions, actualConditions) {
   for (const [condition, requirement] of Object.entries(traitConditions)) {
     switch (condition) {
-    case 'mareStressMax':
-      if (actualConditions.mareStress > requirement) {return false;}
-      break;
-    case 'mareStressMin':
-      if (actualConditions.mareStress < requirement) {return false;}
-      break;
-    case 'feedQualityMin':
-      if (actualConditions.feedQuality < requirement) {return false;}
-      break;
-    case 'feedQualityMax':
-      if (actualConditions.feedQuality > requirement) {return false;}
-      break;
-    case 'disciplineSpecialization':
-      if (actualConditions.disciplineSpecialization !== requirement) {return false;}
-      break;
-    case 'inbreedingDetected':
-      if (actualConditions.inbreedingDetected !== requirement) {return false;}
-      break;
-    case 'noInbreeding':
-      if (actualConditions.noInbreeding !== requirement) {return false;}
-      break;
-    default:
-      logger.warn(`[atBirthTraits.evaluateTraitConditions] Unknown condition: ${condition}`);
+      case 'mareStressMax':
+        if (actualConditions.mareStress > requirement) {
+          return false;
+        }
+        break;
+      case 'mareStressMin':
+        if (actualConditions.mareStress < requirement) {
+          return false;
+        }
+        break;
+      case 'feedQualityMin':
+        if (actualConditions.feedQuality < requirement) {
+          return false;
+        }
+        break;
+      case 'feedQualityMax':
+        if (actualConditions.feedQuality > requirement) {
+          return false;
+        }
+        break;
+      case 'disciplineSpecialization':
+        if (actualConditions.disciplineSpecialization !== requirement) {
+          return false;
+        }
+        break;
+      case 'inbreedingDetected':
+        if (actualConditions.inbreedingDetected !== requirement) {
+          return false;
+        }
+        break;
+      case 'noInbreeding':
+        if (actualConditions.noInbreeding !== requirement) {
+          return false;
+        }
+        break;
+      default:
+        logger.warn(`[atBirthTraits.evaluateTraitConditions] Unknown condition: ${condition}`);
     }
   }
   return true;
@@ -501,7 +539,9 @@ function evaluateTraitConditions(traitConditions, actualConditions) {
  */
 function checkLineageForDisciplineAffinity(ancestors) {
   try {
-    logger.info(`[atBirthTraits.checkLineageForDisciplineAffinity] Analyzing ${ancestors.length} ancestors for discipline affinity`);
+    logger.info(
+      `[atBirthTraits.checkLineageForDisciplineAffinity] Analyzing ${ancestors.length} ancestors for discipline affinity`
+    );
 
     if (!ancestors || ancestors.length === 0) {
       logger.info('[atBirthTraits.checkLineageForDisciplineAffinity] No ancestors provided');
@@ -532,11 +572,15 @@ function checkLineageForDisciplineAffinity(ancestors) {
       if (preferredDiscipline) {
         disciplineCount[preferredDiscipline] = (disciplineCount[preferredDiscipline] || 0) + 1;
         totalAncestorsWithDisciplines++;
-        logger.info(`[atBirthTraits.checkLineageForDisciplineAffinity] Ancestor ${ancestor.name || ancestor.id} prefers ${preferredDiscipline}`);
+        logger.info(
+          `[atBirthTraits.checkLineageForDisciplineAffinity] Ancestor ${ancestor.name || ancestor.id} prefers ${preferredDiscipline}`
+        );
       }
     }
 
-    logger.info(`[atBirthTraits.checkLineageForDisciplineAffinity] Discipline counts: ${JSON.stringify(disciplineCount)}`);
+    logger.info(
+      `[atBirthTraits.checkLineageForDisciplineAffinity] Discipline counts: ${JSON.stringify(disciplineCount)}`
+    );
 
     // Find the most common discipline
     let mostCommonDiscipline = null;
@@ -558,13 +602,14 @@ function checkLineageForDisciplineAffinity(ancestors) {
       count: maxCount,
       totalAnalyzed: ancestors.length,
       totalWithDisciplines: totalAncestorsWithDisciplines,
-      disciplineBreakdown: disciplineCount
+      disciplineBreakdown: disciplineCount,
     };
 
-    logger.info(`[atBirthTraits.checkLineageForDisciplineAffinity] Result: ${JSON.stringify(result)}`);
+    logger.info(
+      `[atBirthTraits.checkLineageForDisciplineAffinity] Result: ${JSON.stringify(result)}`
+    );
 
     return result;
-
   } catch (error) {
     logger.error(`[atBirthTraits.checkLineageForDisciplineAffinity] Error: ${error.message}`);
     return { affinity: false, error: error.message };
@@ -633,5 +678,5 @@ export {
   evaluateTraitConditions,
   checkLineageForDisciplineAffinity,
   getMostCommonDisciplineFromHistory,
-  getHighestScoringDiscipline
+  getHighestScoringDiscipline,
 };

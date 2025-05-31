@@ -31,7 +31,9 @@ try {
   execSync('npx prisma generate --schema=prisma/schema.prisma', { stdio: 'inherit' });
 
   console.log('🗄️ Running database migrations...');
-  execSync(`npx prisma migrate dev --name ${migrationName} --schema=prisma/schema.prisma`, { stdio: 'inherit' });
+  execSync(`npx prisma migrate dev --name ${migrationName} --schema=prisma/schema.prisma`, {
+    stdio: 'inherit',
+  });
 
   console.log('✅ Database migration completed successfully!');
 } catch (error) {

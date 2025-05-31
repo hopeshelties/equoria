@@ -16,17 +16,26 @@ export const validateStatChanges = (allowedFields = []) => {
 
     // Define stat fields that should never be directly modified by users
     const protectedStats = [
-      'precision', 'strength', 'speed', 'agility', 'endurance',
-      'intelligence', 'personality', 'total_earnings', 'level'
+      'precision',
+      'strength',
+      'speed',
+      'agility',
+      'endurance',
+      'intelligence',
+      'personality',
+      'total_earnings',
+      'level',
     ];
 
     // Check for unauthorized stat modifications
-    const unauthorizedChanges = Object.keys(body).filter(field =>
-      protectedStats.includes(field) && !allowedFields.includes(field)
+    const unauthorizedChanges = Object.keys(body).filter(
+      field => protectedStats.includes(field) && !allowedFields.includes(field)
     );
 
     if (unauthorizedChanges.length > 0) {
-      logger.warn(`[integrity] Unauthorized stat modification attempt by user ${req.user?.id}: ${unauthorizedChanges.join(', ')}`);
+      logger.warn(
+        `[integrity] Unauthorized stat modification attempt by user ${req.user?.id}: ${unauthorizedChanges.join(', ')}`
+      );
       return res.status(403).json(ApiResponse.forbidden('Direct stat modification not allowed'));
     }
 
@@ -47,19 +56,23 @@ export const validateStatChanges = (allowedFields = []) => {
 /**
  * Prevents resource duplication exploits
  */
-export const preventDuplication = (resourceType) => {
+export const preventDuplication = resourceType => {
   const recentOperations = new Map();
 
-  return async(req, res, next) => {
+  return async (req, res, next) => {
     const userId = req.user?.id;
     const operationKey = `${userId}_${resourceType}_${req.method}_${JSON.stringify(req.body)}`;
     const now = Date.now();
 
     // Check for duplicate operations within 5 seconds
     const lastOperation = recentOperations.get(operationKey);
-    if (lastOperation && (now - lastOperation) < 5000) {
-      logger.warn(`[integrity] Potential duplication exploit detected for user ${userId} on ${resourceType}`);
-      return res.status(429).json(ApiResponse.error('Operation too recent. Please wait before trying again.'));
+    if (lastOperation && now - lastOperation < 5000) {
+      logger.warn(
+        `[integrity] Potential duplication exploit detected for user ${userId} on ${resourceType}`
+      );
+      return res
+        .status(429)
+        .json(ApiResponse.error('Operation too recent. Please wait before trying again.'));
     }
 
     // Store operation timestamp
@@ -79,7 +92,7 @@ export const preventDuplication = (resourceType) => {
 /**
  * Validates breeding operations to prevent exploit breeding
  */
-export const validateBreeding = async(req, res, next) => {
+export const validateBreeding = async (req, res, next) => {
   try {
     const { sireId, damId } = req.body;
     const userId = req.user?.id;
@@ -93,17 +106,28 @@ export const validateBreeding = async(req, res, next) => {
       prisma.horse.findUnique({
         where: { id: parseInt(sireId) },
         select: {
-          id: true, sex: true, age: true, playerId: true, ownerId: true,
-          last_bred_date: true, stud_status: true, health_status: true
-        }
+          id: true,
+          sex: true,
+          age: true,
+          playerId: true,
+          ownerId: true,
+          last_bred_date: true,
+          stud_status: true,
+          health_status: true,
+        },
       }),
       prisma.horse.findUnique({
         where: { id: parseInt(damId) },
         select: {
-          id: true, sex: true, age: true, playerId: true, ownerId: true,
-          last_bred_date: true, health_status: true
-        }
-      })
+          id: true,
+          sex: true,
+          age: true,
+          playerId: true,
+          ownerId: true,
+          last_bred_date: true,
+          health_status: true,
+        },
+      }),
     ]);
 
     if (!sire || !dam) {
@@ -111,16 +135,19 @@ export const validateBreeding = async(req, res, next) => {
     }
 
     // Ownership validation
-    const userOwnsOrHasAccess = (horse) =>
-      horse.playerId === userId || horse.ownerId === userId;
+    const userOwnsOrHasAccess = horse => horse.playerId === userId || horse.ownerId === userId;
 
     if (!userOwnsOrHasAccess(sire) && sire.stud_status !== 'Public Stud') {
-      logger.warn(`[integrity] Unauthorized breeding attempt: User ${userId} tried to use sire ${sireId}`);
+      logger.warn(
+        `[integrity] Unauthorized breeding attempt: User ${userId} tried to use sire ${sireId}`
+      );
       return res.status(403).json(ApiResponse.forbidden('You do not have access to this sire'));
     }
 
     if (!userOwnsOrHasAccess(dam)) {
-      logger.warn(`[integrity] Unauthorized breeding attempt: User ${userId} tried to use dam ${damId}`);
+      logger.warn(
+        `[integrity] Unauthorized breeding attempt: User ${userId} tried to use dam ${damId}`
+      );
       return res.status(403).json(ApiResponse.forbidden('You do not own this mare'));
     }
 
@@ -135,7 +162,9 @@ export const validateBreeding = async(req, res, next) => {
 
     // Age validation
     if (sire.age < 3 || dam.age < 3) {
-      return res.status(400).json(ApiResponse.badRequest('Both horses must be at least 3 years old'));
+      return res
+        .status(400)
+        .json(ApiResponse.badRequest('Both horses must be at least 3 years old'));
     }
 
     // Health validation
@@ -164,7 +193,6 @@ export const validateBreeding = async(req, res, next) => {
     // Add validated horses to request for use in controller
     req.validatedHorses = { sire, dam };
     next();
-
   } catch (error) {
     logger.error('[integrity] Breeding validation error:', error);
     return res.status(500).json(ApiResponse.serverError('Breeding validation failed'));
@@ -174,7 +202,7 @@ export const validateBreeding = async(req, res, next) => {
 /**
  * Validates training operations to prevent training exploits
  */
-export const validateTraining = async(req, res, next) => {
+export const validateTraining = async (req, res, next) => {
   try {
     const { horseId, discipline } = req.body;
     const userId = req.user?.id;
@@ -187,9 +215,13 @@ export const validateTraining = async(req, res, next) => {
     const horse = await prisma.horse.findUnique({
       where: { id: parseInt(horseId) },
       select: {
-        id: true, age: true, playerId: true, ownerId: true,
-        health_status: true, trainingCooldown: true
-      }
+        id: true,
+        age: true,
+        playerId: true,
+        ownerId: true,
+        health_status: true,
+        trainingCooldown: true,
+      },
     });
 
     if (!horse) {
@@ -198,13 +230,17 @@ export const validateTraining = async(req, res, next) => {
 
     // Ownership validation
     if (horse.playerId !== userId && horse.ownerId !== userId) {
-      logger.warn(`[integrity] Unauthorized training attempt: User ${userId} tried to train horse ${horseId}`);
+      logger.warn(
+        `[integrity] Unauthorized training attempt: User ${userId} tried to train horse ${horseId}`
+      );
       return res.status(403).json(ApiResponse.forbidden('You do not own this horse'));
     }
 
     // Age validation
     if (horse.age < 3) {
-      return res.status(400).json(ApiResponse.badRequest('Horse must be at least 3 years old to train'));
+      return res
+        .status(400)
+        .json(ApiResponse.badRequest('Horse must be at least 3 years old to train'));
     }
 
     // Health validation
@@ -218,7 +254,11 @@ export const validateTraining = async(req, res, next) => {
       const cooldownEnd = new Date(horse.trainingCooldown);
       if (now < cooldownEnd) {
         const remainingTime = Math.ceil((cooldownEnd - now) / (1000 * 60 * 60)); // hours
-        return res.status(400).json(ApiResponse.badRequest(`Horse is in training cooldown for ${remainingTime} more hours`));
+        return res
+          .status(400)
+          .json(
+            ApiResponse.badRequest(`Horse is in training cooldown for ${remainingTime} more hours`)
+          );
       }
     }
 
@@ -229,7 +269,6 @@ export const validateTraining = async(req, res, next) => {
     }
 
     next();
-
   } catch (error) {
     logger.error('[integrity] Training validation error:', error);
     return res.status(500).json(ApiResponse.serverError('Training validation failed'));
@@ -239,8 +278,8 @@ export const validateTraining = async(req, res, next) => {
 /**
  * Validates financial transactions to prevent money exploits
  */
-export const validateTransaction = (transactionType) => {
-  return async(req, res, next) => {
+export const validateTransaction = transactionType => {
+  return async (req, res, next) => {
     try {
       const { amount, targetUserId } = req.body;
       const userId = req.user?.id;
@@ -252,7 +291,7 @@ export const validateTransaction = (transactionType) => {
       // Fetch user's current balance
       const user = await prisma.player.findUnique({
         where: { id: userId },
-        select: { money: true }
+        select: { money: true },
       });
 
       if (!user) {
@@ -267,7 +306,9 @@ export const validateTransaction = (transactionType) => {
 
         // Additional validation for large transactions
         if (amount > 100000) {
-          logger.warn(`[integrity] Large transaction attempt: User ${userId} trying to ${transactionType} ${amount}`);
+          logger.warn(
+            `[integrity] Large transaction attempt: User ${userId} trying to ${transactionType} ${amount}`
+          );
           return res.status(400).json(ApiResponse.badRequest('Transaction amount exceeds limit'));
         }
       }
@@ -280,7 +321,7 @@ export const validateTransaction = (transactionType) => {
 
         const targetUser = await prisma.player.findUnique({
           where: { id: targetUserId },
-          select: { id: true }
+          select: { id: true },
         });
 
         if (!targetUser) {
@@ -289,7 +330,6 @@ export const validateTransaction = (transactionType) => {
       }
 
       next();
-
     } catch (error) {
       logger.error('[integrity] Transaction validation error:', error);
       return res.status(500).json(ApiResponse.serverError('Transaction validation failed'));
@@ -310,7 +350,9 @@ export const validateTimestamp = (req, res, next) => {
 
     // Allow 5 minutes of clock drift
     if (timeDiff > 5 * 60 * 1000) {
-      logger.warn(`[integrity] Timestamp manipulation detected: User ${req.user?.id}, diff: ${timeDiff}ms`);
+      logger.warn(
+        `[integrity] Timestamp manipulation detected: User ${req.user?.id}, diff: ${timeDiff}ms`
+      );
       return res.status(400).json(ApiResponse.badRequest('Invalid timestamp'));
     }
   }
@@ -326,5 +368,5 @@ export default {
   validateBreeding,
   validateTraining,
   validateTransaction,
-  validateTimestamp
+  validateTimestamp,
 };

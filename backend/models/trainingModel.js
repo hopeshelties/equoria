@@ -26,21 +26,24 @@ async function logTrainingSession({ horseId, discipline }) {
       throw new Error('Horse ID must be a positive integer');
     }
 
-    logger.info(`[trainingModel.logTrainingSession] Logging training session for horse ${parsedHorseId} in ${discipline}`);
+    logger.info(
+      `[trainingModel.logTrainingSession] Logging training session for horse ${parsedHorseId} in ${discipline}`
+    );
 
     // Insert training log record using Prisma
     const trainingLog = await prisma.trainingLog.create({
       data: {
         horseId: parsedHorseId,
         discipline,
-        trainedAt: new Date()
-      }
+        trainedAt: new Date(),
+      },
     });
 
-    logger.info(`[trainingModel.logTrainingSession] Successfully logged training session: ID ${trainingLog.id}`);
+    logger.info(
+      `[trainingModel.logTrainingSession] Successfully logged training session: ID ${trainingLog.id}`
+    );
 
     return trainingLog;
-
   } catch (error) {
     logger.error(`[trainingModel.logTrainingSession] Database error: ${error.message}`);
     throw new Error(`Database error: ${error.message}`);
@@ -67,29 +70,34 @@ async function getLastTrainingDate(horseId, discipline) {
       throw new Error('Discipline is required');
     }
 
-    logger.info(`[trainingModel.getLastTrainingDate] Checking last training date for horse ${parsedHorseId} in ${discipline}`);
+    logger.info(
+      `[trainingModel.getLastTrainingDate] Checking last training date for horse ${parsedHorseId} in ${discipline}`
+    );
 
     // Query for most recent training date using Prisma
     const trainingLog = await prisma.trainingLog.findFirst({
       where: {
         horseId: parsedHorseId,
-        discipline
+        discipline,
       },
       orderBy: {
-        trainedAt: 'desc'
-      }
+        trainedAt: 'desc',
+      },
     });
 
     if (!trainingLog) {
-      logger.info(`[trainingModel.getLastTrainingDate] No training records found for horse ${parsedHorseId} in ${discipline}`);
+      logger.info(
+        `[trainingModel.getLastTrainingDate] No training records found for horse ${parsedHorseId} in ${discipline}`
+      );
       return null;
     }
 
     const lastTrainingDate = trainingLog.trainedAt;
-    logger.info(`[trainingModel.getLastTrainingDate] Last training date for horse ${parsedHorseId} in ${discipline}: ${lastTrainingDate}`);
+    logger.info(
+      `[trainingModel.getLastTrainingDate] Last training date for horse ${parsedHorseId} in ${discipline}: ${lastTrainingDate}`
+    );
 
     return lastTrainingDate;
-
   } catch (error) {
     logger.error(`[trainingModel.getLastTrainingDate] Database error: ${error.message}`);
     throw new Error(`Database error: ${error.message}`);
@@ -115,7 +123,7 @@ async function getHorseAge(horseId) {
     // Query for horse age using Prisma
     const horse = await prisma.horse.findUnique({
       where: { id: parsedHorseId },
-      select: { age: true }
+      select: { age: true },
     });
 
     if (!horse) {
@@ -127,7 +135,6 @@ async function getHorseAge(horseId) {
     logger.info(`[trainingModel.getHorseAge] Horse ${parsedHorseId} is ${age} years old`);
 
     return age;
-
   } catch (error) {
     logger.error(`[trainingModel.getHorseAge] Database error: ${error.message}`);
     throw new Error(`Database error: ${error.message}`);
@@ -148,37 +155,37 @@ async function getAnyRecentTraining(horseId) {
       throw new Error('Horse ID must be a positive integer');
     }
 
-    logger.info(`[trainingModel.getAnyRecentTraining] Checking most recent training date for horse ${parsedHorseId} across all disciplines`);
+    logger.info(
+      `[trainingModel.getAnyRecentTraining] Checking most recent training date for horse ${parsedHorseId} across all disciplines`
+    );
 
     // Query for most recent training date across all disciplines using Prisma
     const trainingLog = await prisma.trainingLog.findFirst({
       where: {
-        horseId: parsedHorseId
+        horseId: parsedHorseId,
       },
       orderBy: {
-        trainedAt: 'desc'
-      }
+        trainedAt: 'desc',
+      },
     });
 
     if (!trainingLog) {
-      logger.info(`[trainingModel.getAnyRecentTraining] No training records found for horse ${parsedHorseId}`);
+      logger.info(
+        `[trainingModel.getAnyRecentTraining] No training records found for horse ${parsedHorseId}`
+      );
       return null;
     }
 
     const lastTrainingDate = trainingLog.trainedAt;
-    logger.info(`[trainingModel.getAnyRecentTraining] Most recent training date for horse ${parsedHorseId}: ${lastTrainingDate} (discipline: ${trainingLog.discipline})`);
+    logger.info(
+      `[trainingModel.getAnyRecentTraining] Most recent training date for horse ${parsedHorseId}: ${lastTrainingDate} (discipline: ${trainingLog.discipline})`
+    );
 
     return lastTrainingDate;
-
   } catch (error) {
     logger.error(`[trainingModel.getAnyRecentTraining] Database error: ${error.message}`);
     throw new Error(`Database error: ${error.message}`);
   }
 }
 
-export {
-  logTrainingSession,
-  getLastTrainingDate,
-  getHorseAge,
-  getAnyRecentTraining
-};
+export { logTrainingSession, getLastTrainingDate, getHorseAge, getAnyRecentTraining };

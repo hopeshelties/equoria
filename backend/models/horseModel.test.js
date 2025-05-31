@@ -16,30 +16,30 @@ const mockPrisma = {
   horse: {
     create: jest.fn(),
     findUnique: jest.fn(),
-    findMany: jest.fn()
+    findMany: jest.fn(),
   },
   competitionResult: {
-    findMany: jest.fn()
-  }
+    findMany: jest.fn(),
+  },
 };
 
 const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
-  warn: jest.fn()
+  warn: jest.fn(),
 };
 
 const mockAtBirthTraits = {
-  applyEpigeneticTraitsAtBirth: jest.fn()
+  applyEpigeneticTraitsAtBirth: jest.fn(),
 };
 
 // Mock the imports
 jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
-  default: mockPrisma
+  default: mockPrisma,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../utils/atBirthTraits.js'), () => mockAtBirthTraits);
@@ -62,31 +62,31 @@ describe('Horse Model At-Birth Traits Integration', () => {
       epigeneticModifiers: {
         positive: ['hardy'],
         negative: [],
-        hidden: []
+        hidden: [],
       },
-      breed: { id: 1, name: 'Thoroughbred' }
+      breed: { id: 1, name: 'Thoroughbred' },
     };
 
-    it('should apply at-birth traits for newborn with parents', async() => {
+    it('should apply at-birth traits for newborn with parents', async () => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
         sireId: 10,
-        damId: 20
+        damId: 20,
       };
 
       const mockAtBirthResult = {
         traits: {
           positive: ['hardy'],
           negative: [],
-          hidden: []
+          hidden: [],
         },
         breedingAnalysis: {
           lineage: { disciplineSpecialization: false },
           inbreeding: { inbreedingDetected: false },
-          conditions: { mareStress: 25, feedQuality: 70 }
-        }
+          conditions: { mareStress: 25, feedQuality: 70 },
+        },
       };
 
       mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockResolvedValue(mockAtBirthResult);
@@ -98,7 +98,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
         sireId: 10,
         damId: 20,
         mareStress: undefined,
-        feedQuality: undefined
+        feedQuality: undefined,
       });
 
       expect(mockPrisma.horse.create).toHaveBeenCalledWith({
@@ -111,20 +111,20 @@ describe('Horse Model At-Birth Traits Integration', () => {
           epigeneticModifiers: {
             positive: ['hardy'],
             negative: [],
-            hidden: []
-          }
+            hidden: [],
+          },
         }),
         include: {
           breed: true,
           user: true,
-          stable: true
-        }
+          stable: true,
+        },
       });
 
       expect(result).toEqual(mockCreatedHorse);
     });
 
-    it('should pass custom mare stress and feed quality', async() => {
+    it('should pass custom mare stress and feed quality', async () => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -132,26 +132,26 @@ describe('Horse Model At-Birth Traits Integration', () => {
         sireId: 10,
         damId: 20,
         mareStress: 15,
-        feedQuality: 85
+        feedQuality: 85,
       };
 
       const mockAtBirthResult = {
         traits: {
           positive: ['hardy', 'premium_care'],
           negative: [],
-          hidden: []
+          hidden: [],
         },
         breedingAnalysis: {
           lineage: { disciplineSpecialization: false },
           inbreeding: { inbreedingDetected: false },
-          conditions: { mareStress: 15, feedQuality: 85 }
-        }
+          conditions: { mareStress: 15, feedQuality: 85 },
+        },
       };
 
       mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockResolvedValue(mockAtBirthResult);
       mockPrisma.horse.create.mockResolvedValue({
         ...mockCreatedHorse,
-        epigeneticModifiers: mockAtBirthResult.traits
+        epigeneticModifiers: mockAtBirthResult.traits,
       });
 
       await createHorse(horseData);
@@ -160,11 +160,11 @@ describe('Horse Model At-Birth Traits Integration', () => {
         sireId: 10,
         damId: 20,
         mareStress: 15,
-        feedQuality: 85
+        feedQuality: 85,
       });
     });
 
-    it('should merge at-birth traits with existing traits', async() => {
+    it('should merge at-birth traits with existing traits', async () => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
@@ -174,17 +174,17 @@ describe('Horse Model At-Birth Traits Integration', () => {
         epigeneticModifiers: {
           positive: ['existing_trait'],
           negative: ['existing_negative'],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const mockAtBirthResult = {
         traits: {
           positive: ['hardy'],
           negative: [],
-          hidden: ['hidden_trait']
+          hidden: ['hidden_trait'],
         },
-        breedingAnalysis: {}
+        breedingAnalysis: {},
       };
 
       mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockResolvedValue(mockAtBirthResult);
@@ -197,26 +197,26 @@ describe('Horse Model At-Birth Traits Integration', () => {
           epigeneticModifiers: {
             positive: ['existing_trait', 'hardy'],
             negative: ['existing_negative'],
-            hidden: ['hidden_trait']
-          }
+            hidden: ['hidden_trait'],
+          },
         }),
-        include: expect.any(Object)
+        include: expect.any(Object),
       });
     });
 
-    it('should not apply at-birth traits for older horses', async() => {
+    it('should not apply at-birth traits for older horses', async () => {
       const horseData = {
         name: 'Adult Horse',
         age: 5,
         breedId: 1,
         sireId: 10,
-        damId: 20
+        damId: 20,
       };
 
       mockPrisma.horse.create.mockResolvedValue({
         ...mockCreatedHorse,
         name: 'Adult Horse',
-        age: 5
+        age: 5,
       });
 
       await createHorse(horseData);
@@ -225,24 +225,24 @@ describe('Horse Model At-Birth Traits Integration', () => {
 
       expect(mockPrisma.horse.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          epigeneticModifiers: { positive: [], negative: [], hidden: [] }
+          epigeneticModifiers: { positive: [], negative: [], hidden: [] },
         }),
-        include: expect.any(Object)
+        include: expect.any(Object),
       });
     });
 
-    it('should not apply at-birth traits for horses without parents', async() => {
+    it('should not apply at-birth traits for horses without parents', async () => {
       const horseData = {
         name: 'Foundling Horse',
         age: 0,
-        breedId: 1
+        breedId: 1,
       };
 
       mockPrisma.horse.create.mockResolvedValue({
         ...mockCreatedHorse,
         name: 'Foundling Horse',
         sireId: null,
-        damId: null
+        damId: null,
       });
 
       await createHorse(horseData);
@@ -250,16 +250,18 @@ describe('Horse Model At-Birth Traits Integration', () => {
       expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
     });
 
-    it('should continue horse creation even if at-birth trait application fails', async() => {
+    it('should continue horse creation even if at-birth trait application fails', async () => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
         sireId: 10,
-        damId: 20
+        damId: 20,
       };
 
-      mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockRejectedValue(new Error('Trait application failed'));
+      mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockRejectedValue(
+        new Error('Trait application failed')
+      );
       mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
 
       const result = await createHorse(horseData);
@@ -272,12 +274,12 @@ describe('Horse Model At-Birth Traits Integration', () => {
       );
     });
 
-    it('should handle missing sire_id gracefully', async() => {
+    it('should handle missing sire_id gracefully', async () => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
-        damId: 20
+        damId: 20,
       };
 
       mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
@@ -287,47 +289,47 @@ describe('Horse Model At-Birth Traits Integration', () => {
       expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
     });
 
-    it('should handle missing dam_id gracefully', async() => {
-      const horseData = {
-        name: 'Test Foal',
-        age: 0,
-        breedId: 1,
-        sireId: 10
-      };
-
-      mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
-
-      await createHorse(horseData);
-
-      expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
-    });
-
-    it('should log breeding analysis information', async() => {
+    it('should handle missing dam_id gracefully', async () => {
       const horseData = {
         name: 'Test Foal',
         age: 0,
         breedId: 1,
         sireId: 10,
-        damId: 20
+      };
+
+      mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
+
+      await createHorse(horseData);
+
+      expect(mockAtBirthTraits.applyEpigeneticTraitsAtBirth).not.toHaveBeenCalled();
+    });
+
+    it('should log breeding analysis information', async () => {
+      const horseData = {
+        name: 'Test Foal',
+        age: 0,
+        breedId: 1,
+        sireId: 10,
+        damId: 20,
       };
 
       const mockAtBirthResult = {
         traits: {
           positive: ['specialized_lineage'],
           negative: ['inbred'],
-          hidden: []
+          hidden: [],
         },
         breedingAnalysis: {
           lineage: {
             disciplineSpecialization: true,
-            specializedDiscipline: 'Racing'
+            specializedDiscipline: 'Racing',
           },
           inbreeding: {
             inbreedingDetected: true,
-            commonAncestors: [{ id: 100, name: 'CommonAncestor' }]
+            commonAncestors: [{ id: 100, name: 'CommonAncestor' }],
           },
-          conditions: { mareStress: 25, feedQuality: 70 }
-        }
+          conditions: { mareStress: 25, feedQuality: 70 },
+        },
       };
 
       mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockResolvedValue(mockAtBirthResult);
@@ -336,7 +338,9 @@ describe('Horse Model At-Birth Traits Integration', () => {
       await createHorse(horseData);
 
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Breeding analysis - Lineage specialization: true, Inbreeding: true')
+        expect.stringContaining(
+          'Breeding analysis - Lineage specialization: true, Inbreeding: true'
+        )
       );
     });
   });

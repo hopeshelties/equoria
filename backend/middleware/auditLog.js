@@ -10,7 +10,7 @@ import prisma from '../db/index.js';
  * Comprehensive audit logging for sensitive operations
  */
 export const auditLog = (operationType, sensitivityLevel = 'medium') => {
-  return async(req, res, next) => {
+  return async (req, res, next) => {
     // Skip audit logging in test environment
     if (process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined) {
       return next();
@@ -20,7 +20,7 @@ export const auditLog = (operationType, sensitivityLevel = 'medium') => {
     const originalSend = res.send;
 
     // Capture response data
-    res.send = function(data) {
+    res.send = function (data) {
       const endTime = Date.now();
       const duration = endTime - startTime;
 
@@ -56,7 +56,7 @@ async function logOperation(req, res, operationType, sensitivityLevel, duration,
       requestBody: sanitizeLogData(req.body),
       requestParams: req.params,
       requestQuery: req.query,
-      success: res.statusCode < 400
+      success: res.statusCode < 400,
     };
 
     // Add response data for failed operations
@@ -74,7 +74,7 @@ async function logOperation(req, res, operationType, sensitivityLevel, duration,
         method: logEntry.method,
         path: logEntry.path,
         statusCode: logEntry.statusCode,
-        duration: logEntry.duration
+        duration: logEntry.duration,
       });
     }
 
@@ -85,7 +85,6 @@ async function logOperation(req, res, operationType, sensitivityLevel, duration,
 
     // Check for suspicious patterns
     await checkSuspiciousActivity(logEntry);
-
   } catch (error) {
     logger.error('[audit] Failed to log operation:', error);
   }
@@ -115,7 +114,6 @@ async function storeAuditLog(logEntry) {
     //     timestamp: logEntry.timestamp
     //   }
     // });
-
   } catch (error) {
     logger.error('[audit] Failed to store audit log:', error);
   }
@@ -129,7 +127,9 @@ const suspiciousActivityCache = new Map();
 async function checkSuspiciousActivity(logEntry) {
   try {
     const { userId } = logEntry;
-    if (!userId) {return;}
+    if (!userId) {
+      return;
+    }
 
     const now = Date.now();
     const windowMs = 5 * 60 * 1000; // 5 minutes
@@ -146,7 +146,7 @@ async function checkSuspiciousActivity(logEntry) {
       operationType: logEntry.operationType,
       statusCode: logEntry.statusCode,
       ip: logEntry.ip,
-      path: logEntry.path
+      path: logEntry.path,
     });
 
     // Update cache
@@ -160,13 +160,12 @@ async function checkSuspiciousActivity(logEntry) {
         userId,
         userEmail: logEntry.userEmail,
         patterns: suspiciousPatterns,
-        recentActivity: userActivity.slice(-10) // Last 10 activities
+        recentActivity: userActivity.slice(-10), // Last 10 activities
       });
 
       // TODO: Implement alerting system
       // await sendSecurityAlert(userId, suspiciousPatterns);
     }
-
   } catch (error) {
     logger.error('[audit] Failed to check suspicious activity:', error);
   }
@@ -185,19 +184,19 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
     patterns.push({
       type: 'excessive_failures',
       count: failedRequests.length,
-      severity: 'high'
+      severity: 'high',
     });
   }
 
   // Pattern 2: Rapid-fire requests (potential automation)
-  const rapidRequests = userActivity.filter(entry =>
-    now - entry.timestamp < 30000 // Last 30 seconds
+  const rapidRequests = userActivity.filter(
+    entry => now - entry.timestamp < 30000 // Last 30 seconds
   );
   if (rapidRequests.length >= 20) {
     patterns.push({
       type: 'rapid_fire_requests',
       count: rapidRequests.length,
-      severity: 'medium'
+      severity: 'medium',
     });
   }
 
@@ -208,7 +207,7 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
       type: 'multiple_ip_addresses',
       ipCount: uniqueIPs.size,
       ips: Array.from(uniqueIPs),
-      severity: 'high'
+      severity: 'high',
     });
   }
 
@@ -220,23 +219,28 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
     patterns.push({
       type: 'excessive_sensitive_operations',
       count: sensitiveOps.length,
-      severity: 'medium'
+      severity: 'medium',
     });
   }
 
   // Pattern 5: Error followed by success (potential exploit attempt)
   const recentEntries = userActivity.slice(-5);
   const hasErrorThenSuccess = recentEntries.some((entry, index) => {
-    if (index === 0) {return false;}
+    if (index === 0) {
+      return false;
+    }
     const prevEntry = recentEntries[index - 1];
-    return prevEntry.statusCode >= 400 && entry.statusCode < 400 &&
-           prevEntry.operationType === entry.operationType;
+    return (
+      prevEntry.statusCode >= 400 &&
+      entry.statusCode < 400 &&
+      prevEntry.operationType === entry.operationType
+    );
   });
 
   if (hasErrorThenSuccess) {
     patterns.push({
       type: 'error_then_success_pattern',
-      severity: 'high'
+      severity: 'high',
     });
   }
 
@@ -247,11 +251,23 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
  * Sanitize sensitive data for logging
  */
 function sanitizeLogData(data) {
-  if (!data || typeof data !== 'object') {return data;}
+  if (!data || typeof data !== 'object') {
+    return data;
+  }
 
   const sensitiveFields = [
-    'password', 'token', 'secret', 'key', 'auth', 'credential',
-    'ssn', 'social', 'credit', 'card', 'cvv', 'pin'
+    'password',
+    'token',
+    'secret',
+    'key',
+    'auth',
+    'credential',
+    'ssn',
+    'social',
+    'credit',
+    'card',
+    'cvv',
+    'pin',
   ];
 
   const sanitized = { ...data };
@@ -279,22 +295,23 @@ export const auditAdmin = auditLog('admin_operation', 'high');
 /**
  * Clean up old cache entries periodically
  */
-setInterval(() => {
-  const now = Date.now();
-  const maxAge = 10 * 60 * 1000; // 10 minutes
+setInterval(
+  () => {
+    const now = Date.now();
+    const maxAge = 10 * 60 * 1000; // 10 minutes
 
-  for (const [userId, activities] of suspiciousActivityCache.entries()) {
-    const recentActivities = activities.filter(activity =>
-      now - activity.timestamp < maxAge
-    );
+    for (const [userId, activities] of suspiciousActivityCache.entries()) {
+      const recentActivities = activities.filter(activity => now - activity.timestamp < maxAge);
 
-    if (recentActivities.length === 0) {
-      suspiciousActivityCache.delete(userId);
-    } else {
-      suspiciousActivityCache.set(userId, recentActivities);
+      if (recentActivities.length === 0) {
+        suspiciousActivityCache.delete(userId);
+      } else {
+        suspiciousActivityCache.set(userId, recentActivities);
+      }
     }
-  }
-}, 5 * 60 * 1000); // Clean every 5 minutes
+  },
+  5 * 60 * 1000
+); // Clean every 5 minutes
 
 export default {
   auditLog,
@@ -303,5 +320,5 @@ export default {
   auditTransaction,
   auditStatModification,
   auditAuth,
-  auditAdmin
+  auditAdmin,
 };

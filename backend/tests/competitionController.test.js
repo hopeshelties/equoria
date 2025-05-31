@@ -39,17 +39,17 @@ jest.unstable_mockModule('../models/userModel.js', () => ({
     currentXP: 120,
     currentLevel: 2,
     leveledUp: false,
-    levelsGained: 0
-  })
+    levelsGained: 0,
+  }),
 }));
 
 jest.unstable_mockModule('../models/horseModel.js', () => ({
-  getHorseById: jest.fn((id) =>
+  getHorseById: jest.fn(id =>
     Promise.resolve({
       id,
       name: `Horse ${id}`,
       ownerId: `user-${id}`, // Required for XP to be awarded
-      riderId: 'rider-1',    // Required to enter
+      riderId: 'rider-1', // Required to enter
       stress_level: 0,
       health: 'Good',
       tack: {},
@@ -61,17 +61,19 @@ jest.unstable_mockModule('../models/horseModel.js', () => ({
       agility: 10,
       coordination: 10,
       boldness: 10,
-      balance: 10
+      balance: 10,
     })
-  )
+  ),
 }));
 
 let addXpToUser;
 let enterAndRunShow;
 
-beforeEach(async() => {
+beforeEach(async () => {
   const { addXpToUser: importedAddXpToUser } = await import('../models/userModel.js');
-  const { enterAndRunShow: importedEnterAndRunShow } = await import('../controllers/competitionController.js');
+  const { enterAndRunShow: importedEnterAndRunShow } = await import(
+    '../controllers/competitionController.js'
+  );
   addXpToUser = importedAddXpToUser;
   enterAndRunShow = importedEnterAndRunShow;
 });
@@ -82,7 +84,7 @@ afterEach(() => {
 
 describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
   describe('enterAndRunShow', () => {
-    it('should successfully enter and run show with 5 horses and award XP to top 3', async() => {
+    it('should successfully enter and run show with 5 horses and award XP to top 3', async () => {
       const horseIds = ['h1', 'h2', 'h3', 'h4', 'h5'];
 
       const show = {
@@ -92,7 +94,7 @@ describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
         runDate: new Date(),
         discipline: 'Dressage',
         entryFee: 10,
-        hostUserId: 'user-host'
+        hostUserId: 'user-host',
       };
 
       const result = await enterAndRunShow(horseIds, show);
@@ -102,7 +104,7 @@ describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
       expect(addXpToUser).toHaveBeenCalledTimes(3); // Only top 3 get XP
     });
 
-    it('should award correct XP amounts for show placements', async() => {
+    it('should award correct XP amounts for show placements', async () => {
       const horseIds = ['h1', 'h2', 'h3'];
 
       const show = {
@@ -112,7 +114,7 @@ describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
         runDate: new Date(),
         discipline: 'Jumping',
         entryFee: 10,
-        hostUserId: 'user-host'
+        hostUserId: 'user-host',
       };
 
       const result = await enterAndRunShow(horseIds, show);
@@ -120,15 +122,15 @@ describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
       expect(result.summary.xpEvents.length).toBe(3);
       expect(addXpToUser).toHaveBeenCalledTimes(3);
 
-      result.summary.xpEvents.forEach((event) => {
+      result.summary.xpEvents.forEach(event => {
         expect(event).toHaveProperty('horseId');
         expect(event).toHaveProperty('xp');
         expect(event.xp).toBeGreaterThan(0);
       });
     });
 
-    it('should not award XP for horses that do not place (4th or lower)', async() => {
-      const highStatHorse = (id) => ({
+    it('should not award XP for horses that do not place (4th or lower)', async () => {
+      const highStatHorse = id => ({
         id,
         name: `Horse ${id}`,
         ownerId: `user-${id}`,
@@ -144,11 +146,11 @@ describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
         agility: 20,
         coordination: 20,
         boldness: 20,
-        balance: 20
+        balance: 20,
       });
 
       jest.unstable_mockModule('../models/horseModel.js', () => ({
-        getHorseById: jest.fn((id) => {
+        getHorseById: jest.fn(id => {
           if (['h1', 'h2', 'h3'].includes(id)) {
             return Promise.resolve(highStatHorse(id));
           }
@@ -168,12 +170,14 @@ describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
             agility: 5,
             coordination: 5,
             boldness: 5,
-            balance: 5
+            balance: 5,
           });
-        })
+        }),
       }));
 
-      const { enterAndRunShow: updatedEnterAndRunShow } = await import('../controllers/competitionController.js');
+      const { enterAndRunShow: updatedEnterAndRunShow } = await import(
+        '../controllers/competitionController.js'
+      );
       enterAndRunShow = updatedEnterAndRunShow;
 
       const horseIds = ['h1', 'h2', 'h3', 'h4', 'h5'];
@@ -185,7 +189,7 @@ describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
         runDate: new Date(),
         discipline: 'Endurance',
         entryFee: 10,
-        hostUserId: 'user-host'
+        hostUserId: 'user-host',
       };
 
       const result = await enterAndRunShow(horseIds, show);
@@ -193,7 +197,7 @@ describe('🏆 UNIT: Competition Controller - Show Entry & Execution', () => {
       expect(result.summary.xpEvents.length).toBe(3);
       expect(addXpToUser).toHaveBeenCalledTimes(3);
 
-      const awardedHorseIds = result.summary.xpEvents.map((e) => e.horseId);
+      const awardedHorseIds = result.summary.xpEvents.map(e => e.horseId);
       expect(awardedHorseIds).not.toContain('h4');
       expect(awardedHorseIds).not.toContain('h5');
     });

@@ -30,6 +30,7 @@ The system uses the `epigenetic_modifiers` JSONB field in the Horse table:
 ### Trait Categories
 
 #### Positive Traits
+
 - **resilient**: Faster stress recovery, improved training consistency
 - **calm**: Reduced stress accumulation, improved focus
 - **intelligent**: Accelerated learning, improved skill retention
@@ -38,6 +39,7 @@ The system uses the `epigenetic_modifiers` JSONB field in the Horse table:
 - **trainability_boost**: Major training efficiency bonus (rare)
 
 #### Negative Traits
+
 - **nervous**: Increased stress sensitivity, requires gentle approach
 - **stubborn**: Slower initial learning, increased training time
 - **fragile**: Higher injury risk, requires careful management
@@ -45,6 +47,7 @@ The system uses the `epigenetic_modifiers` JSONB field in the Horse table:
 - **lazy**: Reduced training efficiency, requires motivation
 
 #### Rare Traits
+
 - **legendary_bloodline**: Exceptional heritage (legendary rarity)
 - **weather_immunity**: Environmental resistance (rare)
 - **night_vision**: Enhanced night performance (rare)
@@ -64,6 +67,7 @@ Each trait has specific conditions that must be met for revelation:
 ### Trait Conflicts
 
 The system prevents conflicting traits from coexisting:
+
 - `calm` conflicts with `nervous`, `aggressive`
 - `resilient` conflicts with `fragile`
 - `bold` conflicts with `nervous`
@@ -72,6 +76,7 @@ The system prevents conflicting traits from coexisting:
 ## Cron Job Schedule
 
 ### Daily Execution
+
 - **Schedule**: `0 0 * * *` (midnight UTC)
 - **Target**: All foals aged 0-1 years
 - **Process**: Evaluates each foal for trait revelation
@@ -89,11 +94,13 @@ The system prevents conflicting traits from coexisting:
 ### Admin Management
 
 #### Get Cron Job Status
+
 ```
 GET /api/admin/cron/status
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -111,12 +118,14 @@ Response:
 ```
 
 #### Start/Stop Cron Service
+
 ```
 POST /api/admin/cron/start
 POST /api/admin/cron/stop
 ```
 
 #### Manual Trait Evaluation
+
 ```
 POST /api/admin/traits/evaluate
 ```
@@ -124,6 +133,7 @@ POST /api/admin/traits/evaluate
 Triggers immediate trait evaluation for all eligible foals.
 
 #### Get Foals in Development
+
 ```
 GET /api/admin/foals/development
 ```
@@ -131,6 +141,7 @@ GET /api/admin/foals/development
 Returns all foals currently in the development period with their current stats.
 
 #### Get Trait Definitions
+
 ```
 GET /api/admin/traits/definitions
 ```
@@ -151,6 +162,7 @@ Returns complete trait definitions with revelation conditions.
 ### Probability Modifiers
 
 - **Bonding Score Effects**:
+
   - High bonding (80-100): +20% positive trait chance, -15% negative trait chance
   - Low bonding (0-20): -20% positive trait chance, +15% negative trait chance
 
@@ -170,6 +182,7 @@ Returns complete trait definitions with revelation conditions.
 ### Audit Logging
 
 All trait revelations are logged with:
+
 - Timestamp
 - Foal ID and name
 - Development day
@@ -179,6 +192,7 @@ All trait revelations are logged with:
 ### Daily Summary
 
 Each evaluation produces a summary log:
+
 ```json
 {
   "type": "DAILY_TRAIT_EVALUATION_SUMMARY",
@@ -203,12 +217,14 @@ Each evaluation produces a summary log:
 ### Environment Variables
 
 The cron job service respects the following environment settings:
+
 - `NODE_ENV=test`: Disables automatic cron job startup
 - Timezone: UTC (hardcoded for consistency)
 
 ### Customization
 
 Trait definitions can be modified in `utils/traitEvaluation.js`:
+
 - Add new traits with revelation conditions
 - Adjust probability values
 - Modify conflict relationships
@@ -216,12 +232,14 @@ Trait definitions can be modified in `utils/traitEvaluation.js`:
 ## Testing
 
 ### Unit Tests (`tests/traitEvaluation.test.js`)
+
 - Trait revelation logic
 - Condition validation
 - Conflict resolution
 - Error handling
 
 ### Integration Tests (`tests/cronJobsIntegration.test.js`)
+
 - End-to-end cron job execution
 - Database integration
 - Admin API endpoints
@@ -267,6 +285,7 @@ curl http://localhost:3000/api/admin/foals/development
 ### Log Analysis
 
 Search application logs for:
+
 - `[CronJobService.AUDIT]`: Trait revelation events
 - `[CronJobService.evaluateDailyFoalTraits]`: Daily execution logs
 - `[traitEvaluation]`: Detailed trait evaluation logic
@@ -297,16 +316,19 @@ Search application logs for:
 ## Integration with Game Systems
 
 ### Foal Development
+
 - Uses bond_score and stress_level from enrichment activities
 - Respects development day progression (0-6)
 - Integrates with foal training history
 
 ### Competition System
+
 - Revealed traits affect competition performance
 - Hidden traits provide discovery gameplay
 - Trait conflicts prevent overpowered combinations
 
 ### Breeding System
+
 - Traits influence offspring genetics
 - Hidden traits add breeding strategy depth
-- Rare traits increase breeding value 
+- Rare traits increase breeding value

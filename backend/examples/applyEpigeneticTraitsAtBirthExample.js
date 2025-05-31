@@ -16,14 +16,14 @@ const optimalMare = {
   id: 1,
   name: 'Premium Mare',
   stress_level: 15,
-  health_status: 'Excellent'
+  health_status: 'Excellent',
 };
 
 const optimalResult = applyEpigeneticTraitsAtBirth({
   mare: optimalMare,
   lineage: [],
   feedQuality: 85,
-  stressLevel: 15
+  stressLevel: 15,
 });
 
 console.log('Result:', JSON.stringify(optimalResult, null, 2));
@@ -36,7 +36,7 @@ console.log('Common ancestors in lineage');
 const inbreedingMare = {
   id: 2,
   name: 'Inbred Mare',
-  stress_level: 50
+  stress_level: 50,
 };
 
 const inbredLineage = [
@@ -44,14 +44,14 @@ const inbredLineage = [
   { id: 100, name: 'Common Ancestor' }, // Same ancestor appears multiple times
   { id: 100, name: 'Common Ancestor' },
   { id: 100, name: 'Common Ancestor' }, // High inbreeding
-  { id: 101, name: 'Other Horse' }
+  { id: 101, name: 'Other Horse' },
 ];
 
 const inbreedingResult = applyEpigeneticTraitsAtBirth({
   mare: inbreedingMare,
   lineage: inbredLineage,
   feedQuality: 50,
-  stressLevel: 50
+  stressLevel: 50,
 });
 
 console.log('Result:', JSON.stringify(inbreedingResult, null, 2));
@@ -64,7 +64,7 @@ console.log('3+ ancestors specialized in Racing');
 const racingMare = {
   id: 3,
   name: 'Racing Mare',
-  stress_level: 30
+  stress_level: 30,
 };
 
 const racingLineage = [
@@ -72,14 +72,14 @@ const racingLineage = [
   { id: 202, name: 'Racing Champion 2', discipline: 'Racing' },
   { id: 203, name: 'Racing Champion 3', discipline: 'Racing' },
   { id: 204, name: 'Racing Champion 4', discipline: 'Racing' }, // 4 ancestors = legacy talent chance
-  { id: 205, name: 'Dressage Horse', discipline: 'Dressage' }
+  { id: 205, name: 'Dressage Horse', discipline: 'Dressage' },
 ];
 
 const racingResult = applyEpigeneticTraitsAtBirth({
   mare: racingMare,
   lineage: racingLineage,
   feedQuality: 60,
-  stressLevel: 30
+  stressLevel: 30,
 });
 
 console.log('Result:', JSON.stringify(racingResult, null, 2));
@@ -92,37 +92,37 @@ console.log('Ancestors with high jumping scores');
 const jumpingMare = {
   id: 4,
   name: 'Jumping Mare',
-  stress_level: 25
+  stress_level: 25,
 };
 
 const jumpingLineage = [
   {
     id: 301,
     name: 'Jumper 1',
-    disciplineScores: { 'Show Jumping': 95, 'Dressage': 60 }
+    disciplineScores: { 'Show Jumping': 95, Dressage: 60 },
   },
   {
     id: 302,
     name: 'Jumper 2',
-    disciplineScores: { 'Show Jumping': 88, 'Racing': 55 }
+    disciplineScores: { 'Show Jumping': 88, Racing: 55 },
   },
   {
     id: 303,
     name: 'Jumper 3',
-    disciplineScores: { 'Show Jumping': 92, 'Cross Country': 70 }
+    disciplineScores: { 'Show Jumping': 92, 'Cross Country': 70 },
   },
   {
     id: 304,
     name: 'Mixed Horse',
-    disciplineScores: { 'Dressage': 85, 'Show Jumping': 65 }
-  }
+    disciplineScores: { Dressage: 85, 'Show Jumping': 65 },
+  },
 ];
 
 const jumpingResult = applyEpigeneticTraitsAtBirth({
   mare: jumpingMare,
   lineage: jumpingLineage,
   feedQuality: 70,
-  stressLevel: 25
+  stressLevel: 25,
 });
 
 console.log('Result:', JSON.stringify(jumpingResult, null, 2));
@@ -135,14 +135,14 @@ console.log('Very stressed mare (85) with poor nutrition (25)');
 const stressedMare = {
   id: 5,
   name: 'Stressed Mare',
-  stress_level: 85
+  stress_level: 85,
 };
 
 const stressResult = applyEpigeneticTraitsAtBirth({
   mare: stressedMare,
   lineage: [],
   feedQuality: 25,
-  stressLevel: 85
+  stressLevel: 85,
 });
 
 console.log('Result:', JSON.stringify(stressResult, null, 2));
@@ -155,7 +155,7 @@ console.log('Moderate conditions with some lineage specialization');
 const mixedMare = {
   id: 6,
   name: 'Mixed Mare',
-  stress_level: 40
+  stress_level: 40,
 };
 
 const mixedLineage = [
@@ -163,14 +163,14 @@ const mixedLineage = [
   { id: 402, name: 'Dressage Horse 2', discipline: 'Dressage' },
   { id: 403, name: 'Dressage Horse 3', discipline: 'Dressage' },
   { id: 404, name: 'Racing Horse', discipline: 'Racing' },
-  { id: 405, name: 'Show Jumper', discipline: 'Show Jumping' }
+  { id: 405, name: 'Show Jumper', discipline: 'Show Jumping' },
 ];
 
 const mixedResult = applyEpigeneticTraitsAtBirth({
   mare: mixedMare,
   lineage: mixedLineage,
   feedQuality: 65,
-  stressLevel: 40
+  stressLevel: 40,
 });
 
 console.log('Result:', JSON.stringify(mixedResult, null, 2));
@@ -183,7 +183,7 @@ console.log('Diverse lineage with no clear specialization');
 const diverseMare = {
   id: 7,
   name: 'Diverse Mare',
-  stress_level: 35
+  stress_level: 35,
 };
 
 const diverseLineage = [
@@ -191,14 +191,14 @@ const diverseLineage = [
   { id: 502, name: 'Dressage Horse', discipline: 'Dressage' },
   { id: 503, name: 'Show Jumper', discipline: 'Show Jumping' },
   { id: 504, name: 'Cross Country Horse', discipline: 'Cross Country' },
-  { id: 505, name: 'Reining Horse', discipline: 'Reining' }
+  { id: 505, name: 'Reining Horse', discipline: 'Reining' },
 ];
 
 const diverseResult = applyEpigeneticTraitsAtBirth({
   mare: diverseMare,
   lineage: diverseLineage,
   feedQuality: 55,
-  stressLevel: 35
+  stressLevel: 35,
 });
 
 console.log('Result:', JSON.stringify(diverseResult, null, 2));
@@ -212,21 +212,21 @@ console.log('Testing boundary conditions');
 const edgeMare = {
   id: 8,
   name: 'Edge Case Mare',
-  stress_level: 20
+  stress_level: 20,
 };
 
 const edgeLineage = [
   { id: 601, name: 'Endurance Horse 1', discipline: 'Endurance' },
   { id: 602, name: 'Endurance Horse 2', discipline: 'Endurance' },
   { id: 603, name: 'Endurance Horse 3', discipline: 'Endurance' }, // Exactly 3
-  { id: 604, name: 'Other Horse', discipline: 'Racing' }
+  { id: 604, name: 'Other Horse', discipline: 'Racing' },
 ];
 
 const edgeResult = applyEpigeneticTraitsAtBirth({
   mare: edgeMare,
   lineage: edgeLineage,
   feedQuality: 80, // Exactly at threshold
-  stressLevel: 20  // Exactly at threshold
+  stressLevel: 20, // Exactly at threshold
 });
 
 console.log('Result:', JSON.stringify(edgeResult, null, 2));

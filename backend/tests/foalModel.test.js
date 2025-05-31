@@ -538,14 +538,14 @@ describe('🍼 UNIT: Foal Model - Foal Development & Activity Management', () =>
         id: 1,
         name: 'Test Foal',
         age: 0,
-        bond_score: 50,
-        stress_level: 20
+        bondScore: 50,
+        stressLevel: 20
       };
 
       const mockTrainingRecord = { id: 1 };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mockHorse);
-      mockPrisma.horse.update.mockResolvedValue({ ...mockHorse, bond_score: 55, stress_level: 18 });
+      mockPrisma.horse.update.mockResolvedValue({ ...mockHorse, bondScore: 55, stressLevel: 18 });
       mockPrisma.foalTrainingHistory.create.mockResolvedValue(mockTrainingRecord);
 
       const result = await completeEnrichmentActivity(1, 0, 'gentle_touch');
@@ -569,8 +569,8 @@ describe('🍼 UNIT: Foal Model - Foal Development & Activity Management', () =>
         id: 1,
         name: 'Test Foal',
         age: 0,
-        bond_score: 50,
-        stress_level: 20
+        bondScore: 50,
+        stressLevel: 20
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mockHorse);
@@ -584,12 +584,12 @@ describe('🍼 UNIT: Foal Model - Foal Development & Activity Management', () =>
         id: 1,
         name: 'Test Foal',
         age: 0,
-        bond_score: 98, // High bond score
-        stress_level: 2   // Low stress level
+        bondScore: 98, // High bond score
+        stressLevel: 2   // Low stress level
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mockHorse);
-      mockPrisma.horse.update.mockResolvedValue({ ...mockHorse, bond_score: 100, stress_level: 0 });
+      mockPrisma.horse.update.mockResolvedValue({ ...mockHorse, bondScore: 100, stressLevel: 0 });
       mockPrisma.foalTrainingHistory.create.mockResolvedValue({ id: 1 });
 
       const result = await completeEnrichmentActivity(1, 0, 'gentle_touch');
@@ -599,17 +599,17 @@ describe('🍼 UNIT: Foal Model - Foal Development & Activity Management', () =>
       expect(result.levels.stress_level).toBeGreaterThanOrEqual(0);
     });
 
-    it('should handle null bond_score and stress_level with defaults', async() => {
+    it('should handle null bondScore and stressLevel with defaults', async() => {
       const mockHorse = {
         id: 1,
         name: 'Test Foal',
         age: 0,
-        bond_score: null, // Null values
-        stress_level: null
+        bondScore: null, // Null values
+        stressLevel: null
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mockHorse);
-      mockPrisma.horse.update.mockResolvedValue({ ...mockHorse, bond_score: 55, stress_level: 18 });
+      mockPrisma.horse.update.mockResolvedValue({ ...mockHorse, bondScore: 55, stressLevel: 18 });
       mockPrisma.foalTrainingHistory.create.mockResolvedValue({ id: 1 });
 
       const result = await completeEnrichmentActivity(1, 0, 'gentle_touch');
@@ -625,8 +625,8 @@ describe('🍼 UNIT: Foal Model - Foal Development & Activity Management', () =>
         id: 1,
         name: 'Adult Horse',
         age: 3,
-        bond_score: 50,
-        stress_level: 20
+        bondScore: 50,
+        stressLevel: 20
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mockHorse);

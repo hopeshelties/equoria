@@ -21,14 +21,15 @@ async function updateUserMoney(userId, amount) {
       where: { id: userId },
       data: {
         money: {
-          increment: amount
-        }
-      }
+          increment: amount,
+        },
+      },
     });
 
-    logger.info(`[userUpdates.updateUserMoney] Updated user ${userId} money by $${amount} (total: $${updatedUser.money})`);
+    logger.info(
+      `[userUpdates.updateUserMoney] Updated user ${userId} money by $${amount} (total: $${updatedUser.money})`
+    );
     return updatedUser;
-
   } catch (error) {
     if (error.code === 'P2025') {
       logger.error(`[userUpdates.updateUserMoney] User not found: ${userId}`);
@@ -50,23 +51,23 @@ async function updateUserMoney(userId, amount) {
 async function transferEntryFees(hostUserId, entryFee, numEntries) {
   try {
     if (!hostUserId) {
-      logger.info('[userUpdates.transferEntryFees] No host user specified, entry fees not transferred');
+      logger.info(
+        '[userUpdates.transferEntryFees] No host user specified, entry fees not transferred'
+      );
       return null;
     }
 
     const totalFees = entryFee * numEntries;
     const updatedUser = await updateUserMoney(hostUserId, totalFees);
 
-    logger.info(`[userUpdates.transferEntryFees] Transferred $${totalFees} in entry fees to host user ${hostUserId}`);
+    logger.info(
+      `[userUpdates.transferEntryFees] Transferred $${totalFees} in entry fees to host user ${hostUserId}`
+    );
     return updatedUser;
-
   } catch (error) {
     logger.error(`[userUpdates.transferEntryFees] Error transferring entry fees: ${error.message}`);
     throw error;
   }
 }
 
-export {
-  updateUserMoney,
-  transferEntryFees
-};
+export { updateUserMoney, transferEntryFees };

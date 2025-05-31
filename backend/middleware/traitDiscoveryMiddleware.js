@@ -18,14 +18,14 @@ export function autoDiscoveryMiddleware(options = {}) {
   const {
     checkEnrichment = true,
     skipIfRecentlyChecked = true,
-    recentCheckThreshold = 5 * 60 * 1000 // 5 minutes
+    recentCheckThreshold = 5 * 60 * 1000, // 5 minutes
   } = options;
 
-  return async(req, res, next) => {
+  return async (req, res, next) => {
     // Store original res.json to intercept successful responses
     const originalJson = res.json;
 
-    res.json = function(data) {
+    res.json = function (data) {
       // Call original json method first
       const result = originalJson.call(this, data);
 
@@ -36,16 +36,18 @@ export function autoDiscoveryMiddleware(options = {}) {
 
         if (horseId) {
           // Trigger discovery asynchronously (don't block response)
-          setImmediate(async() => {
+          setImmediate(async () => {
             try {
               await triggerAutoDiscovery(horseId, {
                 checkEnrichment,
                 skipIfRecentlyChecked,
                 recentCheckThreshold,
-                trigger: req.route?.path || req.path
+                trigger: req.route?.path || req.path,
               });
             } catch (error) {
-              logger.error(`[traitDiscoveryMiddleware] Auto-discovery failed for horse ${horseId}: ${error.message}`);
+              logger.error(
+                `[traitDiscoveryMiddleware] Auto-discovery failed for horse ${horseId}: ${error.message}`
+              );
             }
           });
         }
@@ -115,17 +117,21 @@ async function triggerAutoDiscovery(horseId, options = {}) {
     checkEnrichment = true,
     skipIfRecentlyChecked = true,
     recentCheckThreshold = 5 * 60 * 1000,
-    trigger = 'unknown'
+    trigger = 'unknown',
   } = options;
 
   try {
-    logger.debug(`[traitDiscoveryMiddleware.triggerAutoDiscovery] Checking discovery for horse ${horseId} (trigger: ${trigger})`);
+    logger.debug(
+      `[traitDiscoveryMiddleware.triggerAutoDiscovery] Checking discovery for horse ${horseId} (trigger: ${trigger})`
+    );
 
     // Check if we should skip due to recent check
     if (skipIfRecentlyChecked) {
       const lastCheck = await getLastDiscoveryCheck(horseId);
-      if (lastCheck && (Date.now() - lastCheck.getTime()) < recentCheckThreshold) {
-        logger.debug(`[traitDiscoveryMiddleware.triggerAutoDiscovery] Skipping discovery for horse ${horseId} - recently checked`);
+      if (lastCheck && Date.now() - lastCheck.getTime() < recentCheckThreshold) {
+        logger.debug(
+          `[traitDiscoveryMiddleware.triggerAutoDiscovery] Skipping discovery for horse ${horseId} - recently checked`
+        );
         return;
       }
     }
@@ -133,7 +139,7 @@ async function triggerAutoDiscovery(horseId, options = {}) {
     // Perform discovery
     const discoveryResult = await revealTraits(horseId, {
       checkEnrichment,
-      forceCheck: false
+      forceCheck: false,
     });
 
     // Update last check time
@@ -141,14 +147,17 @@ async function triggerAutoDiscovery(horseId, options = {}) {
 
     // Log significant discoveries
     if (discoveryResult.revealed && discoveryResult.revealed.length > 0) {
-      logger.info(`[traitDiscoveryMiddleware.triggerAutoDiscovery] Auto-discovered ${discoveryResult.revealed.length} traits for horse ${horseId} (trigger: ${trigger})`);
+      logger.info(
+        `[traitDiscoveryMiddleware.triggerAutoDiscovery] Auto-discovered ${discoveryResult.revealed.length} traits for horse ${horseId} (trigger: ${trigger})`
+      );
 
       // Emit discovery event for real-time updates (if WebSocket is available)
       emitDiscoveryEvent(horseId, discoveryResult);
     }
-
   } catch (error) {
-    logger.error(`[traitDiscoveryMiddleware.triggerAutoDiscovery] Error during auto-discovery for horse ${horseId}: ${error.message}`);
+    logger.error(
+      `[traitDiscoveryMiddleware.triggerAutoDiscovery] Error during auto-discovery for horse ${horseId}: ${error.message}`
+    );
   }
 }
 
@@ -167,7 +176,9 @@ async function getLastDiscoveryCheck(horseId) {
 
     return global.discoveryCheckCache.get(horseId) || null;
   } catch (error) {
-    logger.warn(`[traitDiscoveryMiddleware.getLastDiscoveryCheck] Error getting last check time: ${error.message}`);
+    logger.warn(
+      `[traitDiscoveryMiddleware.getLastDiscoveryCheck] Error getting last check time: ${error.message}`
+    );
     return null;
   }
 }
@@ -194,9 +205,10 @@ async function updateLastDiscoveryCheck(horseId) {
         global.discoveryCheckCache.set(id, time);
       });
     }
-
   } catch (error) {
-    logger.warn(`[traitDiscoveryMiddleware.updateLastDiscoveryCheck] Error updating last check time: ${error.message}`);
+    logger.warn(
+      `[traitDiscoveryMiddleware.updateLastDiscoveryCheck] Error updating last check time: ${error.message}`
+    );
   }
 }
 
@@ -212,13 +224,17 @@ function emitDiscoveryEvent(horseId, discoveryResult) {
       global.io.emit('traitDiscovered', {
         horseId,
         timestamp: new Date().toISOString(),
-        ...discoveryResult
+        ...discoveryResult,
       });
 
-      logger.debug(`[traitDiscoveryMiddleware.emitDiscoveryEvent] Emitted discovery event for horse ${horseId}`);
+      logger.debug(
+        `[traitDiscoveryMiddleware.emitDiscoveryEvent] Emitted discovery event for horse ${horseId}`
+      );
     }
   } catch (error) {
-    logger.warn(`[traitDiscoveryMiddleware.emitDiscoveryEvent] Error emitting discovery event: ${error.message}`);
+    logger.warn(
+      `[traitDiscoveryMiddleware.emitDiscoveryEvent] Error emitting discovery event: ${error.message}`
+    );
   }
 }
 
@@ -230,7 +246,7 @@ export function enrichmentDiscoveryMiddleware() {
   return autoDiscoveryMiddleware({
     checkEnrichment: true,
     skipIfRecentlyChecked: true,
-    recentCheckThreshold: 2 * 60 * 1000 // 2 minutes for enrichment
+    recentCheckThreshold: 2 * 60 * 1000, // 2 minutes for enrichment
   });
 }
 
@@ -242,7 +258,7 @@ export function trainingDiscoveryMiddleware() {
   return autoDiscoveryMiddleware({
     checkEnrichment: false,
     skipIfRecentlyChecked: true,
-    recentCheckThreshold: 10 * 60 * 1000 // 10 minutes for training
+    recentCheckThreshold: 10 * 60 * 1000, // 10 minutes for training
   });
 }
 
@@ -254,7 +270,7 @@ export function bondingDiscoveryMiddleware() {
   return autoDiscoveryMiddleware({
     checkEnrichment: true,
     skipIfRecentlyChecked: true,
-    recentCheckThreshold: 1 * 60 * 1000 // 1 minute for bonding changes
+    recentCheckThreshold: 1 * 60 * 1000, // 1 minute for bonding changes
   });
 }
 
@@ -264,12 +280,14 @@ export function bondingDiscoveryMiddleware() {
  */
 export async function manualDiscoveryTrigger(horseId, options = {}) {
   try {
-    logger.info(`[traitDiscoveryMiddleware.manualDiscoveryTrigger] Manual discovery triggered for horse ${horseId}`);
+    logger.info(
+      `[traitDiscoveryMiddleware.manualDiscoveryTrigger] Manual discovery triggered for horse ${horseId}`
+    );
 
     const discoveryResult = await revealTraits(horseId, {
       checkEnrichment: true,
       forceCheck: true,
-      ...options
+      ...options,
     });
 
     // Emit discovery event
@@ -278,9 +296,10 @@ export async function manualDiscoveryTrigger(horseId, options = {}) {
     }
 
     return discoveryResult;
-
   } catch (error) {
-    logger.error(`[traitDiscoveryMiddleware.manualDiscoveryTrigger] Error during manual discovery: ${error.message}`);
+    logger.error(
+      `[traitDiscoveryMiddleware.manualDiscoveryTrigger] Error during manual discovery: ${error.message}`
+    );
     throw error;
   }
 }
@@ -290,5 +309,5 @@ export default {
   enrichmentDiscoveryMiddleware,
   trainingDiscoveryMiddleware,
   bondingDiscoveryMiddleware,
-  manualDiscoveryTrigger
+  manualDiscoveryTrigger,
 };

@@ -12,13 +12,15 @@ import logger from '../utils/logger.js';
 export const corsOptions = {
   origin(origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) {return callback(null, true);}
+    if (!origin) {
+      return callback(null, true);
+    }
 
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
       'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001'
+      'http://127.0.0.1:3001',
     ];
 
     // Add production origins from environment
@@ -35,7 +37,7 @@ export const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
 // Rate limiting configuration
@@ -46,7 +48,7 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
     message: {
       success: false,
       error: 'Too many requests from this IP, please try again later.',
-      retryAfter: Math.ceil(windowMs / 1000)
+      retryAfter: Math.ceil(windowMs / 1000),
     },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -54,15 +56,15 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
       logger.warn(`Rate limit exceeded for IP: ${req.ip}`, {
         ip: req.ip,
         userAgent: req.get('User-Agent'),
-        url: req.originalUrl
+        url: req.originalUrl,
       });
 
       res.status(429).json({
         success: false,
         error: 'Too many requests from this IP, please try again later.',
-        retryAfter: Math.ceil(windowMs / 1000)
+        retryAfter: Math.ceil(windowMs / 1000),
       });
-    }
+    },
   });
 };
 
@@ -70,23 +72,23 @@ export const createRateLimiter = (windowMs = 15 * 60 * 1000, max = 100) => {
 export const helmetConfig = {
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ['\'self\''],
-      styleSrc: ['\'self\'', '\'unsafe-inline\''],
-      scriptSrc: ['\'self\''],
-      imgSrc: ['\'self\'', 'data:', 'https:'],
-      connectSrc: ['\'self\''],
-      fontSrc: ['\'self\''],
-      objectSrc: ['\'none\''],
-      mediaSrc: ['\'self\''],
-      frameSrc: ['\'none\'']
-    }
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
   },
   crossOriginEmbedderPolicy: false, // Disable for API compatibility
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
-    preload: true
-  }
+    preload: true,
+  },
 };
 
 // API-specific rate limiters
@@ -96,9 +98,5 @@ export const authLimiter = createRateLimiter(15 * 60 * 1000, 5); // 5 requests p
 
 // Security middleware factory
 export const createSecurityMiddleware = () => {
-  return [
-    helmet(helmetConfig),
-    cors(corsOptions),
-    apiLimiter
-  ];
+  return [helmet(helmetConfig), cors(corsOptions), apiLimiter];
 };

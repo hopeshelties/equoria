@@ -19,7 +19,7 @@ export async function getUserProgression(req, res, next) {
     if (!userId) {
       return res.status(400).json({
         success: false,
-        message: 'User ID is required'
+        message: 'User ID is required',
       });
     }
 
@@ -28,7 +28,7 @@ export async function getUserProgression(req, res, next) {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
@@ -39,7 +39,9 @@ export async function getUserProgression(req, res, next) {
     const xpForCurrentLevel = calculateXpForLevel(currentLevel);
     const xpProgress = currentXp - xpForCurrentLevel;
     const xpNeeded = xpForNextLevel - currentXp;
-    const progressPercentage = Math.round((xpProgress / (xpForNextLevel - xpForCurrentLevel)) * 100);
+    const progressPercentage = Math.round(
+      (xpProgress / (xpForNextLevel - xpForCurrentLevel)) * 100
+    );
 
     const progressionData = {
       currentLevel,
@@ -48,19 +50,22 @@ export async function getUserProgression(req, res, next) {
       xpProgress,
       xpNeeded,
       progressPercentage: Math.max(0, Math.min(100, progressPercentage)),
-      totalEarnings: user.money || 0
+      totalEarnings: user.money || 0,
     };
 
-    logger.info(`[progressionController.getUserProgression] Retrieved progression for user ${userId}`);
+    logger.info(
+      `[progressionController.getUserProgression] Retrieved progression for user ${userId}`
+    );
 
     res.json({
       success: true,
       message: 'User progression retrieved successfully',
-      data: progressionData
+      data: progressionData,
     });
-
   } catch (error) {
-    logger.error(`[progressionController.getUserProgression] Error getting progression for user ${req.params.userId}: ${error.message}`);
+    logger.error(
+      `[progressionController.getUserProgression] Error getting progression for user ${req.params.userId}: ${error.message}`
+    );
     next(error);
   }
 }
@@ -79,29 +84,32 @@ export async function awardXp(req, res, next) {
     if (!userId) {
       return res.status(400).json({
         success: false,
-        message: 'User ID is required'
+        message: 'User ID is required',
       });
     }
 
     if (!amount || typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({
         success: false,
-        message: 'Valid XP amount is required'
+        message: 'Valid XP amount is required',
       });
     }
 
     const result = await addXpToUser(userId, amount, reason);
 
-    logger.info(`[progressionController.awardXp] Awarded ${amount} XP to user ${userId}: ${reason || 'No reason provided'}`);
+    logger.info(
+      `[progressionController.awardXp] Awarded ${amount} XP to user ${userId}: ${reason || 'No reason provided'}`
+    );
 
     res.json({
       success: true,
       message: `Successfully awarded ${amount} XP`,
-      data: result
+      data: result,
     });
-
   } catch (error) {
-    logger.error(`[progressionController.awardXp] Error awarding XP to user ${req.params.userId}: ${error.message}`);
+    logger.error(
+      `[progressionController.awardXp] Error awarding XP to user ${req.params.userId}: ${error.message}`
+    );
     next(error);
   }
 }
@@ -112,7 +120,9 @@ export async function awardXp(req, res, next) {
  * @returns {number} XP required for that level
  */
 function calculateXpForLevel(level) {
-  if (level <= 1) {return 0;}
+  if (level <= 1) {
+    return 0;
+  }
 
   // Progressive XP requirement: level^2 * 100
   // Level 2: 400 XP, Level 3: 900 XP, Level 4: 1600 XP, etc.
@@ -125,7 +135,9 @@ function calculateXpForLevel(level) {
  * @returns {number} Current level based on XP
  */
 export function getLevelFromXp(xp) {
-  if (xp < 400) {return 1;}
+  if (xp < 400) {
+    return 1;
+  }
 
   // Reverse calculation: level = sqrt(xp / 100)
   return Math.floor(Math.sqrt(xp / 100));
@@ -150,25 +162,28 @@ export async function checkLevelUp(userId) {
     if (calculatedLevel > currentLevel) {
       const levelsGained = calculatedLevel - currentLevel;
 
-      logger.info(`[progressionController.checkLevelUp] User ${userId} leveled up! ${currentLevel} → ${calculatedLevel}`);
+      logger.info(
+        `[progressionController.checkLevelUp] User ${userId} leveled up! ${currentLevel} → ${calculatedLevel}`
+      );
 
       return {
         leveledUp: true,
         oldLevel: currentLevel,
         newLevel: calculatedLevel,
         levelsGained,
-        message: `Congratulations! You reached level ${calculatedLevel}!`
+        message: `Congratulations! You reached level ${calculatedLevel}!`,
       };
     }
 
     return {
       leveledUp: false,
       currentLevel,
-      message: 'No level up'
+      message: 'No level up',
     };
-
   } catch (error) {
-    logger.error(`[progressionController.checkLevelUp] Error checking level up for user ${userId}: ${error.message}`);
+    logger.error(
+      `[progressionController.checkLevelUp] Error checking level up for user ${userId}: ${error.message}`
+    );
     throw error;
   }
 }

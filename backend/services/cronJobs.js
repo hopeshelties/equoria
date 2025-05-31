@@ -25,12 +25,16 @@ class CronJobService {
     logger.info('[CronJobService] Starting cron job service');
 
     // Daily trait evaluation job - runs at midnight
-    const dailyTraitJob = cron.schedule('0 0 * * *', async() => {
-      await this.evaluateDailyFoalTraits();
-    }, {
-      scheduled: false,
-      timezone: 'UTC'
-    });
+    const dailyTraitJob = cron.schedule(
+      '0 0 * * *',
+      async () => {
+        await this.evaluateDailyFoalTraits();
+      },
+      {
+        scheduled: false,
+        timezone: 'UTC',
+      }
+    );
 
     this.jobs.set('dailyTraitEvaluation', dailyTraitJob);
 
@@ -77,12 +81,12 @@ class CronJobService {
       const foals = await prisma.horse.findMany({
         where: {
           age: {
-            in: [0, 1] // 0 = newborn, 1 = yearling
-          }
+            in: [0, 1], // 0 = newborn, 1 = yearling
+          },
         },
         include: {
-          foalDevelopment: true
-        }
+          foalDevelopment: true,
+        },
       });
 
       if (foals.length === 0) {
@@ -90,7 +94,9 @@ class CronJobService {
         return;
       }
 
-      logger.info(`[CronJobService.evaluateDailyFoalTraits] Found ${foals.length} foals for evaluation`);
+      logger.info(
+        `[CronJobService.evaluateDailyFoalTraits] Found ${foals.length} foals for evaluation`
+      );
 
       let processedCount = 0;
       let updatedCount = 0;
@@ -105,16 +111,19 @@ class CronJobService {
           if (result.traitsRevealed > 0) {
             updatedCount++;
           }
-
         } catch (error) {
           errorCount++;
-          logger.error(`[CronJobService.evaluateDailyFoalTraits] Error processing foal ${foal.id}: ${error.message}`);
+          logger.error(
+            `[CronJobService.evaluateDailyFoalTraits] Error processing foal ${foal.id}: ${error.message}`
+          );
         }
       }
 
       const duration = Date.now() - startTime;
       logger.info(`[CronJobService.evaluateDailyFoalTraits] Completed evaluation in ${duration}ms`);
-      logger.info(`[CronJobService.evaluateDailyFoalTraits] Summary: ${processedCount} processed, ${updatedCount} updated, ${errorCount} errors`);
+      logger.info(
+        `[CronJobService.evaluateDailyFoalTraits] Summary: ${processedCount} processed, ${updatedCount} updated, ${errorCount} errors`
+      );
 
       // Log audit summary
       await this.logAuditSummary({
@@ -122,9 +131,8 @@ class CronJobService {
         foalsProcessed: processedCount,
         foalsUpdated: updatedCount,
         errors: errorCount,
-        duration
+        duration,
       });
-
     } catch (error) {
       logger.error(`[CronJobService.evaluateDailyFoalTraits] Critical error: ${error.message}`);
       throw error;
@@ -145,7 +153,9 @@ class CronJobService {
 
       // Skip foals that have completed development (day > 6)
       if (currentDay > 6) {
-        logger.info(`[CronJobService.evaluateFoalTraits] Foal ${foal.id} has completed development (day ${currentDay})`);
+        logger.info(
+          `[CronJobService.evaluateFoalTraits] Foal ${foal.id} has completed development (day ${currentDay})`
+        );
         return { traitsRevealed: 0, reason: 'development_complete' };
       }
 
@@ -153,17 +163,20 @@ class CronJobService {
       const currentTraits = foal.epigenetic_modifiers || {
         positive: [],
         negative: [],
-        hidden: []
+        hidden: [],
       };
 
       // Evaluate new traits
       const newTraits = evaluateTraitRevelation(foal, currentTraits, currentDay);
 
       // Check if any new traits were revealed
-      const totalNewTraits = newTraits.positive.length + newTraits.negative.length + newTraits.hidden.length;
+      const totalNewTraits =
+        newTraits.positive.length + newTraits.negative.length + newTraits.hidden.length;
 
       if (totalNewTraits === 0) {
-        logger.info(`[CronJobService.evaluateFoalTraits] No new traits revealed for foal ${foal.id}`);
+        logger.info(
+          `[CronJobService.evaluateFoalTraits] No new traits revealed for foal ${foal.id}`
+        );
         return { traitsRevealed: 0, reason: 'no_new_traits' };
       }
 
@@ -171,30 +184,33 @@ class CronJobService {
       const updatedTraits = {
         positive: [...(currentTraits.positive || []), ...newTraits.positive],
         negative: [...(currentTraits.negative || []), ...newTraits.negative],
-        hidden: [...(currentTraits.hidden || []), ...newTraits.hidden]
+        hidden: [...(currentTraits.hidden || []), ...newTraits.hidden],
       };
 
       // Update the horse record
       await prisma.horse.update({
         where: { id: foal.id },
         data: {
-          epigenetic_modifiers: updatedTraits
-        }
+          epigenetic_modifiers: updatedTraits,
+        },
       });
 
       // Log the action for auditing
       await this.logTraitRevelation(foal.id, foal.name, newTraits, currentDay);
 
-      logger.info(`[CronJobService.evaluateFoalTraits] Updated foal ${foal.id} with ${totalNewTraits} new traits`);
+      logger.info(
+        `[CronJobService.evaluateFoalTraits] Updated foal ${foal.id} with ${totalNewTraits} new traits`
+      );
 
       return {
         traitsRevealed: totalNewTraits,
         newTraits,
-        updatedTraits
+        updatedTraits,
       };
-
     } catch (error) {
-      logger.error(`[CronJobService.evaluateFoalTraits] Error evaluating foal ${foal.id}: ${error.message}`);
+      logger.error(
+        `[CronJobService.evaluateFoalTraits] Error evaluating foal ${foal.id}: ${error.message}`
+      );
       throw error;
     }
   }
@@ -216,9 +232,9 @@ class CronJobService {
         traitsRevealed: {
           positive: newTraits.positive,
           negative: newTraits.negative,
-          hidden: newTraits.hidden
+          hidden: newTraits.hidden,
         },
-        totalCount: newTraits.positive.length + newTraits.negative.length + newTraits.hidden.length
+        totalCount: newTraits.positive.length + newTraits.negative.length + newTraits.hidden.length,
       };
 
       // Log to application logs
@@ -226,9 +242,10 @@ class CronJobService {
 
       // Could also store in a dedicated audit table if needed
       // await prisma.traitAuditLog.create({ data: logEntry });
-
     } catch (error) {
-      logger.error(`[CronJobService.logTraitRevelation] Error logging trait revelation: ${error.message}`);
+      logger.error(
+        `[CronJobService.logTraitRevelation] Error logging trait revelation: ${error.message}`
+      );
     }
   }
 
@@ -245,14 +262,15 @@ class CronJobService {
           foalsProcessed: summary.foalsProcessed,
           foalsUpdated: summary.foalsUpdated,
           errors: summary.errors,
-          duration: summary.duration
-        }
+          duration: summary.duration,
+        },
       };
 
       logger.info(`[CronJobService.AUDIT] Daily summary: ${JSON.stringify(auditSummary)}`);
-
     } catch (error) {
-      logger.error(`[CronJobService.logAuditSummary] Error logging audit summary: ${error.message}`);
+      logger.error(
+        `[CronJobService.logAuditSummary] Error logging audit summary: ${error.message}`
+      );
     }
   }
 
@@ -274,14 +292,14 @@ class CronJobService {
     this.jobs.forEach((job, name) => {
       jobStatuses[name] = {
         running: job.running,
-        scheduled: job.scheduled
+        scheduled: job.scheduled,
       };
     });
 
     return {
       serviceRunning: this.isRunning,
       jobs: jobStatuses,
-      totalJobs: this.jobs.size
+      totalJobs: this.jobs.size,
     };
   }
 }

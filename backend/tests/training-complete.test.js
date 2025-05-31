@@ -14,32 +14,34 @@ const createTestApp = () => {
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // Auth routes
-  app.post('/api/auth/register',
+  app.post(
+    '/api/auth/register',
     body('name').trim().isLength({ min: 2, max: 50 }),
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 8, max: 128 }),
     register
   );
 
-  app.post('/api/auth/login',
+  app.post(
+    '/api/auth/login',
     body('email').isEmail().normalizeEmail(),
     body('password').notEmpty(),
     login
   );
 
   // Training routes (simplified)
-  app.get('/api/horses/trainable/:playerId', authenticateToken, async(req, res) => {
+  app.get('/api/horses/trainable/:playerId', authenticateToken, async (req, res) => {
     try {
       const { playerId } = req.params;
 
       // Find horses owned by this user (using ownerId since that's what exists)
       const horses = await prisma.horse.findMany({
         where: {
-          ownerId: parseInt(playerId) // Convert to int since ownerId is integer
+          ownerId: parseInt(playerId), // Convert to int since ownerId is integer
         },
         include: {
-          breed: true
-        }
+          breed: true,
+        },
       });
 
       // Filter for trainable horses (age >= 3)
@@ -50,43 +52,43 @@ const createTestApp = () => {
           name: horse.name,
           age: horse.age,
           breed: horse.breed?.name || 'Unknown',
-          trainableDisciplines: ['Racing', 'Dressage', 'Show Jumping', 'Cross Country', 'Western']
+          trainableDisciplines: ['Racing', 'Dressage', 'Show Jumping', 'Cross Country', 'Western'],
         }));
 
       res.json({
         success: true,
-        data: trainableHorses
+        data: trainableHorses,
       });
     } catch (error) {
       console.error('Error getting trainable horses:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: 'Internal server error',
       });
     }
   });
 
-  app.post('/api/training/train', authenticateToken, async(req, res) => {
+  app.post('/api/training/train', authenticateToken, async (req, res) => {
     try {
       const { horseId, discipline } = req.body;
 
       // Find the horse
       const horse = await prisma.horse.findUnique({
         where: { id: parseInt(horseId) },
-        include: { breed: true }
+        include: { breed: true },
       });
 
       if (!horse) {
         return res.status(400).json({
           success: false,
-          message: 'Training not allowed: Horse not found'
+          message: 'Training not allowed: Horse not found',
         });
       }
 
       if (horse.age < 3) {
         return res.status(400).json({
           success: false,
-          message: 'Training not allowed: Horse is under age'
+          message: 'Training not allowed: Horse is under age',
         });
       }
 
@@ -95,13 +97,13 @@ const createTestApp = () => {
         success: true,
         message: `${horse.name} trained in ${discipline}. +5 added.`,
         updatedScore: 5,
-        nextEligibleDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+        nextEligibleDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       });
     } catch (error) {
       console.error('Error training horse:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: 'Internal server error',
       });
     }
   });
@@ -115,19 +117,17 @@ describe('Training System Complete Test', () => {
   let testUser;
   let testHorses;
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     app = createTestApp();
 
     // Create a test user
     const userData = {
       name: 'Training Test User',
       email: 'training-test@example.com',
-      password: 'TestPassword123!'
+      password: 'TestPassword123!',
     };
 
-    const registerResponse = await request(app)
-      .post('/api/auth/register')
-      .send(userData);
+    const registerResponse = await request(app).post('/api/auth/register').send(userData);
 
     expect(registerResponse.status).toBe(201);
     authToken = registerResponse.body.data.token;
@@ -141,8 +141,8 @@ describe('Training System Complete Test', () => {
       breed = await prisma.breed.create({
         data: {
           name: 'Test Breed',
-          description: 'Test breed for training tests'
-        }
+          description: 'Test breed for training tests',
+        },
       });
     }
 
@@ -154,8 +154,8 @@ describe('Training System Complete Test', () => {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'mare',
-          healthStatus: 'Good'
-        }
+          healthStatus: 'Good',
+        },
       }),
       prisma.horse.create({
         data: {
@@ -164,8 +164,8 @@ describe('Training System Complete Test', () => {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'stallion',
-          healthStatus: 'Good'
-        }
+          healthStatus: 'Good',
+        },
       }),
       prisma.horse.create({
         data: {
@@ -174,29 +174,29 @@ describe('Training System Complete Test', () => {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id, // Link to user
           sex: 'colt',
-          healthStatus: 'Good'
-        }
-      })
+          healthStatus: 'Good',
+        },
+      }),
     ]);
 
     console.log(`Created test user ${testUser.id} with ${testHorses.length} horses`);
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Clean up test data
     if (testHorses) {
       await prisma.horse.deleteMany({
         where: {
           id: {
-            in: testHorses.map(h => h.id)
-          }
-        }
+            in: testHorses.map(h => h.id),
+          },
+        },
       });
     }
 
     if (testUser) {
       await prisma.user.delete({
-        where: { id: testUser.id }
+        where: { id: testUser.id },
       });
     }
 
@@ -213,7 +213,7 @@ describe('Training System Complete Test', () => {
   });
 
   describe('Trainable Horses', () => {
-    it('should get trainable horses for authenticated user', async() => {
+    it('should get trainable horses for authenticated user', async () => {
       const response = await request(app)
         .get(`/api/horses/trainable/${testUser.id}`)
         .set('Authorization', `Bearer ${authToken}`);
@@ -236,7 +236,7 @@ describe('Training System Complete Test', () => {
   });
 
   describe('Training Functionality', () => {
-    it('should successfully train an adult horse', async() => {
+    it('should successfully train an adult horse', async () => {
       // First get trainable horses
       const trainableResponse = await request(app)
         .get(`/api/horses/trainable/${testUser.id}`)
@@ -253,7 +253,7 @@ describe('Training System Complete Test', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: trainableHorse.horseId,
-          discipline: 'Racing'
+          discipline: 'Racing',
         });
 
       expect(response.status).toBe(200);
@@ -265,7 +265,7 @@ describe('Training System Complete Test', () => {
       console.log('Training response:', JSON.stringify(response.body, null, 2));
     });
 
-    it('should reject training for young horse', async() => {
+    it('should reject training for young horse', async () => {
       // Try to train the 2-year-old horse directly
       const youngHorse = testHorses.find(h => h.age === 2);
 
@@ -274,7 +274,7 @@ describe('Training System Complete Test', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: youngHorse.id,
-          discipline: 'Racing'
+          discipline: 'Racing',
         });
 
       expect(response.status).toBe(400);
@@ -284,9 +284,8 @@ describe('Training System Complete Test', () => {
   });
 
   describe('Authentication Protection', () => {
-    it('should reject unauthenticated requests', async() => {
-      const response = await request(app)
-        .get(`/api/horses/trainable/${testUser.id}`);
+    it('should reject unauthenticated requests', async () => {
+      const response = await request(app).get(`/api/horses/trainable/${testUser.id}`);
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);

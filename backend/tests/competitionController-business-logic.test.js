@@ -13,7 +13,6 @@
  * Note: Simplified due to Horse model constraints
  */
 
-
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import dotenv from 'dotenv';
@@ -34,32 +33,32 @@ describe('Competition Controller Business Logic Tests', () => {
   let testHorse1, testHorse2, testHorse3;
   let testShow;
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     // Clean up any existing test data
     await prisma.competitionResult.deleteMany({
       where: {
         horse: {
           name: {
-            in: ['Competition Star', 'Competition Runner', 'Competition Novice']
-          }
-        }
-      }
+            in: ['Competition Star', 'Competition Runner', 'Competition Novice'],
+          },
+        },
+      },
     });
 
     await prisma.horse.deleteMany({
       where: {
         name: {
-          in: ['Competition Star', 'Competition Runner', 'Competition Novice']
-        }
-      }
+          in: ['Competition Star', 'Competition Runner', 'Competition Novice'],
+        },
+      },
     });
 
     await prisma.show.deleteMany({
       where: {
         name: {
-          startsWith: 'Business Logic Test Show'
-        }
-      }
+          startsWith: 'Business Logic Test Show',
+        },
+      },
     });
 
     // await prisma.player.deleteMany({ // Removed player deletion
@@ -68,12 +67,13 @@ describe('Competition Controller Business Logic Tests', () => {
     //   }
     // });
 
-    await prisma.user.deleteMany({ // Keep user deletion for cleanup
+    await prisma.user.deleteMany({
+      // Keep user deletion for cleanup
       where: {
         email: {
-          in: ['competition-user@test.com', 'competition@test.com'] // Added old player email for cleanup
-        }
-      }
+          in: ['competition-user@test.com', 'competition@test.com'], // Added old player email for cleanup
+        },
+      },
     });
 
     // Create test data
@@ -88,8 +88,8 @@ describe('Competition Controller Business Logic Tests', () => {
         money: 1000,
         level: 2,
         xp: 100,
-        settings: { darkMode: false }
-      }
+        settings: { darkMode: false },
+      },
     });
 
     // testPlayer = await prisma.player.create({ // Removed player creation
@@ -106,14 +106,14 @@ describe('Competition Controller Business Logic Tests', () => {
     testBreed = await prisma.breed.findFirst();
     if (!testBreed) {
       testBreed = await prisma.breed.create({
-        data: { name: 'Competition Thoroughbred' }
+        data: { name: 'Competition Thoroughbred' },
       });
     }
 
     testStable = await prisma.stable.findFirst();
     if (!testStable) {
       testStable = await prisma.stable.create({
-        data: { name: 'Competition Test Stable' }
+        data: { name: 'Competition Test Stable' },
       });
     }
 
@@ -127,8 +127,8 @@ describe('Competition Controller Business Logic Tests', () => {
         levelMax: 5,
         entryFee: 100,
         prize: 1000,
-        runDate: new Date()
-      }
+        runDate: new Date(),
+      },
     });
 
     // Create test horses
@@ -152,9 +152,9 @@ describe('Competition Controller Business Logic Tests', () => {
         epigenetic_modifiers: {
           positive: ['discipline_affinity_racing'],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     testHorse2 = await prisma.horse.create({
@@ -177,9 +177,9 @@ describe('Competition Controller Business Logic Tests', () => {
         epigenetic_modifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     testHorse3 = await prisma.horse.create({
@@ -202,38 +202,38 @@ describe('Competition Controller Business Logic Tests', () => {
         epigenetic_modifiers: {
           positive: [],
           negative: ['nervous_temperament'],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Clean up test data
     await prisma.competitionResult.deleteMany({
       where: {
         horse: {
           name: {
-            in: ['Competition Star', 'Competition Runner', 'Competition Novice']
-          }
-        }
-      }
+            in: ['Competition Star', 'Competition Runner', 'Competition Novice'],
+          },
+        },
+      },
     });
 
     await prisma.horse.deleteMany({
       where: {
         name: {
-          in: ['Competition Star', 'Competition Runner', 'Competition Novice']
-        }
-      }
+          in: ['Competition Star', 'Competition Runner', 'Competition Novice'],
+        },
+      },
     });
 
     await prisma.show.deleteMany({
       where: {
         name: {
-          startsWith: 'Business Logic Test Show'
-        }
-      }
+          startsWith: 'Business Logic Test Show',
+        },
+      },
     });
 
     // await prisma.player.deleteMany({ // Removed player deletion
@@ -242,19 +242,20 @@ describe('Competition Controller Business Logic Tests', () => {
     //   }
     // });
 
-    await prisma.user.deleteMany({ // Keep user deletion for cleanup
+    await prisma.user.deleteMany({
+      // Keep user deletion for cleanup
       where: {
         email: {
-          in: ['competition-user@test.com', 'competition@test.com'] // Added old player email for cleanup
-        }
-      }
+          in: ['competition-user@test.com', 'competition@test.com'], // Added old player email for cleanup
+        },
+      },
     });
 
     await prisma.$disconnect();
   });
 
   describe('Competition Scoring Business Logic', () => {
-    it('CALCULATES realistic competition scores based on horse stats', async() => {
+    it('CALCULATES realistic competition scores based on horse stats', async () => {
       // VERIFY: Competition scoring function works correctly
       const score1 = calculateCompetitionScore(testHorse1, 'Racing');
       const score3 = calculateCompetitionScore(testHorse3, 'Racing');
@@ -266,7 +267,7 @@ describe('Competition Controller Business Logic Tests', () => {
       expect(score1).toBeGreaterThan(score3);
     });
 
-    it('APPLIES trait bonuses correctly in competition scoring', async() => {
+    it('APPLIES trait bonuses correctly in competition scoring', async () => {
       // testHorse1 has 'discipline_affinity_racing' trait
       const scoreWithTrait = calculateCompetitionScore(testHorse1, 'Racing');
       const scoreWithoutTrait = calculateCompetitionScore(testHorse3, 'Racing');
@@ -280,7 +281,7 @@ describe('Competition Controller Business Logic Tests', () => {
   });
 
   describe('Competition Result Persistence', () => {
-    it('PERSISTS competition results in database correctly', async() => {
+    it('PERSISTS competition results in database correctly', async () => {
       // Create a competition result
       const resultData = {
         horseId: testHorse1.id,
@@ -289,7 +290,7 @@ describe('Competition Controller Business Logic Tests', () => {
         placement: '1st',
         discipline: 'Racing',
         runDate: new Date(),
-        showName: testShow.name
+        showName: testShow.name,
       };
 
       const savedResult = await saveResult(resultData);
@@ -303,7 +304,7 @@ describe('Competition Controller Business Logic Tests', () => {
       expect(savedResult.discipline).toBe('Racing');
     });
 
-    it('RETRIEVES competition results by show correctly', async() => {
+    it('RETRIEVES competition results by show correctly', async () => {
       // Create multiple results for the same show
       await saveResult({
         horseId: testHorse1.id,
@@ -312,7 +313,7 @@ describe('Competition Controller Business Logic Tests', () => {
         placement: '1st',
         discipline: 'Racing',
         runDate: new Date(),
-        showName: testShow.name
+        showName: testShow.name,
       });
 
       await saveResult({
@@ -322,7 +323,7 @@ describe('Competition Controller Business Logic Tests', () => {
         placement: '2nd',
         discipline: 'Racing',
         runDate: new Date(),
-        showName: testShow.name
+        showName: testShow.name,
       });
 
       // VERIFY: Can retrieve all results for show
@@ -336,7 +337,7 @@ describe('Competition Controller Business Logic Tests', () => {
       });
     });
 
-    it('MAINTAINS database integrity with proper relationships', async() => {
+    it('MAINTAINS database integrity with proper relationships', async () => {
       // Create result and verify relationships
       const resultData = {
         horseId: testHorse1.id,
@@ -345,7 +346,7 @@ describe('Competition Controller Business Logic Tests', () => {
         placement: '1st',
         discipline: 'Racing',
         runDate: new Date(),
-        showName: testShow.name
+        showName: testShow.name,
       };
 
       await saveResult(resultData);
@@ -353,7 +354,7 @@ describe('Competition Controller Business Logic Tests', () => {
       // VERIFY: Database relationships work correctly
       const savedResults = await prisma.competitionResult.findMany({
         where: { showId: testShow.id },
-        include: { horse: true, show: true }
+        include: { horse: true, show: true },
       });
 
       expect(savedResults.length).toBeGreaterThan(0);
@@ -368,23 +369,25 @@ describe('Competition Controller Business Logic Tests', () => {
   });
 
   describe('Error Handling and Edge Cases', () => {
-    it('HANDLES invalid result data gracefully', async() => {
+    it('HANDLES invalid result data gracefully', async () => {
       // Test with missing required fields
-      await expect(saveResult({
-        // Missing horseId
-        showId: testShow.id,
-        score: 85.0,
-        discipline: 'Racing',
-        runDate: new Date()
-      })).rejects.toThrow();
+      await expect(
+        saveResult({
+          // Missing horseId
+          showId: testShow.id,
+          score: 85.0,
+          discipline: 'Racing',
+          runDate: new Date(),
+        })
+      ).rejects.toThrow();
     });
 
-    it('HANDLES non-existent show ID gracefully', async() => {
+    it('HANDLES non-existent show ID gracefully', async () => {
       const results = await getResultsByShow(99999);
       expect(results).toEqual([]);
     });
 
-    it('MAINTAINS data consistency during concurrent operations', async() => {
+    it('MAINTAINS data consistency during concurrent operations', async () => {
       // Create multiple results simultaneously
       const promises = [
         saveResult({
@@ -394,7 +397,7 @@ describe('Competition Controller Business Logic Tests', () => {
           placement: '1st',
           discipline: 'Racing',
           runDate: new Date(),
-          showName: testShow.name
+          showName: testShow.name,
         }),
         saveResult({
           horseId: testHorse2.id,
@@ -403,7 +406,7 @@ describe('Competition Controller Business Logic Tests', () => {
           placement: '2nd',
           discipline: 'Racing',
           runDate: new Date(),
-          showName: testShow.name
+          showName: testShow.name,
         }),
         saveResult({
           horseId: testHorse3.id,
@@ -412,8 +415,8 @@ describe('Competition Controller Business Logic Tests', () => {
           placement: '3rd',
           discipline: 'Racing',
           runDate: new Date(),
-          showName: testShow.name
-        })
+          showName: testShow.name,
+        }),
       ];
 
       const results = await Promise.all(promises);

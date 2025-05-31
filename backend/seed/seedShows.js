@@ -20,7 +20,7 @@ const prisma = new PrismaClient();
 async function checkShowExists(name) {
   try {
     const existingShow = await prisma.show.findFirst({
-      where: { name }
+      where: { name },
     });
     return !!existingShow;
   } catch (error) {
@@ -44,8 +44,8 @@ async function createShow(showData) {
         levelMax: showData.levelMax,
         entryFee: showData.entryFee,
         prize: showData.prize,
-        runDate: showData.runDate
-      }
+        runDate: showData.runDate,
+      },
     });
     console.log(`✅ Created show: ${show.name} (ID: ${show.id})`);
     return show;
@@ -104,7 +104,6 @@ async function seedShows(count = 10) {
       console.log('\n⚠️  Show seeding completed with some errors.');
       return false;
     }
-
   } catch (error) {
     console.error(`💥 Fatal error during show seeding: ${error.message}`);
     return false;
@@ -134,11 +133,7 @@ async function main() {
 }
 
 // Export functions for testing
-export {
-  seedShows,
-  createShow,
-  checkShowExists
-};
+export { seedShows, createShow, checkShowExists };
 
 // Run main function if this file is executed directly
 const currentFileUrl = import.meta.url;

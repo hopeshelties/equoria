@@ -34,10 +34,10 @@ if (config.env !== 'test') {
 if (config.env !== 'test') {
   // Morgan stream piped to Winston
   const morganStream = {
-    write: (message) => {
+    write: message => {
       // Remove newline characters from morgan's output to avoid double newlines in winston logs
       logger.info(message.trim());
-    }
+    },
   };
   app.use(morgan('dev', { stream: morganStream }));
 }
@@ -47,11 +47,15 @@ app.use(express.json({ limit: '10mb' })); // Middleware to parse JSON bodies wit
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // Parse URL-encoded bodies
 
 // API Documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-  explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Equoria API Documentation'
-}));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(specs, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Equoria API Documentation',
+  })
+);
 
 // API Documentation JSON
 app.get('/api-docs.json', (_req, res) => {
@@ -90,7 +94,7 @@ const _input = {
   damTraits: ['resilient', 'nervous'], // Mixed traits
   sireTraits: ['bold', 'stubborn'], // Mixed traits
   damBondScore: 70,
-  damStressLevel: 30
+  damStressLevel: 30,
 };
 
 export default app;

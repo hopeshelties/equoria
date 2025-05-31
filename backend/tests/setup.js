@@ -11,7 +11,9 @@ dotenv.config({ path: join(__dirname, '..', '.env.test') });
 
 // Verify we're using the test database
 if (!process.env.DATABASE_URL || !process.env.DATABASE_URL.includes('equoria_test')) {
-  throw new Error('Tests must use the test database (equoria_test). Check .env.test configuration.');
+  throw new Error(
+    'Tests must use the test database (equoria_test). Check .env.test configuration.'
+  );
 }
 
 // Set NODE_ENV to test if not already set

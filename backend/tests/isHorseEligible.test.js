@@ -1,6 +1,43 @@
+/**
+ * 🧪 UNIT TEST: Horse Eligibility - Competition Entry Validation
+ *
+ * This test validates the horse eligibility system for competition entry,
+ * focusing on business rule validation and entry requirement checking.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Age requirements: Horses must be 3-20 years old (inclusive) to compete
+ * - Level requirements: Horse level must be within show's levelMin-levelMax range
+ * - Previous entry prevention: Horses cannot enter the same show twice
+ * - Input validation: Proper error handling for invalid horse/show objects
+ * - Discipline independence: All horses can enter any discipline (no trait restrictions)
+ * - Health status independence: Health status does not affect eligibility
+ * - Flexible level limits: Shows can have no levelMin/levelMax (open entry)
+ * - Mixed ID types: Support for string and numeric show IDs
+ * - Edge case handling: Zero levels, negative values, large arrays, empty strings
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. isHorseEligibleForShow() - Complete eligibility validation engine
+ * 2. Input validation - Null/undefined horse/show objects, invalid previousEntries
+ * 3. Age validation - Boundary testing (2, 3, 20, 21), invalid age types
+ * 4. Level validation - Range checking, boundary testing, missing limits
+ * 5. Previous entry checking - Duplicate prevention, mixed ID types
+ * 6. Discipline independence - No trait-based restrictions
+ * 7. Edge cases - Zero values, negative numbers, large datasets, empty strings
+ * 8. Valid entry scenarios - Complete success cases with all requirements met
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete business logic, validation rules, eligibility calculations
+ * ✅ REAL: Input validation, boundary checking, edge case handling
+ * 🔧 MOCK: None - pure utility function testing with real business logic
+ *
+ * 💡 TEST STRATEGY: Pure unit testing of business logic without external dependencies
+ *    to validate eligibility rules and ensure comprehensive edge case coverage
+ */
+
+import { jest, describe, it, expect } from '@jest/globals';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
 
-describe('isHorseEligibleForShow', () => {
+describe('🏆 UNIT: Horse Eligibility - Competition Entry Validation', () => {
   // Sample test data
   const validHorse = {
     id: 1,
@@ -8,7 +45,7 @@ describe('isHorseEligibleForShow', () => {
     age: 5,
     level: 10,
     trait: 'Agile',
-    health_status: 'Excellent'
+    health_status: 'Excellent',
   };
 
   const validShow = {
@@ -16,7 +53,7 @@ describe('isHorseEligibleForShow', () => {
     name: 'Test Show',
     levelMin: 5,
     levelMax: 15,
-    discipline: 'Dressage'
+    discipline: 'Dressage',
   };
 
   describe('Input Validation', () => {
@@ -25,7 +62,9 @@ describe('isHorseEligibleForShow', () => {
     });
 
     it('should throw error for undefined horse', () => {
-      expect(() => isHorseEligibleForShow(undefined, validShow)).toThrow('Horse object is required');
+      expect(() => isHorseEligibleForShow(undefined, validShow)).toThrow(
+        'Horse object is required'
+      );
     });
 
     it('should throw error for null show', () => {
@@ -33,15 +72,21 @@ describe('isHorseEligibleForShow', () => {
     });
 
     it('should throw error for undefined show', () => {
-      expect(() => isHorseEligibleForShow(validHorse, undefined)).toThrow('Show object is required');
+      expect(() => isHorseEligibleForShow(validHorse, undefined)).toThrow(
+        'Show object is required'
+      );
     });
 
     it('should throw error for non-array previousEntries', () => {
-      expect(() => isHorseEligibleForShow(validHorse, validShow, 'not-array')).toThrow('previousEntries must be an array');
+      expect(() => isHorseEligibleForShow(validHorse, validShow, 'not-array')).toThrow(
+        'previousEntries must be an array'
+      );
     });
 
     it('should throw error for null previousEntries', () => {
-      expect(() => isHorseEligibleForShow(validHorse, validShow, null)).toThrow('previousEntries must be an array');
+      expect(() => isHorseEligibleForShow(validHorse, validShow, null)).toThrow(
+        'previousEntries must be an array'
+      );
     });
   });
 
@@ -217,7 +262,7 @@ describe('isHorseEligibleForShow', () => {
         age: 8,
         level: 12,
         trait: 'Swift',
-        health_status: 'Excellent'
+        health_status: 'Excellent',
       };
 
       const openShow = {
@@ -225,7 +270,7 @@ describe('isHorseEligibleForShow', () => {
         name: 'Annual Championship',
         levelMin: 10,
         levelMax: 20,
-        discipline: 'All-Around'
+        discipline: 'All-Around',
       };
 
       const previousEntries = ['local-show-1', 'regional-show-2'];
@@ -238,7 +283,7 @@ describe('isHorseEligibleForShow', () => {
         id: 2,
         name: 'Young Talent',
         age: 3,
-        level: 1
+        level: 1,
       };
 
       const beginnerShow = {
@@ -246,7 +291,7 @@ describe('isHorseEligibleForShow', () => {
         name: 'Beginner Competition',
         levelMin: 1,
         levelMax: 5,
-        discipline: 'Training'
+        discipline: 'Training',
       };
 
       expect(isHorseEligibleForShow(minRequirementHorse, beginnerShow)).toBe(true);
@@ -257,7 +302,7 @@ describe('isHorseEligibleForShow', () => {
         id: 3,
         name: 'Veteran Champion',
         age: 20,
-        level: 50
+        level: 50,
       };
 
       const veteranShow = {
@@ -265,7 +310,7 @@ describe('isHorseEligibleForShow', () => {
         name: 'Veteran Competition',
         levelMin: 40,
         levelMax: 50,
-        discipline: 'Senior'
+        discipline: 'Senior',
       };
 
       expect(isHorseEligibleForShow(maxRequirementHorse, veteranShow)).toBe(true);

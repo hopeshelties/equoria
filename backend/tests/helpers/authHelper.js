@@ -9,13 +9,13 @@ export const generateTestToken = (userData = {}) => {
     id: 'test-user-uuid-123',
     email: 'test@example.com',
     role: 'user',
-    fingerprint: Date.now()
+    fingerprint: Date.now(),
   };
 
   const user = { ...defaultUser, ...userData };
 
   return jwt.sign(user, config.jwtSecret, {
-    expiresIn: config.jwtExpiresIn || '7d'
+    expiresIn: config.jwtExpiresIn || '7d',
   });
 };
 
@@ -26,14 +26,14 @@ export const generateAdminToken = () => {
   return generateTestToken({
     id: 'admin-user-uuid-456',
     email: 'admin@example.com',
-    role: 'admin'
+    role: 'admin',
   });
 };
 
 /**
  * Create authorization header for requests
  */
-export const authHeader = (token) => {
+export const authHeader = token => {
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -48,7 +48,7 @@ export const createTestUser = (overrides = {}) => {
     email: 'test@example.com',
     password: 'TestPassword123',
     money: 1000, // Added default money
-    ...overrides
+    ...overrides,
   };
 };
 
@@ -56,6 +56,6 @@ export const createLoginData = (overrides = {}) => {
   return {
     email: 'test@example.com',
     password: 'TestPassword123',
-    ...overrides
+    ...overrides,
   };
 };

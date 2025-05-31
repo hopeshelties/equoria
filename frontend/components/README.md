@@ -5,7 +5,7 @@ A React Native component for displaying horse epigenetic traits with positive/ne
 ## Features
 
 - ✅ **Positive traits** displayed with green badges
-- ❌ **Negative traits** displayed with red badges  
+- ❌ **Negative traits** displayed with red badges
 - 🔍 **Hidden traits** shown as "???" placeholders
 - 📱 **Modal descriptions** with detailed trait information
 - ♿ **Full accessibility** support with proper labels and hints
@@ -28,7 +28,7 @@ const MyHorseScreen = () => {
   const traits = {
     positive: ['resilient', 'bold'],
     negative: ['nervous'],
-    hidden: ['trainability_boost']
+    hidden: ['trainability_boost'],
   };
 
   return (
@@ -45,18 +45,18 @@ const MyHorseScreen = () => {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `traits` | `Object` | `{}` | Object containing positive, negative, and hidden trait arrays |
-| `horseName` | `string` | `'Horse'` | Name of the horse for display and accessibility |
-| `onTraitPress` | `function` | `undefined` | Optional callback when a trait is pressed |
+| Prop           | Type       | Default     | Description                                                   |
+| -------------- | ---------- | ----------- | ------------------------------------------------------------- |
+| `traits`       | `Object`   | `{}`        | Object containing positive, negative, and hidden trait arrays |
+| `horseName`    | `string`   | `'Horse'`   | Name of the horse for display and accessibility               |
+| `onTraitPress` | `function` | `undefined` | Optional callback when a trait is pressed                     |
 
 ### Traits Object Structure
 
 ```javascript
 {
   positive: ['resilient', 'bold', 'intelligent'],  // Array of positive trait keys
-  negative: ['nervous', 'stubborn'],               // Array of negative trait keys  
+  negative: ['nervous', 'stubborn'],               // Array of negative trait keys
   hidden: ['trainability_boost', 'athletic']       // Array of hidden trait keys
 }
 ```
@@ -64,6 +64,7 @@ const MyHorseScreen = () => {
 ## Supported Traits
 
 ### Positive Traits
+
 - `resilient` - Faster stress recovery, improved training consistency
 - `bold` - Enhanced competition performance, better adaptability
 - `intelligent` - Accelerated learning, improved skill retention
@@ -72,6 +73,7 @@ const MyHorseScreen = () => {
 - `trainability_boost` - Major training efficiency bonus, faster skill development
 
 ### Negative Traits
+
 - `nervous` - Increased stress sensitivity, requires gentle approach
 - `stubborn` - Slower initial learning, increased training time required
 - `fragile` - Higher injury risk, requires careful training management
@@ -79,55 +81,67 @@ const MyHorseScreen = () => {
 - `lazy` - Reduced training efficiency, requires motivation techniques
 
 ### Custom Traits
+
 The component gracefully handles unknown traits by auto-generating display names:
+
 - `fire_resistance` → "Fire Resistance"
 - `weather_immunity` → "Weather Immunity"
 
 ## Examples
 
 ### Complete Horse Profile
+
 ```jsx
 <TraitDisplay
   traits={{
     positive: ['resilient', 'bold', 'intelligent'],
     negative: ['nervous', 'stubborn'],
-    hidden: ['trainability_boost', 'athletic']
+    hidden: ['trainability_boost', 'athletic'],
   }}
   horseName="Thunder"
 />
 ```
 
 ### Champion Horse (Positive Only)
+
 ```jsx
 <TraitDisplay
   traits={{
     positive: ['athletic', 'calm', 'intelligent', 'bold'],
     negative: [],
-    hidden: ['trainability_boost']
+    hidden: ['trainability_boost'],
   }}
   horseName="Champion"
 />
 ```
 
 ### Young Horse (Mostly Hidden)
+
 ```jsx
 <TraitDisplay
   traits={{
     positive: ['bold'],
     negative: [],
-    hidden: ['intelligent', 'athletic', 'nervous', 'trainability_boost', 'calm']
+    hidden: [
+      'intelligent',
+      'athletic',
+      'nervous',
+      'trainability_boost',
+      'calm',
+    ],
   }}
   horseName="Starlight"
 />
 ```
 
 ### Empty State
+
 ```jsx
 <TraitDisplay
   traits={{
     positive: [],
     negative: [],
-    hidden: []
+    hidden: [],
   }}
   horseName="Mystery"
 />
@@ -144,6 +158,7 @@ The component includes comprehensive accessibility support:
 - **Descriptive Labels**: Clear descriptions of trait types and interactions
 
 ### Accessibility Labels
+
 - Positive traits: `"Resilient trait - positive"`
 - Negative traits: `"Nervous trait - negative"`
 - Hidden traits: `"Hidden trait - not yet discovered"`
@@ -154,12 +169,14 @@ The component includes comprehensive accessibility support:
 The component uses Tailwind CSS classes and can be customized by modifying the internal styles:
 
 ### Color Scheme
+
 - **Positive traits**: Green badges (`bg-green-500`)
 - **Negative traits**: Red badges (`bg-red-500`)
 - **Hidden traits**: Gray dashed borders (`border-gray-400`)
 - **Header**: Purple gradient (`#8B5CF6` to `#7C3AED`)
 
 ### Responsive Design
+
 - Mobile-first approach with proper spacing
 - Flexible badge layout that wraps on smaller screens
 - Modal adapts to screen size with max-width constraints
@@ -174,6 +191,7 @@ Clicking any visible trait opens a detailed modal with:
 - **Close options**: X button, backdrop tap, or "Got it!" button
 
 ### Modal Content Structure
+
 ```javascript
 {
   name: 'Resilient',
@@ -210,6 +228,7 @@ The component includes comprehensive tests covering:
 - ✅ Empty states and missing data
 
 Run tests with:
+
 ```bash
 npm test -- --testPathPattern=TraitDisplay.test.js
 ```
@@ -238,4 +257,4 @@ When adding new traits:
 
 ## License
 
-This component is part of the Equoria project and follows the project's licensing terms. 
+This component is part of the Equoria project and follows the project's licensing terms.

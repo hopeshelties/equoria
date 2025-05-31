@@ -18,7 +18,6 @@ async function checkDatabase() {
 
     const shows = await prisma.show.findMany();
     console.log(`🏆 Shows: ${shows.length}`);
-
   } catch (error) {
     console.error('❌ Database error:', error);
   } finally {

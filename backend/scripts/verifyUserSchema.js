@@ -22,13 +22,13 @@ async function verifyUserSchema() {
       money: 1000,
       level: 1,
       xp: 0,
-      settings: { theme: 'light', notifications: true }
+      settings: { theme: 'light', notifications: true },
       // isActive, role, lastLoginAt, createdAt, updatedAt will have defaults or be set by Prisma
     };
 
     logger.info('1. Testing user creation with all required fields...');
     const testUser = await prisma.user.create({
-      data: testUserData
+      data: testUserData,
     });
 
     logger.info('✅ User created successfully!');
@@ -57,8 +57,8 @@ async function verifyUserSchema() {
         money: 1500,
         settings: { theme: 'dark', notifications: false, newPreference: 'test' },
         lastLoginAt: new Date(),
-        isActive: false
-      }
+        isActive: false,
+      },
     });
 
     logger.info('✅ User fields updated successfully!');
@@ -72,7 +72,7 @@ async function verifyUserSchema() {
     // Clean up test user
     logger.info('3. Cleaning up test user...');
     await prisma.user.delete({
-      where: { id: testUser.id }
+      where: { id: testUser.id },
     });
     logger.info('✅ Test user deleted\n');
 
@@ -88,22 +88,27 @@ async function verifyUserSchema() {
     logger.info('- ✅ xp (Integer, Default: 0) - Merged from Player');
     logger.info('- ✅ settings (JSONB, Default: {}) - Merged from Player');
     logger.info('- ✅ isActive (Boolean, Default: true)');
-    logger.info('- ✅ role (String, Default: \'user\')');
+    logger.info("- ✅ role (String, Default: 'user')");
     logger.info('- ✅ createdAt (DateTime, Default: CURRENT_TIMESTAMP)');
     logger.info('- ✅ updatedAt (DateTime, Auto-updated)');
     logger.info('- ✅ lastLoginAt (DateTime, Optional)\n');
 
     logger.info('ForeignKey constraints (not directly verified by this script but crucial):');
     logger.info('- Horses must link to User via ownerId (formerly playerId)');
-
   } catch (error) {
     logger.error('❌ Schema verification failed:', error.message);
 
-    if (error.message.includes('Unknown column') || error.message.includes('column') || error.message.includes('field')) {
+    if (
+      error.message.includes('Unknown column') ||
+      error.message.includes('column') ||
+      error.message.includes('field')
+    ) {
       logger.error('\n💡 Possible Issues:');
       logger.error('- Missing one or more columns in the users table as defined in schema.prisma');
       logger.error('- Incorrect column types (e.g., INTEGER vs. TEXT, JSON vs. JSONB)');
-      logger.error('- Database migration (`npx prisma migrate dev`) may not have run successfully or is pending.');
+      logger.error(
+        '- Database migration (`npx prisma migrate dev`) may not have run successfully or is pending.'
+      );
     }
 
     logger.error('[verifyUserSchema] Schema error: %o', error);
@@ -118,7 +123,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       logger.info('\n✨ Schema verification completed');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       logger.error('💥 Schema verification failed:', error.message);
       process.exit(1);
     });

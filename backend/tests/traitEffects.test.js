@@ -5,12 +5,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Import the trait effects system
-const {
-  getTraitEffects,
-  getAllTraitEffects,
-  hasTraitEffect,
-  getCombinedTraitEffects
-} = await import(join(__dirname, '../utils/traitEffects.js'));
+const { getTraitEffects, getAllTraitEffects, hasTraitEffect, getCombinedTraitEffects } =
+  await import(join(__dirname, '../utils/traitEffects.js'));
 
 describe('Trait Effects System', () => {
   describe('getTraitEffects', () => {
@@ -120,7 +116,7 @@ describe('Trait Effects System', () => {
       const effects = getTraitEffects('intelligent');
       expect(effects.trainingXpModifier).toBe(0.25);
       expect(effects.statGainChanceModifier).toBe(0.15);
-      expect(effects.trainingTimeReduction).toBe(0.10);
+      expect(effects.trainingTimeReduction).toBe(0.1);
       expect(effects.competitionScoreModifier).toBe(0.03);
       expect(effects.problemSolvingBonus).toBe(true);
       expect(effects.disciplineModifiers['Dressage']).toBe(0.06);
@@ -128,7 +124,7 @@ describe('Trait Effects System', () => {
 
     test('athletic trait should have correct effects', () => {
       const effects = getTraitEffects('athletic');
-      expect(effects.physicalTrainingBonus).toBe(0.20);
+      expect(effects.physicalTrainingBonus).toBe(0.2);
       expect(effects.competitionScoreModifier).toBe(0.05);
       expect(effects.baseStatBoost).toBeDefined();
       expect(effects.baseStatBoost.stamina).toBe(2);
@@ -143,13 +139,13 @@ describe('Trait Effects System', () => {
       expect(effects.trainingStressIncrease).toBe(0.25);
       expect(effects.competitionStressRisk).toBe(10);
       expect(effects.competitionScoreModifier).toBe(-0.04);
-      expect(effects.stressAccumulation).toBe(1.20);
+      expect(effects.stressAccumulation).toBe(1.2);
       expect(effects.disciplineModifiers['Racing']).toBe(-0.06);
     });
 
     test('lazy trait should have correct penalties', () => {
       const effects = getTraitEffects('lazy');
-      expect(effects.trainingXpModifier).toBe(-0.20);
+      expect(effects.trainingXpModifier).toBe(-0.2);
       expect(effects.trainingMotivationPenalty).toBe(0.25);
       expect(effects.competitionScoreModifier).toBe(-0.035);
       expect(effects.activityAvoidance).toBe(true);
@@ -159,8 +155,8 @@ describe('Trait Effects System', () => {
     test('burnout trait should have severe penalties', () => {
       const effects = getTraitEffects('burnout');
       expect(effects.statGainBlocked).toBe(true);
-      expect(effects.trainingXpModifier).toBe(-0.50);
-      expect(effects.competitionScoreModifier).toBe(-0.10);
+      expect(effects.trainingXpModifier).toBe(-0.5);
+      expect(effects.competitionScoreModifier).toBe(-0.1);
       expect(effects.extendedRestRequired).toBe(true);
       expect(effects.disciplineModifiers['Endurance']).toBe(-0.15);
     });
@@ -169,14 +165,14 @@ describe('Trait Effects System', () => {
   describe('Rare Traits', () => {
     test('legendary_bloodline trait should have powerful effects', () => {
       const effects = getTraitEffects('legendary_bloodline');
-      expect(effects.trainingXpModifier).toBe(0.50);
-      expect(effects.statGainChanceModifier).toBe(0.30);
+      expect(effects.trainingXpModifier).toBe(0.5);
+      expect(effects.statGainChanceModifier).toBe(0.3);
       expect(effects.competitionScoreModifier).toBe(0.08);
       expect(effects.eliteTrainingAccess).toBe(true);
       expect(effects.baseStatBoost).toBeDefined();
       expect(effects.baseStatBoost.stamina).toBe(3);
-      expect(effects.breedingValueBonus).toBe(0.50);
-      expect(effects.disciplineModifiers['Racing']).toBe(0.10);
+      expect(effects.breedingValueBonus).toBe(0.5);
+      expect(effects.disciplineModifiers['Racing']).toBe(0.1);
     });
   });
 

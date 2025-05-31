@@ -21,22 +21,25 @@ async function updateHorseEarnings(horseId, prizeAmount) {
       where: { id: horseId },
       data: {
         earnings: {
-          increment: prizeAmount
-        }
+          increment: prizeAmount,
+        },
       },
       include: {
         breed: true,
         owner: true,
         stable: true,
-        player: true
-      }
+        player: true,
+      },
     });
 
-    logger.info(`[horseUpdates.updateHorseEarnings] Updated horse ${horseId} earnings by $${prizeAmount} (total: $${updatedHorse.earnings})`);
+    logger.info(
+      `[horseUpdates.updateHorseEarnings] Updated horse ${horseId} earnings by $${prizeAmount} (total: $${updatedHorse.earnings})`
+    );
     return updatedHorse;
-
   } catch (error) {
-    logger.error(`[horseUpdates.updateHorseEarnings] Error updating horse earnings: ${error.message}`);
+    logger.error(
+      `[horseUpdates.updateHorseEarnings] Error updating horse earnings: ${error.message}`
+    );
     throw error;
   }
 }
@@ -64,8 +67,16 @@ async function updateHorseStat(horseId, statName, increase = 1) {
 
     // Validate stat name
     const validStats = [
-      'speed', 'stamina', 'agility', 'balance', 'precision',
-      'intelligence', 'boldness', 'flexibility', 'obedience', 'focus'
+      'speed',
+      'stamina',
+      'agility',
+      'balance',
+      'precision',
+      'intelligence',
+      'boldness',
+      'flexibility',
+      'obedience',
+      'focus',
     ];
 
     if (!validStats.includes(statName)) {
@@ -75,8 +86,8 @@ async function updateHorseStat(horseId, statName, increase = 1) {
     // Build dynamic update object
     const updateData = {
       [statName]: {
-        increment: increase
-      }
+        increment: increase,
+      },
     };
 
     const updatedHorse = await prisma.horse.update({
@@ -86,13 +97,14 @@ async function updateHorseStat(horseId, statName, increase = 1) {
         breed: true,
         owner: true,
         stable: true,
-        player: true
-      }
+        player: true,
+      },
     });
 
-    logger.info(`[horseUpdates.updateHorseStat] Updated horse ${horseId} ${statName} by +${increase} (new value: ${updatedHorse[statName]})`);
+    logger.info(
+      `[horseUpdates.updateHorseStat] Updated horse ${horseId} ${statName} by +${increase} (new value: ${updatedHorse[statName]})`
+    );
     return updatedHorse;
-
   } catch (error) {
     logger.error(`[horseUpdates.updateHorseStat] Error updating horse stat: ${error.message}`);
     throw error;
@@ -117,15 +129,12 @@ async function updateHorseRewards(horseId, prizeAmount, statGain = null) {
     }
 
     return updatedHorse;
-
   } catch (error) {
-    logger.error(`[horseUpdates.updateHorseRewards] Error updating horse rewards: ${error.message}`);
+    logger.error(
+      `[horseUpdates.updateHorseRewards] Error updating horse rewards: ${error.message}`
+    );
     throw error;
   }
 }
 
-export {
-  updateHorseEarnings,
-  updateHorseStat,
-  updateHorseRewards
-};
+export { updateHorseEarnings, updateHorseStat, updateHorseRewards };

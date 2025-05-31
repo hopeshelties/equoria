@@ -5,6 +5,7 @@ A sophisticated breeding system that determines offspring traits based on parent
 ## Overview
 
 The epigenetic traits system simulates realistic inheritance patterns where offspring traits are influenced by:
+
 - **Parent Genetics**: Traits from both dam and sire
 - **Environmental Factors**: Bonding scores and stress levels during foal development
 - **Random Variation**: Natural genetic variation and rare trait emergence
@@ -47,7 +48,7 @@ const breedingParams = {
   damTraits: ['resilient', 'intelligent'],
   sireTraits: ['bold', 'athletic'],
   damBondScore: 85,
-  damStressLevel: 20
+  damStressLevel: 20,
 };
 
 const offspring = calculateEpigeneticTraits(breedingParams);
@@ -64,6 +65,7 @@ console.log(offspring);
 ### Trait Categories
 
 #### Positive Traits
+
 - **resilient**: Faster stress recovery, improved training consistency
 - **bold**: Enhanced competition performance, better adaptability
 - **intelligent**: Accelerated learning, improved skill retention
@@ -72,6 +74,7 @@ console.log(offspring);
 - **trainability_boost**: Major training efficiency bonus (rare)
 
 #### Negative Traits
+
 - **nervous**: Increased stress sensitivity, requires gentle approach
 - **stubborn**: Slower initial learning, increased training time
 - **fragile**: Higher injury risk, requires careful management
@@ -79,6 +82,7 @@ console.log(offspring);
 - **lazy**: Reduced training efficiency, requires motivation
 
 #### Rare Traits
+
 - **legendary_bloodline**: Exceptional heritage (legendary rarity)
 - **weather_immunity**: Environmental resistance (rare)
 - **fire_resistance**: Heat tolerance (rare)
@@ -88,6 +92,7 @@ console.log(offspring);
 ### Trait Properties
 
 Each trait has:
+
 - **Type**: positive, negative
 - **Rarity**: common, rare, legendary
 - **Conflicts**: List of incompatible traits
@@ -95,6 +100,7 @@ Each trait has:
 ### Trait Conflicts
 
 The system automatically resolves conflicting traits:
+
 - `calm` conflicts with `nervous`, `aggressive`
 - `resilient` conflicts with `fragile`
 - `bold` conflicts with `nervous`
@@ -107,6 +113,7 @@ The system automatically resolves conflicting traits:
 ### Inheritance Probability
 
 Base inheritance probabilities by rarity:
+
 - **Common traits**: 50% base chance
 - **Rare traits**: 15% base chance
 - **Legendary traits**: 5% base chance
@@ -114,6 +121,7 @@ Base inheritance probabilities by rarity:
 ### Environmental Modifiers
 
 #### Bonding Score Effects (0-100)
+
 - **High bonding (80-100)**:
   - +20% max increase to positive trait probability
   - -15% max decrease to negative trait probability
@@ -122,6 +130,7 @@ Base inheritance probabilities by rarity:
   - +15% max increase to negative trait probability
 
 #### Stress Level Effects (0-100)
+
 - **High stress (80-100)**:
   - -15% max decrease to positive trait probability
   - +20% max increase to negative trait probability
@@ -135,20 +144,24 @@ Base inheritance probabilities by rarity:
 The system can generate new traits based on conditions:
 
 #### Positive Environmental Traits
+
 - Generated when `(bondScore - stressLevel) > 20`
 - 30% chance to generate: `resilient`, `calm`, or `intelligent`
 
 #### Negative Environmental Traits
+
 - Generated when `(bondScore - stressLevel) < -20`
 - 60% chance to generate: `nervous`, `fragile`, or `lazy`
 
 #### Rare Environmental Traits
+
 - Base 3% chance, increased to 8% with excellent conditions
 - Can generate: `weather_immunity`, `night_vision`, `legendary_bloodline`
 
 ### Trait Visibility
 
 Traits are categorized as visible or hidden:
+
 - **Rare traits**: 70% chance to be hidden
 - **Legendary traits**: 90% chance to be hidden
 - **Poor conditions**: 30% chance for any trait to be hidden
@@ -173,9 +186,9 @@ await prisma.horse.create({
     epigeneticTraits: {
       positive: offspring.positive,
       negative: offspring.negative,
-      hidden: offspring.hidden
-    }
-  }
+      hidden: offspring.hidden,
+    },
+  },
 });
 ```
 
@@ -191,7 +204,7 @@ const breedingParams = {
   damTraits: dam.epigeneticTraits.positive.concat(dam.epigeneticTraits.negative),
   sireTraits: sire.epigeneticTraits.positive.concat(sire.epigeneticTraits.negative),
   damBondScore: foalDev.bondingLevel,
-  damStressLevel: foalDev.stressLevel
+  damStressLevel: foalDev.stressLevel,
 };
 
 const offspring = calculateEpigeneticTraits(breedingParams);
@@ -206,7 +219,7 @@ Display traits using the TraitDisplay component:
   traits={{
     positive: horse.epigeneticTraits.positive,
     negative: horse.epigeneticTraits.negative,
-    hidden: horse.epigeneticTraits.hidden
+    hidden: horse.epigeneticTraits.hidden,
   }}
   horseName={horse.name}
   onTraitPress={(trait, info) => {
@@ -254,6 +267,7 @@ const conflicts = checkTraitConflict('calm', 'nervous');
 ### Unit Tests
 
 Comprehensive test suite covers:
+
 - Input validation
 - Inheritance probability
 - Environmental effects
@@ -270,7 +284,7 @@ const result = calculateEpigeneticTraits({
   sireTraits: ['bold'],
   damBondScore: 80,
   damStressLevel: 20,
-  seed: 12345
+  seed: 12345,
 });
 
 // Test environmental effects
@@ -278,7 +292,7 @@ const highStressResult = calculateEpigeneticTraits({
   damTraits: ['resilient'],
   sireTraits: ['bold'],
   damBondScore: 20,
-  damStressLevel: 90
+  damStressLevel: 90,
 });
 ```
 
@@ -303,6 +317,7 @@ try {
 ```
 
 Common errors:
+
 - `Missing required breeding parameters`
 - `Parent traits must be arrays`
 - `Bond scores and stress levels must be numbers`
@@ -315,10 +330,12 @@ Common errors:
 Different strategies yield different outcomes:
 
 - **High Bond Strategy**: Focus on maximizing dam bonding
+
   - Pros: More positive traits, fewer negative traits
   - Cons: Stress levels may still cause issues
 
 - **Low Stress Strategy**: Minimize environmental stress
+
   - Pros: Better trait expression, fewer hidden traits
   - Cons: May miss bonding benefits
 
@@ -329,6 +346,7 @@ Different strategies yield different outcomes:
 ### Rare Trait Breeding
 
 Breeding for rare traits requires:
+
 - Excellent environmental conditions (high bond, low stress)
 - Multiple attempts due to low probability
 - Strategic parent selection with existing rare traits
@@ -337,6 +355,7 @@ Breeding for rare traits requires:
 ## Future Enhancements
 
 Potential system expansions:
+
 - **Seasonal Effects**: Environmental factors based on breeding season
 - **Bloodline Tracking**: Multi-generational trait inheritance
 - **Mutation System**: Spontaneous new trait generation
@@ -346,10 +365,11 @@ Potential system expansions:
 ## Conclusion
 
 The epigenetic traits system provides a sophisticated, realistic breeding mechanic that:
+
 - Rewards careful foal development
 - Creates meaningful breeding decisions
 - Generates trait variety and rarity
 - Integrates seamlessly with existing game systems
 - Provides engaging long-term progression
 
-Users must balance environmental factors during foal development to maximize positive trait inheritance while minimizing negative traits, creating a deep and rewarding breeding experience. 
+Users must balance environmental factors during foal development to maximize positive trait inheritance while minimizing negative traits, creating a deep and rewarding breeding experience.

@@ -37,7 +37,6 @@ import { jest, describe, it, expect } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
 describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhancement', () => {
-
   // Helper function to create a test horse with specific traits
   function createTestHorse(id, name, traits = {}) {
     return {
@@ -53,17 +52,17 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
       trainingScore: 50,
       tack: {
         saddleBonus: 5,
-        bridleBonus: 5
+        bridleBonus: 5,
       },
       rider: {
         bonusPercent: 0,
-        penaltyPercent: 0
+        penaltyPercent: 0,
       },
       epigeneticModifiers: {
         positive: traits.positive || [],
         negative: traits.negative || [],
-        hidden: traits.hidden || []
-      }
+        hidden: traits.hidden || [],
+      },
     };
   }
 
@@ -73,17 +72,17 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
       id: 1,
       name: `Test ${discipline} Show`,
       discipline,
-      runDate: new Date().toISOString()
+      runDate: new Date().toISOString(),
     };
   }
 
   describe('Discipline Affinity Trait Matching', () => {
     it('should apply +5 bonus for discipline_affinity_racing trait in Racing competition', () => {
       const horseWithAffinity = createTestHorse(1, 'RacingSpecialist', {
-        positive: ['discipline_affinity_racing']
+        positive: ['discipline_affinity_racing'],
       });
       const horseWithoutAffinity = createTestHorse(2, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Racing');
@@ -100,10 +99,10 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
 
     it('should apply +5 bonus for discipline_affinity_show_jumping trait in Show Jumping competition', () => {
       const horseWithAffinity = createTestHorse(1, 'JumpingSpecialist', {
-        positive: ['discipline_affinity_show_jumping']
+        positive: ['discipline_affinity_show_jumping'],
       });
       const horseWithoutAffinity = createTestHorse(2, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Show Jumping');
@@ -117,10 +116,10 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
 
     it('should apply +5 bonus for discipline_affinity_dressage trait in Dressage competition', () => {
       const horseWithAffinity = createTestHorse(1, 'DressageSpecialist', {
-        positive: ['discipline_affinity_dressage']
+        positive: ['discipline_affinity_dressage'],
       });
       const horseWithoutAffinity = createTestHorse(2, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Dressage');
@@ -134,10 +133,10 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
 
     it('should apply +5 bonus for discipline_affinity_cross_country trait in Cross Country competition', () => {
       const horseWithAffinity = createTestHorse(1, 'CrossCountrySpecialist', {
-        positive: ['discipline_affinity_cross_country']
+        positive: ['discipline_affinity_cross_country'],
       });
       const horseWithoutAffinity = createTestHorse(2, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Cross Country');
@@ -153,10 +152,10 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
   describe('Discipline Affinity Trait Non-Matching', () => {
     it('should NOT apply bonus for discipline_affinity_racing trait in Dressage competition', () => {
       const horseWithWrongAffinity = createTestHorse(1, 'RacingSpecialist', {
-        positive: ['discipline_affinity_racing']
+        positive: ['discipline_affinity_racing'],
       });
       const horseWithoutAffinity = createTestHorse(2, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Dressage');
@@ -174,10 +173,10 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
 
     it('should NOT apply bonus for discipline_affinity_show_jumping trait in Racing competition', () => {
       const horseWithWrongAffinity = createTestHorse(1, 'JumpingSpecialist', {
-        positive: ['discipline_affinity_show_jumping']
+        positive: ['discipline_affinity_show_jumping'],
       });
       const horseWithoutAffinity = createTestHorse(2, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Racing');
@@ -197,14 +196,21 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
   describe('Multiple Discipline Affinity Traits', () => {
     it('should only apply one +5 bonus even with multiple discipline affinity traits', () => {
       const horseWithMultipleAffinities = createTestHorse(1, 'MultiSpecialist', {
-        positive: ['discipline_affinity_racing', 'discipline_affinity_dressage', 'discipline_affinity_show_jumping']
+        positive: [
+          'discipline_affinity_racing',
+          'discipline_affinity_dressage',
+          'discipline_affinity_show_jumping',
+        ],
       });
       const horseWithSingleAffinity = createTestHorse(2, 'SingleSpecialist', {
-        positive: ['discipline_affinity_racing']
+        positive: ['discipline_affinity_racing'],
       });
 
       const show = createTestShow('Racing');
-      const results = simulateCompetition([horseWithMultipleAffinities, horseWithSingleAffinity], show);
+      const results = simulateCompetition(
+        [horseWithMultipleAffinities, horseWithSingleAffinity],
+        show
+      );
 
       const multiResult = results.find(r => r.horseId === 1);
       const singleResult = results.find(r => r.horseId === 2);
@@ -219,10 +225,10 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
   describe('Discipline Name Conversion', () => {
     it('should correctly convert "Show Jumping" to "discipline_affinity_show_jumping"', () => {
       const horseWithAffinity = createTestHorse(1, 'JumpingSpecialist', {
-        positive: ['discipline_affinity_show_jumping']
+        positive: ['discipline_affinity_show_jumping'],
       });
       const horseWithoutAffinity = createTestHorse(2, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Show Jumping'); // Space in discipline name
@@ -236,10 +242,10 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
 
     it('should correctly convert "Cross Country" to "discipline_affinity_cross_country"', () => {
       const horseWithAffinity = createTestHorse(1, 'CrossCountrySpecialist', {
-        positive: ['discipline_affinity_cross_country']
+        positive: ['discipline_affinity_cross_country'],
       });
       const horseWithoutAffinity = createTestHorse(2, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Cross Country'); // Space in discipline name
@@ -263,20 +269,23 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
         .mockReturnValueOnce(0.5) // Horse 1 (super specialist) - neutral luck (0% modifier)
         .mockReturnValueOnce(0.5) // Horse 2 (affinity only) - neutral luck (0% modifier)
         .mockReturnValueOnce(0.5) // Horse 3 (regular) - neutral luck (0% modifier)
-        .mockReturnValue(0.5);    // Any additional random calls
+        .mockReturnValue(0.5); // Any additional random calls
 
       const horseWithAffinityAndTraits = createTestHorse(1, 'SuperSpecialist', {
-        positive: ['discipline_affinity_racing', 'athletic', 'resilient']
+        positive: ['discipline_affinity_racing', 'athletic', 'resilient'],
       });
       const horseWithOnlyAffinity = createTestHorse(2, 'AffinityOnly', {
-        positive: ['discipline_affinity_racing']
+        positive: ['discipline_affinity_racing'],
       });
       const horseWithoutAffinity = createTestHorse(3, 'RegularHorse', {
-        positive: []
+        positive: [],
       });
 
       const show = createTestShow('Racing');
-      const results = simulateCompetition([horseWithAffinityAndTraits, horseWithOnlyAffinity, horseWithoutAffinity], show);
+      const results = simulateCompetition(
+        [horseWithAffinityAndTraits, horseWithOnlyAffinity, horseWithoutAffinity],
+        show
+      );
 
       const superResult = results.find(r => r.horseId === 1);
       const affinityResult = results.find(r => r.horseId === 2);
@@ -305,7 +314,7 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
         balance: 70,
         health: 'Good',
         stressLevel: 20,
-        trainingScore: 50
+        trainingScore: 50,
         // No epigeneticModifiers field
       };
 

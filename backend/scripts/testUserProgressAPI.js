@@ -22,7 +22,7 @@ async function testUserProgressAPI() {
       money: 2500,
       level: 1,
       xp: 0,
-      settings: { theme: 'dark', notifications: true }
+      settings: { theme: 'dark', notifications: true },
     };
 
     logger.info('1. Creating test user...');
@@ -36,7 +36,7 @@ async function testUserProgressAPI() {
       { description: 'After training (+5 XP)', xpToAdd: 5, expectedXpToNext: 95 },
       { description: 'After competition (+20 XP)', xpToAdd: 20, expectedXpToNext: 75 },
       { description: 'Near level up (+70 XP)', xpToAdd: 70, expectedXpToNext: 5 },
-      { description: 'Level up (+10 XP)', xpToAdd: 10, expectedXpToNext: 95 } // Should level up and have 5 XP remaining
+      { description: 'Level up (+10 XP)', xpToAdd: 10, expectedXpToNext: 95 }, // Should level up and have 5 XP remaining
     ];
 
     for (const scenario of testScenarios) {
@@ -57,7 +57,7 @@ async function testUserProgressAPI() {
         username: currentUser.username,
         level: currentUser.level,
         xp: currentUser.xp,
-        xpToNextLevel
+        xpToNextLevel,
       };
 
       logger.info(`   API Response for "${scenario.description}":`);
@@ -73,7 +73,9 @@ async function testUserProgressAPI() {
       if (xpToNextLevel === scenario.expectedXpToNext) {
         logger.info(`   ✅ xpToNextLevel calculation correct: ${xpToNextLevel}`);
       } else {
-        logger.info(`   ❌ xpToNextLevel calculation incorrect: expected ${scenario.expectedXpToNext}, got ${xpToNextLevel}`);
+        logger.info(
+          `   ❌ xpToNextLevel calculation incorrect: expected ${scenario.expectedXpToNext}, got ${xpToNextLevel}`
+        );
       }
       logger.info('');
     }
@@ -89,7 +91,7 @@ async function testUserProgressAPI() {
       money: 1000,
       level: 3,
       xp: 0, // Exactly at level boundary
-      settings: { theme: 'light' }
+      settings: { theme: 'light' },
     });
 
     const edgeResponse = {
@@ -97,12 +99,16 @@ async function testUserProgressAPI() {
       username: edgeUser.username,
       level: edgeUser.level,
       xp: edgeUser.xp,
-      xpToNextLevel: 100 - (edgeUser.xp % 100)
+      xpToNextLevel: 100 - (edgeUser.xp % 100),
     };
 
     logger.info('   Edge case - exactly at level boundary:');
-    logger.info(`   Level: ${edgeResponse.level}, XP: ${edgeResponse.xp}, XP to next: ${edgeResponse.xpToNextLevel}`);
-    logger.info(`   ✅ Should be 100 XP to next level: ${edgeResponse.xpToNextLevel === 100 ? 'PASS' : 'FAIL'}\n`);
+    logger.info(
+      `   Level: ${edgeResponse.level}, XP: ${edgeResponse.xp}, XP to next: ${edgeResponse.xpToNextLevel}`
+    );
+    logger.info(
+      `   ✅ Should be 100 XP to next level: ${edgeResponse.xpToNextLevel === 100 ? 'PASS' : 'FAIL'}\n`
+    );
 
     logger.info('🎉 User Progress API test completed successfully!');
     logger.info('\n📋 API Endpoint Summary:');
@@ -111,7 +117,6 @@ async function testUserProgressAPI() {
     logger.info('- 🧮 Formula: xpToNextLevel = 100 - (xp % 100)');
     logger.info('- ✅ Handles all XP values correctly');
     logger.info('- 🛡️ Includes proper validation and error handling');
-
   } catch (error) {
     logger.error('❌ Test failed:', error.message);
     logger.error('[testUserProgressAPI] Test error: %o', error);
@@ -125,7 +130,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       logger.info('\n✨ Test script completed');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       logger.error('💥 Test script failed:', error);
       process.exit(1);
     });

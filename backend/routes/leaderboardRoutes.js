@@ -8,7 +8,7 @@ import {
   getTopHorsesByPerformance,
   getTopPlayersByHorseEarnings,
   getRecentWinners,
-  getLeaderboardStats
+  getLeaderboardStats,
 } from '../controllers/leaderboardController.js';
 import { getAllDisciplines } from '../utils/competitionLogic.js';
 import auth from '../middleware/auth.js';
@@ -337,302 +337,300 @@ router.get('/stats', auth, getLeaderboardStats);
  *       200:
  *         description: Competition leaderboard results
  */
-router.get('/competition', auth, [
-  query('discipline')
-    .optional()
-    .isString()
-    .custom((value) => {
-      if (value && !getAllDisciplines().includes(value)) {
-        throw new Error('Invalid discipline');
-      }
-      return true;
-    }),
-  query('period')
-    .optional()
-    .isIn(['week', 'month', 'year', 'all'])
-    .withMessage('Period must be one of: week, month, year, all'),
-  query('metric')
-    .optional()
-    .isIn(['wins', 'earnings', 'placements', 'average_placement'])
-    .withMessage('Metric must be one of: wins, earnings, placements, average_placement'),
-  query('limit')
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage('Limit must be between 1 and 100'),
-  query('offset')
-    .optional()
-    .isInt({ min: 0 })
-    .withMessage('Offset must be non-negative')
-], async(req, res) => {
-  try {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      logger.warn(`[leaderboardRoutes.GET /competition] Validation errors: ${JSON.stringify(errors.array())}`);
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
-
-    const {
-      discipline,
-      period = 'all',
-      metric = 'wins',
-      limit = 20,
-      offset = 0
-    } = req.query;
-
-    logger.info(`[leaderboardRoutes.GET /competition] Getting competition leaderboard: discipline=${discipline}, period=${period}, metric=${metric}`);
-
-    // Calculate date filter based on period
-    let dateFilter = {};
-    if (period !== 'all') {
-      const now = new Date();
-      let startDate;
-
-      switch (period) {
-      case 'week':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case 'month':
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      case 'year':
-        startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-        break;
+router.get(
+  '/competition',
+  auth,
+  [
+    query('discipline')
+      .optional()
+      .isString()
+      .custom(value => {
+        if (value && !getAllDisciplines().includes(value)) {
+          throw new Error('Invalid discipline');
+        }
+        return true;
+      }),
+    query('period')
+      .optional()
+      .isIn(['week', 'month', 'year', 'all'])
+      .withMessage('Period must be one of: week, month, year, all'),
+    query('metric')
+      .optional()
+      .isIn(['wins', 'earnings', 'placements', 'average_placement'])
+      .withMessage('Metric must be one of: wins, earnings, placements, average_placement'),
+    query('limit')
+      .optional()
+      .isInt({ min: 1, max: 100 })
+      .withMessage('Limit must be between 1 and 100'),
+    query('offset').optional().isInt({ min: 0 }).withMessage('Offset must be non-negative'),
+  ],
+  async (req, res) => {
+    try {
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        logger.warn(
+          `[leaderboardRoutes.GET /competition] Validation errors: ${JSON.stringify(errors.array())}`
+        );
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array(),
+        });
       }
 
-      if (startDate) {
-        dateFilter = {
-          runDate: {
-            gte: startDate.toISOString().split('T')[0]
-          }
-        };
-      }
-    }
+      const { discipline, period = 'all', metric = 'wins', limit = 20, offset = 0 } = req.query;
 
-    // Build where clause
-    const whereClause = {
-      placement: { not: null }, // Only completed competitions
-      ...dateFilter
-    };
+      logger.info(
+        `[leaderboardRoutes.GET /competition] Getting competition leaderboard: discipline=${discipline}, period=${period}, metric=${metric}`
+      );
 
-    if (discipline) {
-      whereClause.discipline = discipline;
-    }
+      // Calculate date filter based on period
+      let dateFilter = {};
+      if (period !== 'all') {
+        const now = new Date();
+        let startDate;
 
-    // Get competition results based on metric
-    let results = [];
+        switch (period) {
+          case 'week':
+            startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            break;
+          case 'month':
+            startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            break;
+          case 'year':
+            startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+            break;
+        }
 
-    if (metric === 'wins') {
-      // Count wins (1st place) per horse
-      const winCounts = await prisma.competitionResult.groupBy({
-        by: ['horseId'],
-        where: {
-          ...whereClause,
-          placement: '1'
-        },
-        _count: {
-          id: true
-        },
-        orderBy: {
-          _count: {
-            id: 'desc'
-          }
-        },
-        take: parseInt(limit),
-        skip: parseInt(offset)
-      });
-
-      // Get horse details for winners
-      const horseIds = winCounts.map(w => w.horseId);
-      const horses = await prisma.horse.findMany({
-        where: { id: { in: horseIds } },
-        include: { user: { select: { id: true, username: true } } }
-      });
-
-      results = winCounts.map((winCount, index) => {
-        const horse = horses.find(h => h.id === winCount.horseId);
-        return {
-          rank: parseInt(offset) + index + 1,
-          horseId: winCount.horseId,
-          horseName: horse?.name || 'Unknown',
-          userId: horse?.userId,
-          userName: horse?.user?.username || 'Unknown',
-          wins: winCount._count.id,
-          metric: 'wins',
-          value: winCount._count.id
-        };
-      });
-
-    } else if (metric === 'earnings') {
-      // Sum earnings per horse
-      const earnings = await prisma.competitionResult.groupBy({
-        by: ['horseId'],
-        where: whereClause,
-        _sum: {
-          prizeWon: true
-        },
-        orderBy: {
-          _sum: {
-            prizeWon: 'desc'
-          }
-        },
-        take: parseInt(limit),
-        skip: parseInt(offset)
-      });
-
-      // Get horse details
-      const horseIds = earnings.map(e => e.horseId);
-      const horses = await prisma.horse.findMany({
-        where: { id: { in: horseIds } },
-        include: { user: { select: { id: true, username: true } } }
-      });
-
-      results = earnings.map((earning, index) => {
-        const horse = horses.find(h => h.id === earning.horseId);
-        return {
-          rank: parseInt(offset) + index + 1,
-          horseId: earning.horseId,
-          horseName: horse?.name || 'Unknown',
-          userId: horse?.userId,
-          userName: horse?.user?.username || 'Unknown',
-          totalEarnings: Number(earning._sum.prizeWon) || 0,
-          metric: 'earnings',
-          value: Number(earning._sum.prizeWon) || 0
-        };
-      });
-
-    } else if (metric === 'placements') {
-      // Count top 3 placements per horse
-      const placements = await prisma.competitionResult.groupBy({
-        by: ['horseId'],
-        where: {
-          ...whereClause,
-          placement: { in: ['1', '2', '3'] }
-        },
-        _count: {
-          id: true
-        },
-        orderBy: {
-          _count: {
-            id: 'desc'
-          }
-        },
-        take: parseInt(limit),
-        skip: parseInt(offset)
-      });
-
-      // Get horse details
-      const horseIds = placements.map(p => p.horseId);
-      const horses = await prisma.horse.findMany({
-        where: { id: { in: horseIds } },
-        include: { user: { select: { id: true, username: true } } }
-      });
-
-      results = placements.map((placement, index) => {
-        const horse = horses.find(h => h.id === placement.horseId);
-        return {
-          rank: parseInt(offset) + index + 1,
-          horseId: placement.horseId,
-          horseName: horse?.name || 'Unknown',
-          userId: horse?.userId,
-          userName: horse?.user?.username || 'Unknown',
-          topPlacements: placement._count.id,
-          metric: 'placements',
-          value: placement._count.id
-        };
-      });
-
-    } else if (metric === 'average_placement') {
-      // Calculate average placement per horse
-      const avgPlacements = await prisma.competitionResult.groupBy({
-        by: ['horseId'],
-        where: whereClause,
-        _avg: {
-          placement: true
-        },
-        _count: {
-          id: true
-        },
-        having: {
-          id: {
-            _count: {
-              gte: 3 // Minimum 3 competitions for average
-            }
-          }
-        },
-        orderBy: {
-          _avg: {
-            placement: 'asc' // Lower average placement is better
-          }
-        },
-        take: parseInt(limit),
-        skip: parseInt(offset)
-      });
-
-      // Get horse details
-      const horseIds = avgPlacements.map(a => a.horseId);
-      const horses = await prisma.horse.findMany({
-        where: { id: { in: horseIds } },
-        include: { user: { select: { id: true, username: true } } }
-      });
-
-      results = avgPlacements.map((avgPlacement, index) => {
-        const horse = horses.find(h => h.id === avgPlacement.horseId);
-        return {
-          rank: parseInt(offset) + index + 1,
-          horseId: avgPlacement.horseId,
-          horseName: horse?.name || 'Unknown',
-          userId: horse?.userId,
-          userName: horse?.user?.username || 'Unknown',
-          averagePlacement: Number(avgPlacement._avg.placement) || 0,
-          competitionCount: avgPlacement._count.id,
-          metric: 'average_placement',
-          value: Number(avgPlacement._avg.placement) || 0
-        };
-      });
-    }
-
-    // Get total count for pagination
-    const totalCount = await prisma.competitionResult.groupBy({
-      by: ['horseId'],
-      where: whereClause,
-      _count: {
-        id: true
-      }
-    });
-
-    logger.info(`[leaderboardRoutes.GET /competition] Retrieved ${results.length} leaderboard entries`);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        leaderboard: results,
-        filters: {
-          discipline,
-          period,
-          metric
-        },
-        pagination: {
-          total: totalCount.length,
-          limit: parseInt(limit),
-          offset: parseInt(offset),
-          hasMore: parseInt(offset) + parseInt(limit) < totalCount.length
+        if (startDate) {
+          dateFilter = {
+            runDate: {
+              gte: startDate.toISOString().split('T')[0],
+            },
+          };
         }
       }
-    });
 
-  } catch (error) {
-    logger.error(`[leaderboardRoutes.GET /competition] Error: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
-    });
+      // Build where clause
+      const whereClause = {
+        placement: { not: null }, // Only completed competitions
+        ...dateFilter,
+      };
+
+      if (discipline) {
+        whereClause.discipline = discipline;
+      }
+
+      // Get competition results based on metric
+      let results = [];
+
+      if (metric === 'wins') {
+        // Count wins (1st place) per horse
+        const winCounts = await prisma.competitionResult.groupBy({
+          by: ['horseId'],
+          where: {
+            ...whereClause,
+            placement: '1',
+          },
+          _count: {
+            id: true,
+          },
+          orderBy: {
+            _count: {
+              id: 'desc',
+            },
+          },
+          take: parseInt(limit),
+          skip: parseInt(offset),
+        });
+
+        // Get horse details for winners
+        const horseIds = winCounts.map(w => w.horseId);
+        const horses = await prisma.horse.findMany({
+          where: { id: { in: horseIds } },
+          include: { user: { select: { id: true, username: true } } },
+        });
+
+        results = winCounts.map((winCount, index) => {
+          const horse = horses.find(h => h.id === winCount.horseId);
+          return {
+            rank: parseInt(offset) + index + 1,
+            horseId: winCount.horseId,
+            horseName: horse?.name || 'Unknown',
+            userId: horse?.userId,
+            userName: horse?.user?.username || 'Unknown',
+            wins: winCount._count.id,
+            metric: 'wins',
+            value: winCount._count.id,
+          };
+        });
+      } else if (metric === 'earnings') {
+        // Sum earnings per horse
+        const earnings = await prisma.competitionResult.groupBy({
+          by: ['horseId'],
+          where: whereClause,
+          _sum: {
+            prizeWon: true,
+          },
+          orderBy: {
+            _sum: {
+              prizeWon: 'desc',
+            },
+          },
+          take: parseInt(limit),
+          skip: parseInt(offset),
+        });
+
+        // Get horse details
+        const horseIds = earnings.map(e => e.horseId);
+        const horses = await prisma.horse.findMany({
+          where: { id: { in: horseIds } },
+          include: { user: { select: { id: true, username: true } } },
+        });
+
+        results = earnings.map((earning, index) => {
+          const horse = horses.find(h => h.id === earning.horseId);
+          return {
+            rank: parseInt(offset) + index + 1,
+            horseId: earning.horseId,
+            horseName: horse?.name || 'Unknown',
+            userId: horse?.userId,
+            userName: horse?.user?.username || 'Unknown',
+            totalEarnings: Number(earning._sum.prizeWon) || 0,
+            metric: 'earnings',
+            value: Number(earning._sum.prizeWon) || 0,
+          };
+        });
+      } else if (metric === 'placements') {
+        // Count top 3 placements per horse
+        const placements = await prisma.competitionResult.groupBy({
+          by: ['horseId'],
+          where: {
+            ...whereClause,
+            placement: { in: ['1', '2', '3'] },
+          },
+          _count: {
+            id: true,
+          },
+          orderBy: {
+            _count: {
+              id: 'desc',
+            },
+          },
+          take: parseInt(limit),
+          skip: parseInt(offset),
+        });
+
+        // Get horse details
+        const horseIds = placements.map(p => p.horseId);
+        const horses = await prisma.horse.findMany({
+          where: { id: { in: horseIds } },
+          include: { user: { select: { id: true, username: true } } },
+        });
+
+        results = placements.map((placement, index) => {
+          const horse = horses.find(h => h.id === placement.horseId);
+          return {
+            rank: parseInt(offset) + index + 1,
+            horseId: placement.horseId,
+            horseName: horse?.name || 'Unknown',
+            userId: horse?.userId,
+            userName: horse?.user?.username || 'Unknown',
+            topPlacements: placement._count.id,
+            metric: 'placements',
+            value: placement._count.id,
+          };
+        });
+      } else if (metric === 'average_placement') {
+        // Calculate average placement per horse
+        const avgPlacements = await prisma.competitionResult.groupBy({
+          by: ['horseId'],
+          where: whereClause,
+          _avg: {
+            placement: true,
+          },
+          _count: {
+            id: true,
+          },
+          having: {
+            id: {
+              _count: {
+                gte: 3, // Minimum 3 competitions for average
+              },
+            },
+          },
+          orderBy: {
+            _avg: {
+              placement: 'asc', // Lower average placement is better
+            },
+          },
+          take: parseInt(limit),
+          skip: parseInt(offset),
+        });
+
+        // Get horse details
+        const horseIds = avgPlacements.map(a => a.horseId);
+        const horses = await prisma.horse.findMany({
+          where: { id: { in: horseIds } },
+          include: { user: { select: { id: true, username: true } } },
+        });
+
+        results = avgPlacements.map((avgPlacement, index) => {
+          const horse = horses.find(h => h.id === avgPlacement.horseId);
+          return {
+            rank: parseInt(offset) + index + 1,
+            horseId: avgPlacement.horseId,
+            horseName: horse?.name || 'Unknown',
+            userId: horse?.userId,
+            userName: horse?.user?.username || 'Unknown',
+            averagePlacement: Number(avgPlacement._avg.placement) || 0,
+            competitionCount: avgPlacement._count.id,
+            metric: 'average_placement',
+            value: Number(avgPlacement._avg.placement) || 0,
+          };
+        });
+      }
+
+      // Get total count for pagination
+      const totalCount = await prisma.competitionResult.groupBy({
+        by: ['horseId'],
+        where: whereClause,
+        _count: {
+          id: true,
+        },
+      });
+
+      logger.info(
+        `[leaderboardRoutes.GET /competition] Retrieved ${results.length} leaderboard entries`
+      );
+
+      res.status(200).json({
+        success: true,
+        data: {
+          leaderboard: results,
+          filters: {
+            discipline,
+            period,
+            metric,
+          },
+          pagination: {
+            total: totalCount.length,
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            hasMore: parseInt(offset) + parseInt(limit) < totalCount.length,
+          },
+        },
+      });
+    } catch (error) {
+      logger.error(`[leaderboardRoutes.GET /competition] Error: ${error.message}`);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
+      });
+    }
   }
-});
+);
 
 export default router;

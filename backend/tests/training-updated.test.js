@@ -9,33 +9,33 @@ expect.extend({
     if (pass) {
       return {
         message: () => `expected ${received} not to be one of ${expected}`,
-        pass: true
+        pass: true,
       };
     } else {
       return {
         message: () => `expected ${received} to be one of ${expected}`,
-        pass: false
+        pass: false,
       };
     }
-  }
+  },
 });
 
 describe('Training System Integration Tests (Updated for User Model)', () => {
   let authToken;
   let testUserId;
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     // Create a test user token (using UUID string for User model)
     testUserId = '00000000-0000-0000-0000-000000000001'; // Consistent UUID
     authToken = generateTestToken({
       id: testUserId,
       email: 'test@example.com',
-      role: 'user'
+      role: 'user',
     });
   });
 
   describe('Age Requirement Tests', () => {
-    it('should get trainable horses for authenticated user', async() => {
+    it('should get trainable horses for authenticated user', async () => {
       const response = await request(app)
         .get(`/api/horses/trainable/${testUserId}`) // Use consistent testUserId
         .set('Authorization', `Bearer ${authToken}`);
@@ -48,7 +48,7 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
       // console.log(`Found ${response.body.data.length} trainable horses for user ${testUserId}`);
     });
 
-    it('should block training for horse under 3 years old', async() => {
+    it('should block training for horse under 3 years old', async () => {
       // First, get trainable horses
       const trainableResponse = await request(app)
         .get(`/api/horses/trainable/${testUserId}`) // Use consistent testUserId
@@ -70,7 +70,7 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: firstHorse.horseId,
-          discipline: 'Racing'
+          discipline: 'Racing',
         });
 
       // This should either succeed (if horse is eligible) or fail with a specific reason
@@ -84,7 +84,7 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
       // }
     });
 
-    it('should allow training for horse 3+ years old', async() => {
+    it('should allow training for horse 3+ years old', async () => {
       // Get trainable horses
       const trainableResponse = await request(app)
         .get(`/api/horses/trainable/${testUserId}`) // Use consistent testUserId
@@ -109,7 +109,7 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: adultHorse.horseId,
-          discipline: 'Racing'
+          discipline: 'Racing',
         });
 
       expect(response.status).toBe(200);
@@ -121,7 +121,7 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
   });
 
   describe('Training Status Tests', () => {
-    it('should get training status for a specific horse and discipline', async() => {
+    it('should get training status for a specific horse and discipline', async () => {
       // Assuming a horseId and discipline for testing
       const horseIdToTest = 1; // Replace with a valid horse ID from your test data
       const disciplineToTest = 'Racing';
@@ -136,7 +136,7 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
       expect(response.body.data).toHaveProperty('horseAge');
     });
 
-    it('should get all training status for a horse', async() => {
+    it('should get all training status for a horse', async () => {
       // Assuming a horseId for testing
       const horseIdToTest = 1; // Replace with a valid horse ID from your test data
 
@@ -151,22 +151,19 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
   });
 
   describe('Authentication Protection Tests', () => {
-    it('should reject unauthenticated requests to get trainable horses', async() => {
-      const response = await request(app)
-        .get(`/api/horses/trainable/${testUserId}`); // Use consistent testUserId
+    it('should reject unauthenticated requests to get trainable horses', async () => {
+      const response = await request(app).get(`/api/horses/trainable/${testUserId}`); // Use consistent testUserId
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Access token required');
     });
 
-    it('should reject unauthenticated training requests', async() => {
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: 1,
-          discipline: 'Racing'
-        });
+    it('should reject unauthenticated training requests', async () => {
+      const response = await request(app).post('/api/training/train').send({
+        horseId: 1,
+        discipline: 'Racing',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -175,13 +172,13 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
   });
 
   describe('Error Handling Tests', () => {
-    it('should handle invalid horse ID gracefully', async() => {
+    it('should handle invalid horse ID gracefully', async () => {
       const response = await request(app)
         .post('/api/training/train')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: 99999, // Non-existent horse
-          discipline: 'Racing'
+          discipline: 'Racing',
         });
 
       expect(response.status).toBe(400);
@@ -189,13 +186,13 @@ describe('Training System Integration Tests (Updated for User Model)', () => {
       expect(response.body.message).toContain('not found');
     });
 
-    it('should handle invalid discipline gracefully', async() => {
+    it('should handle invalid discipline gracefully', async () => {
       const response = await request(app)
         .post('/api/training/train')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           horseId: 1,
-          discipline: 'InvalidDiscipline'
+          discipline: 'InvalidDiscipline',
         });
 
       expect(response.status).toBe(400);

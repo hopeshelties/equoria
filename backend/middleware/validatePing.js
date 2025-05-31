@@ -8,9 +8,12 @@ import { handleValidationErrors } from './validationErrorHandler.js';
 export const validatePing = [
   query('name')
     .optional()
-    .isString().withMessage('Name must be a string')
+    .isString()
+    .withMessage('Name must be a string')
     .trim()
-    .isLength({ min: 2, max: 30 }).withMessage('Name must be between 2 and 30 characters')
-    .matches(/^[a-zA-Z0-9\s]+$/).withMessage('Name can only contain letters, numbers, and spaces'),
-  handleValidationErrors
+    .isLength({ min: 2, max: 30 })
+    .withMessage('Name must be between 2 and 30 characters')
+    .matches(/^[a-zA-Z0-9\s]+$/)
+    .withMessage('Name can only contain letters, numbers, and spaces'),
+  handleValidationErrors,
 ];

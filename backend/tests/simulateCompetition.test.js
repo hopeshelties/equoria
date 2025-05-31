@@ -41,20 +41,19 @@ import { getHealthModifier } from '../utils/healthBonus.js';
 import { applyRiderModifiers } from '../utils/riderBonus.js';
 
 describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking', () => {
-
   describe('getStatScore', () => {
     const testHorse = {
       speed: 80,
       stamina: 70,
       focus: 60,
       agility: 50,
-      balance: 40
+      balance: 40,
     };
 
     it('should calculate correct weighted score for Racing discipline', () => {
       // Racing uses: ["speed", "stamina", "focus"] = 50/30/20
       const score = getStatScore(testHorse, 'Racing');
-      const expected = (80 * 0.5) + (70 * 0.3) + (60 * 0.2); // 40 + 21 + 12 = 73
+      const expected = 80 * 0.5 + 70 * 0.3 + 60 * 0.2; // 40 + 21 + 12 = 73
       expect(score).toBe(expected);
     });
 
@@ -62,19 +61,21 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
       // Show Jumping uses: ["balance", "agility", "boldness"]
       const horseWithBoldness = { ...testHorse, boldness: 30 };
       const score = getStatScore(horseWithBoldness, 'Show Jumping');
-      const expected = (40 * 0.5) + (50 * 0.3) + (30 * 0.2); // 20 + 15 + 6 = 41
+      const expected = 40 * 0.5 + 50 * 0.3 + 30 * 0.2; // 20 + 15 + 6 = 41
       expect(score).toBe(expected);
     });
 
     it('should handle missing stats by defaulting to 0', () => {
       const incompleteHorse = { speed: 50 }; // missing stamina and focus
       const score = getStatScore(incompleteHorse, 'Racing');
-      const expected = (50 * 0.5) + (0 * 0.3) + (0 * 0.2); // 25 + 0 + 0 = 25
+      const expected = 50 * 0.5 + 0 * 0.3 + 0 * 0.2; // 25 + 0 + 0 = 25
       expect(score).toBe(expected);
     });
 
     it('should throw error for invalid discipline', () => {
-      expect(() => getStatScore(testHorse, 'InvalidDiscipline')).toThrow('Unknown discipline: InvalidDiscipline');
+      expect(() => getStatScore(testHorse, 'InvalidDiscipline')).toThrow(
+        'Unknown discipline: InvalidDiscipline'
+      );
     });
 
     it('should throw error for missing horse object', () => {
@@ -86,7 +87,7 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
     it('should return correct modifiers for all health ratings', () => {
       expect(getHealthModifier('Excellent')).toBe(0.05);
       expect(getHealthModifier('Very Good')).toBe(0.03);
-      expect(getHealthModifier('Good')).toBe(0.00);
+      expect(getHealthModifier('Good')).toBe(0.0);
       expect(getHealthModifier('Fair')).toBe(-0.03);
       expect(getHealthModifier('Bad')).toBe(-0.05);
     });
@@ -100,7 +101,7 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
 
   describe('applyRiderModifiers', () => {
     it('should apply bonus correctly', () => {
-      const result = applyRiderModifiers(100, 0.10, 0); // +10% bonus
+      const result = applyRiderModifiers(100, 0.1, 0); // +10% bonus
       expect(result).toBeCloseTo(110, 10);
     });
 
@@ -120,8 +121,12 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
     });
 
     it('should validate input ranges', () => {
-      expect(() => applyRiderModifiers(100, 0.15, 0)).toThrow('Bonus percent must be between 0 and 0.10');
-      expect(() => applyRiderModifiers(100, 0, 0.10)).toThrow('Penalty percent must be between 0 and 0.08');
+      expect(() => applyRiderModifiers(100, 0.15, 0)).toThrow(
+        'Bonus percent must be between 0 and 0.10'
+      );
+      expect(() => applyRiderModifiers(100, 0, 0.1)).toThrow(
+        'Penalty percent must be between 0 and 0.08'
+      );
       expect(() => applyRiderModifiers(-10, 0, 0)).toThrow('Score must be a non-negative number');
     });
   });
@@ -130,7 +135,7 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
     const sampleShow = {
       id: 'test-show',
       name: 'Test Racing Competition',
-      discipline: 'Racing'
+      discipline: 'Racing',
     };
 
     const createTestHorse = (id, name, overrides = {}) => ({
@@ -143,44 +148,54 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
       trainingScore: 50,
       tack: {
         saddleBonus: 5,
-        bridleBonus: 3
+        bridleBonus: 3,
       },
       health: 'Good',
       rider: {
         bonusPercent: 0,
-        penaltyPercent: 0
+        penaltyPercent: 0,
       },
-      ...overrides
+      ...overrides,
     });
 
     it('should simulate competition with 5 horses and return correct rankings', () => {
       const horses = [
         createTestHorse(1, 'Nova', {
-          speed: 90, stamina: 80, focus: 70,
+          speed: 90,
+          stamina: 80,
+          focus: 70,
           trait: 'Racing', // Matches discipline for +5 bonus
           health: 'Excellent', // +5% health bonus
-          trainingScore: 80
+          trainingScore: 80,
         }),
         createTestHorse(2, 'Ashen', {
-          speed: 85, stamina: 75, focus: 65,
+          speed: 85,
+          stamina: 75,
+          focus: 65,
           trainingScore: 70,
-          rider: { bonusPercent: 0.05, penaltyPercent: 0 } // +5% rider bonus
+          rider: { bonusPercent: 0.05, penaltyPercent: 0 }, // +5% rider bonus
         }),
         createTestHorse(3, 'Dart', {
-          speed: 80, stamina: 70, focus: 60,
+          speed: 80,
+          stamina: 70,
+          focus: 60,
           trainingScore: 60,
-          health: 'Very Good' // +3% health bonus
+          health: 'Very Good', // +3% health bonus
         }),
         createTestHorse(4, 'Milo', {
-          speed: 75, stamina: 65, focus: 55,
+          speed: 75,
+          stamina: 65,
+          focus: 55,
           trainingScore: 40,
-          rider: { bonusPercent: 0, penaltyPercent: 0.08 } // -8% rider penalty
+          rider: { bonusPercent: 0, penaltyPercent: 0.08 }, // -8% rider penalty
         }),
         createTestHorse(5, 'Zuri', {
-          speed: 70, stamina: 60, focus: 50,
+          speed: 70,
+          stamina: 60,
+          focus: 50,
           trainingScore: 30,
-          health: 'Bad' // -5% health penalty
-        })
+          health: 'Bad', // -5% health penalty
+        }),
       ];
 
       const results = simulateCompetition(horses, sampleShow);
@@ -221,16 +236,16 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
             epigeneticModifiers: {
               positive: ['discipline_affinity_racing'], // Matches show discipline
               negative: [],
-              hidden: []
-            }
+              hidden: [],
+            },
           }),
           createTestHorse(2, 'NoTraitMatch', {
             epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
-              hidden: []
-            }
-          })
+              hidden: [],
+            },
+          }),
         ];
 
         const results = simulateCompetition(horses, sampleShow);
@@ -255,9 +270,9 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
           name: 'MinimalHorse',
           speed: 50,
           stamina: 40,
-          focus: 30
+          focus: 30,
           // Missing: trait, trainingScore, tack, health, rider
-        }
+        },
       ];
 
       const results = simulateCompetition(horses, sampleShow);
@@ -276,17 +291,21 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
       const horses = [createTestHorse(1, 'Test')];
 
       expect(() => simulateCompetition('not-array', sampleShow)).toThrow('Horses must be an array');
-      expect(() => simulateCompetition(horses, null)).toThrow('Show object with discipline is required');
-      expect(() => simulateCompetition(horses, {})).toThrow('Show object with discipline is required');
+      expect(() => simulateCompetition(horses, null)).toThrow(
+        'Show object with discipline is required'
+      );
+      expect(() => simulateCompetition(horses, {})).toThrow(
+        'Show object with discipline is required'
+      );
     });
 
     it('should handle calculation errors gracefully', () => {
       const horses = [
         {
           id: 1,
-          name: 'ErrorHorse'
+          name: 'ErrorHorse',
           // Missing required stats - should cause error but not crash
-        }
+        },
       ];
 
       const results = simulateCompetition(horses, sampleShow);
@@ -305,7 +324,7 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
         trainingScore: 20, // +20 training
         tack: { saddleBonus: 10, bridleBonus: 5 }, // +15 tack
         health: 'Excellent', // +5% health modifier
-        rider: { bonusPercent: 0.05, penaltyPercent: 0.02 } // +5% -2% = +3% net rider
+        rider: { bonusPercent: 0.05, penaltyPercent: 0.02 }, // +5% -2% = +3% net rider
       });
 
       const results = simulateCompetition([horse], sampleShow);
@@ -336,7 +355,7 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
         focus: 50,
         trait: 'Racing',
         trainingScore: 50,
-        health: 'Good'
+        health: 'Good',
       });
 
       // Run simulation multiple times to verify randomness

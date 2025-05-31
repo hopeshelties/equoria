@@ -18,11 +18,15 @@ async function main() {
       if (!user.username) {
         try {
           if (typeof user.email !== 'string' || !user.email.includes('@')) {
-            throw new Error(`User email (${JSON.stringify(user.email)}) is not a valid string or does not contain '@'.`);
+            throw new Error(
+              `User email (${JSON.stringify(user.email)}) is not a valid string or does not contain '@'.`
+            );
           }
           const usernameBase = user.email.split('@')[0];
           if (!usernameBase) {
-            throw new Error(`Username base derived from email (${JSON.stringify(user.email)}) is empty.`);
+            throw new Error(
+              `Username base derived from email (${JSON.stringify(user.email)}) is empty.`
+            );
           }
 
           let username = usernameBase;
@@ -32,10 +36,12 @@ async function main() {
             const existingUser = await prisma.user.findFirst({
               where: {
                 username,
-                NOT: { id: user.id }
-              }
+                NOT: { id: user.id },
+              },
             });
-            if (!existingUser) { break; }
+            if (!existingUser) {
+              break;
+            }
             username = `${usernameBase}${counter}`;
             counter++;
           }
@@ -91,7 +97,7 @@ async function main() {
       if (Object.keys(updates).length > 0) {
         await prisma.user.update({
           where: { id: user.id },
-          data: updates
+          data: updates,
         });
         // console.log(`Updated user ${user.email} with fields: ${Object.keys(updates).join(', ')}`);
       }
@@ -102,11 +108,10 @@ async function main() {
   }
 }
 
-main()
-  .catch(async(_e) => {
-    // console.error('Unhandled migration error:', _e);
-    await prisma.$disconnect().catch(_disconnectError => {
-      // console.error('Error disconnecting Prisma:', _disconnectError);
-    });
-    process.exit(1);
+main().catch(async _e => {
+  // console.error('Unhandled migration error:', _e);
+  await prisma.$disconnect().catch(_disconnectError => {
+    // console.error('Error disconnecting Prisma:', _disconnectError);
   });
+  process.exit(1);
+});

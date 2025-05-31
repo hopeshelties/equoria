@@ -7,14 +7,14 @@ describe('Trait Discovery API Integration Tests', () => {
   let testBreed;
   let testFoals = [];
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     // Create test breed with unique name
     const uniqueName = `Test Breed for Trait Discovery ${Date.now()}`;
     testBreed = await prisma.breed.create({
       data: {
         name: uniqueName,
-        description: 'Test breed for trait discovery testing'
-      }
+        description: 'Test breed for trait discovery testing',
+      },
     });
 
     // Create test foals with different conditions
@@ -30,9 +30,9 @@ describe('Trait Discovery API Integration Tests', () => {
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: ['intelligent', 'calm', 'athletic', 'resilient', 'bold']
-        }
-      }
+          hidden: ['intelligent', 'calm', 'athletic', 'resilient', 'bold'],
+        },
+      },
     });
 
     const foal2 = await prisma.horse.create({
@@ -47,9 +47,9 @@ describe('Trait Discovery API Integration Tests', () => {
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: ['resilient', 'nervous', 'stubborn']
-        }
-      }
+          hidden: ['resilient', 'nervous', 'stubborn'],
+        },
+      },
     });
 
     const foal3 = await prisma.horse.create({
@@ -64,9 +64,9 @@ describe('Trait Discovery API Integration Tests', () => {
         epigeneticModifiers: {
           positive: ['calm'],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     testFoals = [foal1, foal2, foal3];
@@ -77,8 +77,8 @@ describe('Trait Discovery API Integration Tests', () => {
         foalId: foal1.id,
         currentDay: 3,
         bondingLevel: 85,
-        stressLevel: 15
-      }
+        stressLevel: 15,
+      },
     });
 
     await prisma.foalDevelopment.create({
@@ -86,8 +86,8 @@ describe('Trait Discovery API Integration Tests', () => {
         foalId: foal2.id,
         currentDay: 2,
         bondingLevel: 30,
-        stressLevel: 70
-      }
+        stressLevel: 70,
+      },
     });
 
     // Create some enrichment activities for foal1
@@ -98,8 +98,8 @@ describe('Trait Discovery API Integration Tests', () => {
         activity: 'gentle_handling',
         outcome: 'Gentle Touch - Successful bonding session',
         bondChange: 5,
-        stressChange: -2
-      }
+        stressChange: -2,
+      },
     });
 
     await prisma.foalTrainingHistory.create({
@@ -109,8 +109,8 @@ describe('Trait Discovery API Integration Tests', () => {
         activity: 'human_interaction',
         outcome: 'Human Bonding - Positive interaction',
         bondChange: 3,
-        stressChange: -1
-      }
+        stressChange: -1,
+      },
     });
 
     await prisma.foalTrainingHistory.create({
@@ -120,20 +120,20 @@ describe('Trait Discovery API Integration Tests', () => {
         activity: 'social_play',
         outcome: 'Social Time - Enjoyed playtime',
         bondChange: 2,
-        stressChange: -1
-      }
+        stressChange: -1,
+      },
     });
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Clean up test data
     for (const foal of testFoals) {
       try {
         await prisma.foalTrainingHistory.deleteMany({
-          where: { horseId: foal.id }
+          where: { horseId: foal.id },
         });
         await prisma.foalDevelopment.deleteMany({
-          where: { foalId: foal.id }
+          where: { foalId: foal.id },
         });
         await prisma.horse.delete({ where: { id: foal.id } });
       } catch (error) {
@@ -151,7 +151,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('POST /api/traits/discover/:foalId', () => {
-    it('should discover traits for foal with high bonding', async() => {
+    it('should discover traits for foal with high bonding', async () => {
       const response = await request(app)
         .post(`/api/traits/discover/${testFoals[0].id}`)
         .expect(200);
@@ -175,7 +175,7 @@ describe('Trait Discovery API Integration Tests', () => {
       }
     });
 
-    it('should handle foal with no discoverable traits', async() => {
+    it('should handle foal with no discoverable traits', async () => {
       const response = await request(app)
         .post(`/api/traits/discover/${testFoals[1].id}`)
         .expect(200);
@@ -188,7 +188,7 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.data.conditionsMet.length).toBeLessThanOrEqual(1);
     });
 
-    it('should return 400 for non-foal horse', async() => {
+    it('should return 400 for non-foal horse', async () => {
       const response = await request(app)
         .post(`/api/traits/discover/${testFoals[2].id}`)
         .expect(400);
@@ -197,19 +197,15 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.message).toContain('not a foal');
     });
 
-    it('should return 404 for non-existent foal', async() => {
-      const response = await request(app)
-        .post('/api/traits/discover/99999')
-        .expect(404);
+    it('should return 404 for non-existent foal', async () => {
+      const response = await request(app).post('/api/traits/discover/99999').expect(404);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toContain('not found');
     });
 
-    it('should return 400 for invalid foal ID', async() => {
-      const response = await request(app)
-        .post('/api/traits/discover/invalid')
-        .expect(400);
+    it('should return 400 for invalid foal ID', async () => {
+      const response = await request(app).post('/api/traits/discover/invalid').expect(400);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Validation failed');
@@ -217,7 +213,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('GET /api/traits/progress/:foalId', () => {
-    it('should return discovery progress for foal', async() => {
+    it('should return discovery progress for foal', async () => {
       const response = await request(app)
         .get(`/api/traits/progress/${testFoals[0].id}`)
         .expect(200);
@@ -232,7 +228,7 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.data.currentStats).toEqual({
         bondScore: 85,
         stressLevel: 15,
-        developmentDay: 3
+        developmentDay: 3,
       });
 
       // Should have all discovery conditions
@@ -255,10 +251,8 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(conditions.social_activities.progress).toBe(100);
     });
 
-    it('should return 404 for non-existent foal', async() => {
-      const response = await request(app)
-        .get('/api/traits/progress/99999')
-        .expect(404);
+    it('should return 404 for non-existent foal', async () => {
+      const response = await request(app).get('/api/traits/progress/99999').expect(404);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toContain('not found');
@@ -266,13 +260,13 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('POST /api/traits/discover/batch', () => {
-    it('should process multiple foals in batch', async() => {
+    it('should process multiple foals in batch', async () => {
       console.log('Batch test foal IDs:', [testFoals[0].id, testFoals[1].id]);
 
       const response = await request(app)
         .post('/api/traits/discover/batch')
         .send({
-          foalIds: [testFoals[0].id, testFoals[1].id]
+          foalIds: [testFoals[0].id, testFoals[1].id],
         });
 
       if (response.status !== 200) {
@@ -292,11 +286,11 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(response.body.data.summary).toHaveProperty('failedDiscoveries');
     });
 
-    it('should handle mixed valid and invalid foals', async() => {
+    it('should handle mixed valid and invalid foals', async () => {
       const response = await request(app)
         .post('/api/traits/discover/batch')
         .send({
-          foalIds: [testFoals[0].id, 99999, testFoals[2].id] // Valid foal, non-existent, adult horse
+          foalIds: [testFoals[0].id, 99999, testFoals[2].id], // Valid foal, non-existent, adult horse
         })
         .expect(200);
 
@@ -308,11 +302,11 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(failedResults.length).toBeGreaterThan(0);
     });
 
-    it('should return 400 for invalid request body', async() => {
+    it('should return 400 for invalid request body', async () => {
       const response = await request(app)
         .post('/api/traits/discover/batch')
         .send({
-          foalIds: []
+          foalIds: [],
         })
         .expect(400);
 
@@ -322,10 +316,8 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('GET /api/traits/conditions', () => {
-    it('should return all discovery conditions', async() => {
-      const response = await request(app)
-        .get('/api/traits/conditions')
-        .expect(200);
+    it('should return all discovery conditions', async () => {
+      const response = await request(app).get('/api/traits/conditions').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('conditions');
@@ -354,7 +346,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('POST /api/traits/check-conditions/:foalId', () => {
-    it('should check conditions without triggering discovery', async() => {
+    it('should check conditions without triggering discovery', async () => {
       const response = await request(app)
         .post(`/api/traits/check-conditions/${testFoals[0].id}`)
         .expect(200);
@@ -389,10 +381,8 @@ describe('Trait Discovery API Integration Tests', () => {
       expect(summary).toHaveProperty('hiddenTraitsRemaining');
     });
 
-    it('should return 404 for non-existent foal', async() => {
-      const response = await request(app)
-        .post('/api/traits/check-conditions/99999')
-        .expect(404);
+    it('should return 404 for non-existent foal', async () => {
+      const response = await request(app).post('/api/traits/check-conditions/99999').expect(404);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toContain('not found');
@@ -400,7 +390,7 @@ describe('Trait Discovery API Integration Tests', () => {
   });
 
   describe('Real-time trait discovery workflow', () => {
-    it('should demonstrate complete trait discovery workflow', async() => {
+    it('should demonstrate complete trait discovery workflow', async () => {
       // Create a fresh foal with guaranteed hidden traits for this test
       const freshFoal = await prisma.horse.create({
         data: {
@@ -414,9 +404,9 @@ describe('Trait Discovery API Integration Tests', () => {
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: ['intelligent', 'calm', 'athletic', 'resilient', 'bold']
-          }
-        }
+            hidden: ['intelligent', 'calm', 'athletic', 'resilient', 'bold'],
+          },
+        },
       });
 
       // Add to cleanup array
@@ -428,8 +418,8 @@ describe('Trait Discovery API Integration Tests', () => {
           foalId: freshFoal.id,
           currentDay: 3,
           bondingLevel: 85,
-          stressLevel: 15
-        }
+          stressLevel: 15,
+        },
       });
 
       // Create some enrichment activities
@@ -440,16 +430,14 @@ describe('Trait Discovery API Integration Tests', () => {
           activity: 'gentle_handling',
           outcome: 'Gentle Touch - Successful bonding session',
           bondChange: 5,
-          stressChange: -2
-        }
+          stressChange: -2,
+        },
       });
 
       const foalId = freshFoal.id;
 
       // 1. Check initial progress
-      const progressResponse = await request(app)
-        .get(`/api/traits/progress/${foalId}`)
-        .expect(200);
+      const progressResponse = await request(app).get(`/api/traits/progress/${foalId}`).expect(200);
 
       const initialHiddenCount = progressResponse.body.data.hiddenTraitsCount;
       console.log('Initial hidden count:', initialHiddenCount);
@@ -475,8 +463,9 @@ describe('Trait Discovery API Integration Tests', () => {
 
         // If traits were revealed, hidden count should decrease
         if (discoveryResponse.body.data.traitsRevealed.length > 0) {
-          expect(discoveryResponse.body.data.summary.hiddenAfter)
-            .toBeLessThan(discoveryResponse.body.data.summary.hiddenBefore);
+          expect(discoveryResponse.body.data.summary.hiddenAfter).toBeLessThan(
+            discoveryResponse.body.data.summary.hiddenBefore
+          );
         }
       }
 
@@ -486,8 +475,9 @@ describe('Trait Discovery API Integration Tests', () => {
         .expect(200);
 
       // Hidden count should be same or less than initial
-      expect(finalProgressResponse.body.data.hiddenTraitsCount)
-        .toBeLessThanOrEqual(initialHiddenCount);
+      expect(finalProgressResponse.body.data.hiddenTraitsCount).toBeLessThanOrEqual(
+        initialHiddenCount
+      );
     });
   });
 });

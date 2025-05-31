@@ -47,124 +47,124 @@ export function calculateCompetitionScore(disciplineScore, traits, age, discipli
       'Western Pleasure': {
         stats: ['focus', 'obedience', 'intelligence'],
         beneficial: ['calm', 'people_trusting', 'focused', 'intelligent'],
-        detrimental: ['nervous', 'aggressive', 'stubborn']
+        detrimental: ['nervous', 'aggressive', 'stubborn'],
       },
-      'Reining': {
+      Reining: {
         stats: ['agility', 'precision', 'focus'],
         beneficial: ['athletic', 'focused', 'intelligent', 'agile'],
-        detrimental: ['clumsy', 'nervous', 'stubborn']
+        detrimental: ['clumsy', 'nervous', 'stubborn'],
       },
-      'Cutting': {
+      Cutting: {
         stats: ['intelligence', 'agility', 'boldness'],
         beneficial: ['intelligent', 'athletic', 'brave', 'focused'],
-        detrimental: ['slow', 'nervous', 'fearful']
+        detrimental: ['slow', 'nervous', 'fearful'],
       },
       'Barrel Racing': {
         stats: ['speed', 'agility', 'obedience'],
         beneficial: ['fast', 'athletic', 'focused', 'brave'],
-        detrimental: ['slow', 'clumsy', 'nervous']
+        detrimental: ['slow', 'clumsy', 'nervous'],
       },
-      'Roping': {
+      Roping: {
         stats: ['precision', 'focus', 'speed'],
         beneficial: ['focused', 'precise', 'fast', 'intelligent'],
-        detrimental: ['clumsy', 'nervous', 'slow']
+        detrimental: ['clumsy', 'nervous', 'slow'],
       },
       'Team Penning': {
         stats: ['intelligence', 'agility', 'stamina'],
         beneficial: ['intelligent', 'athletic', 'resilient', 'focused'],
-        detrimental: ['slow', 'weak', 'nervous']
+        detrimental: ['slow', 'weak', 'nervous'],
       },
-      'Rodeo': {
+      Rodeo: {
         stats: ['boldness', 'agility', 'stamina'],
         beneficial: ['brave', 'athletic', 'resilient', 'powerful'],
-        detrimental: ['fearful', 'weak', 'nervous']
+        detrimental: ['fearful', 'weak', 'nervous'],
       },
-      'Hunter': {
+      Hunter: {
         stats: ['balance', 'precision', 'intelligence'],
         beneficial: ['balanced', 'precise', 'intelligent', 'calm'],
-        detrimental: ['clumsy', 'nervous', 'aggressive']
+        detrimental: ['clumsy', 'nervous', 'aggressive'],
       },
-      'Saddleseat': {
+      Saddleseat: {
         stats: ['flexibility', 'balance', 'obedience'],
         beneficial: ['flexible', 'balanced', 'people_trusting', 'focused'],
-        detrimental: ['stiff', 'clumsy', 'stubborn']
+        detrimental: ['stiff', 'clumsy', 'stubborn'],
       },
-      'Endurance': {
+      Endurance: {
         stats: ['stamina', 'intelligence', 'speed'],
         beneficial: ['resilient', 'intelligent', 'fast', 'focused'],
-        detrimental: ['weak', 'slow', 'lazy']
+        detrimental: ['weak', 'slow', 'lazy'],
       },
-      'Eventing': {
+      Eventing: {
         stats: ['stamina', 'boldness', 'agility'],
         beneficial: ['brave', 'athletic', 'resilient', 'focused'],
-        detrimental: ['fearful', 'weak', 'nervous']
+        detrimental: ['fearful', 'weak', 'nervous'],
       },
-      'Dressage': {
+      Dressage: {
         stats: ['precision', 'focus', 'obedience'],
         beneficial: ['focused', 'intelligent', 'calm', 'people_trusting'],
-        detrimental: ['nervous', 'aggressive', 'stubborn']
+        detrimental: ['nervous', 'aggressive', 'stubborn'],
       },
       'Show Jumping': {
         stats: ['balance', 'agility', 'boldness'],
         beneficial: ['brave', 'athletic', 'focused', 'powerful'],
-        detrimental: ['nervous', 'clumsy', 'fearful']
+        detrimental: ['nervous', 'clumsy', 'fearful'],
       },
-      'Vaulting': {
+      Vaulting: {
         stats: ['flexibility', 'balance', 'obedience'],
         beneficial: ['flexible', 'balanced', 'calm', 'people_trusting'],
-        detrimental: ['stiff', 'nervous', 'aggressive']
+        detrimental: ['stiff', 'nervous', 'aggressive'],
       },
-      'Polo': {
+      Polo: {
         stats: ['speed', 'boldness', 'agility'],
         beneficial: ['fast', 'brave', 'athletic', 'focused'],
-        detrimental: ['slow', 'fearful', 'clumsy']
+        detrimental: ['slow', 'fearful', 'clumsy'],
       },
       'Cross Country': {
         stats: ['stamina', 'boldness', 'intelligence'],
         beneficial: ['brave', 'athletic', 'resilient', 'intelligent'],
-        detrimental: ['nervous', 'weak', 'fearful']
+        detrimental: ['nervous', 'weak', 'fearful'],
       },
       'Combined Driving': {
         stats: ['obedience', 'stamina', 'focus'],
         beneficial: ['people_trusting', 'resilient', 'focused', 'intelligent'],
-        detrimental: ['stubborn', 'nervous', 'weak']
+        detrimental: ['stubborn', 'nervous', 'weak'],
       },
       'Fine Harness': {
         stats: ['flexibility', 'precision', 'balance'],
         beneficial: ['flexible', 'precise', 'balanced', 'focused'],
-        detrimental: ['stiff', 'clumsy', 'nervous']
+        detrimental: ['stiff', 'clumsy', 'nervous'],
       },
-      'Gaited': {
+      Gaited: {
         stats: ['flexibility', 'balance', 'obedience'],
         beneficial: ['flexible', 'balanced', 'gaited', 'calm'],
         detrimental: ['stiff', 'clumsy', 'nervous'],
-        requiresTrait: 'gaited'
+        requiresTrait: 'gaited',
       },
-      'Gymkhana': {
+      Gymkhana: {
         stats: ['speed', 'flexibility', 'focus'],
         beneficial: ['fast', 'flexible', 'focused', 'athletic'],
-        detrimental: ['slow', 'stiff', 'nervous']
+        detrimental: ['slow', 'stiff', 'nervous'],
       },
-      'Steeplechase': {
+      Steeplechase: {
         stats: ['stamina', 'boldness', 'balance'],
         beneficial: ['resilient', 'brave', 'balanced', 'athletic'],
-        detrimental: ['weak', 'fearful', 'clumsy']
+        detrimental: ['weak', 'fearful', 'clumsy'],
       },
-      'Racing': {
+      Racing: {
         stats: ['speed', 'stamina', 'focus'],
         beneficial: ['fast', 'athletic', 'focused', 'brave', 'resilient'],
-        detrimental: ['slow', 'lazy', 'nervous']
+        detrimental: ['slow', 'lazy', 'nervous'],
       },
       'Harness Racing': {
         stats: ['speed', 'precision', 'stamina'],
         beneficial: ['fast', 'precise', 'resilient', 'focused'],
-        detrimental: ['slow', 'clumsy', 'weak']
+        detrimental: ['slow', 'clumsy', 'weak'],
       },
       'Obedience Training': {
         stats: ['obedience', 'precision', 'intelligence'],
         beneficial: ['people_trusting', 'intelligent', 'focused', 'calm'],
-        detrimental: ['stubborn', 'aggressive', 'nervous']
-      }
+        detrimental: ['stubborn', 'aggressive', 'nervous'],
+      },
     };
 
     const disciplineMap = disciplineConfig[discipline] || disciplineConfig['Racing'];
@@ -191,14 +191,13 @@ export function calculateCompetitionScore(disciplineScore, traits, age, discipli
 
     // Random performance factor (using Math.random for some variability)
     // In tests, this will be mocked for deterministic results
-    const performanceFactor = 0.8 + (Math.random() * 0.4); // 0.8 to 1.2
+    const performanceFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
     score *= performanceFactor;
 
     // Ensure score is within bounds
     score = Math.max(0, Math.min(100, Math.round(score)));
 
     return score;
-
   } catch (error) {
     logger.error('[competitionLogic.calculateCompetitionScore] Error:', error.message);
     return 0;
@@ -220,14 +219,13 @@ export function calculatePrizeAmount(totalPrizePool, placement, totalEntries) {
 
     // Prize distribution percentages (4th place gets no earnings)
     const prizeDistribution = {
-      1: 0.50, // 50% for 1st place
-      2: 0.30, // 30% for 2nd place
-      3: 0.20  // 20% for 3rd place (increased from 15% since 4th gets nothing)
+      1: 0.5, // 50% for 1st place
+      2: 0.3, // 30% for 2nd place
+      3: 0.2, // 20% for 3rd place (increased from 15% since 4th gets nothing)
     };
 
     const percentage = prizeDistribution[placement] || 0;
     return Math.round(totalPrizePool * percentage);
-
   } catch (error) {
     logger.error('[competitionLogic.calculatePrizeAmount] Error:', error.message);
     return 0;
@@ -263,7 +261,6 @@ export function calculateCompetitionXP(score, placement, totalEntries) {
     xp = Math.max(xp, 3);
 
     return xp;
-
   } catch (error) {
     logger.error('[competitionLogic.calculateCompetitionXP] Error:', error.message);
     return 3; // Minimum participation XP
@@ -283,14 +280,13 @@ export function calculatePlacements(competitionEntries) {
     // Assign placements
     return sortedEntries.map((entry, index) => ({
       ...entry,
-      placement: index + 1
+      placement: index + 1,
     }));
-
   } catch (error) {
     logger.error('[competitionLogic.calculatePlacements] Error:', error.message);
     return competitionEntries.map((entry, index) => ({
       ...entry,
-      placement: index + 1
+      placement: index + 1,
     }));
   }
 }
@@ -304,124 +300,124 @@ function getDisciplineConfigurations() {
     'Western Pleasure': {
       stats: ['focus', 'obedience', 'intelligence'],
       beneficial: ['calm', 'people_trusting', 'focused', 'intelligent'],
-      detrimental: ['nervous', 'aggressive', 'stubborn']
+      detrimental: ['nervous', 'aggressive', 'stubborn'],
     },
-    'Reining': {
+    Reining: {
       stats: ['agility', 'precision', 'focus'],
       beneficial: ['athletic', 'focused', 'intelligent', 'agile'],
-      detrimental: ['clumsy', 'nervous', 'stubborn']
+      detrimental: ['clumsy', 'nervous', 'stubborn'],
     },
-    'Cutting': {
+    Cutting: {
       stats: ['intelligence', 'agility', 'boldness'],
       beneficial: ['intelligent', 'athletic', 'brave', 'focused'],
-      detrimental: ['slow', 'nervous', 'fearful']
+      detrimental: ['slow', 'nervous', 'fearful'],
     },
     'Barrel Racing': {
       stats: ['speed', 'agility', 'obedience'],
       beneficial: ['fast', 'athletic', 'focused', 'brave'],
-      detrimental: ['slow', 'clumsy', 'nervous']
+      detrimental: ['slow', 'clumsy', 'nervous'],
     },
-    'Roping': {
+    Roping: {
       stats: ['precision', 'focus', 'speed'],
       beneficial: ['focused', 'precise', 'fast', 'intelligent'],
-      detrimental: ['clumsy', 'nervous', 'slow']
+      detrimental: ['clumsy', 'nervous', 'slow'],
     },
     'Team Penning': {
       stats: ['intelligence', 'agility', 'stamina'],
       beneficial: ['intelligent', 'athletic', 'resilient', 'focused'],
-      detrimental: ['slow', 'weak', 'nervous']
+      detrimental: ['slow', 'weak', 'nervous'],
     },
-    'Rodeo': {
+    Rodeo: {
       stats: ['boldness', 'agility', 'stamina'],
       beneficial: ['brave', 'athletic', 'resilient', 'powerful'],
-      detrimental: ['fearful', 'weak', 'nervous']
+      detrimental: ['fearful', 'weak', 'nervous'],
     },
-    'Hunter': {
+    Hunter: {
       stats: ['balance', 'precision', 'intelligence'],
       beneficial: ['balanced', 'precise', 'intelligent', 'calm'],
-      detrimental: ['clumsy', 'nervous', 'aggressive']
+      detrimental: ['clumsy', 'nervous', 'aggressive'],
     },
-    'Saddleseat': {
+    Saddleseat: {
       stats: ['flexibility', 'balance', 'obedience'],
       beneficial: ['flexible', 'balanced', 'people_trusting', 'focused'],
-      detrimental: ['stiff', 'clumsy', 'stubborn']
+      detrimental: ['stiff', 'clumsy', 'stubborn'],
     },
-    'Endurance': {
+    Endurance: {
       stats: ['stamina', 'intelligence', 'speed'],
       beneficial: ['resilient', 'intelligent', 'fast', 'focused'],
-      detrimental: ['weak', 'slow', 'lazy']
+      detrimental: ['weak', 'slow', 'lazy'],
     },
-    'Eventing': {
+    Eventing: {
       stats: ['stamina', 'boldness', 'agility'],
       beneficial: ['brave', 'athletic', 'resilient', 'focused'],
-      detrimental: ['fearful', 'weak', 'nervous']
+      detrimental: ['fearful', 'weak', 'nervous'],
     },
-    'Dressage': {
+    Dressage: {
       stats: ['precision', 'focus', 'obedience'],
       beneficial: ['focused', 'intelligent', 'calm', 'people_trusting'],
-      detrimental: ['nervous', 'aggressive', 'stubborn']
+      detrimental: ['nervous', 'aggressive', 'stubborn'],
     },
     'Show Jumping': {
       stats: ['balance', 'agility', 'boldness'],
       beneficial: ['brave', 'athletic', 'focused', 'powerful'],
-      detrimental: ['nervous', 'clumsy', 'fearful']
+      detrimental: ['nervous', 'clumsy', 'fearful'],
     },
-    'Vaulting': {
+    Vaulting: {
       stats: ['flexibility', 'balance', 'obedience'],
       beneficial: ['flexible', 'balanced', 'calm', 'people_trusting'],
-      detrimental: ['stiff', 'nervous', 'aggressive']
+      detrimental: ['stiff', 'nervous', 'aggressive'],
     },
-    'Polo': {
+    Polo: {
       stats: ['speed', 'boldness', 'agility'],
       beneficial: ['fast', 'brave', 'athletic', 'focused'],
-      detrimental: ['slow', 'fearful', 'clumsy']
+      detrimental: ['slow', 'fearful', 'clumsy'],
     },
     'Cross Country': {
       stats: ['stamina', 'boldness', 'intelligence'],
       beneficial: ['brave', 'athletic', 'resilient', 'intelligent'],
-      detrimental: ['nervous', 'weak', 'fearful']
+      detrimental: ['nervous', 'weak', 'fearful'],
     },
     'Combined Driving': {
       stats: ['obedience', 'stamina', 'focus'],
       beneficial: ['people_trusting', 'resilient', 'focused', 'intelligent'],
-      detrimental: ['stubborn', 'nervous', 'weak']
+      detrimental: ['stubborn', 'nervous', 'weak'],
     },
     'Fine Harness': {
       stats: ['flexibility', 'precision', 'balance'],
       beneficial: ['flexible', 'precise', 'balanced', 'focused'],
-      detrimental: ['stiff', 'clumsy', 'nervous']
+      detrimental: ['stiff', 'clumsy', 'nervous'],
     },
-    'Gaited': {
+    Gaited: {
       stats: ['flexibility', 'balance', 'obedience'],
       beneficial: ['flexible', 'balanced', 'gaited', 'calm'],
       detrimental: ['stiff', 'clumsy', 'nervous'],
-      requiresTrait: 'gaited'
+      requiresTrait: 'gaited',
     },
-    'Gymkhana': {
+    Gymkhana: {
       stats: ['speed', 'flexibility', 'focus'],
       beneficial: ['fast', 'flexible', 'focused', 'athletic'],
-      detrimental: ['slow', 'stiff', 'nervous']
+      detrimental: ['slow', 'stiff', 'nervous'],
     },
-    'Steeplechase': {
+    Steeplechase: {
       stats: ['stamina', 'boldness', 'balance'],
       beneficial: ['resilient', 'brave', 'balanced', 'athletic'],
-      detrimental: ['weak', 'fearful', 'clumsy']
+      detrimental: ['weak', 'fearful', 'clumsy'],
     },
-    'Racing': {
+    Racing: {
       stats: ['speed', 'stamina', 'focus'],
       beneficial: ['fast', 'athletic', 'focused', 'brave', 'resilient'],
-      detrimental: ['slow', 'lazy', 'nervous']
+      detrimental: ['slow', 'lazy', 'nervous'],
     },
     'Harness Racing': {
       stats: ['speed', 'precision', 'stamina'],
       beneficial: ['fast', 'precise', 'resilient', 'focused'],
-      detrimental: ['slow', 'clumsy', 'weak']
+      detrimental: ['slow', 'clumsy', 'weak'],
     },
     'Obedience Training': {
       stats: ['obedience', 'precision', 'intelligence'],
       beneficial: ['people_trusting', 'intelligent', 'focused', 'calm'],
-      detrimental: ['stubborn', 'aggressive', 'nervous']
-    }
+      detrimental: ['stubborn', 'aggressive', 'nervous'],
+    },
   };
 }
 
@@ -488,7 +484,6 @@ export function calculateHorseLevel(horse, discipline) {
     }
 
     return Math.max(1, level);
-
   } catch (error) {
     logger.error('[competitionLogic.calculateHorseLevel] Error:', error.message);
     return 1;
@@ -529,7 +524,6 @@ export function checkTraitRequirements(horse, discipline) {
     const positiveTraits = traits.positive || [];
 
     return positiveTraits.includes(disciplineMap.requiresTrait);
-
   } catch (error) {
     logger.error('[competitionLogic.checkTraitRequirements] Error:', error.message);
     return false;
@@ -546,9 +540,9 @@ export function calculateStatGain(placement, discipline) {
   try {
     // Stat gain chances
     const statGainChances = {
-      1: 0.10, // 10% for 1st place
+      1: 0.1, // 10% for 1st place
       2: 0.05, // 5% for 2nd place
-      3: 0.03  // 3% for 3rd place
+      3: 0.03, // 3% for 3rd place
     };
 
     const chance = statGainChances[placement];
@@ -566,9 +560,8 @@ export function calculateStatGain(placement, discipline) {
 
     return {
       stat: randomStat,
-      amount: 1 // +1 stat increase
+      amount: 1, // +1 stat increase
     };
-
   } catch (error) {
     logger.error('[competitionLogic.calculateStatGain] Error:', error.message);
     return null;
@@ -604,5 +597,5 @@ export default {
   checkTraitRequirements,
   calculateStatGain,
   getAllDisciplines,
-  getDisciplineConfig
+  getDisciplineConfig,
 };

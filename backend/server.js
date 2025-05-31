@@ -15,10 +15,10 @@ const server = app.listen(port, () => {
 });
 
 // Graceful shutdown handler
-const gracefulShutdown = (signal) => {
+const gracefulShutdown = signal => {
   logger.info(`[shutdown] Received ${signal}. Starting graceful shutdown...`);
 
-  server.close((err) => {
+  server.close(err => {
     if (err) {
       logger.error('[shutdown] Error during server close:', err);
       process.exit(1);
@@ -27,16 +27,19 @@ const gracefulShutdown = (signal) => {
     logger.info('[shutdown] HTTP server closed');
 
     // Close database connections
-    import('./db/index.js').then(({ default: prisma }) => {
-      return prisma.$disconnect();
-    }).then(() => {
-      logger.info('[shutdown] Database connections closed');
-      logger.info('[shutdown] Graceful shutdown completed');
-      process.exit(0);
-    }).catch((err) => {
-      logger.error('[shutdown] Error closing database connections:', err);
-      process.exit(1);
-    });
+    import('./db/index.js')
+      .then(({ default: prisma }) => {
+        return prisma.$disconnect();
+      })
+      .then(() => {
+        logger.info('[shutdown] Database connections closed');
+        logger.info('[shutdown] Graceful shutdown completed');
+        process.exit(0);
+      })
+      .catch(err => {
+        logger.error('[shutdown] Error closing database connections:', err);
+        process.exit(1);
+      });
   });
 
   // Force shutdown after 30 seconds
@@ -51,7 +54,7 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   logger.error('[fatal] Uncaught Exception:', err);
   gracefulShutdown('uncaughtException');
 });

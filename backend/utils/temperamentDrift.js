@@ -11,42 +11,42 @@ import logger from './logger.js';
  * Available temperament types and their characteristics
  */
 const TEMPERAMENT_TYPES = {
-  'Calm': {
+  Calm: {
     stability: 0.9,
     stressResistance: 0.8,
     trainingBonus: 0.1,
-    competitionPenalty: 0.0
+    competitionPenalty: 0.0,
   },
-  'Spirited': {
+  Spirited: {
     stability: 0.6,
     stressResistance: 0.4,
     trainingBonus: 0.15,
-    competitionPenalty: 0.05
+    competitionPenalty: 0.05,
   },
-  'Nervous': {
+  Nervous: {
     stability: 0.4,
     stressResistance: 0.2,
     trainingBonus: -0.1,
-    competitionPenalty: 0.15
+    competitionPenalty: 0.15,
   },
-  'Aggressive': {
+  Aggressive: {
     stability: 0.5,
     stressResistance: 0.6,
     trainingBonus: 0.05,
-    competitionPenalty: 0.1
+    competitionPenalty: 0.1,
   },
-  'Docile': {
+  Docile: {
     stability: 0.8,
     stressResistance: 0.7,
     trainingBonus: 0.05,
-    competitionPenalty: -0.05
+    competitionPenalty: -0.05,
   },
-  'Unpredictable': {
+  Unpredictable: {
     stability: 0.3,
     stressResistance: 0.3,
     trainingBonus: 0.0,
-    competitionPenalty: 0.2
-  }
+    competitionPenalty: 0.2,
+  },
 };
 
 /**
@@ -57,7 +57,9 @@ const TEMPERAMENT_TYPES = {
  */
 export function calculateTemperamentDrift(horse, factors = {}) {
   try {
-    logger.debug(`[temperamentDrift] Calculating drift for horse ${horse.id} with temperament ${horse.temperament}`);
+    logger.debug(
+      `[temperamentDrift] Calculating drift for horse ${horse.id} with temperament ${horse.temperament}`
+    );
 
     // Get trait effects
     const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
@@ -66,14 +68,14 @@ export function calculateTemperamentDrift(horse, factors = {}) {
 
     // Check if temperament drift is suppressed by traits
     if (traitEffects.suppressTemperamentDrift) {
-      logger.info(`[temperamentDrift] Temperament drift suppressed by traits for horse ${horse.id}`);
+      logger.info(
+        `[temperamentDrift] Temperament drift suppressed by traits for horse ${horse.id}`
+      );
       return {
         driftOccurred: false,
         newTemperament: horse.temperament,
         reason: 'Suppressed by traits',
-        suppressingTraits: allTraits.filter(trait =>
-          ['resilient', 'calm'].includes(trait)
-        )
+        suppressingTraits: allTraits.filter(trait => ['resilient', 'calm'].includes(trait)),
       };
     }
 
@@ -87,7 +89,7 @@ export function calculateTemperamentDrift(horse, factors = {}) {
       recentCompetition = false,
       healthStatus = horse.health_status || 'Good',
       bondScore = horse.bond_score || 50,
-      age = horse.age || 1
+      age = horse.age || 1,
     } = factors;
 
     // Stress increases drift probability
@@ -121,7 +123,7 @@ export function calculateTemperamentDrift(horse, factors = {}) {
 
     // Current temperament affects stability
     const currentTempData = TEMPERAMENT_TYPES[horse.temperament] || TEMPERAMENT_TYPES['Calm'];
-    driftProbability *= (1 - currentTempData.stability);
+    driftProbability *= 1 - currentTempData.stability;
 
     // Apply trait effects that might reduce drift probability
     if (traitEffects.temperamentStability) {
@@ -131,7 +133,9 @@ export function calculateTemperamentDrift(horse, factors = {}) {
     // Cap probability at 25%
     driftProbability = Math.min(0.25, driftProbability);
 
-    logger.debug(`[temperamentDrift] Final drift probability: ${(driftProbability * 100).toFixed(2)}%`);
+    logger.debug(
+      `[temperamentDrift] Final drift probability: ${(driftProbability * 100).toFixed(2)}%`
+    );
 
     // Roll for drift
     if (Math.random() > driftProbability) {
@@ -139,14 +143,16 @@ export function calculateTemperamentDrift(horse, factors = {}) {
         driftOccurred: false,
         newTemperament: horse.temperament,
         reason: 'No drift occurred',
-        driftProbability
+        driftProbability,
       };
     }
 
     // Determine new temperament
     const newTemperament = selectNewTemperament(horse.temperament, factors);
 
-    logger.info(`[temperamentDrift] Temperament drift occurred for horse ${horse.id}: ${horse.temperament} -> ${newTemperament}`);
+    logger.info(
+      `[temperamentDrift] Temperament drift occurred for horse ${horse.id}: ${horse.temperament} -> ${newTemperament}`
+    );
 
     return {
       driftOccurred: true,
@@ -160,17 +166,16 @@ export function calculateTemperamentDrift(horse, factors = {}) {
         recentCompetition,
         healthStatus,
         bondScore,
-        age
-      }
+        age,
+      },
     };
-
   } catch (error) {
     logger.error(`[temperamentDrift] Error calculating drift: ${error.message}`);
     return {
       driftOccurred: false,
       newTemperament: horse.temperament,
       reason: 'Error in calculation',
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -251,9 +256,8 @@ export async function applyTemperamentDrift(horseId, _factors = {}) {
     return {
       success: true,
       message: 'Temperament drift calculation completed',
-      horseId
+      horseId,
     };
-
   } catch (error) {
     logger.error(`[temperamentDrift] Error applying drift: ${error.message}`);
     throw error;

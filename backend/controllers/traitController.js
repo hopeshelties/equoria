@@ -23,35 +23,39 @@ export async function discoverTraits(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Invalid horse ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     }
 
-    logger.info(`[traitController.discoverTraits] Triggering trait discovery for horse ${parsedHorseId}`);
+    logger.info(
+      `[traitController.discoverTraits] Triggering trait discovery for horse ${parsedHorseId}`
+    );
 
     // Check if horse exists
     const horse = await prisma.horse.findUnique({
       where: { id: parsedHorseId },
-      select: { id: true, name: true }
+      select: { id: true, name: true },
     });
 
     if (!horse) {
       return res.status(404).json({
         success: false,
         message: 'Horse not found',
-        data: null
+        data: null,
       });
     }
 
     // Perform trait discovery
     const discoveryResult = await revealTraits(parsedHorseId, {
       checkEnrichment,
-      forceCheck
+      forceCheck,
     });
 
     // Log discovery event
     if (discoveryResult.revealed.length > 0) {
-      logger.info(`[traitController.discoverTraits] Discovered ${discoveryResult.revealed.length} traits for horse ${parsedHorseId} (${horse.name})`);
+      logger.info(
+        `[traitController.discoverTraits] Discovered ${discoveryResult.revealed.length} traits for horse ${parsedHorseId} (${horse.name})`
+      );
     }
 
     res.status(200).json({
@@ -60,16 +64,15 @@ export async function discoverTraits(req, res) {
       data: {
         horseId: parsedHorseId,
         horseName: horse.name,
-        ...discoveryResult
-      }
+        ...discoveryResult,
+      },
     });
-
   } catch (error) {
     logger.error(`[traitController.discoverTraits] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to discover traits',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -88,7 +91,7 @@ export async function getHorseTraits(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Invalid horse ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     }
 
@@ -103,15 +106,15 @@ export async function getHorseTraits(req, res) {
         epigenetic_modifiers: true,
         bond_score: true,
         stress_level: true,
-        age: true
-      }
+        age: true,
+      },
     });
 
     if (!horse) {
       return res.status(404).json({
         success: false,
         message: 'Horse not found',
-        data: null
+        data: null,
       });
     }
 
@@ -119,18 +122,21 @@ export async function getHorseTraits(req, res) {
     const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
 
     const enhancedTraits = {
-      positive: traits.positive?.map(trait => ({
-        name: trait,
-        definition: getTraitDefinition(trait)
-      })) || [],
-      negative: traits.negative?.map(trait => ({
-        name: trait,
-        definition: getTraitDefinition(trait)
-      })) || [],
-      hidden: traits.hidden?.map(trait => ({
-        name: trait,
-        definition: getTraitDefinition(trait)
-      })) || []
+      positive:
+        traits.positive?.map(trait => ({
+          name: trait,
+          definition: getTraitDefinition(trait),
+        })) || [],
+      negative:
+        traits.negative?.map(trait => ({
+          name: trait,
+          definition: getTraitDefinition(trait),
+        })) || [],
+      hidden:
+        traits.hidden?.map(trait => ({
+          name: trait,
+          definition: getTraitDefinition(trait),
+        })) || [],
     };
 
     res.status(200).json({
@@ -144,19 +150,21 @@ export async function getHorseTraits(req, res) {
         age: horse.age,
         traits: enhancedTraits,
         summary: {
-          totalTraits: enhancedTraits.positive.length + enhancedTraits.negative.length + enhancedTraits.hidden.length,
+          totalTraits:
+            enhancedTraits.positive.length +
+            enhancedTraits.negative.length +
+            enhancedTraits.hidden.length,
           visibleTraits: enhancedTraits.positive.length + enhancedTraits.negative.length,
-          hiddenTraits: enhancedTraits.hidden.length
-        }
-      }
+          hiddenTraits: enhancedTraits.hidden.length,
+        },
+      },
     });
-
   } catch (error) {
     logger.error(`[traitController.getHorseTraits] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve horse traits',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -169,7 +177,9 @@ export async function getTraitDefinitions(req, res) {
   try {
     const { type } = req.query;
 
-    logger.info(`[traitController.getTraitDefinitions] Getting trait definitions${type ? ` for type: ${type}` : ''}`);
+    logger.info(
+      `[traitController.getTraitDefinitions] Getting trait definitions${type ? ` for type: ${type}` : ''}`
+    );
 
     let traits;
     if (type && ['positive', 'negative'].includes(type)) {
@@ -184,7 +194,7 @@ export async function getTraitDefinitions(req, res) {
       if (definition) {
         acc[trait] = {
           name: trait,
-          ...definition
+          ...definition,
         };
       }
       return acc;
@@ -196,16 +206,15 @@ export async function getTraitDefinitions(req, res) {
       data: {
         traits: definitions,
         count: Object.keys(definitions).length,
-        filter: type || 'all'
-      }
+        filter: type || 'all',
+      },
     });
-
   } catch (error) {
     logger.error(`[traitController.getTraitDefinitions] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve trait definitions',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -224,11 +233,13 @@ export async function getDiscoveryStatus(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Invalid horse ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     }
 
-    logger.info(`[traitController.getDiscoveryStatus] Getting discovery status for horse ${parsedHorseId}`);
+    logger.info(
+      `[traitController.getDiscoveryStatus] Getting discovery status for horse ${parsedHorseId}`
+    );
 
     // Get horse data
     const horse = await prisma.horse.findUnique({
@@ -236,21 +247,23 @@ export async function getDiscoveryStatus(req, res) {
       include: {
         foalActivities: {
           orderBy: { createdAt: 'desc' },
-          take: 20
-        }
-      }
+          take: 20,
+        },
+      },
     });
 
     if (!horse) {
       return res.status(404).json({
         success: false,
         message: 'Horse not found',
-        data: null
+        data: null,
       });
     }
 
     // Import discovery functions
-    const { checkDiscoveryConditions, checkEnrichmentDiscoveries } = await import('../utils/traitDiscovery.js');
+    const { checkDiscoveryConditions, checkEnrichmentDiscoveries } = await import(
+      '../utils/traitDiscovery.js'
+    );
 
     // Check current conditions
     const metConditions = await checkDiscoveryConditions(horse);
@@ -267,27 +280,28 @@ export async function getDiscoveryStatus(req, res) {
         currentStats: {
           bondScore: horse.bond_score,
           stressLevel: horse.stress_level,
-          age: horse.age
+          age: horse.age,
         },
         traitCounts: {
           visible: (traits.positive?.length || 0) + (traits.negative?.length || 0),
-          hidden: traits.hidden?.length || 0
+          hidden: traits.hidden?.length || 0,
         },
         discoveryConditions: {
           met: metConditions,
           enrichment: enrichmentConditions,
-          total: metConditions.length + enrichmentConditions.length
+          total: metConditions.length + enrichmentConditions.length,
         },
-        canDiscover: (metConditions.length + enrichmentConditions.length) > 0 && (traits.hidden?.length || 0) > 0
-      }
+        canDiscover:
+          metConditions.length + enrichmentConditions.length > 0 &&
+          (traits.hidden?.length || 0) > 0,
+      },
     });
-
   } catch (error) {
     logger.error(`[traitController.getDiscoveryStatus] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to get discovery status',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }
@@ -305,7 +319,7 @@ export async function batchDiscoverTraits(req, res) {
       return res.status(400).json({
         success: false,
         message: 'horseIds must be a non-empty array',
-        data: null
+        data: null,
       });
     }
 
@@ -313,11 +327,13 @@ export async function batchDiscoverTraits(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Maximum 10 horses can be processed at once',
-        data: null
+        data: null,
       });
     }
 
-    logger.info(`[traitController.batchDiscoverTraits] Processing batch discovery for ${horseIds.length} horses`);
+    logger.info(
+      `[traitController.batchDiscoverTraits] Processing batch discovery for ${horseIds.length} horses`
+    );
 
     const results = [];
     const errors = [];
@@ -334,11 +350,12 @@ export async function batchDiscoverTraits(req, res) {
         const discoveryResult = await revealTraits(parsedHorseId, { checkEnrichment });
         results.push({
           horseId: parsedHorseId,
-          ...discoveryResult
+          ...discoveryResult,
         });
-
       } catch (error) {
-        logger.error(`[traitController.batchDiscoverTraits] Error processing horse ${horseId}: ${error.message}`);
+        logger.error(
+          `[traitController.batchDiscoverTraits] Error processing horse ${horseId}: ${error.message}`
+        );
         errors.push({ horseId, error: error.message });
       }
     }
@@ -354,17 +371,16 @@ export async function batchDiscoverTraits(req, res) {
         summary: {
           processed: results.length,
           failed: errors.length,
-          totalRevealed
-        }
-      }
+          totalRevealed,
+        },
+      },
     });
-
   } catch (error) {
     logger.error(`[traitController.batchDiscoverTraits] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to process batch discovery',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 }

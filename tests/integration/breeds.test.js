@@ -33,7 +33,10 @@ describe('Breeds API - /api/breeds', () => {
 
   describe('POST /api/breeds', () => {
     it('should create a new breed and return 201 status with the created breed', async () => {
-      const newBreedData = { name: 'Arabian', description: 'Elegant and spirited' };
+      const newBreedData = {
+        name: 'Arabian',
+        description: 'Elegant and spirited',
+      };
       const response = await request(app)
         .post('/api/breeds')
         .send(newBreedData);
@@ -43,7 +46,9 @@ describe('Breeds API - /api/breeds', () => {
       expect(response.body.description).toBe(newBreedData.description);
 
       // Verify the breed was actually inserted into the database using Prisma
-      const dbBreed = await prisma.breed.findUnique({ where: { id: response.body.id } });
+      const dbBreed = await prisma.breed.findUnique({
+        where: { id: response.body.id },
+      });
       expect(dbBreed).not.toBeNull();
       expect(dbBreed.name).toBe(newBreedData.name);
       expect(dbBreed.description).toBe(newBreedData.description);
@@ -70,8 +75,10 @@ describe('Breeds API - /api/breeds', () => {
 
     it('should return 409 if breed name already exists (case-insensitive handled by controller)', async () => {
       const breedName = 'Thoroughbred';
-      await prisma.breed.create({ data: { name: breedName, description: 'Racehorse' } });
-      
+      await prisma.breed.create({
+        data: { name: breedName, description: 'Racehorse' },
+      });
+
       // Attempt to create it again (same case)
       const responseSameCase = await request(app)
         .post('/api/breeds')
@@ -100,7 +107,7 @@ describe('Breeds API - /api/breeds', () => {
       expect(response.statusCode).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBe(2);
-      const names = response.body.map(b => b.name);
+      const names = response.body.map((b) => b.name);
       expect(names).toContain('Quarter Horse');
       expect(names).toContain('Morgan');
     });
@@ -115,8 +122,8 @@ describe('Breeds API - /api/breeds', () => {
 
   describe('GET /api/breeds/:id', () => {
     it('should return a single breed by id and 200 status', async () => {
-      const createdBreed = await prisma.breed.create({ 
-        data: { name: 'Appaloosa', description: 'Spotted' } 
+      const createdBreed = await prisma.breed.create({
+        data: { name: 'Appaloosa', description: 'Spotted' },
       });
       const breedId = createdBreed.id;
 
@@ -137,7 +144,7 @@ describe('Breeds API - /api/breeds', () => {
       const response = await request(app).get(`/api/breeds/${invalidId}`);
       // This depends on your route validation for the ID parameter.
       // If it's like the breedController, it should be a 400 due to parseInt failing before Prisma is even hit.
-      // Or if the route param validation is less strict and allows it to reach the controller, 
+      // Or if the route param validation is less strict and allows it to reach the controller,
       // Prisma might throw its own error or the parseInt in controller would make it NaN, leading to 404 if not found (or other error).
       // Assuming route param validation catches non-integers for /:id and returns 400 as per typical practice.
       expect(response.statusCode).toBe(400);

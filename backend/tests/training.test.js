@@ -58,36 +58,36 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
   let youngHorse; // Under 3 years old, not eligible
   let trainedHorse; // Horse that has been trained recently
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     // Clean up any existing test data
     await prisma.trainingLog.deleteMany({
       where: {
         horse: {
           name: {
-            in: ['Test Adult Horse', 'Test Young Horse', 'Test Trained Horse']
-          }
-        }
-      }
+            in: ['Test Adult Horse', 'Test Young Horse', 'Test Trained Horse'],
+          },
+        },
+      },
     });
 
     await prisma.horse.deleteMany({
       where: {
         name: {
-          in: ['Test Adult Horse', 'Test Young Horse', 'Test Trained Horse']
-        }
-      }
+          in: ['Test Adult Horse', 'Test Young Horse', 'Test Trained Horse'],
+        },
+      },
     });
 
     await prisma.user.deleteMany({
       where: {
-        email: 'training-test-player@example.com'
-      }
+        email: 'training-test-player@example.com',
+      },
     });
 
     await prisma.user.deleteMany({
       where: {
-        email: 'training-test@example.com'
-      }
+        email: 'training-test@example.com',
+      },
     });
 
     // Create a test User (for legacy ownerId relationship)
@@ -97,8 +97,8 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
         username: 'trainingtest',
         firstName: 'Training',
         lastName: 'Tester',
-        password: 'hashedpassword'
-      }
+        password: 'hashedpassword',
+      },
     });
 
     // Create a test Player (for XP system and userId relationship)
@@ -108,8 +108,8 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
         email: 'training-test-player@example.com',
         firstName: 'Training',
         lastName: 'Player',
-        password: 'hashedpassword'
-      }
+        password: 'hashedpassword',
+      },
     });
 
     // Ensure we have a breed
@@ -118,8 +118,8 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
       breed = await prisma.breed.create({
         data: {
           name: 'Test Thoroughbred',
-          description: 'Test breed for training tests'
-        }
+          description: 'Test breed for training tests',
+        },
       });
     }
 
@@ -129,7 +129,7 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
         name: 'Test Adult Horse',
         age: 4, // Eligible for training
         breedId: breed.id,
-        userId: testPlayer.id,       // User relationship (for XP and ownership)
+        userId: testPlayer.id, // User relationship (for XP and ownership)
         sex: 'Mare',
         dateOfBirth: new Date('2020-01-01'),
         healthStatus: 'Excellent',
@@ -137,9 +137,9 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     youngHorse = await prisma.horse.create({
@@ -155,9 +155,9 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     trainedHorse = await prisma.horse.create({
@@ -170,14 +170,14 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
         dateOfBirth: new Date('2019-01-01'),
         healthStatus: 'Excellent',
         disciplineScores: {
-          Racing: 10 // Has some previous training
+          Racing: 10, // Has some previous training
         },
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     // Create a recent training log to put trainedHorse in cooldown
@@ -185,54 +185,52 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
       data: {
         horseId: trainedHorse.id,
         discipline: 'Racing',
-        trainedAt: new Date() // Just trained now
-      }
+        trainedAt: new Date(), // Just trained now
+      },
     });
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Clean up test data
     await prisma.trainingLog.deleteMany({
       where: {
         horse: {
           name: {
-            in: ['Test Adult Horse', 'Test Young Horse', 'Test Trained Horse']
-          }
-        }
-      }
+            in: ['Test Adult Horse', 'Test Young Horse', 'Test Trained Horse'],
+          },
+        },
+      },
     });
 
     await prisma.horse.deleteMany({
       where: {
         name: {
-          in: ['Test Adult Horse', 'Test Young Horse', 'Test Trained Horse']
-        }
-      }
+          in: ['Test Adult Horse', 'Test Young Horse', 'Test Trained Horse'],
+        },
+      },
     });
 
     await prisma.user.deleteMany({
       where: {
-        email: 'training-test-player@example.com'
-      }
+        email: 'training-test-player@example.com',
+      },
     });
 
     await prisma.user.deleteMany({
       where: {
-        email: 'training-test@example.com'
-      }
+        email: 'training-test@example.com',
+      },
     });
 
     await prisma.$disconnect();
   });
 
   describe('BUSINESS RULE: Age Requirements (3+ years old)', () => {
-    it('BLOCKS training for horses under 3 years old', async() => {
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: youngHorse.id,
-          discipline: 'Racing'
-        });
+    it('BLOCKS training for horses under 3 years old', async () => {
+      const response = await request(app).post('/api/training/train').send({
+        horseId: youngHorse.id,
+        discipline: 'Racing',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -240,24 +238,22 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
 
       // VERIFY: No discipline score change in database
       const unchangedHorse = await prisma.horse.findUnique({
-        where: { id: youngHorse.id }
+        where: { id: youngHorse.id },
       });
       expect(unchangedHorse.disciplineScores).toEqual({});
 
       // VERIFY: No training log created
       const trainingLogs = await prisma.trainingLog.findMany({
-        where: { horseId: youngHorse.id }
+        where: { horseId: youngHorse.id },
       });
       expect(trainingLogs).toHaveLength(0);
     });
 
-    it('ALLOWS training for horses 3+ years old', async() => {
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: adultHorse.id,
-          discipline: 'Dressage'
-        });
+    it('ALLOWS training for horses 3+ years old', async () => {
+      const response = await request(app).post('/api/training/train').send({
+        horseId: adultHorse.id,
+        discipline: 'Dressage',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -265,7 +261,7 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
 
       // VERIFY: Discipline score increased in database
       const updatedHorse = await prisma.horse.findUnique({
-        where: { id: adultHorse.id }
+        where: { id: adultHorse.id },
       });
       expect(updatedHorse.disciplineScores.Dressage).toBeGreaterThanOrEqual(5);
 
@@ -273,15 +269,15 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
       const trainingLogs = await prisma.trainingLog.findMany({
         where: {
           horseId: adultHorse.id,
-          discipline: 'Dressage'
-        }
+          discipline: 'Dressage',
+        },
       });
       expect(trainingLogs).toHaveLength(1);
     });
   });
 
   describe('BUSINESS RULE: Discipline Score Progression (+5 base)', () => {
-    it('INCREASES discipline scores by +5 for first-time training', async() => {
+    it('INCREASES discipline scores by +5 for first-time training', async () => {
       // Create a fresh horse specifically for score testing
       const scoreTestHorse = await prisma.horse.create({
         data: {
@@ -297,30 +293,28 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       // Get initial state
       const initialHorse = await prisma.horse.findUnique({
-        where: { id: scoreTestHorse.id }
+        where: { id: scoreTestHorse.id },
       });
       const initialScore = initialHorse.disciplineScores['Show Jumping'] || 0;
 
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: scoreTestHorse.id,
-          discipline: 'Show Jumping'
-        });
+      const response = await request(app).post('/api/training/train').send({
+        horseId: scoreTestHorse.id,
+        discipline: 'Show Jumping',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
 
       // VERIFY: Exact score increase in database
       const finalHorse = await prisma.horse.findUnique({
-        where: { id: scoreTestHorse.id }
+        where: { id: scoreTestHorse.id },
       });
       const finalScore = finalHorse.disciplineScores['Show Jumping'];
       const scoreIncrease = finalScore - initialScore;
@@ -331,14 +325,14 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
 
       // Clean up
       await prisma.trainingLog.deleteMany({
-        where: { horseId: scoreTestHorse.id }
+        where: { horseId: scoreTestHorse.id },
       });
       await prisma.horse.delete({
-        where: { id: scoreTestHorse.id }
+        where: { id: scoreTestHorse.id },
       });
     });
 
-    it('ACCUMULATES discipline scores across multiple training sessions (different horses)', async() => {
+    it('ACCUMULATES discipline scores across multiple training sessions (different horses)', async () => {
       // BUSINESS RULE: Since we have one-discipline-per-week cooldown, we test accumulation
       // by checking that different horses can build up scores independently
 
@@ -357,9 +351,9 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       const horse2 = await prisma.horse.create({
@@ -376,51 +370,47 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       // Train horse 1 in a new discipline
-      const response1 = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: horse1.id,
-          discipline: 'Cross Country'
-        });
+      const response1 = await request(app).post('/api/training/train').send({
+        horseId: horse1.id,
+        discipline: 'Cross Country',
+      });
 
       expect(response1.status).toBe(200);
 
       // VERIFY: Horse 1 now has Cross Country score
       const horse1AfterTraining = await prisma.horse.findUnique({
-        where: { id: horse1.id }
+        where: { id: horse1.id },
       });
       expect(horse1AfterTraining.disciplineScores['Cross Country']).toBeGreaterThanOrEqual(5);
 
       // VERIFY: Horse 2's existing scores are preserved (independent horses)
       const horse2Current = await prisma.horse.findUnique({
-        where: { id: horse2.id }
+        where: { id: horse2.id },
       });
       expect(horse2Current.disciplineScores['Cross Country']).toBe(10); // Should be unchanged
 
       // Clean up
       await prisma.trainingLog.deleteMany({
-        where: { horseId: { in: [horse1.id, horse2.id] } }
+        where: { horseId: { in: [horse1.id, horse2.id] } },
       });
       await prisma.horse.deleteMany({
-        where: { id: { in: [horse1.id, horse2.id] } }
+        where: { id: { in: [horse1.id, horse2.id] } },
       });
     });
   });
 
   describe('BUSINESS RULE: Global Cooldown (One Discipline Per Week)', () => {
-    it('BLOCKS training when horse has trained ANY discipline within 7 days', async() => {
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: trainedHorse.id,
-          discipline: 'Dressage' // Different discipline than recent training
-        });
+    it('BLOCKS training when horse has trained ANY discipline within 7 days', async () => {
+      const response = await request(app).post('/api/training/train').send({
+        horseId: trainedHorse.id,
+        discipline: 'Dressage', // Different discipline than recent training
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -428,7 +418,7 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
 
       // VERIFY: No new discipline score
       const unchangedHorse = await prisma.horse.findUnique({
-        where: { id: trainedHorse.id }
+        where: { id: trainedHorse.id },
       });
       expect(unchangedHorse.disciplineScores.Dressage).toBeUndefined();
 
@@ -436,13 +426,13 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
       const dressageLogs = await prisma.trainingLog.findMany({
         where: {
           horseId: trainedHorse.id,
-          discipline: 'Dressage'
-        }
+          discipline: 'Dressage',
+        },
       });
       expect(dressageLogs).toHaveLength(0);
     });
 
-    it('ALLOWS training after 7-day cooldown expires', async() => {
+    it('ALLOWS training after 7-day cooldown expires', async () => {
       // Create a horse with old training (more than 7 days ago)
       const oldTrainedHorse = await prisma.horse.create({
         data: {
@@ -458,9 +448,9 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       // Create old training log (8 days ago)
@@ -471,41 +461,39 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
         data: {
           horseId: oldTrainedHorse.id,
           discipline: 'Racing',
-          trainedAt: eightDaysAgo
-        }
+          trainedAt: eightDaysAgo,
+        },
       });
 
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: oldTrainedHorse.id,
-          discipline: 'Endurance'
-        });
+      const response = await request(app).post('/api/training/train').send({
+        horseId: oldTrainedHorse.id,
+        discipline: 'Endurance',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
 
       // VERIFY: New discipline score created
       const updatedHorse = await prisma.horse.findUnique({
-        where: { id: oldTrainedHorse.id }
+        where: { id: oldTrainedHorse.id },
       });
       expect(updatedHorse.disciplineScores.Endurance).toBeGreaterThanOrEqual(5);
 
       // Clean up
       await prisma.trainingLog.deleteMany({
-        where: { horseId: oldTrainedHorse.id }
+        where: { horseId: oldTrainedHorse.id },
       });
       await prisma.horse.delete({
-        where: { id: oldTrainedHorse.id }
+        where: { id: oldTrainedHorse.id },
       });
     });
   });
 
   describe('BUSINESS RULE: XP Award for Training', () => {
-    it('AWARDS XP to horse owner (Player) when training succeeds', async() => {
+    it('AWARDS XP to horse owner (Player) when training succeeds', async () => {
       // Get initial player XP
       const initialPlayer = await prisma.user.findUnique({
-        where: { id: testPlayer.id }
+        where: { id: testPlayer.id },
       });
       const initialXP = initialPlayer.xp || 0;
       const initialLevel = initialPlayer.level || 1;
@@ -517,7 +505,7 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
           age: 4,
           breedId: (await prisma.breed.findFirst()).id,
           ownerId: testUser.id,
-          userId: testPlayer.id,       // THIS is what matters for XP
+          userId: testPlayer.id, // THIS is what matters for XP
           sex: 'Mare',
           dateOfBirth: new Date('2020-01-01'),
           healthStatus: 'Excellent',
@@ -525,30 +513,28 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: xpTestHorse.id,
-          discipline: 'Trail'
-        });
+      const response = await request(app).post('/api/training/train').send({
+        horseId: xpTestHorse.id,
+        discipline: 'Trail',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
 
       // VERIFY: Training completed successfully
       const updatedHorse = await prisma.horse.findUnique({
-        where: { id: xpTestHorse.id }
+        where: { id: xpTestHorse.id },
       });
       expect(updatedHorse.disciplineScores.Trail).toBeGreaterThanOrEqual(5);
 
       // VERIFY: Player received XP (base amount is 5 XP for training)
       const finalPlayer = await prisma.user.findUnique({
-        where: { id: testPlayer.id }
+        where: { id: testPlayer.id },
       });
 
       const xpGained = (finalPlayer.xp || 0) - initialXP;
@@ -561,16 +547,16 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
 
       // Clean up
       await prisma.trainingLog.deleteMany({
-        where: { horseId: xpTestHorse.id }
+        where: { horseId: xpTestHorse.id },
       });
       await prisma.horse.delete({
-        where: { id: xpTestHorse.id }
+        where: { id: xpTestHorse.id },
       });
     });
   });
 
   describe('BUSINESS RULE: Training Log Creation', () => {
-    it('CREATES training log entry for successful training', async() => {
+    it('CREATES training log entry for successful training', async () => {
       // Create fresh horse for log testing
       const logTestHorse = await prisma.horse.create({
         data: {
@@ -586,19 +572,17 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       const beforeTraining = new Date();
 
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: logTestHorse.id,
-          discipline: 'Reining'
-        });
+      const response = await request(app).post('/api/training/train').send({
+        horseId: logTestHorse.id,
+        discipline: 'Reining',
+      });
 
       expect(response.status).toBe(200);
 
@@ -606,8 +590,8 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
       const trainingLogs = await prisma.trainingLog.findMany({
         where: {
           horseId: logTestHorse.id,
-          discipline: 'Reining'
-        }
+          discipline: 'Reining',
+        },
       });
 
       expect(trainingLogs).toHaveLength(1);
@@ -619,24 +603,22 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
 
       // Clean up
       await prisma.trainingLog.deleteMany({
-        where: { horseId: logTestHorse.id }
+        where: { horseId: logTestHorse.id },
       });
       await prisma.horse.delete({
-        where: { id: logTestHorse.id }
+        where: { id: logTestHorse.id },
       });
     });
   });
 
   describe('BUSINESS RULE: Error Handling and Data Integrity', () => {
-    it('MAINTAINS database integrity when training non-existent horse', async() => {
+    it('MAINTAINS database integrity when training non-existent horse', async () => {
       const nonExistentHorseId = 99999;
 
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: nonExistentHorseId,
-          discipline: 'Racing'
-        });
+      const response = await request(app).post('/api/training/train').send({
+        horseId: nonExistentHorseId,
+        discipline: 'Racing',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -644,18 +626,16 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
 
       // VERIFY: No training logs created for non-existent horse
       const trainingLogs = await prisma.trainingLog.findMany({
-        where: { horseId: nonExistentHorseId }
+        where: { horseId: nonExistentHorseId },
       });
       expect(trainingLogs).toHaveLength(0);
     });
 
-    it('VALIDATES input parameters and rejects invalid requests', async() => {
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: 'invalid',
-          discipline: ''
-        });
+    it('VALIDATES input parameters and rejects invalid requests', async () => {
+      const response = await request(app).post('/api/training/train').send({
+        horseId: 'invalid',
+        discipline: '',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -665,7 +645,7 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
   });
 
   describe('BUSINESS RULE: Next Training Date Calculation', () => {
-    it('PROVIDES accurate next training date (7 days from training)', async() => {
+    it('PROVIDES accurate next training date (7 days from training)', async () => {
       // Create fresh horse for date testing
       const dateTestHorse = await prisma.horse.create({
         data: {
@@ -681,19 +661,17 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       const trainingTime = new Date();
 
-      const response = await request(app)
-        .post('/api/training/train')
-        .send({
-          horseId: dateTestHorse.id,
-          discipline: 'Driving'
-        });
+      const response = await request(app).post('/api/training/train').send({
+        horseId: dateTestHorse.id,
+        discipline: 'Driving',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.nextEligibleDate).toBeDefined();
@@ -708,10 +686,10 @@ describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validat
 
       // Clean up
       await prisma.trainingLog.deleteMany({
-        where: { horseId: dateTestHorse.id }
+        where: { horseId: dateTestHorse.id },
       });
       await prisma.horse.delete({
-        where: { id: dateTestHorse.id }
+        where: { id: dateTestHorse.id },
       });
     });
   });

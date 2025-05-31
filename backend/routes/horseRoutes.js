@@ -9,9 +9,7 @@ const router = express.Router();
  * Validation middleware for horse ID parameter
  */
 const validateHorseId = [
-  param('id')
-    .isInt({ min: 1 })
-    .withMessage('Horse ID must be a positive integer'),
+  param('id').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -19,11 +17,11 @@ const validateHorseId = [
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: errors.array()
+        errors: errors.array(),
       });
     }
     next();
-  }
+  },
 ];
 
 /**
@@ -40,18 +38,18 @@ const validateUserId = [
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: errors.array()
+        errors: errors.array(),
       });
     }
     next();
-  }
+  },
 ];
 
 /**
  * GET /horses/trainable/:userId
  * Get all horses owned by a user that are eligible for training
  */
-router.get('/trainable/:userId', validateUserId, async(req, res) => {
+router.get('/trainable/:userId', validateUserId, async (req, res) => {
   try {
     const { userId } = req.params;
 
@@ -60,13 +58,13 @@ router.get('/trainable/:userId', validateUserId, async(req, res) => {
     res.json({
       success: true,
       message: `Found ${trainableHorses.length} trainable horses`,
-      data: trainableHorses
+      data: trainableHorses,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
     });
   }
 });
@@ -75,7 +73,7 @@ router.get('/trainable/:userId', validateUserId, async(req, res) => {
  * GET /horses/:id/history
  * Get competition history for a specific horse
  */
-router.get('/:id/history', validateHorseId, async(req, res) => {
+router.get('/:id/history', validateHorseId, async (req, res) => {
   try {
     // Dynamic import for ES module
     const { getHorseHistory } = await import('../controllers/horseController.js');
@@ -84,7 +82,7 @@ router.get('/:id/history', validateHorseId, async(req, res) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
     });
   }
 });
@@ -96,15 +94,9 @@ const validateFoalCreation = [
   body('name')
     .isLength({ min: 1, max: 100 })
     .withMessage('Name must be between 1 and 100 characters'),
-  body('breedId')
-    .isInt({ min: 1 })
-    .withMessage('Breed ID must be a positive integer'),
-  body('sire_id')
-    .isInt({ min: 1 })
-    .withMessage('Sire ID must be a positive integer'),
-  body('dam_id')
-    .isInt({ min: 1 })
-    .withMessage('Dam ID must be a positive integer'),
+  body('breedId').isInt({ min: 1 }).withMessage('Breed ID must be a positive integer'),
+  body('sire_id').isInt({ min: 1 }).withMessage('Sire ID must be a positive integer'),
+  body('dam_id').isInt({ min: 1 }).withMessage('Dam ID must be a positive integer'),
   body('sex')
     .optional()
     .isIn(['stallion', 'mare', 'gelding', 'filly', 'colt'])
@@ -113,10 +105,7 @@ const validateFoalCreation = [
     .optional()
     .isLength({ min: 1, max: 50 })
     .withMessage('User ID must be between 1 and 50 characters'),
-  body('stableId')
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage('Stable ID must be a positive integer'),
+  body('stableId').optional().isInt({ min: 1 }).withMessage('Stable ID must be a positive integer'),
   body('health_status')
     .optional()
     .isIn(['Excellent', 'Good', 'Fair', 'Poor', 'Critical'])
@@ -128,18 +117,18 @@ const validateFoalCreation = [
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: errors.array()
+        errors: errors.array(),
       });
     }
     next();
-  }
+  },
 ];
 
 /**
  * POST /horses/foals
  * Create a new foal with epigenetic traits applied at birth
  */
-router.post('/foals', validateFoalCreation, async(req, res) => {
+router.post('/foals', validateFoalCreation, async (req, res) => {
   try {
     // Dynamic import for ES module
     const { createFoal } = await import('../controllers/horseController.js');
@@ -148,7 +137,7 @@ router.post('/foals', validateFoalCreation, async(req, res) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error during foal creation',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
     });
   }
 });
@@ -157,14 +146,14 @@ router.post('/foals', validateFoalCreation, async(req, res) => {
  * GET /horses/:id/overview
  * Get comprehensive overview data for a specific horse
  */
-router.get('/:id/overview', validateHorseId, async(req, res) => {
+router.get('/:id/overview', validateHorseId, async (req, res) => {
   try {
     await getHorseOverview(req, res);
   } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
     });
   }
 });

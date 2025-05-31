@@ -39,47 +39,50 @@ finalScore = baseStatScore                  // 50/30/20 weighted stats
 
 ### Positive Traits
 
-| Trait | General Effect | Best Disciplines | Specialized Effect |
-|-------|---------------|------------------|-------------------|
-| **Resilient** | +3% | Cross Country (+5%), Endurance (+6%), Racing (+4%) | Superior stamina and stress resistance |
-| **Bold** | +4% | Show Jumping (+6%), Cross Country (+5%), Eventing (+5%) | Fearless approach to obstacles |
-| **Intelligent** | +3% | Dressage (+6%), Reining (+5%), Eventing (+4%) | Quick learning and precise responses |
-| **Calm** | +2.5% | Dressage (+5%), Driving (+4%), Trail (+4%) | Maintains composure under pressure |
-| **Athletic** | +5% | Racing (+7%), Show Jumping (+6%), Cross Country (+6%) | Superior physical capabilities |
-| **Trainability Boost** | +4% | Dressage (+7%), Reining (+6%), Driving (+5%) | Exceptional responsiveness to training |
-| **Legendary Bloodline** | +8% | Racing (+12%), Dressage (+10%), Show Jumping (+10%) | Elite heritage provides competitive edge |
-| **Weather Immunity** | +2% | Cross Country (+5%), Endurance (+4%), Trail (+3%) | Unaffected by adverse conditions |
-| **Night Vision** | +1.5% | Trail (+4%), Endurance (+3%) | Enhanced low-light performance |
+| Trait                   | General Effect | Best Disciplines                                        | Specialized Effect                       |
+| ----------------------- | -------------- | ------------------------------------------------------- | ---------------------------------------- |
+| **Resilient**           | +3%            | Cross Country (+5%), Endurance (+6%), Racing (+4%)      | Superior stamina and stress resistance   |
+| **Bold**                | +4%            | Show Jumping (+6%), Cross Country (+5%), Eventing (+5%) | Fearless approach to obstacles           |
+| **Intelligent**         | +3%            | Dressage (+6%), Reining (+5%), Eventing (+4%)           | Quick learning and precise responses     |
+| **Calm**                | +2.5%          | Dressage (+5%), Driving (+4%), Trail (+4%)              | Maintains composure under pressure       |
+| **Athletic**            | +5%            | Racing (+7%), Show Jumping (+6%), Cross Country (+6%)   | Superior physical capabilities           |
+| **Trainability Boost**  | +4%            | Dressage (+7%), Reining (+6%), Driving (+5%)            | Exceptional responsiveness to training   |
+| **Legendary Bloodline** | +8%            | Racing (+12%), Dressage (+10%), Show Jumping (+10%)     | Elite heritage provides competitive edge |
+| **Weather Immunity**    | +2%            | Cross Country (+5%), Endurance (+4%), Trail (+3%)       | Unaffected by adverse conditions         |
+| **Night Vision**        | +1.5%          | Trail (+4%), Endurance (+3%)                            | Enhanced low-light performance           |
 
 ### Negative Traits
 
-| Trait | General Effect | Worst Disciplines | Specialized Effect |
-|-------|---------------|------------------|-------------------|
-| **Nervous** | -4% | Show Jumping (-7%), Cross Country (-6%), Racing (-5%) | Easily startled and stressed |
-| **Stubborn** | -3% | Dressage (-6%), Reining (-5%), Driving (-4%) | Resistant to rider cues |
-| **Fragile** | -3.5% | Cross Country (-8%), Show Jumping (-6%), Racing (-5%) | Higher injury risk |
-| **Aggressive** | -4.5% | Dressage (-8%), Driving (-7%), Trail (-6%) | Difficult to manage |
-| **Lazy** | -3% | Racing (-6%), Endurance (-5%), Cross Country (-4%) | Lacks drive and motivation |
+| Trait          | General Effect | Worst Disciplines                                     | Specialized Effect           |
+| -------------- | -------------- | ----------------------------------------------------- | ---------------------------- |
+| **Nervous**    | -4%            | Show Jumping (-7%), Cross Country (-6%), Racing (-5%) | Easily startled and stressed |
+| **Stubborn**   | -3%            | Dressage (-6%), Reining (-5%), Driving (-4%)          | Resistant to rider cues      |
+| **Fragile**    | -3.5%          | Cross Country (-8%), Show Jumping (-6%), Racing (-5%) | Higher injury risk           |
+| **Aggressive** | -4.5%          | Dressage (-8%), Driving (-7%), Trail (-6%)            | Difficult to manage          |
+| **Lazy**       | -3%            | Racing (-6%), Endurance (-5%), Cross Country (-4%)    | Lacks drive and motivation   |
 
 ## Balance and Fairness
 
 ### Modifier Limits
+
 - **General Effects**: Maximum ±8% (Legendary Bloodline exception)
 - **Specialized Effects**: Maximum ±12% for legendary traits, ±8% for others
 - **Total Impact**: Capped at reasonable levels through diminishing returns
 
 ### Diminishing Returns Formula
+
 ```javascript
 function calculateDiminishingReturns(traitCount) {
-  if (traitCount <= 1) return 1.0;    // 100% effectiveness
-  if (traitCount === 2) return 0.95;  // 95% effectiveness
-  if (traitCount === 3) return 0.90;  // 90% effectiveness
-  if (traitCount === 4) return 0.85;  // 85% effectiveness
-  if (traitCount >= 5) return 0.80;   // 80% effectiveness
+  if (traitCount <= 1) return 1.0; // 100% effectiveness
+  if (traitCount === 2) return 0.95; // 95% effectiveness
+  if (traitCount === 3) return 0.9; // 90% effectiveness
+  if (traitCount === 4) return 0.85; // 85% effectiveness
+  if (traitCount >= 5) return 0.8; // 80% effectiveness
 }
 ```
 
 ### Design Principles
+
 1. **Enhancement, Not Dominance**: Traits enhance performance but don't override base stats
 2. **Meaningful Choices**: Different traits excel in different disciplines
 3. **Balanced Risk/Reward**: Negative traits provide meaningful penalties
@@ -88,12 +91,15 @@ function calculateDiminishingReturns(traitCount) {
 ## API Endpoints
 
 ### Trait Impact Analysis
+
 ```
 GET /api/traits/competition-impact/:horseId?discipline=Show%20Jumping
 ```
+
 Analyzes trait impact for a specific horse and discipline.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -129,32 +135,38 @@ Analyzes trait impact for a specific horse and discipline.
 ```
 
 ### Cross-Discipline Comparison
+
 ```
 GET /api/traits/competition-comparison/:horseId
 ```
+
 Compares trait impact across all disciplines for strategic planning.
 
 ### Trait Effects Reference
+
 ```
 GET /api/traits/competition-effects?type=positive&discipline=Dressage
 ```
+
 Returns all trait effects with optional filtering.
 
 ## Frontend Integration
 
 ### React Component Usage
+
 ```jsx
 import TraitCompetitionAnalysis from '../components/TraitCompetitionAnalysis';
 
 <TraitCompetitionAnalysis
   horseId={horse.id}
   horseName={horse.name}
-  selectedDiscipline="Show Jumping"
-  onDisciplineChange={(discipline) => setSelectedDiscipline(discipline)}
-/>
+  selectedDiscipline='Show Jumping'
+  onDisciplineChange={discipline => setSelectedDiscipline(discipline)}
+/>;
 ```
 
 ### Features
+
 - **Discipline Selector**: Horizontal scrolling discipline picker
 - **Impact Summary**: Overall effect percentage and score adjustment
 - **Trait Details**: Individual trait effects with specialization indicators
@@ -193,6 +205,7 @@ Competition results now include detailed trait impact information:
 ## Testing Coverage
 
 ### Unit Tests (21 tests)
+
 - Trait effect calculations
 - Diminishing returns logic
 - Error handling for unknown traits
@@ -200,6 +213,7 @@ Competition results now include detailed trait impact information:
 - Discipline-specific effect verification
 
 ### Integration Tests (13 tests)
+
 - Complete competition simulation with traits
 - Multi-horse ranking with trait differences
 - Discipline-specific effect validation
@@ -224,14 +238,17 @@ Competition results now include detailed trait impact information:
 ## Migration and Deployment
 
 ### Database Changes
+
 - No schema changes required (uses existing `epigenetic_modifiers` field)
 - Backward compatible with existing competition system
 
 ### Configuration
+
 - All trait effects are code-based (no database configuration needed)
 - Easy to adjust modifiers through code updates
 
 ### Monitoring
+
 - Comprehensive logging for trait impact analysis
 - Performance metrics for competition simulation
 - Error tracking for unknown traits

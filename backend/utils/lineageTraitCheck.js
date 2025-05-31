@@ -16,7 +16,9 @@ import logger from './logger.js';
  */
 function checkLineageForDisciplineAffinity(ancestors) {
   try {
-    logger.info(`[lineageTraitCheck.checkLineageForDisciplineAffinity] Analyzing ${ancestors?.length || 0} ancestors for discipline affinity`);
+    logger.info(
+      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Analyzing ${ancestors?.length || 0} ancestors for discipline affinity`
+    );
 
     // Handle edge cases
     if (!ancestors || ancestors.length === 0) {
@@ -33,11 +35,15 @@ function checkLineageForDisciplineAffinity(ancestors) {
 
       if (preferredDiscipline) {
         disciplineCount[preferredDiscipline] = (disciplineCount[preferredDiscipline] || 0) + 1;
-        logger.info(`[lineageTraitCheck.checkLineageForDisciplineAffinity] Ancestor ${ancestor.name || ancestor.id} prefers ${preferredDiscipline}`);
+        logger.info(
+          `[lineageTraitCheck.checkLineageForDisciplineAffinity] Ancestor ${ancestor.name || ancestor.id} prefers ${preferredDiscipline}`
+        );
       }
     }
 
-    logger.info(`[lineageTraitCheck.checkLineageForDisciplineAffinity] Discipline counts: ${JSON.stringify(disciplineCount)}`);
+    logger.info(
+      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Discipline counts: ${JSON.stringify(disciplineCount)}`
+    );
 
     // Find the most common discipline
     let mostCommonDiscipline = null;
@@ -55,13 +61,14 @@ function checkLineageForDisciplineAffinity(ancestors) {
 
     const result = {
       affinity: hasAffinity,
-      discipline: hasAffinity ? mostCommonDiscipline : undefined
+      discipline: hasAffinity ? mostCommonDiscipline : undefined,
     };
 
-    logger.info(`[lineageTraitCheck.checkLineageForDisciplineAffinity] Result: ${JSON.stringify(result)}`);
+    logger.info(
+      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Result: ${JSON.stringify(result)}`
+    );
 
     return result;
-
   } catch (error) {
     logger.error(`[lineageTraitCheck.checkLineageForDisciplineAffinity] Error: ${error.message}`);
     return { affinity: false };
@@ -169,7 +176,7 @@ function checkLineageForDisciplineAffinityDetailed(ancestors) {
         totalAnalyzed: 0,
         totalWithDisciplines: 0,
         disciplineBreakdown: {},
-        affinityStrength: 0
+        affinityStrength: 0,
       };
     }
 
@@ -187,8 +194,8 @@ function checkLineageForDisciplineAffinityDetailed(ancestors) {
 
     // Calculate affinity strength (percentage of ancestors with the dominant discipline)
     const maxCount = Math.max(...Object.values(disciplineCount), 0);
-    const affinityStrength = totalAncestorsWithDisciplines > 0 ?
-      (maxCount / totalAncestorsWithDisciplines) * 100 : 0;
+    const affinityStrength =
+      totalAncestorsWithDisciplines > 0 ? (maxCount / totalAncestorsWithDisciplines) * 100 : 0;
 
     return {
       ...basicResult,
@@ -196,18 +203,19 @@ function checkLineageForDisciplineAffinityDetailed(ancestors) {
       totalWithDisciplines: totalAncestorsWithDisciplines,
       disciplineBreakdown: disciplineCount,
       affinityStrength: Math.round(affinityStrength),
-      dominantCount: maxCount
+      dominantCount: maxCount,
     };
-
   } catch (error) {
-    logger.error(`[lineageTraitCheck.checkLineageForDisciplineAffinityDetailed] Error: ${error.message}`);
+    logger.error(
+      `[lineageTraitCheck.checkLineageForDisciplineAffinityDetailed] Error: ${error.message}`
+    );
     return {
       affinity: false,
       totalAnalyzed: 0,
       totalWithDisciplines: 0,
       disciplineBreakdown: {},
       affinityStrength: 0,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -226,7 +234,7 @@ function checkSpecificDisciplineAffinity(ancestors, targetDiscipline, minimumCou
         hasAffinity: false,
         count: 0,
         required: minimumCount,
-        discipline: targetDiscipline
+        discipline: targetDiscipline,
       };
     }
 
@@ -243,7 +251,9 @@ function checkSpecificDisciplineAffinity(ancestors, targetDiscipline, minimumCou
 
     const hasAffinity = count >= minimumCount;
 
-    logger.info(`[lineageTraitCheck.checkSpecificDisciplineAffinity] ${targetDiscipline} affinity: ${hasAffinity} (${count}/${minimumCount})`);
+    logger.info(
+      `[lineageTraitCheck.checkSpecificDisciplineAffinity] ${targetDiscipline} affinity: ${hasAffinity} (${count}/${minimumCount})`
+    );
 
     return {
       hasAffinity,
@@ -251,9 +261,8 @@ function checkSpecificDisciplineAffinity(ancestors, targetDiscipline, minimumCou
       required: minimumCount,
       discipline: targetDiscipline,
       matchingAncestors,
-      percentage: Math.round((count / ancestors.length) * 100)
+      percentage: Math.round((count / ancestors.length) * 100),
     };
-
   } catch (error) {
     logger.error(`[lineageTraitCheck.checkSpecificDisciplineAffinity] Error: ${error.message}`);
     return {
@@ -261,7 +270,7 @@ function checkSpecificDisciplineAffinity(ancestors, targetDiscipline, minimumCou
       count: 0,
       required: minimumCount,
       discipline: targetDiscipline,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -272,5 +281,5 @@ export {
   checkSpecificDisciplineAffinity,
   getAncestorPreferredDiscipline,
   getMostCommonDisciplineFromHistory,
-  getHighestScoringDiscipline
+  getHighestScoringDiscipline,
 };

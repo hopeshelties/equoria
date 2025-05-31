@@ -1,9 +1,40 @@
-import { jest, describe, beforeEach, expect, it } from '@jest/globals';
-
 /**
- * Lineage Trait Check Utility Tests
- * Tests for the standalone lineage discipline affinity checking utility
+ * 🧪 UNIT TEST: Lineage Trait Check - Discipline Affinity Analysis
+ *
+ * This test validates the lineage trait checking utilities for analyzing
+ * discipline affinity patterns across horse ancestry and competition history.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Discipline affinity detection: 3+ ancestors with same discipline = affinity
+ * - Ancestor discipline priority: direct field > competition history > scores > specialty
+ * - Detailed affinity analysis: Breakdown, strength percentage, dominant counts
+ * - Specific discipline checking: Custom minimum thresholds and percentage calculations
+ * - Competition history analysis: Most common discipline from competition records
+ * - Score-based discipline detection: Highest scoring discipline from performance data
+ * - Edge case handling: Empty arrays, null values, missing fields, circular references
+ * - Data source flexibility: Multiple field names (competitionHistory vs competitions)
+ * - Robust error handling: Graceful degradation with invalid or incomplete data
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. checkLineageForDisciplineAffinity() - Main affinity detection with 3+ threshold
+ * 2. checkLineageForDisciplineAffinityDetailed() - Comprehensive analysis with statistics
+ * 3. checkSpecificDisciplineAffinity() - Custom discipline and threshold checking
+ * 4. getAncestorPreferredDiscipline() - Multi-source discipline preference detection
+ * 5. getMostCommonDisciplineFromHistory() - Competition history analysis
+ * 6. getHighestScoringDiscipline() - Performance score-based discipline detection
+ * 7. Edge cases - Null handling, empty data, circular references, invalid inputs
+ * 8. Data flexibility - Multiple field names and data structure variations
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete business logic, affinity calculations, statistical analysis
+ * ✅ REAL: Data processing, field priority logic, percentage calculations
+ * 🔧 MOCK: Logger only - external dependency for error reporting
+ *
+ * 💡 TEST STRATEGY: Pure unit testing of business logic with minimal mocking
+ *    to validate affinity detection accuracy and comprehensive edge case coverage
  */
+
+import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -15,12 +46,12 @@ const __dirname = dirname(__filename);
 const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
-  warn: jest.fn()
+  warn: jest.fn(),
 };
 
 // Mock the logger import
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the functions after mocking
@@ -30,10 +61,10 @@ const {
   checkSpecificDisciplineAffinity,
   getAncestorPreferredDiscipline,
   getMostCommonDisciplineFromHistory,
-  getHighestScoringDiscipline
+  getHighestScoringDiscipline,
 } = await import(join(__dirname, '../utils/lineageTraitCheck.js'));
 
-describe('Lineage Trait Check Utility', () => {
+describe('🧬 UNIT: Lineage Trait Check - Discipline Affinity Analysis', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -45,7 +76,7 @@ describe('Lineage Trait Check Utility', () => {
         { id: 2, name: 'Horse2', discipline: 'Show Jumping' },
         { id: 3, name: 'Horse3', discipline: 'Show Jumping' },
         { id: 4, name: 'Horse4', discipline: 'Dressage' },
-        { id: 5, name: 'Horse5', discipline: 'Racing' }
+        { id: 5, name: 'Horse5', discipline: 'Racing' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -60,7 +91,7 @@ describe('Lineage Trait Check Utility', () => {
         { id: 2, name: 'Horse2', discipline: 'Show Jumping' },
         { id: 3, name: 'Horse3', discipline: 'Dressage' },
         { id: 4, name: 'Horse4', discipline: 'Racing' },
-        { id: 5, name: 'Horse5', discipline: 'Racing' }
+        { id: 5, name: 'Horse5', discipline: 'Racing' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -87,7 +118,7 @@ describe('Lineage Trait Check Utility', () => {
       const ancestors = [
         { id: 1, name: 'Horse1' },
         { id: 2, name: 'Horse2' },
-        { id: 3, name: 'Horse3' }
+        { id: 3, name: 'Horse3' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -100,7 +131,7 @@ describe('Lineage Trait Check Utility', () => {
       const ancestors = [
         { id: 1, name: 'Horse1', discipline: 'Racing' },
         { id: 2, name: 'Horse2', discipline: 'Racing' },
-        { id: 3, name: 'Horse3', discipline: 'Racing' }
+        { id: 3, name: 'Horse3', discipline: 'Racing' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -115,7 +146,7 @@ describe('Lineage Trait Check Utility', () => {
         { id: 2, name: 'Horse2', discipline: 'Dressage' },
         { id: 3, name: 'Horse3', discipline: 'Dressage' },
         { id: 4, name: 'Horse4', discipline: 'Dressage' },
-        { id: 5, name: 'Horse5', discipline: 'Racing' }
+        { id: 5, name: 'Horse5', discipline: 'Racing' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -132,7 +163,7 @@ describe('Lineage Trait Check Utility', () => {
         name: 'Horse1',
         discipline: 'Show Jumping',
         competitionHistory: [{ discipline: 'Racing', placement: '1st' }],
-        disciplineScores: { 'Dressage': 95 }
+        disciplineScores: { Dressage: 95 },
       };
 
       const result = getAncestorPreferredDiscipline(ancestor);
@@ -147,8 +178,8 @@ describe('Lineage Trait Check Utility', () => {
         competitionHistory: [
           { discipline: 'Racing', placement: '1st' },
           { discipline: 'Racing', placement: '2nd' },
-          { discipline: 'Dressage', placement: '3rd' }
-        ]
+          { discipline: 'Dressage', placement: '3rd' },
+        ],
       };
 
       const result = getAncestorPreferredDiscipline(ancestor);
@@ -160,7 +191,7 @@ describe('Lineage Trait Check Utility', () => {
       const ancestor = {
         id: 1,
         name: 'Horse1',
-        disciplineScores: { 'Racing': 75, 'Dressage': 90, 'Show Jumping': 65 }
+        disciplineScores: { Racing: 75, Dressage: 90, 'Show Jumping': 65 },
       };
 
       const result = getAncestorPreferredDiscipline(ancestor);
@@ -174,8 +205,8 @@ describe('Lineage Trait Check Utility', () => {
         name: 'Horse1',
         competitions: [
           { discipline: 'Show Jumping', placement: '1st' },
-          { discipline: 'Show Jumping', placement: '2nd' }
-        ]
+          { discipline: 'Show Jumping', placement: '2nd' },
+        ],
       };
 
       const result = getAncestorPreferredDiscipline(ancestor);
@@ -187,7 +218,7 @@ describe('Lineage Trait Check Utility', () => {
       const ancestor = {
         id: 1,
         name: 'Horse1',
-        specialty: 'Eventing'
+        specialty: 'Eventing',
       };
 
       const result = getAncestorPreferredDiscipline(ancestor);
@@ -198,7 +229,7 @@ describe('Lineage Trait Check Utility', () => {
     it('should return null when no discipline information available', () => {
       const ancestor = {
         id: 1,
-        name: 'Horse1'
+        name: 'Horse1',
       };
 
       const result = getAncestorPreferredDiscipline(ancestor);
@@ -214,7 +245,7 @@ describe('Lineage Trait Check Utility', () => {
         { id: 2, name: 'Horse2', discipline: 'Racing' },
         { id: 3, name: 'Horse3', discipline: 'Racing' },
         { id: 4, name: 'Horse4', discipline: 'Dressage' },
-        { id: 5, name: 'Horse5', discipline: 'Show Jumping' }
+        { id: 5, name: 'Horse5', discipline: 'Show Jumping' },
       ];
 
       const result = checkLineageForDisciplineAffinityDetailed(ancestors);
@@ -224,9 +255,9 @@ describe('Lineage Trait Check Utility', () => {
       expect(result.totalAnalyzed).toBe(5);
       expect(result.totalWithDisciplines).toBe(5);
       expect(result.disciplineBreakdown).toEqual({
-        'Racing': 3,
-        'Dressage': 1,
-        'Show Jumping': 1
+        Racing: 3,
+        Dressage: 1,
+        'Show Jumping': 1,
       });
       expect(result.affinityStrength).toBe(60); // 3/5 = 60%
       expect(result.dominantCount).toBe(3);
@@ -236,7 +267,7 @@ describe('Lineage Trait Check Utility', () => {
       const ancestors = [
         { id: 1, name: 'Horse1', discipline: 'Racing' },
         { id: 2, name: 'Horse2', discipline: 'Dressage' },
-        { id: 3, name: 'Horse3', discipline: 'Show Jumping' }
+        { id: 3, name: 'Horse3', discipline: 'Show Jumping' },
       ];
 
       const result = checkLineageForDisciplineAffinityDetailed(ancestors);
@@ -265,7 +296,7 @@ describe('Lineage Trait Check Utility', () => {
         { id: 1, name: 'Horse1', discipline: 'Racing' },
         { id: 2, name: 'Horse2', discipline: 'Racing' },
         { id: 3, name: 'Horse3', discipline: 'Racing' },
-        { id: 4, name: 'Horse4', discipline: 'Dressage' }
+        { id: 4, name: 'Horse4', discipline: 'Dressage' },
       ];
 
       const result = checkSpecificDisciplineAffinity(ancestors, 'Racing');
@@ -282,7 +313,7 @@ describe('Lineage Trait Check Utility', () => {
       const ancestors = [
         { id: 1, name: 'Horse1', discipline: 'Show Jumping' },
         { id: 2, name: 'Horse2', discipline: 'Show Jumping' },
-        { id: 3, name: 'Horse3', discipline: 'Dressage' }
+        { id: 3, name: 'Horse3', discipline: 'Dressage' },
       ];
 
       const result = checkSpecificDisciplineAffinity(ancestors, 'Show Jumping', 2);
@@ -297,7 +328,7 @@ describe('Lineage Trait Check Utility', () => {
       const ancestors = [
         { id: 1, name: 'Horse1', discipline: 'Racing' },
         { id: 2, name: 'Horse2', discipline: 'Dressage' },
-        { id: 3, name: 'Horse3', discipline: 'Show Jumping' }
+        { id: 3, name: 'Horse3', discipline: 'Show Jumping' },
       ];
 
       const result = checkSpecificDisciplineAffinity(ancestors, 'Racing', 3);
@@ -310,7 +341,9 @@ describe('Lineage Trait Check Utility', () => {
     it('should handle empty ancestors or missing target discipline', () => {
       expect(checkSpecificDisciplineAffinity([], 'Racing').hasAffinity).toBe(false);
       expect(checkSpecificDisciplineAffinity(null, 'Racing').hasAffinity).toBe(false);
-      expect(checkSpecificDisciplineAffinity([{ discipline: 'Racing' }], null).hasAffinity).toBe(false);
+      expect(checkSpecificDisciplineAffinity([{ discipline: 'Racing' }], null).hasAffinity).toBe(
+        false
+      );
     });
   });
 
@@ -320,7 +353,7 @@ describe('Lineage Trait Check Utility', () => {
         { discipline: 'Racing', placement: '1st' },
         { discipline: 'Racing', placement: '2nd' },
         { discipline: 'Racing', placement: '3rd' },
-        { discipline: 'Dressage', placement: '1st' }
+        { discipline: 'Dressage', placement: '1st' },
       ];
 
       const result = getMostCommonDisciplineFromHistory(history);
@@ -334,10 +367,7 @@ describe('Lineage Trait Check Utility', () => {
     });
 
     it('should handle competitions without discipline field', () => {
-      const history = [
-        { placement: '1st' },
-        { placement: '2nd' }
-      ];
+      const history = [{ placement: '1st' }, { placement: '2nd' }];
 
       const result = getMostCommonDisciplineFromHistory(history);
 
@@ -348,9 +378,9 @@ describe('Lineage Trait Check Utility', () => {
   describe('getHighestScoringDiscipline', () => {
     it('should return the highest scoring discipline', () => {
       const scores = {
-        'Racing': 75,
-        'Dressage': 90,
-        'Show Jumping': 65
+        Racing: 75,
+        Dressage: 90,
+        'Show Jumping': 65,
       };
 
       const result = getHighestScoringDiscipline(scores);
@@ -365,9 +395,9 @@ describe('Lineage Trait Check Utility', () => {
 
     it('should handle non-numeric scores', () => {
       const scores = {
-        'Racing': 'high',
-        'Dressage': 90,
-        'Show Jumping': 'medium'
+        Racing: 'high',
+        Dressage: 90,
+        'Show Jumping': 'medium',
       };
 
       const result = getHighestScoringDiscipline(scores);
@@ -377,9 +407,9 @@ describe('Lineage Trait Check Utility', () => {
 
     it('should return null when all scores are non-numeric', () => {
       const scores = {
-        'Racing': 'high',
-        'Dressage': 'medium',
-        'Show Jumping': 'low'
+        Racing: 'high',
+        Dressage: 'medium',
+        'Show Jumping': 'low',
       };
 
       const result = getHighestScoringDiscipline(scores);

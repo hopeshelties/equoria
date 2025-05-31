@@ -60,13 +60,21 @@ const router = express.Router();
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/', [
-  body('name')
-    .isString().withMessage('Breed name must be a string.')
-    .trim()
-    .notEmpty().withMessage('Breed name cannot be empty after trimming.')
-    .isLength({ min: 2, max: 255 }).withMessage('Breed name must be between 2 and 255 characters.')
-], handleValidationErrors, breedController.createBreed);
+router.post(
+  '/',
+  [
+    body('name')
+      .isString()
+      .withMessage('Breed name must be a string.')
+      .trim()
+      .notEmpty()
+      .withMessage('Breed name cannot be empty after trimming.')
+      .isLength({ min: 2, max: 255 })
+      .withMessage('Breed name must be between 2 and 255 characters.'),
+  ],
+  handleValidationErrors,
+  breedController.createBreed
+);
 
 /**
  * @swagger
@@ -139,8 +147,11 @@ router.get('/', breedController.getAllBreeds);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id', [
-  param('id').isInt({ min: 1 }).withMessage('Breed ID must be a positive integer.')
-], handleValidationErrors, breedController.getBreedById);
+router.get(
+  '/:id',
+  [param('id').isInt({ min: 1 }).withMessage('Breed ID must be a positive integer.')],
+  handleValidationErrors,
+  breedController.getBreedById
+);
 
 export default router;

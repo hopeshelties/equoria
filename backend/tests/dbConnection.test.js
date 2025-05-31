@@ -39,16 +39,16 @@ import { jest, describe, it, expect, afterAll } from '@jest/globals';
 import prisma from '../../packages/database/prismaClient.js';
 
 describe('🔌 INTEGRATION: Database Connection - Alternative Prisma Client Path Testing', () => {
-  afterAll(async() => {
+  afterAll(async () => {
     await prisma.$disconnect();
   });
 
-  it('should connect to the database and fetch users', async() => {
+  it('should connect to the database and fetch users', async () => {
     const users = await prisma.user.findMany({
       select: {
         id: true,
-        email: true
-      }
+        email: true,
+      },
     });
     expect(Array.isArray(users)).toBe(true);
     // Optionally, assert that if users are returned, they have the selected fields

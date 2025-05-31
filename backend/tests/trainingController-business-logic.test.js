@@ -28,7 +28,8 @@ dotenv.config({ path: join(__dirname, '../.env.test') });
 
 // Import without mocking for real integration testing
 const { default: prisma } = await import(join(__dirname, '../db/index.js'));
-const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses, trainRouteHandler } = await import(join(__dirname, '../controllers/trainingController.js'));
+const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses, trainRouteHandler } =
+  await import(join(__dirname, '../controllers/trainingController.js'));
 
 describe('Training Controller Business Logic Tests', () => {
   let testUser;
@@ -37,32 +38,45 @@ describe('Training Controller Business Logic Tests', () => {
   let trainedHorse; // Horse that has been trained recently
   let userWithHorses;
 
-  beforeAll(async() => { // Kept async() as per previous lint fix attempt
+  beforeAll(async () => {
+    // Kept async() as per previous lint fix attempt
     // Clean up any existing test data
     await prisma.trainingLog.deleteMany({
       where: {
         horse: {
           name: {
-            in: ['Controller Adult Horse', 'Controller Young Horse', 'Controller Trained Horse', 'Controller Horse 1', 'Controller Horse 2']
-          }
-        }
-      }
+            in: [
+              'Controller Adult Horse',
+              'Controller Young Horse',
+              'Controller Trained Horse',
+              'Controller Horse 1',
+              'Controller Horse 2',
+            ],
+          },
+        },
+      },
     });
 
     await prisma.horse.deleteMany({
       where: {
         name: {
-          in: ['Controller Adult Horse', 'Controller Young Horse', 'Controller Trained Horse', 'Controller Horse 1', 'Controller Horse 2']
-        }
-      }
+          in: [
+            'Controller Adult Horse',
+            'Controller Young Horse',
+            'Controller Trained Horse',
+            'Controller Horse 1',
+            'Controller Horse 2',
+          ],
+        },
+      },
     });
 
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: ['controller-test-user@example.com', 'controller-multi-user@example.com']
-        }
-      }
+          in: ['controller-test-user@example.com', 'controller-multi-user@example.com'],
+        },
+      },
     });
 
     // Create test users
@@ -76,8 +90,8 @@ describe('Training Controller Business Logic Tests', () => {
         money: 1000,
         level: 1,
         xp: 0,
-        settings: { theme: 'light' }
-      }
+        settings: { theme: 'light' },
+      },
     });
 
     userWithHorses = await prisma.user.create({
@@ -90,8 +104,8 @@ describe('Training Controller Business Logic Tests', () => {
         money: 2000,
         level: 2,
         xp: 150,
-        settings: { theme: 'dark' }
-      }
+        settings: { theme: 'dark' },
+      },
     });
 
     // Ensure we have a breed
@@ -100,8 +114,8 @@ describe('Training Controller Business Logic Tests', () => {
       breed = await prisma.breed.create({
         data: {
           name: 'Controller Test Thoroughbred',
-          description: 'Test breed for controller tests'
-        }
+          description: 'Test breed for controller tests',
+        },
       });
     }
 
@@ -119,9 +133,9 @@ describe('Training Controller Business Logic Tests', () => {
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     youngHorse = await prisma.horse.create({
@@ -137,9 +151,9 @@ describe('Training Controller Business Logic Tests', () => {
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     trainedHorse = await prisma.horse.create({
@@ -152,14 +166,14 @@ describe('Training Controller Business Logic Tests', () => {
         dateOfBirth: new Date('2019-01-01'),
         healthStatus: 'Excellent',
         disciplineScores: {
-          Racing: 10 // Has some previous training
+          Racing: 10, // Has some previous training
         },
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     // Create horses for multi-horse user testing
@@ -176,9 +190,9 @@ describe('Training Controller Business Logic Tests', () => {
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     await prisma.horse.create({
@@ -194,9 +208,9 @@ describe('Training Controller Business Logic Tests', () => {
         epigeneticModifiers: {
           positive: [],
           negative: [],
-          hidden: []
-        }
-      }
+          hidden: [],
+        },
+      },
     });
 
     // Create a recent training log to put trainedHorse in cooldown
@@ -204,88 +218,104 @@ describe('Training Controller Business Logic Tests', () => {
       data: {
         horseId: trainedHorse.id,
         discipline: 'Racing',
-        trainedAt: new Date() // Just trained now
-      }
+        trainedAt: new Date(), // Just trained now
+      },
     });
   });
 
-  afterAll(async() => { // Kept async() as per previous lint fix attempt
+  afterAll(async () => {
+    // Kept async() as per previous lint fix attempt
     // Clean up test data
     await prisma.trainingLog.deleteMany({
       where: {
         horse: {
           name: {
-            in: ['Controller Adult Horse', 'Controller Young Horse', 'Controller Trained Horse', 'Controller Horse 1', 'Controller Horse 2']
-          }
-        }
-      }
+            in: [
+              'Controller Adult Horse',
+              'Controller Young Horse',
+              'Controller Trained Horse',
+              'Controller Horse 1',
+              'Controller Horse 2',
+            ],
+          },
+        },
+      },
     });
 
     await prisma.horse.deleteMany({
       where: {
         name: {
-          in: ['Controller Adult Horse', 'Controller Young Horse', 'Controller Trained Horse', 'Controller Horse 1', 'Controller Horse 2']
-        }
-      }
+          in: [
+            'Controller Adult Horse',
+            'Controller Young Horse',
+            'Controller Trained Horse',
+            'Controller Horse 1',
+            'Controller Horse 2',
+          ],
+        },
+      },
     });
 
     await prisma.user.deleteMany({
       where: {
         email: {
-          in: ['controller-test-user@example.com', 'controller-multi-user@example.com']
-        }
-      }
+          in: ['controller-test-user@example.com', 'controller-multi-user@example.com'],
+        },
+      },
     });
 
     await prisma.$disconnect();
   });
 
   describe('BUSINESS RULE: canTrain() Function Validation', () => {
-    it('RETURNS eligible true for horse that meets all requirements', async() => {
+    it('RETURNS eligible true for horse that meets all requirements', async () => {
       const result = await canTrain(adultHorse.id, 'Dressage');
 
       expect(result).toEqual({
         eligible: true,
-        reason: null
+        reason: null,
       });
     });
 
-    it('RETURNS eligible false for horse under 3 years old', async() => {
+    it('RETURNS eligible false for horse under 3 years old', async () => {
       const result = await canTrain(youngHorse.id, 'Dressage');
 
       expect(result).toEqual({
         eligible: false,
-        reason: 'Horse is under age'
+        reason: 'Horse is under age',
       });
     });
 
-    it('RETURNS eligible false for horse with recent training (global cooldown)', async() => {
+    it('RETURNS eligible false for horse with recent training (global cooldown)', async () => {
       const result = await canTrain(trainedHorse.id, 'Dressage');
 
       expect(result).toEqual({
         eligible: false,
-        reason: 'Training cooldown active for this horse'
+        reason: 'Training cooldown active for this horse',
       });
     });
 
-    it('RETURNS eligible false for non-existent horse', async() => {
+    it('RETURNS eligible false for non-existent horse', async () => {
       const result = await canTrain(99999, 'Dressage');
 
       expect(result).toEqual({
         eligible: false,
-        reason: 'Horse not found'
+        reason: 'Horse not found',
       });
     });
 
-    it('THROWS error for invalid input parameters', async() => {
-      await expect(canTrain('invalid', 'Dressage')).rejects.toThrow('Horse ID must be a positive integer');
+    it('THROWS error for invalid input parameters', async () => {
+      await expect(canTrain('invalid', 'Dressage')).rejects.toThrow(
+        'Horse ID must be a positive integer'
+      );
       await expect(canTrain(1, '')).rejects.toThrow('Discipline is required');
       await expect(canTrain(null, 'Dressage')).rejects.toThrow('Horse ID is required');
     });
   });
 
   describe('BUSINESS RULE: trainHorse() Function Complete Workflow', () => {
-    it('EXECUTES successful training workflow for eligible horse', async() => { // Kept async() as per previous lint fix attempt
+    it('EXECUTES successful training workflow for eligible horse', async () => {
+      // Kept async() as per previous lint fix attempt
       // Create a fresh horse for training workflow testing
       const workflowHorse = await prisma.horse.create({
         data: {
@@ -300,14 +330,14 @@ describe('Training Controller Business Logic Tests', () => {
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       // Get initial user XP
       const initialUser = await prisma.user.findUnique({
-        where: { id: testUser.id }
+        where: { id: testUser.id },
       });
       const initialXP = initialUser.xp;
 
@@ -321,7 +351,7 @@ describe('Training Controller Business Logic Tests', () => {
 
       // VERIFY: Discipline score increased in database
       const updatedHorse = await prisma.horse.findUnique({
-        where: { id: workflowHorse.id }
+        where: { id: workflowHorse.id },
       });
       expect(updatedHorse.disciplineScores['Show Jumping']).toBeGreaterThanOrEqual(5);
 
@@ -329,14 +359,14 @@ describe('Training Controller Business Logic Tests', () => {
       const trainingLogs = await prisma.trainingLog.findMany({
         where: {
           horseId: workflowHorse.id,
-          discipline: 'Show Jumping'
-        }
+          discipline: 'Show Jumping',
+        },
       });
       expect(trainingLogs).toHaveLength(1);
 
       // VERIFY: User received XP
       const finalUser = await prisma.user.findUnique({
-        where: { id: testUser.id }
+        where: { id: testUser.id },
       });
       expect(finalUser.xp).toBeGreaterThan(initialXP);
 
@@ -349,48 +379,58 @@ describe('Training Controller Business Logic Tests', () => {
 
       // Clean up
       await prisma.trainingLog.deleteMany({
-        where: { horseId: workflowHorse.id }
+        where: { horseId: workflowHorse.id },
       });
       await prisma.horse.delete({
-        where: { id: workflowHorse.id }
+        where: { id: workflowHorse.id },
       });
     });
 
-    it('REJECTS training for ineligible horse (under age)', async() => { // Kept async() as per previous lint fix attempt
+    it('REJECTS training for ineligible horse (under age)', async () => {
+      // Kept async() as per previous lint fix attempt
       const result = await trainHorse(youngHorse.id, 'Racing', testUser.id);
 
       expect(result).toEqual({
         success: false,
         message: 'Horse is under age', // This reason comes from canTrain
         updatedHorse: null,
-        nextEligible: null
+        nextEligible: null,
       });
     });
 
-    it('REJECTS training for horse in cooldown', async() => { // Kept async() as per previous lint fix attempt
+    it('REJECTS training for horse in cooldown', async () => {
+      // Kept async() as per previous lint fix attempt
       const result = await trainHorse(trainedHorse.id, 'Dressage', testUser.id);
 
       expect(result).toEqual({
         success: false,
         message: 'Training cooldown active for this horse', // This reason comes from canTrain
         updatedHorse: null,
-        nextEligible: expect.any(String) // Cooldown date should still be provided
+        nextEligible: expect.any(String), // Cooldown date should still be provided
       });
     });
 
-    it('THROWS error for non-existent horse ID', async() => { // Kept async() as per previous lint fix attempt
+    it('THROWS error for non-existent horse ID', async () => {
+      // Kept async() as per previous lint fix attempt
       await expect(trainHorse(99999, 'Endurance', testUser.id)).rejects.toThrow('Horse not found');
     });
 
-    it('THROWS error for invalid input parameters to trainHorse', async() => { // Kept async() as per previous lint fix attempt
-      await expect(trainHorse('invalid', 'Dressage', testUser.id)).rejects.toThrow('Horse ID must be a positive integer');
-      await expect(trainHorse(adultHorse.id, '', testUser.id)).rejects.toThrow('Discipline is required');
-      await expect(trainHorse(adultHorse.id, 'Dressage', null)).rejects.toThrow('User ID is required for XP events');
+    it('THROWS error for invalid input parameters to trainHorse', async () => {
+      // Kept async() as per previous lint fix attempt
+      await expect(trainHorse('invalid', 'Dressage', testUser.id)).rejects.toThrow(
+        'Horse ID must be a positive integer'
+      );
+      await expect(trainHorse(adultHorse.id, '', testUser.id)).rejects.toThrow(
+        'Discipline is required'
+      );
+      await expect(trainHorse(adultHorse.id, 'Dressage', null)).rejects.toThrow(
+        'User ID is required for XP events'
+      );
     });
   });
 
   describe('BUSINESS RULE: getTrainingStatus() Accurate Information', () => {
-    it('PROVIDES complete status for eligible horse with no training history', async() => {
+    it('PROVIDES complete status for eligible horse with no training history', async () => {
       const result = await getTrainingStatus(adultHorse.id, 'Racing');
 
       expect(result.eligible).toBe(true);
@@ -400,7 +440,7 @@ describe('Training Controller Business Logic Tests', () => {
       expect(result.cooldown).toBeNull();
     });
 
-    it('PROVIDES accurate cooldown information for horse in cooldown', async() => {
+    it('PROVIDES accurate cooldown information for horse in cooldown', async () => {
       const result = await getTrainingStatus(trainedHorse.id, 'Racing');
 
       expect(result.eligible).toBe(false);
@@ -412,7 +452,7 @@ describe('Training Controller Business Logic Tests', () => {
       expect(result.cooldown.remainingDays).toBeGreaterThan(0);
     });
 
-    it('PROVIDES age restriction information for young horse', async() => {
+    it('PROVIDES age restriction information for young horse', async () => {
       const result = await getTrainingStatus(youngHorse.id, 'Dressage');
 
       expect(result.eligible).toBe(false);
@@ -420,7 +460,7 @@ describe('Training Controller Business Logic Tests', () => {
       expect(result.horseAge).toBe(2);
     });
 
-    it('HANDLES non-existent horse appropriately', async() => {
+    it('HANDLES non-existent horse appropriately', async () => {
       const result = await getTrainingStatus(99999, 'Racing');
 
       expect(result.eligible).toBe(false);
@@ -430,7 +470,8 @@ describe('Training Controller Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: getTrainableHorses() Functionality', () => {
-    it('RETURNS only eligible horses for a given user', async() => { // Kept async() as per previous lint fix attempt
+    it('RETURNS only eligible horses for a given user', async () => {
+      // Kept async() as per previous lint fix attempt
       // userWithHorses has two horses: 'Controller Horse 1' (age 6, eligible) and 'Controller Horse 2' (age 3, eligible)
       // adultHorse (age 4, eligible) belongs to testUser
       // youngHorse (age 2, ineligible) belongs to testUser
@@ -447,7 +488,8 @@ describe('Training Controller Business Logic Tests', () => {
       expect(horseNames).toContain('Controller Horse 2');
     });
 
-    it('RETURNS empty array if user has no trainable horses', async() => { // Kept async() as per previous lint fix attempt
+    it('RETURNS empty array if user has no trainable horses', async () => {
+      // Kept async() as per previous lint fix attempt
       // Create a new user with no horses
       const noHorseUser = await prisma.user.create({
         data: {
@@ -456,8 +498,8 @@ describe('Training Controller Business Logic Tests', () => {
           firstName: 'NoHorse',
           lastName: 'User',
           password: 'password123',
-          name: 'No Horse User'
-        }
+          name: 'No Horse User',
+        },
       });
 
       const result = await getTrainableHorses(noHorseUser.id);
@@ -467,9 +509,12 @@ describe('Training Controller Business Logic Tests', () => {
       await prisma.user.delete({ where: { id: noHorseUser.id } });
     });
 
-    it('THROWS error if user ID is not provided or invalid', async() => { // Kept async() as per previous lint fix attempt
+    it('THROWS error if user ID is not provided or invalid', async () => {
+      // Kept async() as per previous lint fix attempt
       await expect(getTrainableHorses(null)).rejects.toThrow('User ID is required');
-      await expect(getTrainableHorses('invalid')).rejects.toThrow('User ID must be a positive integer');
+      await expect(getTrainableHorses('invalid')).rejects.toThrow(
+        'User ID must be a positive integer'
+      );
     });
   });
 
@@ -479,20 +524,20 @@ describe('Training Controller Business Logic Tests', () => {
     beforeEach(() => {
       mockReq = {
         params: {
-          horseId: '' // Removed trailing comma
+          horseId: '', // Removed trailing comma
         },
         body: {
-          discipline: ''
-        }
+          discipline: '',
+        },
       };
       mockRes = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       _mockNext = jest.fn(); // Renamed mockNext to _mockNext
     });
 
-    it('PROVIDES proper API response format for successful training', async() => {
+    it('PROVIDES proper API response format for successful training', async () => {
       // Setup: Eligible horse, valid discipline
       mockReq.params.horseId = adultHorse.id.toString();
       mockReq.body.discipline = 'Racing';
@@ -501,15 +546,17 @@ describe('Training Controller Business Logic Tests', () => {
       await trainRouteHandler(mockReq, mockRes, _mockNext); // Use _mockNext
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-        success: true,
-        message: expect.stringContaining('Horse trained successfully in Racing'),
-        updatedHorse: expect.any(Object),
-        nextEligible: expect.any(String)
-      }));
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: expect.stringContaining('Horse trained successfully in Racing'),
+          updatedHorse: expect.any(Object),
+          nextEligible: expect.any(String),
+        })
+      );
     });
 
-    it('PROVIDES proper error response for ineligible horse', async() => {
+    it('PROVIDES proper error response for ineligible horse', async () => {
       // Setup: Young horse (ineligible)
       mockReq.params.horseId = youngHorse.id.toString();
       mockReq.body.discipline = 'Dressage';
@@ -522,11 +569,11 @@ describe('Training Controller Business Logic Tests', () => {
         success: false,
         message: 'Horse is under age',
         updatedHorse: null,
-        nextEligible: null // Or specific cooldown if applicable
+        nextEligible: null, // Or specific cooldown if applicable
       });
     });
 
-    it('PROVIDES proper error response for non-existent horse', async() => {
+    it('PROVIDES proper error response for non-existent horse', async () => {
       mockReq.params.horseId = '99999';
       mockReq.body.discipline = 'Eventing';
       mockReq.user = { id: testUser.id };
@@ -553,7 +600,7 @@ describe('Training Controller Business Logic Tests', () => {
   });
 
   describe('BUSINESS RULE: XP System Integration', () => {
-    it('AWARDS XP to horse owner after successful training', async() => {
+    it('AWARDS XP to horse owner after successful training', async () => {
       // Create a fresh horse and user for this specific test to avoid interference
       const xpUser = await prisma.user.create({
         data: {
@@ -563,8 +610,8 @@ describe('Training Controller Business Logic Tests', () => {
           name: 'XP Test User',
           xp: 0,
           level: 1,
-          money: 100
-        }
+          money: 100,
+        },
       });
       const xpHorse = await prisma.horse.create({
         data: {
@@ -575,8 +622,8 @@ describe('Training Controller Business Logic Tests', () => {
           sex: 'Gelding',
           dateOfBirth: new Date('2020-01-01'),
           healthStatus: 'Excellent',
-          disciplineScores: {}
-        }
+          disciplineScores: {},
+        },
       });
 
       const initialUserXP = xpUser.xp;
@@ -596,20 +643,21 @@ describe('Training Controller Business Logic Tests', () => {
   describe('BUSINESS RULE: Error Handling and Data Integrity', () => {
     let mockReq, mockRes, _mockNext; // Declare mocks here
 
-    beforeEach(() => { // Initialize mocks before each test in this block
+    beforeEach(() => {
+      // Initialize mocks before each test in this block
       mockReq = {
         params: { horseId: '' },
         body: { discipline: '' },
-        user: { id: testUser.id } // Assuming testUser is available in this scope
+        user: { id: testUser.id }, // Assuming testUser is available in this scope
       };
       mockRes = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       _mockNext = jest.fn();
     });
 
-    it('MAINTAINS database integrity when operations fail', async() => {
+    it('MAINTAINS database integrity when operations fail', async () => {
       // This test is complex and would involve trying to make an operation fail mid-way
       // For example, mocking a Prisma call to throw an error after some initial writes
       // and then verifying that the initial writes were rolled back (if using transactions)
@@ -618,7 +666,7 @@ describe('Training Controller Business Logic Tests', () => {
       expect(true).toBe(true); // Placeholder
     });
 
-    it('VALIDATES input parameters thoroughly', async() => {
+    it('VALIDATES input parameters thoroughly', async () => {
       // This is partially covered in canTrain and trainHorse specific tests.
       // This could be a higher-level test ensuring various invalid inputs to the route handler
       // are caught and result in appropriate error responses.

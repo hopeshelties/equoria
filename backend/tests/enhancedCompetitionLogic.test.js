@@ -1,13 +1,39 @@
 /**
- * Enhanced Competition Logic Tests
- * Tests for new competition system requirements:
- * - 24 disciplines with 3 weighted stats each
- * - Horse-based level system
- * - Age restrictions (3-21 years)
- * - Gaited trait requirement
- * - Stat gains for top 3 placements
+ * 🧪 UNIT TEST: Enhanced Competition Logic - Complete Competition System Validation
+ *
+ * This test validates the comprehensive competition system including horse levels,
+ * age restrictions, trait requirements, stat gains, and prize distribution.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Horse level calculation: Base stats + trait bonuses + training scores for discipline-specific levels
+ * - Age restrictions: Horses must be 3-21 years old to compete (retirement at 21)
+ * - Trait requirements: Gaited discipline requires Gaited trait, others have no special requirements
+ * - Stat gain system: 1st place 10%, 2nd place 5%, 3rd place 3% chance for +1 stat increase
+ * - Prize distribution: 1st=50%, 2nd=30%, 3rd=20%, 4th+=0% of total prize pool
+ * - Discipline configuration: 24 disciplines with 3-stat weightings each
+ * - Level progression: Every 50 points = +1 level (1-10), then every 100 points (11+)
+ * - Trait bonus integration: Legacy traits and discipline affinity bonuses in level calculation
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. calculateHorseLevel() - Complete level calculation with stats, traits, training
+ * 2. checkAgeRequirements() - Age validation for competition eligibility
+ * 3. checkTraitRequirements() - Trait validation for discipline-specific requirements
+ * 4. calculateStatGain() - Placement-based stat increase probability system
+ * 5. getAllDisciplines() - Complete discipline list validation (24 disciplines)
+ * 6. getDisciplineConfig() - Discipline-specific stat weightings and requirements
+ * 7. calculatePrizeAmount() - Prize distribution based on placement and total pool
+ * 8. Error handling - Graceful behavior with missing/invalid data
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete competition logic, level calculations, prize distributions
+ * ✅ REAL: Age validation, trait requirements, discipline configurations
+ * 🔧 MOCK: Math.random() only - for deterministic stat gain testing
+ *
+ * 💡 TEST STRATEGY: Unit testing with controlled randomness to validate
+ *    complete competition system mechanics and business rule compliance
  */
 
+import { jest, describe, it, expect, test, afterEach } from '@jest/globals';
 import {
   calculateHorseLevel,
   checkAgeRequirements,
@@ -15,11 +41,10 @@ import {
   calculateStatGain,
   getAllDisciplines,
   getDisciplineConfig,
-  calculatePrizeAmount
+  calculatePrizeAmount,
 } from '../utils/competitionLogic.js';
 
-describe('🏆 Enhanced Competition Logic', () => {
-
+describe('🏆 UNIT: Enhanced Competition Logic - Complete Competition System Validation', () => {
   describe('📊 Horse Level Calculation', () => {
     test('should calculate horse level correctly for Racing discipline', () => {
       const horse = {
@@ -28,11 +53,11 @@ describe('🏆 Enhanced Competition Logic', () => {
         focus: 60,
         epigeneticModifiers: {
           positive: ['fast', 'athletic'],
-          negative: []
+          negative: [],
         },
         disciplineScores: {
-          'Racing': 50
-        }
+          Racing: 50,
+        },
       };
 
       const level = calculateHorseLevel(horse, 'Racing');
@@ -54,11 +79,11 @@ describe('🏆 Enhanced Competition Logic', () => {
         focus: 100,
         epigeneticModifiers: {
           positive: ['fast', 'athletic', 'focused', 'brave', 'resilient'],
-          negative: []
+          negative: [],
         },
         disciplineScores: {
-          'Racing': 200
-        }
+          Racing: 200,
+        },
       };
 
       const level = calculateHorseLevel(horse, 'Racing');
@@ -93,15 +118,15 @@ describe('🏆 Enhanced Competition Logic', () => {
       const horseWithGaited = {
         epigeneticModifiers: {
           positive: ['gaited', 'calm'],
-          negative: []
-        }
+          negative: [],
+        },
       };
 
       const horseWithoutGaited = {
         epigeneticModifiers: {
           positive: ['fast', 'athletic'],
-          negative: []
-        }
+          negative: [],
+        },
       };
 
       expect(checkTraitRequirements(horseWithGaited, 'Gaited')).toBe(true);
@@ -112,8 +137,8 @@ describe('🏆 Enhanced Competition Logic', () => {
       const horse = {
         epigeneticModifiers: {
           positive: ['fast', 'athletic'],
-          negative: []
-        }
+          negative: [],
+        },
       };
 
       expect(checkTraitRequirements(horse, 'Racing')).toBe(true);
@@ -170,8 +195,8 @@ describe('🏆 Enhanced Competition Logic', () => {
       expect(calculatePrizeAmount(totalPrize, 1, 10)).toBe(5000); // 50%
       expect(calculatePrizeAmount(totalPrize, 2, 10)).toBe(3000); // 30%
       expect(calculatePrizeAmount(totalPrize, 3, 10)).toBe(2000); // 20%
-      expect(calculatePrizeAmount(totalPrize, 4, 10)).toBe(0);    // 0%
-      expect(calculatePrizeAmount(totalPrize, 5, 10)).toBe(0);    // 0%
+      expect(calculatePrizeAmount(totalPrize, 4, 10)).toBe(0); // 0%
+      expect(calculatePrizeAmount(totalPrize, 5, 10)).toBe(0); // 0%
     });
   });
 
@@ -191,7 +216,11 @@ describe('🏆 Enhanced Competition Logic', () => {
     test('should have correct stats for each discipline', () => {
       expect(getDisciplineConfig('Racing').stats).toEqual(['speed', 'stamina', 'focus']);
       expect(getDisciplineConfig('Dressage').stats).toEqual(['precision', 'focus', 'obedience']);
-      expect(getDisciplineConfig('Western Pleasure').stats).toEqual(['focus', 'obedience', 'intelligence']);
+      expect(getDisciplineConfig('Western Pleasure').stats).toEqual([
+        'focus',
+        'obedience',
+        'intelligence',
+      ]);
       expect(getDisciplineConfig('Gaited').stats).toEqual(['flexibility', 'balance', 'obedience']);
     });
 

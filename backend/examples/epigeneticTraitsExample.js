@@ -1,4 +1,9 @@
-import { calculateEpigeneticTraits, getTraitDefinition, getTraitsByType, checkTraitConflict } from '../utils/epigeneticTraits.js';
+import {
+  calculateEpigeneticTraits,
+  getTraitDefinition,
+  getTraitsByType,
+  checkTraitConflict,
+} from '../utils/epigeneticTraits.js';
 
 /**
  * Epigenetic Traits Calculation Examples
@@ -15,13 +20,16 @@ const optimalBreeding = {
   damTraits: ['resilient', 'intelligent', 'athletic'],
   sireTraits: ['bold', 'calm', 'trainability_boost'],
   damBondScore: 95,
-  damStressLevel: 5
+  damStressLevel: 5,
 };
 
 const optimalResult = calculateEpigeneticTraits(optimalBreeding);
 console.log('Input:', optimalBreeding);
 console.log('Result:', optimalResult);
-console.log('Total traits:', optimalResult.positive.length + optimalResult.negative.length + optimalResult.hidden.length);
+console.log(
+  'Total traits:',
+  optimalResult.positive.length + optimalResult.negative.length + optimalResult.hidden.length
+);
 console.log('');
 
 // Example 2: Poor Breeding Conditions
@@ -32,13 +40,16 @@ const poorBreeding = {
   damTraits: ['nervous', 'fragile'],
   sireTraits: ['aggressive', 'stubborn'],
   damBondScore: 15,
-  damStressLevel: 90
+  damStressLevel: 90,
 };
 
 const poorResult = calculateEpigeneticTraits(poorBreeding);
 console.log('Input:', poorBreeding);
 console.log('Result:', poorResult);
-console.log('Total traits:', poorResult.positive.length + poorResult.negative.length + poorResult.hidden.length);
+console.log(
+  'Total traits:',
+  poorResult.positive.length + poorResult.negative.length + poorResult.hidden.length
+);
 console.log('');
 
 // Example 3: Mixed Parent Traits
@@ -49,13 +60,16 @@ const mixedBreeding = {
   damTraits: ['resilient', 'nervous'], // Mixed traits
   sireTraits: ['bold', 'lazy'], // Mixed traits
   damBondScore: 70,
-  damStressLevel: 30
+  damStressLevel: 30,
 };
 
 const mixedResult = calculateEpigeneticTraits(mixedBreeding);
 console.log('Input:', mixedBreeding);
 console.log('Result:', mixedResult);
-console.log('Total traits:', mixedResult.positive.length + mixedResult.negative.length + mixedResult.hidden.length);
+console.log(
+  'Total traits:',
+  mixedResult.positive.length + mixedResult.negative.length + mixedResult.hidden.length
+);
 console.log('');
 
 // Example 4: First-Time Parents (No Traits)
@@ -66,13 +80,16 @@ const newParents = {
   damTraits: [],
   sireTraits: [],
   damBondScore: 80,
-  damStressLevel: 20
+  damStressLevel: 20,
 };
 
 const newResult = calculateEpigeneticTraits(newParents);
 console.log('Input:', newParents);
 console.log('Result:', newResult);
-console.log('Total traits:', newResult.positive.length + newResult.negative.length + newResult.hidden.length);
+console.log(
+  'Total traits:',
+  newResult.positive.length + newResult.negative.length + newResult.hidden.length
+);
 console.log('');
 
 // Example 5: Deterministic Results (with seed)
@@ -84,7 +101,7 @@ const seededBreeding = {
   sireTraits: ['bold'],
   damBondScore: 80,
   damStressLevel: 20,
-  seed: 12345
+  seed: 12345,
 };
 
 const seededResult1 = calculateEpigeneticTraits(seededBreeding);
@@ -104,7 +121,7 @@ const rareBreeding = {
   damTraits: ['intelligent', 'trainability_boost'],
   sireTraits: ['athletic', 'calm'],
   damBondScore: 100,
-  damStressLevel: 0
+  damStressLevel: 0,
 };
 
 // Run multiple times to show probability
@@ -139,7 +156,7 @@ const conflictPairs = [
   ['calm', 'nervous'],
   ['resilient', 'fragile'],
   ['bold', 'nervous'],
-  ['intelligent', 'lazy']
+  ['intelligent', 'lazy'],
 ];
 
 console.log('Trait conflict analysis:');
@@ -156,16 +173,26 @@ console.log('Comparing different breeding strategies');
 const strategies = [
   {
     name: 'High Bond Strategy',
-    params: { damTraits: ['resilient'], sireTraits: ['bold'], damBondScore: 95, damStressLevel: 50 }
+    params: {
+      damTraits: ['resilient'],
+      sireTraits: ['bold'],
+      damBondScore: 95,
+      damStressLevel: 50,
+    },
   },
   {
     name: 'Low Stress Strategy',
-    params: { damTraits: ['resilient'], sireTraits: ['bold'], damBondScore: 50, damStressLevel: 5 }
+    params: { damTraits: ['resilient'], sireTraits: ['bold'], damBondScore: 50, damStressLevel: 5 },
   },
   {
     name: 'Balanced Strategy',
-    params: { damTraits: ['resilient'], sireTraits: ['bold'], damBondScore: 75, damStressLevel: 25 }
-  }
+    params: {
+      damTraits: ['resilient'],
+      sireTraits: ['bold'],
+      damBondScore: 75,
+      damStressLevel: 25,
+    },
+  },
 ];
 
 strategies.forEach(strategy => {
@@ -186,7 +213,9 @@ strategies.forEach(strategy => {
   console.log(`  Average positive traits: ${(totalPositive / 10).toFixed(1)}`);
   console.log(`  Average negative traits: ${(totalNegative / 10).toFixed(1)}`);
   console.log(`  Average hidden traits: ${(totalHidden / 10).toFixed(1)}`);
-  console.log(`  Total average traits: ${((totalPositive + totalNegative + totalHidden) / 10).toFixed(1)}`);
+  console.log(
+    `  Total average traits: ${((totalPositive + totalNegative + totalHidden) / 10).toFixed(1)}`
+  );
 });
 
 // Example 9: Real-World Integration
@@ -194,13 +223,15 @@ console.log('\n🌍 Example 9: Real-World Integration');
 console.log('How to integrate with game breeding system');
 
 function simulateBreeding(dam, sire, foalDevelopmentData) {
-  console.log(`\nBreeding ${dam.name} (${dam.traits.join(', ')}) with ${sire.name} (${sire.traits.join(', ')})`);
+  console.log(
+    `\nBreeding ${dam.name} (${dam.traits.join(', ')}) with ${sire.name} (${sire.traits.join(', ')})`
+  );
 
   const breedingParams = {
     damTraits: dam.traits,
     sireTraits: sire.traits,
     damBondScore: foalDevelopmentData.bondingLevel,
-    damStressLevel: foalDevelopmentData.stressLevel
+    damStressLevel: foalDevelopmentData.stressLevel,
   };
 
   const offspring = calculateEpigeneticTraits(breedingParams);
@@ -220,18 +251,18 @@ function simulateBreeding(dam, sire, foalDevelopmentData) {
 // Sample horses
 const dam = {
   name: 'Starlight',
-  traits: ['resilient', 'intelligent']
+  traits: ['resilient', 'intelligent'],
 };
 
 const sire = {
   name: 'Thunder',
-  traits: ['bold', 'athletic']
+  traits: ['bold', 'athletic'],
 };
 
 // Sample foal development data (from foal development system)
 const foalDevelopment = {
   bondingLevel: 85,
-  stressLevel: 15
+  stressLevel: 15,
 };
 
 const foalTraits = simulateBreeding(dam, sire, foalDevelopment);
@@ -244,8 +275,14 @@ console.log('Demonstrating proper error handling');
 
 const invalidInputs = [
   { description: 'Missing parameters', input: {} },
-  { description: 'Invalid trait arrays', input: { damTraits: 'not-array', sireTraits: [], damBondScore: 50, damStressLevel: 50 } },
-  { description: 'Out of range values', input: { damTraits: [], sireTraits: [], damBondScore: 150, damStressLevel: 50 } }
+  {
+    description: 'Invalid trait arrays',
+    input: { damTraits: 'not-array', sireTraits: [], damBondScore: 50, damStressLevel: 50 },
+  },
+  {
+    description: 'Out of range values',
+    input: { damTraits: [], sireTraits: [], damBondScore: 150, damStressLevel: 50 },
+  },
 ];
 
 invalidInputs.forEach(({ description, input }) => {

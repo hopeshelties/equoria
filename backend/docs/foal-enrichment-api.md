@@ -13,9 +13,11 @@ POST /api/foals/{foalId}/enrichment
 ## Request Format
 
 ### URL Parameters
+
 - `foalId` (integer, required): The ID of the foal (must be age 0 or 1)
 
 ### Request Body
+
 ```json
 {
   "day": 3,
@@ -24,12 +26,14 @@ POST /api/foals/{foalId}/enrichment
 ```
 
 #### Fields
+
 - `day` (integer, required): Development day (0-6)
 - `activity` (string, required): Activity name (1-100 characters)
 
 ## Response Format
 
 ### Success Response (200 OK)
+
 ```json
 {
   "success": true,
@@ -61,6 +65,7 @@ POST /api/foals/{foalId}/enrichment
 ### Error Responses
 
 #### 400 Bad Request - Validation Error
+
 ```json
 {
   "success": false,
@@ -76,6 +81,7 @@ POST /api/foals/{foalId}/enrichment
 ```
 
 #### 400 Bad Request - Activity Not Appropriate
+
 ```json
 {
   "success": false,
@@ -84,6 +90,7 @@ POST /api/foals/{foalId}/enrichment
 ```
 
 #### 404 Not Found - Foal Not Found
+
 ```json
 {
   "success": false,
@@ -92,6 +99,7 @@ POST /api/foals/{foalId}/enrichment
 ```
 
 #### 404 Not Found - Not a Foal
+
 ```json
 {
   "success": false,
@@ -100,6 +108,7 @@ POST /api/foals/{foalId}/enrichment
 ```
 
 #### 500 Internal Server Error
+
 ```json
 {
   "success": false,
@@ -110,37 +119,44 @@ POST /api/foals/{foalId}/enrichment
 ## Available Activities by Day
 
 ### Day 0 - Birth and Initial Bonding
+
 - **Gentle Touch**: Softly touch and stroke the foal
 - **Quiet Presence**: Sit quietly near the foal
 - **Soft Voice**: Speak gently to the foal
 
 ### Day 1 - Basic Interaction
+
 - **Feeding Assistance**: Help with feeding routine
 - **Grooming Introduction**: Introduce basic grooming
 - **Play Interaction**: Gentle play and interaction
 
 ### Day 2 - Movement and Exploration
+
 - **Walking Practice**: Encourage walking and movement
 - **Environment Exploration**: Explore the stable area
 - **Social Introduction**: Meet other horses safely
 
 ### Day 3 - Learning and Training Basics
+
 - **Halter Introduction**: Introduce wearing a halter
 - **Leading Practice**: Practice being led
 - **Handling Exercises**: Practice being handled
 - **Trailer Exposure**: Introduce the foal to a horse trailer
 
 ### Day 4 - Advanced Interaction
+
 - **Obstacle Introduction**: Navigate simple obstacles
 - **Advanced Grooming**: More thorough grooming session
 - **Training Games**: Fun learning activities
 
 ### Day 5 - Confidence Building
+
 - **Confidence Building**: Activities to build confidence
 - **New Experiences**: Introduce new sights and sounds
 - **Independence Practice**: Practice being independent
 
 ### Day 6 - Final Preparation
+
 - **Final Assessment**: Evaluate development progress
 - **Graduation Ceremony**: Celebrate completion
 - **Future Planning**: Plan next steps
@@ -156,12 +172,14 @@ The API accepts activities in multiple formats:
 ## Bonding and Stress Mechanics
 
 ### Bonding Score (0-100)
+
 - Starts at 50 (default)
 - Increased by positive interactions
 - Higher bonding improves future training success
 - Capped at 100 maximum
 
 ### Stress Level (0-100)
+
 - Starts at 0 (default)
 - Increased by challenging activities
 - Decreased by calming activities
@@ -169,6 +187,7 @@ The API accepts activities in multiple formats:
 - Capped at 100 maximum
 
 ### Activity Outcomes
+
 - **Excellent**: High bonding gain, low stress increase
 - **Success**: Moderate bonding gain, moderate stress change
 - **Challenging**: Lower bonding gain, higher stress increase
@@ -176,12 +195,16 @@ The API accepts activities in multiple formats:
 ## Database Integration
 
 ### Horse Table Updates
+
 The API updates the following fields in the `Horse` table:
+
 - `bond_score`: Updated with activity bonding changes
 - `stress_level`: Updated with activity stress changes
 
 ### Training History Records
+
 Each activity creates a record in the `foal_training_history` table:
+
 ```sql
 CREATE TABLE foal_training_history (
   id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -198,6 +221,7 @@ CREATE TABLE foal_training_history (
 ## Usage Examples
 
 ### JavaScript/Node.js
+
 ```javascript
 const response = await fetch('/api/foals/1/enrichment', {
   method: 'POST',
@@ -206,8 +230,8 @@ const response = await fetch('/api/foals/1/enrichment', {
   },
   body: JSON.stringify({
     day: 3,
-    activity: 'Trailer Exposure'
-  })
+    activity: 'Trailer Exposure',
+  }),
 });
 
 const data = await response.json();
@@ -218,6 +242,7 @@ if (data.success) {
 ```
 
 ### cURL
+
 ```bash
 curl -X POST http://localhost:3000/api/foals/1/enrichment \
   -H "Content-Type: application/json" \
@@ -228,6 +253,7 @@ curl -X POST http://localhost:3000/api/foals/1/enrichment \
 ```
 
 ### React Native
+
 ```javascript
 const completeActivity = async (foalId, day, activity) => {
   try {
@@ -238,9 +264,9 @@ const completeActivity = async (foalId, day, activity) => {
       },
       body: JSON.stringify({ day, activity }),
     });
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       // Update UI with new bonding and stress levels
       updateFoalStats(data.data.updated_levels);
@@ -257,11 +283,13 @@ const completeActivity = async (foalId, day, activity) => {
 ## Validation Rules
 
 ### Request Validation
+
 - `foalId`: Must be a positive integer
 - `day`: Must be an integer between 0 and 6 (inclusive)
 - `activity`: Must be a non-empty string, 1-100 characters
 
 ### Business Logic Validation
+
 - Horse must exist in database
 - Horse must be age 0 or 1 (foal age range)
 - Activity must be appropriate for the specified day
@@ -295,18 +323,21 @@ The API provides comprehensive error handling with specific error messages:
 The API includes comprehensive test coverage:
 
 ### Unit Tests (`foalEnrichment.test.js`)
+
 - Function-level testing with mocked dependencies
 - Validation testing for all input parameters
 - Error handling verification
 - Business logic testing
 
 ### Integration Tests (`foalEnrichmentIntegration.test.js`)
+
 - End-to-end API testing
 - Database integration verification
 - Real HTTP request/response testing
 - Data persistence validation
 
 ### Demo Script (`examples/foalEnrichmentDemo.js`)
+
 - Interactive demonstration of API functionality
 - Example usage patterns
 - Error scenario testing
@@ -324,7 +355,8 @@ This API uses the new `foal_training_history` table introduced in migration `202
 ## Support
 
 For issues or questions about the Foal Enrichment API:
+
 1. Check the test files for usage examples
 2. Run the demo script for interactive testing
 3. Review the validation rules for proper request formatting
-4. Check server logs for detailed error information 
+4. Check server logs for detailed error information

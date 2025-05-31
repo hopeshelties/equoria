@@ -1,7 +1,13 @@
 import request from 'supertest';
 import express from 'express';
 import { body } from 'express-validator';
-import { register, login, refreshToken, logout, getProfile } from '../controllers/authController.js';
+import {
+  register,
+  login,
+  refreshToken,
+  logout,
+  getProfile,
+} from '../controllers/authController.js';
 import { authenticateToken } from '../middleware/auth.js';
 import prisma from '../db/index.js';
 
@@ -14,36 +20,30 @@ const createTestApp = () => {
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // Auth routes with minimal validation
-  app.post('/api/auth/register',
+  app.post(
+    '/api/auth/register',
     body('name').trim().isLength({ min: 2, max: 50 }),
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 8, max: 128 }),
     register
   );
 
-  app.post('/api/auth/login',
+  app.post(
+    '/api/auth/login',
     body('email').isEmail().normalizeEmail(),
     body('password').notEmpty(),
     login
   );
 
-  app.post('/api/auth/refresh',
-    body('refreshToken').notEmpty(),
-    refreshToken
-  );
+  app.post('/api/auth/refresh', body('refreshToken').notEmpty(), refreshToken);
 
-  app.post('/api/auth/logout',
-    authenticateToken,
-    logout
-  );
+  app.post('/api/auth/logout', authenticateToken, logout);
 
-  app.get('/api/auth/me',
-    authenticateToken,
-    getProfile
-  );
+  app.get('/api/auth/me', authenticateToken, getProfile);
 
   // Basic error handler for debugging
-  app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  app.use((err, req, res, next) => {
+    // eslint-disable-line no-unused-vars
     // console.error("TEST APP ERROR HANDLER:", err); // Log the error to the console where Jest runs tests
     res.status(err.statusCode || 500).json({
       success: false,
@@ -53,8 +53,8 @@ const createTestApp = () => {
         stack: err.stack, // Be mindful of exposing stack traces
         name: err.name,
         code: err.code, // For Prisma errors or other specific codes
-        meta: err.meta // For Prisma error metadata
-      }
+        meta: err.meta, // For Prisma error metadata
+      },
     });
   });
 
@@ -64,44 +64,44 @@ const createTestApp = () => {
 describe('Authentication System (Working)', () => {
   let app;
 
-  beforeAll(() => { // Corrected: removed space before ()
+  beforeAll(() => {
+    // Corrected: removed space before ()
     app = createTestApp();
   });
 
-  beforeEach(async() => { // Corrected: async()
+  beforeEach(async () => {
+    // Corrected: async()
     // Clean up test users
     await prisma.user.deleteMany({
       where: {
         email: {
-          contains: 'authtest'
-        }
-      }
+          contains: 'authtest',
+        },
+      },
     });
   });
 
-  afterAll(async() => { // Corrected: async()
+  afterAll(async () => {
+    // Corrected: async()
     await prisma.user.deleteMany({
       where: {
         email: {
-          contains: 'authtest'
-        }
-      }
+          contains: 'authtest',
+        },
+      },
     });
     await prisma.$disconnect();
   });
 
   describe('User Registration', () => {
-    it('should register a new user successfully', async() => {
+    it('should register a new user successfully', async () => {
       const userData = {
         name: 'Auth Test User',
         email: 'authtest-register@example.com',
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201);
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('User registered successfully');
@@ -112,24 +112,18 @@ describe('Authentication System (Working)', () => {
       expect(response.body.data.user.password).toBeUndefined();
     });
 
-    it('should reject duplicate email registration', async() => {
+    it('should reject duplicate email registration', async () => {
       const userData = {
         name: 'Auth Test User',
         email: 'authtest-duplicate@example.com',
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
 
       // First registration
-      await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201);
+      await request(app).post('/api/auth/register').send(userData).expect(201);
 
       // Second registration with same email
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(409);
+      const response = await request(app).post('/api/auth/register').send(userData).expect(409);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Email already registered');
@@ -137,29 +131,25 @@ describe('Authentication System (Working)', () => {
   });
 
   describe('User Login', () => {
-    beforeEach(async() => { // Corrected: async()
+    beforeEach(async () => {
+      // Corrected: async()
       // Create a test user for login tests
       const userData = {
         name: 'Auth Test User',
         email: 'authtest-login@example.com',
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
 
-      await request(app)
-        .post('/api/auth/register')
-        .send(userData);
+      await request(app).post('/api/auth/register').send(userData);
     });
 
-    it('should login successfully with valid credentials', async() => {
+    it('should login successfully with valid credentials', async () => {
       const loginData = {
         email: 'authtest-login@example.com',
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send(loginData)
-        .expect(200);
+      const response = await request(app).post('/api/auth/login').send(loginData).expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.message).toBe('Login successful');
@@ -169,16 +159,13 @@ describe('Authentication System (Working)', () => {
       expect(response.body.data.user.password).toBeUndefined();
     });
 
-    it('should reject login with invalid credentials', async() => {
+    it('should reject login with invalid credentials', async () => {
       const loginData = {
         email: 'authtest-login@example.com',
-        password: 'wrongpassword'
+        password: 'wrongpassword',
       };
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send(loginData)
-        .expect(401);
+      const response = await request(app).post('/api/auth/login').send(loginData).expect(401);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Invalid email or password');
@@ -188,17 +175,16 @@ describe('Authentication System (Working)', () => {
   describe('Token Management', () => {
     let refreshTokenValue; // Renamed to avoid conflict if refreshToken is imported
 
-    beforeEach(async() => { // Corrected: async()
+    beforeEach(async () => {
+      // Corrected: async()
       // Create user and get refresh token
       const userData = {
         name: 'Auth Test User',
         email: 'authtest-token@example.com',
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
 
-      const registerResponse = await request(app)
-        .post('/api/auth/register')
-        .send(userData);
+      const registerResponse = await request(app).post('/api/auth/register').send(userData);
 
       if (registerResponse.body && registerResponse.body.data) {
         refreshTokenValue = registerResponse.body.data.refreshToken;
@@ -208,7 +194,8 @@ describe('Authentication System (Working)', () => {
       }
     });
 
-    it('should refresh token successfully', async() => { // Corrected: async()
+    it('should refresh token successfully', async () => {
+      // Corrected: async()
       const response = await request(app)
         .post('/api/auth/refresh')
         .send({ refreshToken: refreshTokenValue }) // Use the locally scoped variable
@@ -220,7 +207,7 @@ describe('Authentication System (Working)', () => {
       expect(response.body.data.refreshToken).toBeDefined();
     });
 
-    it('should reject invalid refresh token', async() => {
+    it('should reject invalid refresh token', async () => {
       const response = await request(app)
         .post('/api/auth/refresh')
         .send({ refreshToken: 'invalid-token' })
@@ -235,17 +222,16 @@ describe('Authentication System (Working)', () => {
     let authTokenValue; // Renamed
     let testUserValue; // Renamed
 
-    beforeEach(async() => { // Corrected: async()
+    beforeEach(async () => {
+      // Corrected: async()
       // Create user and get auth token
       const userData = {
         name: 'Auth Test User',
         email: 'authtest-protected@example.com',
-        password: 'TestPassword123!'
+        password: 'TestPassword123!',
       };
 
-      const registerResponse = await request(app)
-        .post('/api/auth/register')
-        .send(userData);
+      const registerResponse = await request(app).post('/api/auth/register').send(userData);
 
       if (registerResponse.body && registerResponse.body.data) {
         authTokenValue = registerResponse.body.data.token;
@@ -257,7 +243,8 @@ describe('Authentication System (Working)', () => {
       }
     });
 
-    it('should get user profile with valid token', async() => { // Corrected: async()
+    it('should get user profile with valid token', async () => {
+      // Corrected: async()
       const response = await request(app)
         .get('/api/auth/me')
         .set('Authorization', `Bearer ${authTokenValue}`) // Use renamed variable
@@ -270,16 +257,15 @@ describe('Authentication System (Working)', () => {
       expect(response.body.data.password).toBeUndefined();
     });
 
-    it('should reject profile request without token', async() => {
-      const response = await request(app)
-        .get('/api/auth/me')
-        .expect(401);
+    it('should reject profile request without token', async () => {
+      const response = await request(app).get('/api/auth/me').expect(401);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Access token required');
     });
 
-    it('should logout successfully', async() => { // Corrected: async()
+    it('should logout successfully', async () => {
+      // Corrected: async()
       const response = await request(app)
         .post('/api/auth/logout')
         .set('Authorization', `Bearer ${authTokenValue}`) // Use renamed variable

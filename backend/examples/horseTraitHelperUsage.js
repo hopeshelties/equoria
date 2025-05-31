@@ -9,7 +9,7 @@ import {
   hasTrait,
   getPositiveTraitsArray,
   getNegativeTraitsArray,
-  addTrait
+  addTrait,
 } from '../models/horseModel.js';
 
 /**
@@ -68,9 +68,8 @@ async function exampleTrainingWithTraits(horseId) {
       trainingBonus,
       stressReduction,
       positiveTraits,
-      negativeTraits
+      negativeTraits,
     };
-
   } catch (error) {
     console.error(`Error in training session: ${error.message}`);
     throw error;
@@ -126,15 +125,16 @@ async function exampleCompetitionWithTraits(horseId, competitionType) {
     }
 
     console.log('\nCompetition results:');
-    console.log(`- Performance modifier: ${performanceModifier > 0 ? '+' : ''}${performanceModifier}%`);
+    console.log(
+      `- Performance modifier: ${performanceModifier > 0 ? '+' : ''}${performanceModifier}%`
+    );
     console.log(`- Confidence boost: +${confidenceBoost} points`);
 
     return {
       performanceModifier,
       confidenceBoost,
-      competitionType
+      competitionType,
     };
-
   } catch (error) {
     console.error(`Error in competition: ${error.message}`);
     throw error;
@@ -154,33 +154,33 @@ async function exampleAddTraitBasedOnEvent(horseId, eventType) {
 
     // Determine trait based on event
     switch (eventType) {
-    case 'successful_difficult_training':
-      traitToAdd = 'resilient';
-      category = 'positive';
-      console.log('Horse completed difficult training successfully!');
-      break;
+      case 'successful_difficult_training':
+        traitToAdd = 'resilient';
+        category = 'positive';
+        console.log('Horse completed difficult training successfully!');
+        break;
 
-    case 'traumatic_accident':
-      traitToAdd = 'nervous';
-      category = 'negative';
-      console.log('Horse experienced a traumatic accident.');
-      break;
+      case 'traumatic_accident':
+        traitToAdd = 'nervous';
+        category = 'negative';
+        console.log('Horse experienced a traumatic accident.');
+        break;
 
-    case 'major_competition_win':
-      traitToAdd = 'bold';
-      category = 'positive';
-      console.log('Horse won a major competition!');
-      break;
+      case 'major_competition_win':
+        traitToAdd = 'bold';
+        category = 'positive';
+        console.log('Horse won a major competition!');
+        break;
 
-    case 'repeated_spooking':
-      traitToAdd = 'spooky';
-      category = 'negative';
-      console.log('Horse has been spooking repeatedly.');
-      break;
+      case 'repeated_spooking':
+        traitToAdd = 'spooky';
+        category = 'negative';
+        console.log('Horse has been spooking repeatedly.');
+        break;
 
-    default:
-      console.log(`No trait changes for event: ${eventType}`);
-      return null;
+      default:
+        console.log(`No trait changes for event: ${eventType}`);
+        return null;
     }
 
     if (traitToAdd) {
@@ -209,10 +209,9 @@ async function exampleAddTraitBasedOnEvent(horseId, eventType) {
       return {
         addedTrait: traitToAdd,
         category,
-        updatedHorse
+        updatedHorse,
       };
     }
-
   } catch (error) {
     console.error(`Error adding trait: ${error.message}`);
     throw error;
@@ -254,15 +253,17 @@ async function exampleCompleteWorkflow(horseId) {
 
     // 5. Simulate event-based trait addition
     console.log('\n5. Event-based trait modification:');
-    const eventResults = await exampleAddTraitBasedOnEvent(horseId, 'successful_difficult_training');
+    const eventResults = await exampleAddTraitBasedOnEvent(
+      horseId,
+      'successful_difficult_training'
+    );
 
     return {
       initialTraits: { positiveTraits, negativeTraits },
       trainingResults,
       competitionResults,
-      eventResults
+      eventResults,
     };
-
   } catch (error) {
     console.error(`Error in complete workflow: ${error.message}`);
     throw error;
@@ -274,7 +275,7 @@ export {
   exampleTrainingWithTraits,
   exampleCompetitionWithTraits,
   exampleAddTraitBasedOnEvent,
-  exampleCompleteWorkflow
+  exampleCompleteWorkflow,
 };
 
 // Example usage (uncomment to run):

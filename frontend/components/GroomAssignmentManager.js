@@ -4,7 +4,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Modal, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
+  Alert,
+} from 'react-native';
 import { useGroomManagement } from '../hooks/useGroomManagement';
 
 /**
@@ -15,11 +22,11 @@ import { useGroomManagement } from '../hooks/useGroomManagement';
  * @param {string} props.playerId - ID of the player
  * @param {Function} props.onAssignmentChange - Callback when assignment changes
  */
-const GroomAssignmentManager = ({ 
-  foalId, 
-  foalName, 
+const GroomAssignmentManager = ({
+  foalId,
+  foalName,
   playerId,
-  onAssignmentChange 
+  onAssignmentChange,
 }) => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showGroomDetails, setShowGroomDetails] = useState(false);
@@ -36,7 +43,7 @@ const GroomAssignmentManager = ({
     getActiveAssignment,
     getGroomById,
     clearError,
-    definitions
+    definitions,
   } = useGroomManagement(playerId);
 
   // Load assignments when component mounts
@@ -56,7 +63,9 @@ const GroomAssignmentManager = ({
 
   const foalAssignments = assignments[foalId] || [];
   const activeAssignment = getActiveAssignment(foalId);
-  const activeGroom = activeAssignment ? getGroomById(activeAssignment.groomId) : null;
+  const activeGroom = activeAssignment
+    ? getGroomById(activeAssignment.groomId)
+    : null;
 
   // Handle groom assignment
   const handleAssignGroom = async (groomId) => {
@@ -76,7 +85,7 @@ const GroomAssignmentManager = ({
       foal_care: '🍼',
       general: '🐎',
       training: '🏃',
-      medical: '🏥'
+      medical: '🏥',
     };
     return icons[specialty] || '👤';
   };
@@ -87,7 +96,7 @@ const GroomAssignmentManager = ({
       novice: 'text-gray-600',
       intermediate: 'text-blue-600',
       expert: 'text-purple-600',
-      master: 'text-gold-600'
+      master: 'text-gold-600',
     };
     return colors[skillLevel] || 'text-gray-600';
   };
@@ -98,7 +107,7 @@ const GroomAssignmentManager = ({
       gentle: 'bg-green-100 text-green-800',
       energetic: 'bg-orange-100 text-orange-800',
       patient: 'bg-blue-100 text-blue-800',
-      strict: 'bg-red-100 text-red-800'
+      strict: 'bg-red-100 text-red-800',
     };
     return colors[personality] || 'bg-gray-100 text-gray-800';
   };
@@ -106,9 +115,7 @@ const GroomAssignmentManager = ({
   const AssignmentCard = () => (
     <View className="bg-white rounded-lg shadow-md border border-gray-200 p-4 mb-4">
       <View className="flex-row items-center justify-between mb-3">
-        <Text className="text-lg font-bold text-gray-800">
-          Assigned Groom
-        </Text>
+        <Text className="text-lg font-bold text-gray-800">Assigned Groom</Text>
         <TouchableOpacity
           onPress={() => setShowAssignModal(true)}
           className="bg-blue-500 rounded-lg px-3 py-1"
@@ -136,15 +143,20 @@ const GroomAssignmentManager = ({
                 {activeGroom.name}
               </Text>
               <Text className="text-gray-600 text-sm">
-                {definitions.specialties[activeGroom.speciality]?.name || activeGroom.speciality}
+                {definitions.specialties[activeGroom.speciality]?.name ||
+                  activeGroom.speciality}
               </Text>
               <View className="flex-row items-center mt-1">
-                <View className={`px-2 py-1 rounded-full mr-2 ${getPersonalityColor(activeGroom.personality)}`}>
+                <View
+                  className={`px-2 py-1 rounded-full mr-2 ${getPersonalityColor(activeGroom.personality)}`}
+                >
                   <Text className="text-xs font-medium">
                     {activeGroom.personality}
                   </Text>
                 </View>
-                <Text className={`text-sm font-medium ${getSkillLevelColor(activeGroom.skill_level)}`}>
+                <Text
+                  className={`text-sm font-medium ${getSkillLevelColor(activeGroom.skill_level)}`}
+                >
                   {activeGroom.skill_level}
                 </Text>
               </View>
@@ -170,7 +182,8 @@ const GroomAssignmentManager = ({
       {activeAssignment && (
         <View className="mt-3 pt-3 border-t border-gray-200">
           <Text className="text-gray-600 text-sm">
-            Assigned: {new Date(activeAssignment.startDate).toLocaleDateString()}
+            Assigned:{' '}
+            {new Date(activeAssignment.startDate).toLocaleDateString()}
           </Text>
           {activeAssignment.notes && (
             <Text className="text-gray-600 text-sm mt-1">
@@ -193,10 +206,8 @@ const GroomAssignmentManager = ({
         {/* Header */}
         <View className="bg-blue-500 px-4 py-6 pt-12">
           <View className="flex-row items-center justify-between">
-            <Text className="text-white font-bold text-xl">
-              Assign Groom
-            </Text>
-            <TouchableOpacity 
+            <Text className="text-white font-bold text-xl">Assign Groom</Text>
+            <TouchableOpacity
               onPress={() => setShowAssignModal(false)}
               className="bg-white bg-opacity-20 rounded-full w-10 h-10 items-center justify-center"
             >
@@ -211,7 +222,9 @@ const GroomAssignmentManager = ({
         <ScrollView className="flex-1 p-4">
           {grooms.length === 0 ? (
             <View className="bg-gray-50 rounded-lg p-6 text-center">
-              <Text className="text-gray-600 text-lg mb-2">No Grooms Available</Text>
+              <Text className="text-gray-600 text-lg mb-2">
+                No Grooms Available
+              </Text>
               <Text className="text-gray-500">
                 You need to hire grooms before you can assign them to foals.
               </Text>
@@ -222,8 +235,8 @@ const GroomAssignmentManager = ({
                 key={groom.id}
                 onPress={() => handleAssignGroom(groom.id)}
                 className={`bg-white rounded-lg p-4 mb-3 border-2 ${
-                  activeGroom?.id === groom.id 
-                    ? 'border-blue-500 bg-blue-50' 
+                  activeGroom?.id === groom.id
+                    ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200'
                 }`}
               >
@@ -236,20 +249,28 @@ const GroomAssignmentManager = ({
                       {groom.name}
                     </Text>
                     <Text className="text-gray-600 text-sm">
-                      {definitions.specialties[groom.speciality]?.name || groom.speciality}
+                      {definitions.specialties[groom.speciality]?.name ||
+                        groom.speciality}
                     </Text>
                     <View className="flex-row items-center mt-1">
-                      <View className={`px-2 py-1 rounded-full mr-2 ${getPersonalityColor(groom.personality)}`}>
+                      <View
+                        className={`px-2 py-1 rounded-full mr-2 ${getPersonalityColor(groom.personality)}`}
+                      >
                         <Text className="text-xs font-medium">
                           {groom.personality}
                         </Text>
                       </View>
-                      <Text className={`text-sm font-medium ${getSkillLevelColor(groom.skill_level)}`}>
+                      <Text
+                        className={`text-sm font-medium ${getSkillLevelColor(groom.skill_level)}`}
+                      >
                         {groom.skill_level}
                       </Text>
                     </View>
                     {groom.bio && (
-                      <Text className="text-gray-500 text-sm mt-1" numberOfLines={2}>
+                      <Text
+                        className="text-gray-500 text-sm mt-1"
+                        numberOfLines={2}
+                      >
                         {groom.bio}
                       </Text>
                     )}
@@ -287,10 +308,8 @@ const GroomAssignmentManager = ({
         {/* Header */}
         <View className="bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-6 pt-12">
           <View className="flex-row items-center justify-between">
-            <Text className="text-white font-bold text-xl">
-              Groom Details
-            </Text>
-            <TouchableOpacity 
+            <Text className="text-white font-bold text-xl">Groom Details</Text>
+            <TouchableOpacity
               onPress={() => setShowGroomDetails(false)}
               className="bg-white bg-opacity-20 rounded-full w-10 h-10 items-center justify-center"
             >
@@ -311,46 +330,53 @@ const GroomAssignmentManager = ({
                     {selectedGroom.name}
                   </Text>
                   <Text className="text-gray-600">
-                    {definitions.specialties[selectedGroom.speciality]?.name || selectedGroom.speciality}
+                    {definitions.specialties[selectedGroom.speciality]?.name ||
+                      selectedGroom.speciality}
                   </Text>
                 </View>
               </View>
 
               {selectedGroom.bio && (
                 <View className="mb-4">
-                  <Text className="text-gray-700">
-                    {selectedGroom.bio}
-                  </Text>
+                  <Text className="text-gray-700">{selectedGroom.bio}</Text>
                 </View>
               )}
 
               <View className="space-y-3">
                 <View className="flex-row justify-between">
                   <Text className="text-gray-600">Experience:</Text>
-                  <Text className="font-medium">{selectedGroom.experience} years</Text>
+                  <Text className="font-medium">
+                    {selectedGroom.experience} years
+                  </Text>
                 </View>
-                
+
                 <View className="flex-row justify-between">
                   <Text className="text-gray-600">Skill Level:</Text>
-                  <Text className={`font-medium ${getSkillLevelColor(selectedGroom.skill_level)}`}>
+                  <Text
+                    className={`font-medium ${getSkillLevelColor(selectedGroom.skill_level)}`}
+                  >
                     {selectedGroom.skill_level}
                   </Text>
                 </View>
-                
+
                 <View className="flex-row justify-between">
                   <Text className="text-gray-600">Personality:</Text>
-                  <View className={`px-2 py-1 rounded-full ${getPersonalityColor(selectedGroom.personality)}`}>
+                  <View
+                    className={`px-2 py-1 rounded-full ${getPersonalityColor(selectedGroom.personality)}`}
+                  >
                     <Text className="text-xs font-medium">
                       {selectedGroom.personality}
                     </Text>
                   </View>
                 </View>
-                
+
                 <View className="flex-row justify-between">
                   <Text className="text-gray-600">Hourly Rate:</Text>
-                  <Text className="font-medium">${selectedGroom.hourly_rate}/hour</Text>
+                  <Text className="font-medium">
+                    ${selectedGroom.hourly_rate}/hour
+                  </Text>
                 </View>
-                
+
                 <View className="flex-row justify-between">
                   <Text className="text-gray-600">Hired:</Text>
                   <Text className="font-medium">
@@ -367,7 +393,10 @@ const GroomAssignmentManager = ({
                   Specialty Benefits
                 </Text>
                 <Text className="text-blue-700">
-                  {definitions.specialties[selectedGroom.speciality].description}
+                  {
+                    definitions.specialties[selectedGroom.speciality]
+                      .description
+                  }
                 </Text>
               </View>
             )}
@@ -380,7 +409,9 @@ const GroomAssignmentManager = ({
   if (error) {
     return (
       <View className="bg-red-50 rounded-lg p-4 border border-red-200">
-        <Text className="text-red-800 font-medium mb-2">Error Loading Groom Data</Text>
+        <Text className="text-red-800 font-medium mb-2">
+          Error Loading Groom Data
+        </Text>
         <Text className="text-red-700 mb-3">{error}</Text>
         <TouchableOpacity
           onPress={clearError}

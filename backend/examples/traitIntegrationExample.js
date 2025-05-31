@@ -19,15 +19,21 @@ const eagerLearnerHorse = {
   epigenetic_modifiers: {
     positive: ['eager_learner'],
     negative: [],
-    hidden: []
-  }
+    hidden: [],
+  },
 };
 
 const eagerLearnerEffects = getCombinedTraitEffects(['eager_learner']);
 console.log('Eager Learner Trait Effects:');
-console.log(`- Training XP Modifier: +${(eagerLearnerEffects.trainingXpModifier * 100).toFixed(1)}%`);
-console.log(`- Stat Gain Chance Modifier: +${(eagerLearnerEffects.statGainChanceModifier * 100).toFixed(1)}%`);
-console.log(`- Base Stat Boost: +${eagerLearnerEffects.baseStatBoost} points when stat gain occurs`);
+console.log(
+  `- Training XP Modifier: +${(eagerLearnerEffects.trainingXpModifier * 100).toFixed(1)}%`
+);
+console.log(
+  `- Stat Gain Chance Modifier: +${(eagerLearnerEffects.statGainChanceModifier * 100).toFixed(1)}%`
+);
+console.log(
+  `- Base Stat Boost: +${eagerLearnerEffects.baseStatBoost} points when stat gain occurs`
+);
 
 // Simulate training session
 const baseXp = 5;
@@ -37,8 +43,12 @@ const modifiedStatGainChance = baseStatGainChance + eagerLearnerEffects.statGain
 
 console.log('\nTraining Session Results:');
 console.log(`- Base XP: ${baseXp} → Modified XP: ${modifiedXp} (+${modifiedXp - baseXp})`);
-console.log(`- Base Stat Gain Chance: ${(baseStatGainChance * 100).toFixed(1)}% → Modified: ${(modifiedStatGainChance * 100).toFixed(1)}%`);
-console.log(`- If stat gain occurs: +${1 + eagerLearnerEffects.baseStatBoost} points instead of +1\n`);
+console.log(
+  `- Base Stat Gain Chance: ${(baseStatGainChance * 100).toFixed(1)}% → Modified: ${(modifiedStatGainChance * 100).toFixed(1)}%`
+);
+console.log(
+  `- If stat gain occurs: +${1 + eagerLearnerEffects.baseStatBoost} points instead of +1\n`
+);
 
 // Example 2: Bonding Modifiers
 console.log('2. BONDING SYSTEM INTEGRATION');
@@ -51,8 +61,8 @@ const socialHorse = {
   epigenetic_modifiers: {
     positive: ['social', 'calm'],
     negative: [],
-    hidden: []
-  }
+    hidden: [],
+  },
 };
 
 const antisocialHorse = {
@@ -62,14 +72,18 @@ const antisocialHorse = {
   epigenetic_modifiers: {
     positive: [],
     negative: ['antisocial', 'nervous'],
-    hidden: []
-  }
+    hidden: [],
+  },
 };
 
 // Grooming session comparison
 const groomingDuration = 60; // minutes
-const socialGrooming = calculateBondingChange(socialHorse, 'grooming', { duration: groomingDuration });
-const antisocialGrooming = calculateBondingChange(antisocialHorse, 'grooming', { duration: groomingDuration });
+const socialGrooming = calculateBondingChange(socialHorse, 'grooming', {
+  duration: groomingDuration,
+});
+const antisocialGrooming = calculateBondingChange(antisocialHorse, 'grooming', {
+  duration: groomingDuration,
+});
 
 console.log('Grooming Session (60 minutes):');
 console.log(`Social Horse (${socialHorse.name}):`);
@@ -95,8 +109,8 @@ const stressedHorse = {
   epigenetic_modifiers: {
     positive: [],
     negative: ['nervous'],
-    hidden: []
-  }
+    hidden: [],
+  },
 };
 
 const resilientHorse = {
@@ -106,8 +120,8 @@ const resilientHorse = {
   epigenetic_modifiers: {
     positive: ['resilient'],
     negative: [],
-    hidden: []
-  }
+    hidden: [],
+  },
 };
 
 // Simulate competition stress impact
@@ -127,7 +141,9 @@ console.log(`- Stress Impact: -${stressImpact.toFixed(1)} points`);
 console.log(`- Final Score: ${(baseScore - stressImpact).toFixed(1)}`);
 
 console.log(`\nResilient Horse (${resilientHorse.name}):`);
-console.log(`- Stress Resistance: ${resilientEffects.competitionStressResistance ? `${(resilientEffects.competitionStressResistance * 100).toFixed(1)}%` : 'None'}`);
+console.log(
+  `- Stress Resistance: ${resilientEffects.competitionStressResistance ? `${(resilientEffects.competitionStressResistance * 100).toFixed(1)}%` : 'None'}`
+);
 console.log(`- Reduced Stress Impact: -${resilientStressImpact.toFixed(1)} points`);
 console.log(`- Final Score: ${(baseScore - resilientStressImpact).toFixed(1)}\n`);
 
@@ -143,8 +159,8 @@ const unstableHorse = {
   epigenetic_modifiers: {
     positive: [],
     negative: ['nervous'],
-    hidden: []
-  }
+    hidden: [],
+  },
 };
 
 const stableHorse = {
@@ -155,20 +171,20 @@ const stableHorse = {
   epigenetic_modifiers: {
     positive: ['resilient'],
     negative: [],
-    hidden: []
-  }
+    hidden: [],
+  },
 };
 
 const unstableDrift = calculateTemperamentDrift(unstableHorse, {
   stressLevel: 80,
   recentCompetition: true,
-  bondScore: 30
+  bondScore: 30,
 });
 
 const stableDrift = calculateTemperamentDrift(stableHorse, {
   stressLevel: 80,
   recentCompetition: true,
-  bondScore: 30
+  bondScore: 30,
 });
 
 console.log('High Stress Scenario (Stress: 80, Recent Competition, Low Bond: 30)');

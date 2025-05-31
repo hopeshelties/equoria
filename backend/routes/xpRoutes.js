@@ -13,25 +13,27 @@ const router = express.Router();
  * GET /api/xp/player/:playerId/events
  * Get XP events for a specific player
  */
-router.get('/player/:playerId/events', async(req, res) => {
+router.get('/player/:playerId/events', async (req, res) => {
   try {
     const { playerId } = req.params;
     const { limit = 50, offset = 0, startDate, endDate } = req.query;
 
-    logger.info(`[xpRoutes] GET /api/xp/player/${playerId}/events - limit: ${limit}, offset: ${offset}`);
+    logger.info(
+      `[xpRoutes] GET /api/xp/player/${playerId}/events - limit: ${limit}, offset: ${offset}`
+    );
 
     // Validate playerId
     if (!playerId) {
       return res.status(400).json({
         success: false,
-        message: 'Player ID is required'
+        message: 'Player ID is required',
       });
     }
 
     // Parse optional date filters
     const options = {
       limit: parseInt(limit, 10),
-      offset: parseInt(offset, 10)
+      offset: parseInt(offset, 10),
     };
 
     if (startDate) {
@@ -39,7 +41,7 @@ router.get('/player/:playerId/events', async(req, res) => {
       if (isNaN(options.startDate.getTime())) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid startDate format'
+          message: 'Invalid startDate format',
         });
       }
     }
@@ -49,7 +51,7 @@ router.get('/player/:playerId/events', async(req, res) => {
       if (isNaN(options.endDate.getTime())) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid endDate format'
+          message: 'Invalid endDate format',
         });
       }
     }
@@ -65,17 +67,16 @@ router.get('/player/:playerId/events', async(req, res) => {
         pagination: {
           limit: options.limit,
           offset: options.offset,
-          total: xpEvents.length
-        }
-      }
+          total: xpEvents.length,
+        },
+      },
     });
-
   } catch (error) {
     logger.error(`[xpRoutes] GET /api/xp/player/:playerId/events error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve XP events',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 });
@@ -84,7 +85,7 @@ router.get('/player/:playerId/events', async(req, res) => {
  * GET /api/xp/player/:playerId/summary
  * Get XP summary for a specific player
  */
-router.get('/player/:playerId/summary', async(req, res) => {
+router.get('/player/:playerId/summary', async (req, res) => {
   try {
     const { playerId } = req.params;
     const { startDate, endDate } = req.query;
@@ -95,7 +96,7 @@ router.get('/player/:playerId/summary', async(req, res) => {
     if (!playerId) {
       return res.status(400).json({
         success: false,
-        message: 'Player ID is required'
+        message: 'Player ID is required',
       });
     }
 
@@ -108,7 +109,7 @@ router.get('/player/:playerId/summary', async(req, res) => {
       if (isNaN(parsedStartDate.getTime())) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid startDate format'
+          message: 'Invalid startDate format',
         });
       }
     }
@@ -118,7 +119,7 @@ router.get('/player/:playerId/summary', async(req, res) => {
       if (isNaN(parsedEndDate.getTime())) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid endDate format'
+          message: 'Invalid endDate format',
         });
       }
     }
@@ -133,17 +134,16 @@ router.get('/player/:playerId/summary', async(req, res) => {
         summary: xpSummary,
         dateRange: {
           startDate: parsedStartDate,
-          endDate: parsedEndDate
-        }
-      }
+          endDate: parsedEndDate,
+        },
+      },
     });
-
   } catch (error) {
     logger.error(`[xpRoutes] GET /api/xp/player/:playerId/summary error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve XP summary',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 });
@@ -152,7 +152,7 @@ router.get('/player/:playerId/summary', async(req, res) => {
  * GET /api/xp/recent
  * Get recent XP events across all players (for admin/analytics)
  */
-router.get('/recent', async(req, res) => {
+router.get('/recent', async (req, res) => {
   try {
     const { limit = 100, offset = 0 } = req.query;
 
@@ -161,21 +161,21 @@ router.get('/recent', async(req, res) => {
     // Parse pagination parameters
     const options = {
       limit: parseInt(limit, 10),
-      offset: parseInt(offset, 10)
+      offset: parseInt(offset, 10),
     };
 
     // Validate pagination parameters
     if (options.limit < 1 || options.limit > 500) {
       return res.status(400).json({
         success: false,
-        message: 'Limit must be between 1 and 500'
+        message: 'Limit must be between 1 and 500',
       });
     }
 
     if (options.offset < 0) {
       return res.status(400).json({
         success: false,
-        message: 'Offset must be non-negative'
+        message: 'Offset must be non-negative',
       });
     }
 
@@ -189,17 +189,16 @@ router.get('/recent', async(req, res) => {
         pagination: {
           limit: options.limit,
           offset: options.offset,
-          total: xpEvents.length
-        }
-      }
+          total: xpEvents.length,
+        },
+      },
     });
-
   } catch (error) {
     logger.error(`[xpRoutes] GET /api/xp/recent error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve recent XP events',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 });
@@ -208,7 +207,7 @@ router.get('/recent', async(req, res) => {
  * GET /api/xp/stats
  * Get overall XP statistics (for admin dashboard)
  */
-router.get('/stats', async(req, res) => {
+router.get('/stats', async (req, res) => {
   try {
     logger.info('[xpRoutes] GET /api/xp/stats');
 
@@ -222,8 +221,10 @@ router.get('/stats', async(req, res) => {
       totalXpDeducted: recentEvents.reduce((sum, event) => sum + Math.max(0, -event.amount), 0),
       netXp: recentEvents.reduce((sum, event) => sum + event.amount, 0),
       uniquePlayers: new Set(recentEvents.map(event => event.playerId)).size,
-      averageXpPerEvent: recentEvents.length > 0 ?
-        recentEvents.reduce((sum, event) => sum + event.amount, 0) / recentEvents.length : 0,
+      averageXpPerEvent:
+        recentEvents.length > 0
+          ? recentEvents.reduce((sum, event) => sum + event.amount, 0) / recentEvents.length
+          : 0,
 
       // Breakdown by reason type
       reasonBreakdown: {},
@@ -232,14 +233,17 @@ router.get('/stats', async(req, res) => {
       recentActivity: {
         last24Hours: 0,
         last7Days: 0,
-        last30Days: 0
-      }
+        last30Days: 0,
+      },
     };
 
     // Calculate reason breakdown
     recentEvents.forEach(event => {
-      const reasonKey = event.reason.includes('Trained') ? 'Training' :
-        event.reason.includes('place') ? 'Competition' : 'Other';
+      const reasonKey = event.reason.includes('Trained')
+        ? 'Training'
+        : event.reason.includes('place')
+          ? 'Competition'
+          : 'Other';
 
       if (!stats.reasonBreakdown[reasonKey]) {
         stats.reasonBreakdown[reasonKey] = { count: 0, totalXp: 0 };
@@ -257,25 +261,30 @@ router.get('/stats', async(req, res) => {
 
     recentEvents.forEach(event => {
       const eventDate = new Date(event.timestamp);
-      if (eventDate >= oneDayAgo) {stats.recentActivity.last24Hours++;}
-      if (eventDate >= sevenDaysAgo) {stats.recentActivity.last7Days++;}
-      if (eventDate >= thirtyDaysAgo) {stats.recentActivity.last30Days++;}
+      if (eventDate >= oneDayAgo) {
+        stats.recentActivity.last24Hours++;
+      }
+      if (eventDate >= sevenDaysAgo) {
+        stats.recentActivity.last7Days++;
+      }
+      if (eventDate >= thirtyDaysAgo) {
+        stats.recentActivity.last30Days++;
+      }
     });
 
     res.json({
       success: true,
       data: {
         statistics: stats,
-        generatedAt: new Date().toISOString()
-      }
+        generatedAt: new Date().toISOString(),
+      },
     });
-
   } catch (error) {
     logger.error(`[xpRoutes] GET /api/xp/stats error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve XP statistics',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
 });

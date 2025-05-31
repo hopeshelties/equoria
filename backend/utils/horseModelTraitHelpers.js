@@ -35,18 +35,21 @@ export function _addTraitSafely(horse, traitName, traitData = {}) {
       effect: traitData.effect || {},
       discoveredAt: traitData.discoveredAt || new Date().toISOString(),
       isActive: traitData.isActive !== undefined ? traitData.isActive : true,
-      ...traitData
+      ...traitData,
     };
 
     // Add the trait
     horse.traits[traitName] = safeTraitData;
 
-    logger.info(`[horseModelTraitHelpers._addTraitSafely] Added trait '${traitName}' to horse ${horse.id || 'unknown'}`);
+    logger.info(
+      `[horseModelTraitHelpers._addTraitSafely] Added trait '${traitName}' to horse ${horse.id || 'unknown'}`
+    );
 
     return horse;
-
   } catch (error) {
-    logger.error(`[horseModelTraitHelpers._addTraitSafely] Error adding trait '${traitName}': ${error.message}`);
+    logger.error(
+      `[horseModelTraitHelpers._addTraitSafely] Error adding trait '${traitName}': ${error.message}`
+    );
     throw error;
   }
 }
@@ -75,19 +78,24 @@ export function _removeTraitSafely(horse, traitName) {
 
     // Check if trait exists
     if (!horse.traits[traitName]) {
-      logger.warn(`[horseModelTraitHelpers._removeTraitSafely] Trait '${traitName}' not found on horse ${horse.id || 'unknown'}`);
+      logger.warn(
+        `[horseModelTraitHelpers._removeTraitSafely] Trait '${traitName}' not found on horse ${horse.id || 'unknown'}`
+      );
       return horse;
     }
 
     // Remove the trait
     delete horse.traits[traitName];
 
-    logger.info(`[horseModelTraitHelpers._removeTraitSafely] Removed trait '${traitName}' from horse ${horse.id || 'unknown'}`);
+    logger.info(
+      `[horseModelTraitHelpers._removeTraitSafely] Removed trait '${traitName}' from horse ${horse.id || 'unknown'}`
+    );
 
     return horse;
-
   } catch (error) {
-    logger.error(`[horseModelTraitHelpers._removeTraitSafely] Error removing trait '${traitName}': ${error.message}`);
+    logger.error(
+      `[horseModelTraitHelpers._removeTraitSafely] Error removing trait '${traitName}': ${error.message}`
+    );
     throw error;
   }
 }
@@ -110,7 +118,6 @@ export function _getAllTraits(horse) {
 
     // Return a copy to prevent mutation
     return { ...horse.traits };
-
   } catch (error) {
     logger.error(`[horseModelTraitHelpers._getAllTraits] Error getting traits: ${error.message}`);
     return {};
@@ -134,9 +141,10 @@ export function getActiveTraits(horse) {
     }
 
     return activeTraits;
-
   } catch (error) {
-    logger.error(`[horseModelTraitHelpers.getActiveTraits] Error getting active traits: ${error.message}`);
+    logger.error(
+      `[horseModelTraitHelpers.getActiveTraits] Error getting active traits: ${error.message}`
+    );
     return {};
   }
 }
@@ -155,9 +163,10 @@ export function hasTrait(horse, traitName) {
 
     const traits = _getAllTraits(horse);
     return traits.hasOwnProperty(traitName);
-
   } catch (error) {
-    logger.error(`[horseModelTraitHelpers.hasTrait] Error checking trait '${traitName}': ${error.message}`);
+    logger.error(
+      `[horseModelTraitHelpers.hasTrait] Error checking trait '${traitName}': ${error.message}`
+    );
     return false;
   }
 }
@@ -176,9 +185,10 @@ export function getTrait(horse, traitName) {
 
     const traits = _getAllTraits(horse);
     return traits[traitName] || null;
-
   } catch (error) {
-    logger.error(`[horseModelTraitHelpers.getTrait] Error getting trait '${traitName}': ${error.message}`);
+    logger.error(
+      `[horseModelTraitHelpers.getTrait] Error getting trait '${traitName}': ${error.message}`
+    );
     return null;
   }
 }
@@ -201,9 +211,10 @@ export function getTraitsByType(horse, type) {
     }
 
     return typeTraits;
-
   } catch (error) {
-    logger.error(`[horseModelTraitHelpers.getTraitsByType] Error getting traits by type '${type}': ${error.message}`);
+    logger.error(
+      `[horseModelTraitHelpers.getTraitsByType] Error getting traits by type '${type}': ${error.message}`
+    );
     return {};
   }
 }
@@ -226,9 +237,10 @@ export function getTraitsByRarity(horse, rarity) {
     }
 
     return rarityTraits;
-
   } catch (error) {
-    logger.error(`[horseModelTraitHelpers.getTraitsByRarity] Error getting traits by rarity '${rarity}': ${error.message}`);
+    logger.error(
+      `[horseModelTraitHelpers.getTraitsByRarity] Error getting traits by rarity '${rarity}': ${error.message}`
+    );
     return {};
   }
 }
@@ -242,7 +254,6 @@ export function countTraits(horse) {
   try {
     const traits = _getAllTraits(horse);
     return Object.keys(traits).length;
-
   } catch (error) {
     logger.error(`[horseModelTraitHelpers.countTraits] Error counting traits: ${error.message}`);
     return 0;
@@ -279,9 +290,10 @@ export function validateTraitData(traitData) {
     }
 
     return true;
-
   } catch (error) {
-    logger.error(`[horseModelTraitHelpers.validateTraitData] Error validating trait data: ${error.message}`);
+    logger.error(
+      `[horseModelTraitHelpers.validateTraitData] Error validating trait data: ${error.message}`
+    );
     return false;
   }
 }

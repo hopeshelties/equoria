@@ -7,7 +7,7 @@ The `applyEpigeneticTraitsAtBirth()` function assigns epigenetic traits to foals
 ## Function Signature
 
 ```javascript
-applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stressLevel })
+applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stressLevel });
 ```
 
 ### Parameters
@@ -33,6 +33,7 @@ applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stressLevel })
 **Conditions**: Mare stress ≤ 20 AND feed quality ≥ 80
 
 **Traits Assigned**:
+
 - `resilient` (75% chance) - Stress resistance and recovery bonuses
 - `people_trusting` (60% chance) - Enhanced bonding and handler cooperation
 
@@ -41,11 +42,13 @@ applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stressLevel })
 **Detection**: Common ancestors appearing multiple times in lineage
 
 **Severity Levels**:
+
 - **High**: 4+ occurrences of same ancestor
-- **Moderate**: 3 occurrences of same ancestor  
+- **Moderate**: 3 occurrences of same ancestor
 - **Low**: 2 occurrences of same ancestor
 
 **Traits Assigned**:
+
 - `fragile` - Higher injury risk, slower recovery
   - High inbreeding: 80% chance
   - Moderate inbreeding: 50% chance
@@ -64,11 +67,13 @@ applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stressLevel })
 **Conditions**: 3+ ancestors share the same discipline
 
 **Detection Methods**:
+
 1. Direct `discipline` field on ancestor objects
 2. Highest scoring discipline from `disciplineScores` object
 3. Most common discipline from competition history
 
 **Traits Assigned**:
+
 - `discipline_affinity_*` (70% chance) - Specialized bonuses for inherited discipline
   - Available disciplines: racing, jumping, dressage, etc.
 - `legacy_talent` (40% chance) - Enhanced talent inheritance (requires 4+ ancestors)
@@ -88,13 +93,13 @@ import { applyEpigeneticTraitsAtBirth } from '../utils/applyEpigeneticTraitsAtBi
 const mare = {
   id: 1,
   stress_level: 15,
-  health_status: 'Excellent'
+  health_status: 'Excellent',
 };
 
 const result = applyEpigeneticTraitsAtBirth({
   mare,
   feedQuality: 85,
-  stressLevel: 15
+  stressLevel: 15,
 });
 
 console.log(result);
@@ -108,14 +113,14 @@ const lineage = [
   { id: 1, discipline: 'Racing' },
   { id: 2, discipline: 'Racing' },
   { id: 3, discipline: 'Racing' },
-  { id: 4, discipline: 'Dressage' }
+  { id: 4, discipline: 'Dressage' },
 ];
 
 const result = applyEpigeneticTraitsAtBirth({
   mare,
   lineage,
   feedQuality: 60,
-  stressLevel: 30
+  stressLevel: 30,
 });
 
 // Possible result: { positive: ['discipline_affinity_racing'], negative: [] }
@@ -129,14 +134,14 @@ const inbredLineage = [
   { id: 100, name: 'Common Ancestor' },
   { id: 100, name: 'Common Ancestor' },
   { id: 100, name: 'Common Ancestor' }, // High inbreeding
-  { id: 101, name: 'Other Horse' }
+  { id: 101, name: 'Other Horse' },
 ];
 
 const result = applyEpigeneticTraitsAtBirth({
   mare,
   lineage: inbredLineage,
   feedQuality: 50,
-  stressLevel: 50
+  stressLevel: 50,
 });
 
 // Possible result: { positive: [], negative: ['fragile', 'reactive', 'low_immunity'] }
@@ -187,9 +192,9 @@ await prisma.horse.update({
     epigenetic_modifiers: {
       positive,
       negative,
-      hidden: [] // Some traits may be hidden initially
-    }
-  }
+      hidden: [], // Some traits may be hidden initially
+    },
+  },
 });
 ```
 
@@ -202,6 +207,7 @@ npm test -- tests/applyEpigeneticTraitsAtBirth.test.js
 ```
 
 Test coverage includes:
+
 - Input validation
 - Optimal breeding conditions
 - Inbreeding detection and severity

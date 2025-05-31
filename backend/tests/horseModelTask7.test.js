@@ -3,7 +3,7 @@ import {
   getPositiveTraitsArray,
   getNegativeTraitsArray,
   addTrait,
-  createHorse
+  createHorse,
 } from '../models/horseModel.js';
 
 describe('TASK 7: Horse Model Instance-Style Helper Methods', () => {
@@ -35,60 +35,80 @@ describe('TASK 7: Horse Model Instance-Style Helper Methods', () => {
   });
 
   describe('Input Validation Tests', () => {
-    it('should reject invalid horse IDs in hasTrait', async() => {
+    it('should reject invalid horse IDs in hasTrait', async () => {
       await expect(hasTrait('invalid', 'trait')).rejects.toThrow('Invalid horse ID provided');
       await expect(hasTrait(-1, 'trait')).rejects.toThrow('Invalid horse ID provided');
       await expect(hasTrait(0, 'trait')).rejects.toThrow('Invalid horse ID provided');
       await expect(hasTrait(null, 'trait')).rejects.toThrow('Invalid horse ID provided');
     });
 
-    it('should reject invalid trait names in hasTrait', async() => {
+    it('should reject invalid trait names in hasTrait', async () => {
       await expect(hasTrait(1, '')).rejects.toThrow('Trait name must be a non-empty string');
       await expect(hasTrait(1, null)).rejects.toThrow('Trait name must be a non-empty string');
       await expect(hasTrait(1, undefined)).rejects.toThrow('Trait name must be a non-empty string');
       await expect(hasTrait(1, 123)).rejects.toThrow('Trait name must be a non-empty string');
     });
 
-    it('should reject invalid horse IDs in getPositiveTraitsArray', async() => {
+    it('should reject invalid horse IDs in getPositiveTraitsArray', async () => {
       await expect(getPositiveTraitsArray('invalid')).rejects.toThrow('Invalid horse ID provided');
       await expect(getPositiveTraitsArray(-1)).rejects.toThrow('Invalid horse ID provided');
       await expect(getPositiveTraitsArray(0)).rejects.toThrow('Invalid horse ID provided');
     });
 
-    it('should reject invalid horse IDs in getNegativeTraitsArray', async() => {
+    it('should reject invalid horse IDs in getNegativeTraitsArray', async () => {
       await expect(getNegativeTraitsArray('invalid')).rejects.toThrow('Invalid horse ID provided');
       await expect(getNegativeTraitsArray(-1)).rejects.toThrow('Invalid horse ID provided');
       await expect(getNegativeTraitsArray(0)).rejects.toThrow('Invalid horse ID provided');
     });
 
-    it('should reject invalid inputs in addTrait', async() => {
+    it('should reject invalid inputs in addTrait', async () => {
       // Invalid horse ID
-      await expect(addTrait('invalid', 'trait', 'positive')).rejects.toThrow('Invalid horse ID provided');
+      await expect(addTrait('invalid', 'trait', 'positive')).rejects.toThrow(
+        'Invalid horse ID provided'
+      );
       await expect(addTrait(-1, 'trait', 'positive')).rejects.toThrow('Invalid horse ID provided');
       await expect(addTrait(0, 'trait', 'positive')).rejects.toThrow('Invalid horse ID provided');
 
       // Invalid trait name
-      await expect(addTrait(1, '', 'positive')).rejects.toThrow('Trait name must be a non-empty string');
-      await expect(addTrait(1, null, 'positive')).rejects.toThrow('Trait name must be a non-empty string');
-      await expect(addTrait(1, 123, 'positive')).rejects.toThrow('Trait name must be a non-empty string');
+      await expect(addTrait(1, '', 'positive')).rejects.toThrow(
+        'Trait name must be a non-empty string'
+      );
+      await expect(addTrait(1, null, 'positive')).rejects.toThrow(
+        'Trait name must be a non-empty string'
+      );
+      await expect(addTrait(1, 123, 'positive')).rejects.toThrow(
+        'Trait name must be a non-empty string'
+      );
 
       // Invalid category (should only accept 'positive' and 'negative' for instance-style helper)
-      await expect(addTrait(1, 'trait', 'invalid')).rejects.toThrow('Invalid category \'invalid\'. Must be one of: positive, negative');
-      await expect(addTrait(1, 'trait', 'hidden')).rejects.toThrow('Invalid category \'hidden\'. Must be one of: positive, negative');
-      await expect(addTrait(1, 'trait', '')).rejects.toThrow('Invalid category \'\'. Must be one of: positive, negative');
+      await expect(addTrait(1, 'trait', 'invalid')).rejects.toThrow(
+        "Invalid category 'invalid'. Must be one of: positive, negative"
+      );
+      await expect(addTrait(1, 'trait', 'hidden')).rejects.toThrow(
+        "Invalid category 'hidden'. Must be one of: positive, negative"
+      );
+      await expect(addTrait(1, 'trait', '')).rejects.toThrow(
+        "Invalid category ''. Must be one of: positive, negative"
+      );
     });
   });
 
   describe('Function Behavior Tests', () => {
-    it('should handle non-existent horse IDs gracefully', async() => {
+    it('should handle non-existent horse IDs gracefully', async () => {
       const nonExistentId = 999999;
 
-      await expect(hasTrait(nonExistentId, 'trait')).rejects.toThrow(`Horse with ID ${nonExistentId} not found`);
-      await expect(getPositiveTraitsArray(nonExistentId)).rejects.toThrow(`Horse with ID ${nonExistentId} not found`);
-      await expect(getNegativeTraitsArray(nonExistentId)).rejects.toThrow(`Horse with ID ${nonExistentId} not found`);
+      await expect(hasTrait(nonExistentId, 'trait')).rejects.toThrow(
+        `Horse with ID ${nonExistentId} not found`
+      );
+      await expect(getPositiveTraitsArray(nonExistentId)).rejects.toThrow(
+        `Horse with ID ${nonExistentId} not found`
+      );
+      await expect(getNegativeTraitsArray(nonExistentId)).rejects.toThrow(
+        `Horse with ID ${nonExistentId} not found`
+      );
     });
 
-    it('should validate that functions return correct types', async() => {
+    it('should validate that functions return correct types', async () => {
       // These will fail with "horse not found" but we can check the error types
       try {
         await hasTrait(999999, 'trait');

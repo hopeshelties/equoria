@@ -27,7 +27,7 @@ if (process.env.DATABASE_URL?.includes('equoria_test')) {
 import { Client } from 'pg';
 
 const client = new Client({
-  connectionString: process.env.DATABASE_URL
+  connectionString: process.env.DATABASE_URL,
 });
 
 try {

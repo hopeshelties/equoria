@@ -31,7 +31,7 @@ async function testXpSystem() {
       money: 1000,
       level: 1,
       xp: 0,
-      settings: { theme: 'light' }
+      settings: { theme: 'light' },
     };
 
     console.log('1. Creating test user...');
@@ -66,7 +66,7 @@ async function testXpSystem() {
       xp: userState.xp,
       leveledUp: false,
       levelsGained: 0,
-      message: 'Checked user state without adding XP.'
+      message: 'Checked user state without adding XP.',
     };
     console.log(`✅ Result: Level ${result.level}, XP: ${result.xp}`);
     console.log(`   Leveled up: ${result.leveledUp}, Message: ${result.message}\n`);
@@ -75,7 +75,9 @@ async function testXpSystem() {
     result = await addXpToUser(user.id, 200);
 
     console.log('8. Verifying state after adding 200 XP...');
-    console.log(`✅ Result: Level ${result.currentLevel || result.level}, XP: ${result.currentXP || result.xp}`);
+    console.log(
+      `✅ Result: Level ${result.currentLevel || result.level}, XP: ${result.currentXP || result.xp}`
+    );
     console.log(`   Leveled up: ${result.leveledUp}, Levels gained: ${result.levelsGained}\n`);
 
     console.log('9. Final user state...');
@@ -97,7 +99,7 @@ async function testXpSystem() {
 }
 
 // Auto-run if executed directly
-(async() => {
+(async () => {
   try {
     await testXpSystem();
     console.log('\n✨ Test script completed');

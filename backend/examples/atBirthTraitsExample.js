@@ -17,8 +17,8 @@ async function optimalBreedingExample() {
     const breedingData = {
       sireId: 1,
       damId: 2,
-      mareStress: 10,    // Very low stress
-      feedQuality: 95    // Excellent feed quality
+      mareStress: 10, // Very low stress
+      feedQuality: 95, // Excellent feed quality
     };
 
     const result = await applyEpigeneticTraitsAtBirth(breedingData);
@@ -27,13 +27,14 @@ async function optimalBreedingExample() {
     console.log(`- Mare Stress: ${result.breedingAnalysis.conditions.mareStress}`);
     console.log(`- Feed Quality: ${result.breedingAnalysis.conditions.feedQuality}`);
     console.log(`- Inbreeding Detected: ${result.breedingAnalysis.inbreeding.inbreedingDetected}`);
-    console.log(`- Discipline Specialization: ${result.breedingAnalysis.lineage.disciplineSpecialization}`);
+    console.log(
+      `- Discipline Specialization: ${result.breedingAnalysis.lineage.disciplineSpecialization}`
+    );
 
     console.log('\nApplied Traits:');
     console.log(`- Positive: ${result.traits.positive.join(', ') || 'None'}`);
     console.log(`- Negative: ${result.traits.negative.join(', ') || 'None'}`);
     console.log(`- Hidden: ${result.traits.hidden.join(', ') || 'None'}`);
-
   } catch (error) {
     console.log(`Error: ${error.message}`);
   }
@@ -48,8 +49,8 @@ async function poorBreedingExample() {
     const breedingData = {
       sireId: 3,
       damId: 4,
-      mareStress: 85,    // Very high stress
-      feedQuality: 25    // Poor feed quality
+      mareStress: 85, // Very high stress
+      feedQuality: 25, // Poor feed quality
     };
 
     const result = await applyEpigeneticTraitsAtBirth(breedingData);
@@ -62,7 +63,6 @@ async function poorBreedingExample() {
     console.log(`- Positive: ${result.traits.positive.join(', ') || 'None'}`);
     console.log(`- Negative: ${result.traits.negative.join(', ') || 'None'}`);
     console.log(`- Hidden: ${result.traits.hidden.join(', ') || 'None'}`);
-
   } catch (error) {
     console.log(`Error: ${error.message}`);
   }
@@ -76,14 +76,14 @@ async function horseCreationExample() {
   try {
     const horseData = {
       name: 'Starlight Foal',
-      age: 0,                    // Newborn
+      age: 0, // Newborn
       breedId: 1,
-      sire_id: 5,               // Has parents - triggers at-birth traits
+      sire_id: 5, // Has parents - triggers at-birth traits
       dam_id: 6,
-      mareStress: 20,           // Good conditions
+      mareStress: 20, // Good conditions
       feedQuality: 80,
       sex: 'filly',
-      health_status: 'Excellent'
+      health_status: 'Excellent',
     };
 
     console.log('Creating horse with data:');
@@ -101,7 +101,6 @@ async function horseCreationExample() {
     console.log(`- Positive Traits: ${horse.epigenetic_modifiers.positive.join(', ') || 'None'}`);
     console.log(`- Negative Traits: ${horse.epigenetic_modifiers.negative.join(', ') || 'None'}`);
     console.log(`- Hidden Traits: ${horse.epigenetic_modifiers.hidden.join(', ') || 'None'}`);
-
   } catch (error) {
     console.log(`Error: ${error.message}`);
   }
@@ -135,23 +134,23 @@ function testBreedingScenarios() {
     {
       name: 'Premium Care',
       conditions: { mareStress: 5, feedQuality: 95, inbreedingDetected: false },
-      expectedTraits: ['hardy', 'premium_care', 'well_bred']
+      expectedTraits: ['hardy', 'premium_care', 'well_bred'],
     },
     {
       name: 'Inbred Line',
       conditions: { mareStress: 30, feedQuality: 60, inbreedingDetected: true },
-      expectedTraits: ['inbred']
+      expectedTraits: ['inbred'],
     },
     {
       name: 'Stressed Mare',
       conditions: { mareStress: 75, feedQuality: 45, inbreedingDetected: false },
-      expectedTraits: ['stressed_lineage', 'weak_constitution']
+      expectedTraits: ['stressed_lineage', 'weak_constitution'],
     },
     {
       name: 'Poor Nutrition',
       conditions: { mareStress: 40, feedQuality: 20, inbreedingDetected: false },
-      expectedTraits: ['poor_nutrition']
-    }
+      expectedTraits: ['poor_nutrition'],
+    },
   ];
 
   scenarios.forEach(scenario => {
@@ -182,24 +181,36 @@ function testBreedingScenarios() {
 function evaluateConditions(traitConditions, actualConditions) {
   for (const [condition, requirement] of Object.entries(traitConditions)) {
     switch (condition) {
-    case 'mareStressMax':
-      if (actualConditions.mareStress > requirement) {return false;}
-      break;
-    case 'mareStressMin':
-      if (actualConditions.mareStress < requirement) {return false;}
-      break;
-    case 'feedQualityMin':
-      if (actualConditions.feedQuality < requirement) {return false;}
-      break;
-    case 'feedQualityMax':
-      if (actualConditions.feedQuality > requirement) {return false;}
-      break;
-    case 'inbreedingDetected':
-      if (actualConditions.inbreedingDetected !== requirement) {return false;}
-      break;
-    case 'noInbreeding':
-      if (actualConditions.inbreedingDetected === requirement) {return false;}
-      break;
+      case 'mareStressMax':
+        if (actualConditions.mareStress > requirement) {
+          return false;
+        }
+        break;
+      case 'mareStressMin':
+        if (actualConditions.mareStress < requirement) {
+          return false;
+        }
+        break;
+      case 'feedQualityMin':
+        if (actualConditions.feedQuality < requirement) {
+          return false;
+        }
+        break;
+      case 'feedQualityMax':
+        if (actualConditions.feedQuality > requirement) {
+          return false;
+        }
+        break;
+      case 'inbreedingDetected':
+        if (actualConditions.inbreedingDetected !== requirement) {
+          return false;
+        }
+        break;
+      case 'noInbreeding':
+        if (actualConditions.inbreedingDetected === requirement) {
+          return false;
+        }
+        break;
     }
   }
   return true;
@@ -216,12 +227,13 @@ async function runExamples() {
 
     console.log('\n✅ All examples completed successfully!');
     console.log('\n📝 Key Takeaways:');
-    console.log('- At-birth traits are automatically applied to newborn horses (age 0) with parents');
+    console.log(
+      '- At-birth traits are automatically applied to newborn horses (age 0) with parents'
+    );
     console.log('- Mare stress and feed quality significantly impact trait probability');
     console.log('- Inbreeding detection prevents genetic complications');
     console.log('- Lineage analysis can provide specialized discipline advantages');
     console.log('- Traits can be positive, negative, or hidden at birth');
-
   } catch (error) {
     console.error('Error running examples:', error.message);
   }
@@ -234,7 +246,7 @@ export {
   horseCreationExample,
   showTraitDefinitions,
   testBreedingScenarios,
-  runExamples
+  runExamples,
 };
 
 // Run if called directly

@@ -22,13 +22,15 @@ let cleanupInProgress = false;
 
 // Global cleanup function
 async function performGlobalCleanup() {
-  if (cleanupInProgress) {return;}
+  if (cleanupInProgress) {
+    return;
+  }
   cleanupInProgress = true;
 
   console.log('[Jest Cleanup] Starting global cleanup...');
 
   // Disconnect all Prisma instances
-  const disconnectPromises = Array.from(prismaInstances).map(async(prisma) => {
+  const disconnectPromises = Array.from(prismaInstances).map(async prisma => {
     try {
       await prisma.$disconnect();
       console.log('[Jest Cleanup] Prisma instance disconnected');
@@ -46,16 +48,16 @@ async function performGlobalCleanup() {
   console.log('[Jest Cleanup] Global cleanup completed');
 }
 
-beforeAll(async() => {
+beforeAll(async () => {
   // Any global setup
 });
 
-afterAll(async() => {
+afterAll(async () => {
   await performGlobalCleanup();
 });
 
 // Handle process exit events
-process.on('beforeExit', async() => {
+process.on('beforeExit', async () => {
   await performGlobalCleanup();
 });
 
@@ -63,13 +65,13 @@ process.on('exit', () => {
   console.log('[Jest Setup] Process exiting');
 });
 
-process.on('SIGTERM', async() => {
+process.on('SIGTERM', async () => {
   console.log('[Jest Setup] SIGTERM received');
   await performGlobalCleanup();
   process.exit(0);
 });
 
-process.on('SIGINT', async() => {
+process.on('SIGINT', async () => {
   console.log('[Jest Setup] SIGINT received');
   await performGlobalCleanup();
   process.exit(0);
@@ -80,7 +82,7 @@ process.on('unhandledRejection', (reason, promise) => {
   // Don't exit the process, just log it
 });
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.error('Uncaught Exception:', err);
   // Don't exit the process, just log it
 });

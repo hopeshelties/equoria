@@ -53,6 +53,7 @@ The script includes 3 sample horses:
 ### Output Examples
 
 **Successful Run:**
+
 ```
 [seed] Environment loaded successfully
 [seed] Starting to seed horses with Prisma...
@@ -72,6 +73,7 @@ The script includes 3 sample horses:
 ```
 
 **Duplicate Prevention:**
+
 ```
 [seed] Horse "Midnight Comet" already exists, skipping...
 [seed] Skipped duplicates: 1 horses
@@ -92,6 +94,7 @@ npm test -- backend/seed/horseSeed.test.js
 ```
 
 The test suite covers:
+
 - Breed finding and creation
 - Horse existence checking
 - Reference record creation
@@ -112,4 +115,4 @@ The script handles various error scenarios:
 
 - Database URL is validated but not logged for security
 - All database operations use Prisma Client for SQL injection protection
-- Error messages are detailed but don't expose sensitive information 
+- Error messages are detailed but don't expose sensitive information

@@ -14,15 +14,17 @@ const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
-  debug: jest.fn()
+  debug: jest.fn(),
 };
 
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the function after mocking
-const { applyEpigeneticTraitsAtBirth } = await import(join(__dirname, '../utils/applyEpigeneticTraitsAtBirth.js'));
+const { applyEpigeneticTraitsAtBirth } = await import(
+  join(__dirname, '../utils/applyEpigeneticTraitsAtBirth.js')
+);
 
 describe('applyEpigeneticTraitsAtBirth', () => {
   beforeEach(() => {
@@ -41,7 +43,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         applyEpigeneticTraitsAtBirth({
           lineage: [],
           feedQuality: 50,
-          stressLevel: 50
+          stressLevel: 50,
         });
       }).toThrow('Mare object is required');
     });
@@ -65,7 +67,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         feedQuality: 85,
-        stressLevel: 15
+        stressLevel: 15,
       });
 
       expect(result.positive).toContain('resilient');
@@ -78,7 +80,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         feedQuality: 80,
-        stressLevel: 20
+        stressLevel: 20,
       });
 
       expect(result.positive).toContain('people_trusting');
@@ -89,7 +91,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         feedQuality: 85,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.positive).not.toContain('resilient');
@@ -101,7 +103,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         feedQuality: 60,
-        stressLevel: 15
+        stressLevel: 15,
       });
 
       expect(result.positive).not.toContain('resilient');
@@ -119,14 +121,14 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         { id: 1, name: 'Common Ancestor' }, // Same ancestor appears multiple times
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
-        { id: 2, name: 'Other Horse' }
+        { id: 2, name: 'Other Horse' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).toContain('fragile');
@@ -140,14 +142,14 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
-        { id: 2, name: 'Other Horse' }
+        { id: 2, name: 'Other Horse' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).toContain('reactive');
@@ -161,14 +163,14 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
-        { id: 2, name: 'Other Horse' }
+        { id: 2, name: 'Other Horse' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).toContain('low_immunity');
@@ -180,14 +182,14 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         { id: 1, name: 'Horse 1' },
         { id: 2, name: 'Horse 2' },
         { id: 3, name: 'Horse 3' },
-        { id: 4, name: 'Horse 4' }
+        { id: 4, name: 'Horse 4' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).not.toContain('fragile');
@@ -205,14 +207,14 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         { id: 1, discipline: 'Racing' },
         { id: 2, discipline: 'Racing' },
         { id: 3, discipline: 'Racing' },
-        { id: 4, discipline: 'Dressage' }
+        { id: 4, discipline: 'Dressage' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.positive).toContain('discipline_affinity_racing');
@@ -227,14 +229,14 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         { id: 2, discipline: 'Show Jumping' },
         { id: 3, discipline: 'Show Jumping' },
         { id: 4, discipline: 'Show Jumping' },
-        { id: 5, discipline: 'Dressage' }
+        { id: 5, discipline: 'Dressage' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.positive).toContain('discipline_affinity_show_jumping');
@@ -249,14 +251,14 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         { id: 1, disciplineScores: { Racing: 85, Dressage: 60 } },
         { id: 2, disciplineScores: { Racing: 90, Jumping: 55 } },
         { id: 3, disciplineScores: { Racing: 78, Dressage: 70 } },
-        { id: 4, disciplineScores: { Dressage: 80, Racing: 65 } }
+        { id: 4, disciplineScores: { Dressage: 80, Racing: 65 } },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.positive).toContain('discipline_affinity_racing');
@@ -268,17 +270,19 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         { id: 1, discipline: 'Racing' },
         { id: 2, discipline: 'Dressage' },
         { id: 3, discipline: 'Show Jumping' },
-        { id: 4, discipline: 'Racing' }
+        { id: 4, discipline: 'Racing' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
-      expect(result.positive.filter(trait => trait.startsWith('discipline_affinity_'))).toHaveLength(0);
+      expect(
+        result.positive.filter(trait => trait.startsWith('discipline_affinity_'))
+      ).toHaveLength(0);
       expect(result.positive).not.toContain('legacy_talent');
     });
   });
@@ -292,7 +296,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         mare,
         lineage: [],
         feedQuality: 50,
-        stressLevel: 85
+        stressLevel: 85,
       });
 
       expect(result.negative).toContain('nervous');
@@ -306,7 +310,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         mare,
         lineage: [],
         feedQuality: 25,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).toContain('low_immunity');
@@ -319,14 +323,14 @@ describe('applyEpigeneticTraitsAtBirth', () => {
       const lineage = [
         { id: 1, name: 'Common Ancestor' },
         { id: 1, name: 'Common Ancestor' },
-        { id: 1, name: 'Common Ancestor' }
+        { id: 1, name: 'Common Ancestor' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 25, // Poor nutrition
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       // Should only have one instance of low_immunity even though both inbreeding and poor nutrition can cause it
@@ -342,7 +346,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         mare,
         lineage: [],
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result).toHaveProperty('positive');
@@ -357,7 +361,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         mare,
         lineage: [],
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.positive).toEqual([]);
@@ -370,7 +374,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
         mare,
         lineage: null,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.positive).toEqual([]);

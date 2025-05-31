@@ -1,4 +1,3 @@
-
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -22,39 +21,39 @@ const mockUpdateHorseStat = jest.fn();
 const mockLogger = {
   info: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn()
+  error: jest.fn(),
 };
 
 // Mock all the modules
 jest.unstable_mockModule(join(__dirname, '../../models/xpLogModel.js'), () => ({
-  logXpEvent: mockLogXpEvent
+  logXpEvent: mockLogXpEvent,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
   addXp: mockAddXp,
   levelUpIfNeeded: mockLevelUpIfNeeded,
-  getPlayerWithHorses: jest.fn()
+  getPlayerWithHorses: jest.fn(),
 }));
 
 jest.unstable_mockModule(join(__dirname, '../../models/horseModel.js'), () => ({
   getHorseById: mockGetHorseById,
   incrementDisciplineScore: mockIncrementDisciplineScore,
-  updateHorseStat: mockUpdateHorseStat
+  updateHorseStat: mockUpdateHorseStat,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../../models/trainingModel.js'), () => ({
   logTrainingSession: mockLogTrainingSession,
   getHorseAge: mockGetHorseAge,
   getAnyRecentTraining: mockGetAnyRecentTraining,
-  getLastTrainingDate: jest.fn()
+  getLastTrainingDate: jest.fn(),
 }));
 
 jest.unstable_mockModule(join(__dirname, '../../utils/traitEffects.js'), () => ({
-  getCombinedTraitEffects: mockGetCombinedTraitEffects
+  getCombinedTraitEffects: mockGetCombinedTraitEffects,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the controllers after mocking
@@ -82,7 +81,7 @@ describe('XP Logging Integration Tests', () => {
   });
 
   describe('Training XP Logging', () => {
-    it('should log XP event when training is successful', async() => {
+    it('should log XP event when training is successful', async () => {
       // Setup mocks for successful training
       mockGetHorseAge.mockResolvedValue(5); // Horse is old enough
       mockGetAnyRecentTraining.mockResolvedValue(null); // No recent training
@@ -90,7 +89,7 @@ describe('XP Logging Integration Tests', () => {
         id: 1,
         name: 'Thunder',
         userId: 'user-123', // Corrected: ownerId/playerId to userId
-        epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
       });
       mockGetCombinedTraitEffects.mockReturnValue({});
       mockLogTrainingSession.mockResolvedValue({ id: 1 });
@@ -98,7 +97,7 @@ describe('XP Logging Integration Tests', () => {
         id: 1,
         name: 'Thunder',
         userId: 'user-123', // Corrected: ownerId/playerId to userId
-        disciplineScores: { Dressage: 15 }
+        disciplineScores: { Dressage: 15 },
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 2, xpGained: 5 });
       mockLevelUpIfNeeded.mockResolvedValue({ leveledUp: false, level: 2 });
@@ -107,7 +106,7 @@ describe('XP Logging Integration Tests', () => {
         userId: 'user-123', // Changed from playerId
         amount: 5,
         reason: 'Trained horse Thunder in Dressage',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       const result = await trainHorse(1, 'Dressage');
@@ -118,11 +117,11 @@ describe('XP Logging Integration Tests', () => {
       expect(mockLogXpEvent).toHaveBeenCalledWith({
         userId: 'user-123', // Changed from playerId
         amount: 5,
-        reason: 'Trained horse Thunder in Dressage'
+        reason: 'Trained horse Thunder in Dressage',
       });
     });
 
-    it('should log XP event with trait-modified amount', async() => {
+    it('should log XP event with trait-modified amount', async () => {
       // Setup mocks for training with trait effects
       mockGetHorseAge.mockResolvedValue(4);
       mockGetAnyRecentTraining.mockResolvedValue(null);
@@ -130,17 +129,17 @@ describe('XP Logging Integration Tests', () => {
         id: 2,
         name: 'Lightning',
         userId: 'user-456', // Corrected: ownerId/playerId to userId
-        epigenetic_modifiers: { positive: ['intelligent'], negative: [], hidden: [] }
+        epigenetic_modifiers: { positive: ['intelligent'], negative: [], hidden: [] },
       });
       mockGetCombinedTraitEffects.mockReturnValue({
-        trainingXpModifier: 0.25 // 25% bonus
+        trainingXpModifier: 0.25, // 25% bonus
       });
       mockLogTrainingSession.mockResolvedValue({ id: 2 });
       mockIncrementDisciplineScore.mockResolvedValue({
         id: 2,
         name: 'Lightning',
         userId: 'user-456', // Corrected: ownerId/playerId to userId
-        disciplineScores: { Racing: 20 }
+        disciplineScores: { Racing: 20 },
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 3, xpGained: 6 });
       mockLevelUpIfNeeded.mockResolvedValue({ leveledUp: false, level: 3 });
@@ -149,7 +148,7 @@ describe('XP Logging Integration Tests', () => {
         userId: 'user-456', // Changed from playerId
         amount: 6,
         reason: 'Trained horse Lightning in Racing',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       const result = await trainHorse(2, 'Racing');
@@ -159,11 +158,11 @@ describe('XP Logging Integration Tests', () => {
       expect(mockLogXpEvent).toHaveBeenCalledWith({
         userId: 'user-456', // Changed from playerId
         amount: 6,
-        reason: 'Trained horse Lightning in Racing'
+        reason: 'Trained horse Lightning in Racing',
       });
     });
 
-    it('should continue training even if XP logging fails', async() => {
+    it('should continue training even if XP logging fails', async () => {
       // Setup mocks for successful training but failed XP logging
       mockGetHorseAge.mockResolvedValue(5);
       mockGetAnyRecentTraining.mockResolvedValue(null);
@@ -171,7 +170,7 @@ describe('XP Logging Integration Tests', () => {
         id: 3,
         name: 'Storm',
         userId: 'user-789', // Corrected: ownerId/playerId to userId
-        epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
       });
       mockGetCombinedTraitEffects.mockReturnValue({});
       mockLogTrainingSession.mockResolvedValue({ id: 3 });
@@ -179,7 +178,7 @@ describe('XP Logging Integration Tests', () => {
         id: 3,
         name: 'Storm',
         userId: 'user-789', // Corrected: ownerId/playerId to userId
-        disciplineScores: { 'Show Jumping': 10 }
+        disciplineScores: { 'Show Jumping': 10 },
       });
       mockAddXp.mockResolvedValue({ leveledUp: false, level: 1, xpGained: 5 });
       mockLevelUpIfNeeded.mockResolvedValue({ leveledUp: false, level: 1 });
@@ -192,12 +191,14 @@ describe('XP Logging Integration Tests', () => {
       expect(mockLogXpEvent).toHaveBeenCalledWith({
         userId: 'user-789', // Changed from playerId
         amount: 5,
-        reason: 'Trained horse Storm in Show Jumping'
+        reason: 'Trained horse Storm in Show Jumping',
       });
-      expect(mockLogger.error).toHaveBeenCalledWith('[trainingController.trainHorse] Failed to award training XP: Database connection failed');
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '[trainingController.trainHorse] Failed to award training XP: Database connection failed'
+      );
     });
 
-    it('should not log XP event if training fails', async() => {
+    it('should not log XP event if training fails', async () => {
       // Setup mocks for failed training (horse too young)
       mockGetHorseAge.mockResolvedValue(2); // Horse is too young
 
@@ -211,14 +212,14 @@ describe('XP Logging Integration Tests', () => {
   });
 
   describe('Competition XP Logging', () => {
-    it('should log XP events for competition placements', async() => {
+    it('should log XP events for competition placements', async () => {
       // This is a simplified test since enterAndRunShow is complex
       // We'll focus on the XP logging part
       const mockHorse = {
         id: 1,
         name: 'Champion',
         userId: 'user-123', // Changed from ownerId/playerId
-        rider: { name: 'Test Rider', skill: 5 }
+        rider: { name: 'Test Rider', skill: 5 },
       };
 
       const mockShow = {
@@ -228,7 +229,7 @@ describe('XP Logging Integration Tests', () => {
         entryFee: 50,
         prize: 1000,
         runDate: new Date(),
-        hostUserId: 'host-player'
+        hostUserId: 'host-player',
       };
 
       // Mock the complex dependencies for enterAndRunShow
@@ -243,20 +244,21 @@ describe('XP Logging Integration Tests', () => {
         userId: 'user-123', // Changed from playerId
         amount: 20,
         reason: '1st place with horse Champion in Racing',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Simulate the XP award logic from the competition controller
       const placement = '1st';
       const xpAmount = 20;
 
-      if (mockHorse && mockHorse.userId) { // Changed from ownerId
+      if (mockHorse && mockHorse.userId) {
+        // Changed from ownerId
         await mockAddXp(mockHorse.userId, xpAmount); // Changed from ownerId
         await mockLevelUpIfNeeded(mockHorse.userId); // Changed from ownerId
         await mockLogXpEvent({
           userId: mockHorse.userId, // Changed from playerId & ownerId
           amount: xpAmount,
-          reason: `${placement} place with horse ${mockHorse.name} in ${mockShow.discipline}`
+          reason: `${placement} place with horse ${mockHorse.name} in ${mockShow.discipline}`,
         });
       }
 
@@ -265,15 +267,15 @@ describe('XP Logging Integration Tests', () => {
       expect(mockLogXpEvent).toHaveBeenCalledWith({
         userId: 'user-123', // Changed from playerId
         amount: 20,
-        reason: '1st place with horse Champion in Racing'
+        reason: '1st place with horse Champion in Racing',
       });
     });
 
-    it('should log different XP amounts for different placements', async() => {
+    it('should log different XP amounts for different placements', async () => {
       const testCases = [
         { placement: '1st', expectedXp: 20 },
         { placement: '2nd', expectedXp: 15 },
-        { placement: '3rd', expectedXp: 10 }
+        { placement: '3rd', expectedXp: 10 },
       ];
 
       for (const testCase of testCases) {
@@ -282,7 +284,7 @@ describe('XP Logging Integration Tests', () => {
         const mockHorse = {
           id: 1,
           name: 'TestHorse',
-          userId: 'user-123' // Changed from ownerId/playerId
+          userId: 'user-123', // Changed from ownerId/playerId
         };
 
         mockAddXp.mockResolvedValue({ leveledUp: false, level: 3 });
@@ -292,7 +294,7 @@ describe('XP Logging Integration Tests', () => {
           userId: 'user-123', // Changed from playerId
           amount: testCase.expectedXp,
           reason: `${testCase.placement} place with horse TestHorse in Dressage`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
         // Simulate XP award for placement
@@ -301,13 +303,13 @@ describe('XP Logging Integration Tests', () => {
         await mockLogXpEvent({
           userId: mockHorse.userId, // Changed from playerId & ownerId
           amount: testCase.expectedXp,
-          reason: `${testCase.placement} place with horse ${mockHorse.name} in Dressage`
+          reason: `${testCase.placement} place with horse ${mockHorse.name} in Dressage`,
         });
 
         expect(mockLogXpEvent).toHaveBeenCalledWith({
           userId: 'user-123', // Changed from playerId
           amount: testCase.expectedXp,
-          reason: `${testCase.placement} place with horse TestHorse in Dressage`
+          reason: `${testCase.placement} place with horse TestHorse in Dressage`,
         });
       }
     });

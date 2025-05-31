@@ -10,7 +10,7 @@ const router = express.Router();
  * GET /api/admin/cron/status
  * Get status of all cron jobs
  */
-router.get('/cron/status', async(req, res) => {
+router.get('/cron/status', async (req, res) => {
   try {
     logger.info('[adminRoutes] GET /api/admin/cron/status');
 
@@ -18,14 +18,13 @@ router.get('/cron/status', async(req, res) => {
 
     res.json({
       success: true,
-      data: status
+      data: status,
     });
-
   } catch (error) {
     logger.error(`[adminRoutes] GET /api/admin/cron/status error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
     });
   }
 });
@@ -34,7 +33,7 @@ router.get('/cron/status', async(req, res) => {
  * POST /api/admin/cron/start
  * Start cron job service
  */
-router.post('/cron/start', async(req, res) => {
+router.post('/cron/start', async (req, res) => {
   try {
     logger.info('[adminRoutes] POST /api/admin/cron/start');
 
@@ -42,14 +41,13 @@ router.post('/cron/start', async(req, res) => {
 
     res.json({
       success: true,
-      message: 'Cron job service started successfully'
+      message: 'Cron job service started successfully',
     });
-
   } catch (error) {
     logger.error(`[adminRoutes] POST /api/admin/cron/start error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to start cron job service'
+      message: 'Failed to start cron job service',
     });
   }
 });
@@ -58,7 +56,7 @@ router.post('/cron/start', async(req, res) => {
  * POST /api/admin/cron/stop
  * Stop cron job service
  */
-router.post('/cron/stop', async(req, res) => {
+router.post('/cron/stop', async (req, res) => {
   try {
     logger.info('[adminRoutes] POST /api/admin/cron/stop');
 
@@ -66,14 +64,13 @@ router.post('/cron/stop', async(req, res) => {
 
     res.json({
       success: true,
-      message: 'Cron job service stopped successfully'
+      message: 'Cron job service stopped successfully',
     });
-
   } catch (error) {
     logger.error(`[adminRoutes] POST /api/admin/cron/stop error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to stop cron job service'
+      message: 'Failed to stop cron job service',
     });
   }
 });
@@ -82,24 +79,25 @@ router.post('/cron/stop', async(req, res) => {
  * POST /api/admin/traits/evaluate
  * Manually trigger daily trait evaluation
  */
-router.post('/traits/evaluate', async(req, res) => {
+router.post('/traits/evaluate', async (req, res) => {
   try {
-    logger.info('[adminRoutes] POST /api/admin/traits/evaluate - Manual trait evaluation triggered');
+    logger.info(
+      '[adminRoutes] POST /api/admin/traits/evaluate - Manual trait evaluation triggered'
+    );
 
     const result = await cronJobService.manualTraitEvaluation();
 
     res.json({
       success: true,
       message: 'Manual trait evaluation completed successfully',
-      data: result
+      data: result,
     });
-
   } catch (error) {
     logger.error(`[adminRoutes] POST /api/admin/traits/evaluate error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to complete trait evaluation',
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -108,15 +106,15 @@ router.post('/traits/evaluate', async(req, res) => {
  * GET /api/admin/foals/development
  * Get all foals in development period for monitoring
  */
-router.get('/foals/development', async(req, res) => {
+router.get('/foals/development', async (req, res) => {
   try {
     logger.info('[adminRoutes] GET /api/admin/foals/development');
 
     const foals = await prisma.horse.findMany({
       where: {
         age: {
-          in: [0, 1]
-        }
+          in: [0, 1],
+        },
       },
       select: {
         id: true,
@@ -127,32 +125,31 @@ router.get('/foals/development', async(req, res) => {
         epigenetic_modifiers: true,
         breed: {
           select: {
-            name: true
-          }
+            name: true,
+          },
         },
         foalDevelopment: {
           select: {
             currentDay: true,
             bondingLevel: true,
-            stressLevel: true
-          }
-        }
-      }
+            stressLevel: true,
+          },
+        },
+      },
     });
 
     res.json({
       success: true,
       data: {
         foals,
-        count: foals.length
-      }
+        count: foals.length,
+      },
     });
-
   } catch (error) {
     logger.error(`[adminRoutes] GET /api/admin/foals/development error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve foal development data'
+      message: 'Failed to retrieve foal development data',
     });
   }
 });
@@ -161,7 +158,7 @@ router.get('/foals/development', async(req, res) => {
  * GET /api/admin/traits/definitions
  * Get all trait definitions for reference
  */
-router.get('/traits/definitions', async(req, res) => {
+router.get('/traits/definitions', async (req, res) => {
   try {
     logger.info('[adminRoutes] GET /api/admin/traits/definitions');
 
@@ -170,14 +167,13 @@ router.get('/traits/definitions', async(req, res) => {
 
     res.json({
       success: true,
-      data: definitions
+      data: definitions,
     });
-
   } catch (error) {
     logger.error(`[adminRoutes] GET /api/admin/traits/definitions error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve trait definitions'
+      message: 'Failed to retrieve trait definitions',
     });
   }
 });

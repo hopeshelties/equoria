@@ -45,11 +45,11 @@ export async function createTestUser(userData = {}) {
     money: 5000,
     xp: 100,
     level: 1,
-    ...userData
+    ...userData,
   };
 
   const user = await prisma.user.create({
-    data: defaultData
+    data: defaultData,
   });
 
   const token = jwt.sign(
@@ -85,14 +85,14 @@ export async function createTestHorse(horseData = {}) {
     stressLevel: 20,
     epigeneticModifiers: {
       positive: [],
-      negative: []
+      negative: [],
     },
     disciplineScores: {},
-    ...horseData
+    ...horseData,
   };
 
   return await prisma.horse.create({
-    data: defaultData
+    data: defaultData,
   });
 }
 
@@ -108,11 +108,11 @@ export async function createTestShow(showData = {}) {
     entryFee: 100,
     prize: 1000,
     runDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
-    ...showData
+    ...showData,
   };
 
   return await prisma.show.create({
-    data: defaultData
+    data: defaultData,
   });
 }
 
@@ -126,34 +126,34 @@ export async function cleanupTestData() {
       where: {
         horse: {
           name: {
-            startsWith: 'TestHorse_'
-          }
-        }
-      }
+            startsWith: 'TestHorse_',
+          },
+        },
+      },
     });
 
     await prisma.horse.deleteMany({
       where: {
         name: {
-          startsWith: 'TestHorse_'
-        }
-      }
+          startsWith: 'TestHorse_',
+        },
+      },
     });
 
     await prisma.show.deleteMany({
       where: {
         name: {
-          startsWith: 'TestShow_'
-        }
-      }
+          startsWith: 'TestShow_',
+        },
+      },
     });
 
     await prisma.user.deleteMany({
       where: {
         username: {
-          startsWith: 'testuser_'
-        }
-      }
+          startsWith: 'testuser_',
+        },
+      },
     });
   } catch (error) {
     console.warn('Cleanup error:', error.message);

@@ -3,7 +3,11 @@
  * Handles trait-based competition analysis and impact calculations
  */
 
-import { calculateTraitCompetitionImpact, getAllTraitCompetitionEffects, hasSpecializedEffect as _hasSpecializedEffect } from '../utils/traitCompetitionImpact.js';
+import {
+  calculateTraitCompetitionImpact,
+  getAllTraitCompetitionEffects,
+  hasSpecializedEffect as _hasSpecializedEffect,
+} from '../utils/traitCompetitionImpact.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
 
@@ -25,7 +29,7 @@ export async function analyzeHorseTraitImpact(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Valid horse ID is required',
-        data: null
+        data: null,
       });
     }
 
@@ -33,7 +37,7 @@ export async function analyzeHorseTraitImpact(req, res) {
       return res.status(400).json({
         success: false,
         message: 'Discipline parameter is required',
-        data: null
+        data: null,
       });
     }
 
@@ -50,15 +54,15 @@ export async function analyzeHorseTraitImpact(req, res) {
         boldness: true,
         flexibility: true,
         obedience: true,
-        focus: true
-      }
+        focus: true,
+      },
     });
 
     if (!horse) {
       return res.status(404).json({
         success: false,
         message: 'Horse not found',
-        data: null
+        data: null,
       });
     }
 
@@ -78,7 +82,7 @@ export async function analyzeHorseTraitImpact(req, res) {
         traitModifier: traitImpact.totalScoreModifier,
         scoreAdjustment: traitImpact.finalScoreAdjustment,
         finalScore: baseScore + traitImpact.finalScoreAdjustment,
-        percentageChange: (traitImpact.totalScoreModifier * 100).toFixed(2)
+        percentageChange: (traitImpact.totalScoreModifier * 100).toFixed(2),
       },
       traits: {
         total: traitImpact.appliedTraits.length,
@@ -91,32 +95,38 @@ export async function analyzeHorseTraitImpact(req, res) {
           percentageEffect: `${(trait.modifier * 100).toFixed(2)}%`,
           isSpecialized: trait.isSpecialized,
           discipline: trait.discipline,
-          description: trait.description
-        }))
+          description: trait.description,
+        })),
       },
       summary: {
         hasPositiveTraits: traitImpact.traitBonuses.length > 0,
         hasNegativeTraits: traitImpact.traitPenalties.length > 0,
-        netEffect: traitImpact.totalScoreModifier > 0 ? 'positive' : traitImpact.totalScoreModifier < 0 ? 'negative' : 'neutral',
+        netEffect:
+          traitImpact.totalScoreModifier > 0
+            ? 'positive'
+            : traitImpact.totalScoreModifier < 0
+              ? 'negative'
+              : 'neutral',
         specializedTraits: traitImpact.appliedTraits.filter(t => t.isSpecialized).length,
-        generalTraits: traitImpact.appliedTraits.filter(t => !t.isSpecialized).length
-      }
+        generalTraits: traitImpact.appliedTraits.filter(t => !t.isSpecialized).length,
+      },
     };
 
-    logger.info(`[traitCompetitionController] Analyzed trait impact for horse ${horse.name} in ${discipline}: ${response.analysis.percentageChange}% effect`);
+    logger.info(
+      `[traitCompetitionController] Analyzed trait impact for horse ${horse.name} in ${discipline}: ${response.analysis.percentageChange}% effect`
+    );
 
     res.json({
       success: true,
       message: 'Trait impact analysis completed',
-      data: response
+      data: response,
     });
-
   } catch (error) {
     logger.error(`[traitCompetitionController.analyzeHorseTraitImpact] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to analyze trait impact',
-      data: null
+      data: null,
     });
   }
 }
@@ -128,14 +138,24 @@ export async function analyzeHorseTraitImpact(req, res) {
 export async function compareTraitImpactAcrossDisciplines(req, res) {
   try {
     const { horseId } = req.params;
-    const disciplines = ['Dressage', 'Show Jumping', 'Cross Country', 'Racing', 'Endurance', 'Reining', 'Driving', 'Trail', 'Eventing'];
+    const disciplines = [
+      'Dressage',
+      'Show Jumping',
+      'Cross Country',
+      'Racing',
+      'Endurance',
+      'Reining',
+      'Driving',
+      'Trail',
+      'Eventing',
+    ];
 
     // Validate horse ID
     if (!horseId || isNaN(parseInt(horseId))) {
       return res.status(400).json({
         success: false,
         message: 'Valid horse ID is required',
-        data: null
+        data: null,
       });
     }
 
@@ -145,15 +165,15 @@ export async function compareTraitImpactAcrossDisciplines(req, res) {
       select: {
         id: true,
         name: true,
-        epigenetic_modifiers: true
-      }
+        epigenetic_modifiers: true,
+      },
     });
 
     if (!horse) {
       return res.status(404).json({
         success: false,
         message: 'Horse not found',
-        data: null
+        data: null,
       });
     }
 
@@ -171,7 +191,12 @@ export async function compareTraitImpactAcrossDisciplines(req, res) {
         percentageEffect: `${(traitImpact.totalScoreModifier * 100).toFixed(2)}%`,
         specializedTraits: traitImpact.appliedTraits.filter(t => t.isSpecialized).length,
         totalTraits: traitImpact.appliedTraits.length,
-        netEffect: traitImpact.totalScoreModifier > 0 ? 'positive' : traitImpact.totalScoreModifier < 0 ? 'negative' : 'neutral'
+        netEffect:
+          traitImpact.totalScoreModifier > 0
+            ? 'positive'
+            : traitImpact.totalScoreModifier < 0
+              ? 'negative'
+              : 'neutral',
       });
     });
 
@@ -190,33 +215,36 @@ export async function compareTraitImpactAcrossDisciplines(req, res) {
         bestDiscipline: {
           name: bestDiscipline.discipline,
           effect: bestDiscipline.percentageEffect,
-          specializedTraits: bestDiscipline.specializedTraits
+          specializedTraits: bestDiscipline.specializedTraits,
         },
         worstDiscipline: {
           name: worstDiscipline.discipline,
           effect: worstDiscipline.percentageEffect,
-          specializedTraits: worstDiscipline.specializedTraits
+          specializedTraits: worstDiscipline.specializedTraits,
         },
-        averageEffect: `${(comparisons.reduce((sum, comp) => sum + comp.modifier, 0) / comparisons.length * 100).toFixed(2)}%`,
+        averageEffect: `${((comparisons.reduce((sum, comp) => sum + comp.modifier, 0) / comparisons.length) * 100).toFixed(2)}%`,
         disciplinesWithBonuses: comparisons.filter(comp => comp.modifier > 0).length,
-        disciplinesWithPenalties: comparisons.filter(comp => comp.modifier < 0).length
-      }
+        disciplinesWithPenalties: comparisons.filter(comp => comp.modifier < 0).length,
+      },
     };
 
-    logger.info(`[traitCompetitionController] Compared trait impact for horse ${horse.name} across ${disciplines.length} disciplines`);
+    logger.info(
+      `[traitCompetitionController] Compared trait impact for horse ${horse.name} across ${disciplines.length} disciplines`
+    );
 
     res.json({
       success: true,
       message: 'Trait impact comparison completed',
-      data: response
+      data: response,
     });
-
   } catch (error) {
-    logger.error(`[traitCompetitionController.compareTraitImpactAcrossDisciplines] Error: ${error.message}`);
+    logger.error(
+      `[traitCompetitionController.compareTraitImpactAcrossDisciplines] Error: ${error.message}`
+    );
     res.status(500).json({
       success: false,
       message: 'Failed to compare trait impact',
-      data: null
+      data: null,
     });
   }
 }
@@ -248,9 +276,9 @@ export async function getTraitCompetitionEffects(req, res) {
         general: {
           scoreModifier: effect.general.scoreModifier,
           percentageEffect: `${(effect.general.scoreModifier * 100).toFixed(2)}%`,
-          description: effect.general.description
+          description: effect.general.description,
         },
-        disciplines: {}
+        disciplines: {},
       };
 
       // Add discipline-specific effects
@@ -260,7 +288,7 @@ export async function getTraitCompetitionEffects(req, res) {
             scoreModifier: disciplineEffect.scoreModifier,
             percentageEffect: `${(disciplineEffect.scoreModifier * 100).toFixed(2)}%`,
             description: disciplineEffect.description,
-            isSpecialized: true
+            isSpecialized: true,
           };
         });
       }
@@ -286,21 +314,20 @@ export async function getTraitCompetitionEffects(req, res) {
       positiveTraits: effectsArray.filter(t => t.type === 'positive').length,
       negativeTraits: effectsArray.filter(t => t.type === 'negative').length,
       filter: { type: type || 'all', discipline: discipline || 'all' },
-      effects: effectsArray
+      effects: effectsArray,
     };
 
     res.json({
       success: true,
       message: 'Trait competition effects retrieved',
-      data: response
+      data: response,
     });
-
   } catch (error) {
     logger.error(`[traitCompetitionController.getTraitCompetitionEffects] Error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve trait effects',
-      data: null
+      data: null,
     });
   }
 }

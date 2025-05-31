@@ -30,50 +30,70 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
     }
 
     // Use provided stress level or mare's current stress level
-    const currentStressLevel = stressLevel !== undefined ? stressLevel : (mare.stressLevel || 50);
+    const currentStressLevel = stressLevel !== undefined ? stressLevel : mare.stressLevel || 50;
     const currentFeedQuality = feedQuality !== undefined ? feedQuality : 50;
 
-    logger.info(`[applyEpigeneticTraitsAtBirth] Mare stress: ${currentStressLevel}, Feed quality: ${currentFeedQuality}`);
+    logger.info(
+      `[applyEpigeneticTraitsAtBirth] Mare stress: ${currentStressLevel}, Feed quality: ${currentFeedQuality}`
+    );
 
     // Check for positive conditions: Low stress and premium feed
     if (currentStressLevel <= 20 && currentFeedQuality >= 80) {
       // High chance for resilient trait
       if (Math.random() < 0.75) {
         positive.push('resilient');
-        logger.info('[applyEpigeneticTraitsAtBirth] Applied resilient trait (low stress + premium feed)');
+        logger.info(
+          '[applyEpigeneticTraitsAtBirth] Applied resilient trait (low stress + premium feed)'
+        );
       }
 
       // Good chance for people_trusting trait
-      if (Math.random() < 0.60) {
+      if (Math.random() < 0.6) {
         positive.push('people_trusting');
-        logger.info('[applyEpigeneticTraitsAtBirth] Applied people_trusting trait (low stress + premium feed)');
+        logger.info(
+          '[applyEpigeneticTraitsAtBirth] Applied people_trusting trait (low stress + premium feed)'
+        );
       }
     }
 
     // Check for inbreeding risks
     const inbreedingAnalysis = analyzeInbreeding(lineage);
     if (inbreedingAnalysis.inbreedingDetected) {
-      logger.info(`[applyEpigeneticTraitsAtBirth] Inbreeding detected: ${inbreedingAnalysis.severity}`);
+      logger.info(
+        `[applyEpigeneticTraitsAtBirth] Inbreeding detected: ${inbreedingAnalysis.severity}`
+      );
 
       // Risk of fragile trait
-      const fragileChance = inbreedingAnalysis.severity === 'high' ? 0.80 :
-        inbreedingAnalysis.severity === 'moderate' ? 0.50 : 0.25;
+      const fragileChance =
+        inbreedingAnalysis.severity === 'high'
+          ? 0.8
+          : inbreedingAnalysis.severity === 'moderate'
+            ? 0.5
+            : 0.25;
       if (Math.random() < fragileChance) {
         negative.push('fragile');
         logger.info('[applyEpigeneticTraitsAtBirth] Applied fragile trait (inbreeding)');
       }
 
       // Risk of reactive trait
-      const reactiveChance = inbreedingAnalysis.severity === 'high' ? 0.70 :
-        inbreedingAnalysis.severity === 'moderate' ? 0.40 : 0.20;
+      const reactiveChance =
+        inbreedingAnalysis.severity === 'high'
+          ? 0.7
+          : inbreedingAnalysis.severity === 'moderate'
+            ? 0.4
+            : 0.2;
       if (Math.random() < reactiveChance) {
         negative.push('reactive');
         logger.info('[applyEpigeneticTraitsAtBirth] Applied reactive trait (inbreeding)');
       }
 
       // Risk of low_immunity trait
-      const immunityChance = inbreedingAnalysis.severity === 'high' ? 0.60 :
-        inbreedingAnalysis.severity === 'moderate' ? 0.35 : 0.15;
+      const immunityChance =
+        inbreedingAnalysis.severity === 'high'
+          ? 0.6
+          : inbreedingAnalysis.severity === 'moderate'
+            ? 0.35
+            : 0.15;
       if (Math.random() < immunityChance) {
         negative.push('low_immunity');
         logger.info('[applyEpigeneticTraitsAtBirth] Applied low_immunity trait (inbreeding)');
@@ -83,17 +103,19 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
     // Check for discipline specialization in lineage
     const disciplineAnalysis = analyzeDisciplineSpecialization(lineage);
     if (disciplineAnalysis.hasSpecialization) {
-      logger.info(`[applyEpigeneticTraitsAtBirth] Discipline specialization detected: ${disciplineAnalysis.discipline} (${disciplineAnalysis.count} ancestors)`);
+      logger.info(
+        `[applyEpigeneticTraitsAtBirth] Discipline specialization detected: ${disciplineAnalysis.discipline} (${disciplineAnalysis.count} ancestors)`
+      );
 
       // Assign discipline affinity trait
       const affinityTrait = `discipline_affinity_${disciplineAnalysis.discipline.toLowerCase().replace(/\s+/g, '_')}`;
-      if (Math.random() < 0.70) {
+      if (Math.random() < 0.7) {
         positive.push(affinityTrait);
         logger.info(`[applyEpigeneticTraitsAtBirth] Applied ${affinityTrait} trait`);
       }
 
       // Chance for legacy talent if 4+ ancestors share discipline
-      if (disciplineAnalysis.count >= 4 && Math.random() < 0.40) {
+      if (disciplineAnalysis.count >= 4 && Math.random() < 0.4) {
         positive.push('legacy_talent');
         logger.info('[applyEpigeneticTraitsAtBirth] Applied legacy_talent trait (strong lineage)');
       }
@@ -102,7 +124,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
     // Additional stress-based trait assignments
     if (currentStressLevel >= 80) {
       // High stress can lead to negative traits
-      if (Math.random() < 0.40) {
+      if (Math.random() < 0.4) {
         if (!negative.includes('reactive')) {
           negative.push('nervous');
           logger.info('[applyEpigeneticTraitsAtBirth] Applied nervous trait (high mare stress)');
@@ -113,7 +135,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
     // Feed quality effects
     if (currentFeedQuality <= 30) {
       // Poor nutrition can affect immunity
-      if (Math.random() < 0.30) {
+      if (Math.random() < 0.3) {
         if (!negative.includes('low_immunity')) {
           negative.push('low_immunity');
           logger.info('[applyEpigeneticTraitsAtBirth] Applied low_immunity trait (poor nutrition)');
@@ -127,13 +149,12 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
 
     const result = {
       positive: uniquePositive,
-      negative: uniqueNegative
+      negative: uniqueNegative,
     };
 
     logger.info(`[applyEpigeneticTraitsAtBirth] Final traits assigned: ${JSON.stringify(result)}`);
 
     return result;
-
   } catch (error) {
     logger.error(`[applyEpigeneticTraitsAtBirth] Error: ${error.message}`);
     throw error;
@@ -182,7 +203,7 @@ function analyzeInbreeding(lineage) {
     inbreedingDetected,
     severity,
     commonAncestors,
-    ancestorCounts
+    ancestorCounts,
   };
 }
 
@@ -206,7 +227,8 @@ function analyzeDisciplineSpecialization(lineage) {
 
     // Check mostCompetedDiscipline field (primary field for discipline specialization)
     if (ancestor && ancestor.mostCompetedDiscipline) {
-      disciplineCounts[ancestor.mostCompetedDiscipline] = (disciplineCounts[ancestor.mostCompetedDiscipline] || 0) + 1;
+      disciplineCounts[ancestor.mostCompetedDiscipline] =
+        (disciplineCounts[ancestor.mostCompetedDiscipline] || 0) + 1;
     }
 
     // Also check disciplineScores for highest scoring discipline
@@ -236,7 +258,7 @@ function analyzeDisciplineSpecialization(lineage) {
     hasSpecialization,
     discipline: hasSpecialization ? mostCommonDiscipline : null,
     count: maxCount,
-    disciplineBreakdown: disciplineCounts
+    disciplineBreakdown: disciplineCounts,
   };
 }
 

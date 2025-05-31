@@ -12,10 +12,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 70,
         maxStressLevel: 30,
-        minAge: 2 // days
+        minAge: 2, // days
       },
       rarity: 'common',
-      baseChance: 0.25
+      baseChance: 0.25,
     },
     calm: {
       name: 'Calm',
@@ -23,10 +23,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 60,
         maxStressLevel: 20,
-        minAge: 1
+        minAge: 1,
       },
       rarity: 'common',
-      baseChance: 0.30
+      baseChance: 0.3,
     },
     intelligent: {
       name: 'Intelligent',
@@ -34,10 +34,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 75,
         maxStressLevel: 25,
-        minAge: 3
+        minAge: 3,
       },
       rarity: 'common',
-      baseChance: 0.20
+      baseChance: 0.2,
     },
     bold: {
       name: 'Bold',
@@ -45,10 +45,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 65,
         maxStressLevel: 40,
-        minAge: 4
+        minAge: 4,
       },
       rarity: 'common',
-      baseChance: 0.22
+      baseChance: 0.22,
     },
     athletic: {
       name: 'Athletic',
@@ -56,10 +56,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 80,
         maxStressLevel: 35,
-        minAge: 5
+        minAge: 5,
       },
       rarity: 'rare',
-      baseChance: 0.15
+      baseChance: 0.15,
     },
     trainability_boost: {
       name: 'Trainability Boost',
@@ -67,11 +67,11 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 85,
         maxStressLevel: 15,
-        minAge: 6
+        minAge: 6,
       },
       rarity: 'rare',
-      baseChance: 0.10
-    }
+      baseChance: 0.1,
+    },
   },
 
   // Negative traits revealed through poor bonding and high stress
@@ -82,10 +82,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         maxBondScore: 40,
         minStressLevel: 60,
-        minAge: 1
+        minAge: 1,
       },
       rarity: 'common',
-      baseChance: 0.35
+      baseChance: 0.35,
     },
     stubborn: {
       name: 'Stubborn',
@@ -93,10 +93,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         maxBondScore: 30,
         minStressLevel: 50,
-        minAge: 2
+        minAge: 2,
       },
       rarity: 'common',
-      baseChance: 0.25
+      baseChance: 0.25,
     },
     fragile: {
       name: 'Fragile',
@@ -104,10 +104,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         maxBondScore: 35,
         minStressLevel: 70,
-        minAge: 3
+        minAge: 3,
       },
       rarity: 'common',
-      baseChance: 0.20
+      baseChance: 0.2,
     },
     aggressive: {
       name: 'Aggressive',
@@ -115,10 +115,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         maxBondScore: 25,
         minStressLevel: 80,
-        minAge: 4
+        minAge: 4,
       },
       rarity: 'common',
-      baseChance: 0.30
+      baseChance: 0.3,
     },
     lazy: {
       name: 'Lazy',
@@ -126,11 +126,11 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         maxBondScore: 45,
         minStressLevel: 40,
-        minAge: 5
+        minAge: 5,
       },
       rarity: 'common',
-      baseChance: 0.18
-    }
+      baseChance: 0.18,
+    },
   },
 
   // Rare traits with special conditions
@@ -141,10 +141,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 90,
         maxStressLevel: 10,
-        minAge: 6
+        minAge: 6,
       },
       rarity: 'legendary',
-      baseChance: 0.03
+      baseChance: 0.03,
     },
     weather_immunity: {
       name: 'Weather Immunity',
@@ -152,10 +152,10 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 75,
         maxStressLevel: 20,
-        minAge: 4
+        minAge: 4,
       },
       rarity: 'rare',
-      baseChance: 0.08
+      baseChance: 0.08,
     },
     night_vision: {
       name: 'Night Vision',
@@ -163,12 +163,12 @@ const TRAIT_DEFINITIONS = {
       revealConditions: {
         minBondScore: 70,
         maxStressLevel: 25,
-        minAge: 5
+        minAge: 5,
       },
       rarity: 'rare',
-      baseChance: 0.06
-    }
-  }
+      baseChance: 0.06,
+    },
+  },
 };
 
 /**
@@ -185,7 +185,7 @@ const TRAIT_CONFLICTS = {
   aggressive: ['calm'],
   fragile: ['resilient', 'athletic'],
   lazy: ['intelligent'],
-  stubborn: ['trainability_boost']
+  stubborn: ['trainability_boost'],
 };
 
 /**
@@ -197,7 +197,9 @@ const TRAIT_CONFLICTS = {
  */
 function evaluateTraitRevelation(foal, currentTraits, currentDay) {
   try {
-    logger.info(`[traitEvaluation.evaluateTraitRevelation] Evaluating traits for foal ${foal.id} on day ${currentDay}`);
+    logger.info(
+      `[traitEvaluation.evaluateTraitRevelation] Evaluating traits for foal ${foal.id} on day ${currentDay}`
+    );
 
     const bondScore = foal.bond_score || 50;
     const stressLevel = foal.stress_level || 0;
@@ -209,19 +211,21 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
     const newTraits = {
       positive: [],
       negative: [],
-      hidden: []
+      hidden: [],
     };
 
     // Get all currently revealed traits to avoid duplicates
     const existingTraits = new Set([
       ...(currentTraits.positive || []),
       ...(currentTraits.negative || []),
-      ...(currentTraits.hidden || [])
+      ...(currentTraits.hidden || []),
     ]);
 
     // Evaluate positive traits
     for (const [traitKey, traitDef] of Object.entries(TRAIT_DEFINITIONS.positive)) {
-      if (existingTraits.has(traitKey)) {continue;}
+      if (existingTraits.has(traitKey)) {
+        continue;
+      }
 
       if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge)) {
         if (Math.random() < traitDef.baseChance) {
@@ -235,7 +239,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
               newTraits.positive.push(traitKey);
             }
             existingTraits.add(traitKey);
-            logger.info(`[traitEvaluation] Revealed positive trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`);
+            logger.info(
+              `[traitEvaluation] Revealed positive trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`
+            );
           }
         }
       }
@@ -243,7 +249,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
 
     // Evaluate negative traits
     for (const [traitKey, traitDef] of Object.entries(TRAIT_DEFINITIONS.negative)) {
-      if (existingTraits.has(traitKey)) {continue;}
+      if (existingTraits.has(traitKey)) {
+        continue;
+      }
 
       if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge)) {
         if (Math.random() < traitDef.baseChance) {
@@ -257,7 +265,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
               newTraits.negative.push(traitKey);
             }
             existingTraits.add(traitKey);
-            logger.info(`[traitEvaluation] Revealed negative trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`);
+            logger.info(
+              `[traitEvaluation] Revealed negative trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`
+            );
           }
         }
       }
@@ -265,7 +275,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
 
     // Evaluate rare traits
     for (const [traitKey, traitDef] of Object.entries(TRAIT_DEFINITIONS.rare)) {
-      if (existingTraits.has(traitKey)) {continue;}
+      if (existingTraits.has(traitKey)) {
+        continue;
+      }
 
       if (shouldRevealTrait(traitDef, bondScore, stressLevel, developmentAge)) {
         if (Math.random() < traitDef.baseChance) {
@@ -279,7 +291,9 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
               newTraits.positive.push(traitKey);
             }
             existingTraits.add(traitKey);
-            logger.info(`[traitEvaluation] Revealed rare trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`);
+            logger.info(
+              `[traitEvaluation] Revealed rare trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`
+            );
           }
         }
       }
@@ -287,7 +301,6 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
 
     logger.info(`[traitEvaluation] Evaluation complete. New traits: ${JSON.stringify(newTraits)}`);
     return newTraits;
-
   } catch (error) {
     logger.error(`[traitEvaluation.evaluateTraitRevelation] Error: ${error.message}`);
     throw error;
@@ -350,27 +363,27 @@ function hasTraitConflict(traitKey, existingTraits) {
 function shouldTraitBeHidden(traitDef, bondScore, stressLevel) {
   // Legendary traits are almost always hidden
   if (traitDef.rarity === 'legendary') {
-    return Math.random() < 0.90;
+    return Math.random() < 0.9;
   }
 
   // Rare traits are often hidden
   if (traitDef.rarity === 'rare') {
-    return Math.random() < 0.70;
+    return Math.random() < 0.7;
   }
 
   // Poor conditions increase chance of traits being hidden
   const conditionScore = bondScore - stressLevel;
   if (conditionScore < 20) {
-    return Math.random() < 0.30;
+    return Math.random() < 0.3;
   }
 
   // Good conditions reduce chance of traits being hidden
   if (conditionScore > 60) {
-    return Math.random() < 0.10;
+    return Math.random() < 0.1;
   }
 
   // Normal conditions
-  return Math.random() < 0.20;
+  return Math.random() < 0.2;
 }
 
 /**
@@ -400,5 +413,5 @@ export {
   getTraitDefinition,
   getAllTraitDefinitions,
   TRAIT_DEFINITIONS,
-  TRAIT_CONFLICTS
+  TRAIT_CONFLICTS,
 };

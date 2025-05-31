@@ -8,9 +8,9 @@ import logger from './logger.js';
  */
 function calculatePrizeDistribution(totalPrize) {
   return {
-    first: Math.round(totalPrize * 0.5),   // 50%
-    second: Math.round(totalPrize * 0.3),  // 30%
-    third: Math.round(totalPrize * 0.2)    // 20%
+    first: Math.round(totalPrize * 0.5), // 50%
+    second: Math.round(totalPrize * 0.3), // 30%
+    third: Math.round(totalPrize * 0.2), // 20%
   };
 }
 
@@ -21,18 +21,18 @@ function calculatePrizeDistribution(totalPrize) {
  */
 function getRelevantStats(discipline) {
   const statMap = {
-    'Racing': ['speed', 'stamina', 'focus'],
+    Racing: ['speed', 'stamina', 'focus'],
     'Show Jumping': ['balance', 'agility', 'boldness'],
-    'Dressage': ['precision', 'intelligence', 'obedience'],
+    Dressage: ['precision', 'intelligence', 'obedience'],
     'Cross Country': ['stamina', 'boldness', 'balance'],
-    'Hunter': ['balance', 'precision', 'obedience'],
+    Hunter: ['balance', 'precision', 'obedience'],
     'Barrel Racing': ['speed', 'agility', 'focus'],
-    'Reining': ['agility', 'intelligence', 'obedience'],
-    'Cutting': ['agility', 'intelligence', 'focus'],
-    'Trail': ['intelligence', 'obedience', 'balance'],
+    Reining: ['agility', 'intelligence', 'obedience'],
+    Cutting: ['agility', 'intelligence', 'focus'],
+    Trail: ['intelligence', 'obedience', 'balance'],
     'Western Pleasure': ['obedience', 'precision', 'balance'],
     'English Pleasure': ['precision', 'obedience', 'balance'],
-    'Driving': ['obedience', 'intelligence', 'stamina']
+    Driving: ['obedience', 'intelligence', 'stamina'],
   };
 
   return statMap[discipline] || ['speed', 'stamina', 'focus']; // Default to Racing stats
@@ -46,9 +46,9 @@ function getRelevantStats(discipline) {
  */
 function calculateStatGains(placement, discipline) {
   const chances = {
-    '1st': 0.10,  // 10% chance
-    '2nd': 0.05,  // 5% chance
-    '3rd': 0.03   // 3% chance
+    '1st': 0.1, // 10% chance
+    '2nd': 0.05, // 5% chance
+    '3rd': 0.03, // 3% chance
   };
 
   const chance = chances[placement];
@@ -60,11 +60,13 @@ function calculateStatGains(placement, discipline) {
   const relevantStats = getRelevantStats(discipline);
   const randomStat = relevantStats[Math.floor(Math.random() * relevantStats.length)];
 
-  logger.info(`[competitionRewards.calculateStatGains] ${placement} place winner gained +1 ${randomStat} (${Math.round(chance * 100)}% chance)`);
+  logger.info(
+    `[competitionRewards.calculateStatGains] ${placement} place winner gained +1 ${randomStat} (${Math.round(chance * 100)}% chance)`
+  );
 
   return {
     stat: randomStat,
-    gain: 1
+    gain: 1,
   };
 }
 
@@ -92,5 +94,5 @@ export {
   getRelevantStats,
   calculateStatGains,
   calculateEntryFees,
-  hasValidRider
+  hasValidRider,
 };

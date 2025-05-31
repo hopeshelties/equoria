@@ -24,29 +24,37 @@ export function calculateCompetitionScore(horse, eventType) {
     let baseScore = 0;
 
     switch (normalizedEventType) {
-    case 'Racing':
-      baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
-      break;
+      case 'Racing':
+        baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
+        break;
 
-    case 'Show Jumping':
-    case 'Jumping':
-      baseScore = (horse.precision || horse.agility || 0) + (horse.focus || 0) + (horse.stamina || 0);
-      break;
+      case 'Show Jumping':
+      case 'Jumping':
+        baseScore =
+          (horse.precision || horse.agility || 0) + (horse.focus || 0) + (horse.stamina || 0);
+        break;
 
-    case 'Dressage':
-      baseScore = (horse.precision || horse.agility || 0) + (horse.focus || 0) + (horse.coordination || horse.balance || 0);
-      break;
+      case 'Dressage':
+        baseScore =
+          (horse.precision || horse.agility || 0) +
+          (horse.focus || 0) +
+          (horse.coordination || horse.balance || 0);
+        break;
 
-    case 'Cross Country':
-      baseScore = (horse.stamina || 0) + (horse.agility || 0) + (horse.boldness || 0);
-      break;
+      case 'Cross Country':
+        baseScore = (horse.stamina || 0) + (horse.agility || 0) + (horse.boldness || 0);
+        break;
 
-    default:
-      logger.warn(`[calculateCompetitionScore] Unknown event type: ${normalizedEventType}, using default calculation`);
-      baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
+      default:
+        logger.warn(
+          `[calculateCompetitionScore] Unknown event type: ${normalizedEventType}, using default calculation`
+        );
+        baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
     }
 
-    logger.info(`[calculateCompetitionScore] Horse ${horse.name || horse.id}: Base score for ${normalizedEventType}: ${baseScore}`);
+    logger.info(
+      `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Base score for ${normalizedEventType}: ${baseScore}`
+    );
 
     // Check for matching discipline affinity trait
     let traitBonus = 0;
@@ -58,7 +66,9 @@ export function calculateCompetitionScore(horse, eventType) {
 
       if (epigeneticModifiers.positive.includes(traitName)) {
         traitBonus = 5;
-        logger.info(`[calculateCompetitionScore] Horse ${horse.name || horse.id}: Discipline affinity bonus applied for ${traitName} (+${traitBonus} points)`);
+        logger.info(
+          `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Discipline affinity bonus applied for ${traitName} (+${traitBonus} points)`
+        );
       }
     }
 
@@ -68,24 +78,29 @@ export function calculateCompetitionScore(horse, eventType) {
     // Apply ±9% random luck modifier
     // Ensure the range is exactly -0.09 to +0.09 (±9%)
     const randomValue = Math.random(); // 0 to 1
-    const luckModifier = (randomValue * 0.18) - 0.09; // Range: -0.09 to +0.09 (±9%)
+    const luckModifier = randomValue * 0.18 - 0.09; // Range: -0.09 to +0.09 (±9%)
 
     // Clamp to ensure we never exceed ±9% due to floating point precision
     const clampedLuckModifier = Math.max(-0.09, Math.min(0.09, luckModifier));
     const luckAdjustment = scoreWithTraitBonus * clampedLuckModifier;
 
-    logger.info(`[calculateCompetitionScore] Horse ${horse.name || horse.id}: Luck modifier: ${(clampedLuckModifier * 100).toFixed(1)}%, adjustment: ${luckAdjustment.toFixed(1)}`);
+    logger.info(
+      `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Luck modifier: ${(clampedLuckModifier * 100).toFixed(1)}%, adjustment: ${luckAdjustment.toFixed(1)}`
+    );
 
     // Calculate final score
     const finalScore = scoreWithTraitBonus + luckAdjustment;
     const roundedScore = Math.round(finalScore);
 
-    logger.info(`[calculateCompetitionScore] Horse ${horse.name || horse.id}: Final score: ${roundedScore} (base: ${baseScore}, trait: +${traitBonus}, luck: ${luckAdjustment.toFixed(1)})`);
+    logger.info(
+      `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Final score: ${roundedScore} (base: ${baseScore}, trait: +${traitBonus}, luck: ${luckAdjustment.toFixed(1)})`
+    );
 
     return roundedScore;
-
   } catch (error) {
-    logger.error(`[calculateCompetitionScore] Error calculating score for horse ${horse?.name || horse?.id}: ${error.message}`);
+    logger.error(
+      `[calculateCompetitionScore] Error calculating score for horse ${horse?.name || horse?.id}: ${error.message}`
+    );
     throw error;
   }
 }
@@ -97,14 +112,16 @@ export function calculateCompetitionScore(horse, eventType) {
  */
 function convertEventTypeToTraitName(eventType) {
   const eventTypeMap = {
-    'Racing': 'discipline_affinity_racing',
+    Racing: 'discipline_affinity_racing',
     'Show Jumping': 'discipline_affinity_show_jumping',
-    'Jumping': 'discipline_affinity_show_jumping',
-    'Dressage': 'discipline_affinity_dressage',
-    'Cross Country': 'discipline_affinity_cross_country'
+    Jumping: 'discipline_affinity_show_jumping',
+    Dressage: 'discipline_affinity_dressage',
+    'Cross Country': 'discipline_affinity_cross_country',
   };
 
-  return eventTypeMap[eventType] || `discipline_affinity_${eventType.toLowerCase().replace(/\s+/g, '_')}`;
+  return (
+    eventTypeMap[eventType] || `discipline_affinity_${eventType.toLowerCase().replace(/\s+/g, '_')}`
+  );
 }
 
 /**
@@ -114,31 +131,31 @@ function convertEventTypeToTraitName(eventType) {
  */
 export function getDisciplineStatWeights(eventType) {
   const weights = {
-    'Racing': {
+    Racing: {
       speed: 1.0,
       stamina: 1.0,
-      focus: 1.0
+      focus: 1.0,
     },
     'Show Jumping': {
       precision: 1.0,
       focus: 1.0,
-      stamina: 1.0
+      stamina: 1.0,
     },
-    'Jumping': {
+    Jumping: {
       precision: 1.0,
       focus: 1.0,
-      stamina: 1.0
+      stamina: 1.0,
     },
-    'Dressage': {
+    Dressage: {
       precision: 1.0,
       focus: 1.0,
-      coordination: 1.0
+      coordination: 1.0,
     },
     'Cross Country': {
       stamina: 1.0,
       agility: 1.0,
-      boldness: 1.0
-    }
+      boldness: 1.0,
+    },
   };
 
   return weights[eventType] || weights['Racing']; // Default to Racing weights

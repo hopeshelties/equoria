@@ -32,7 +32,12 @@
  *    validation of complex genetic inheritance algorithms and environmental effects
  */
 
-import { calculateEpigeneticTraits, getTraitDefinition, getTraitsByType, checkTraitConflict } from '../utils/epigeneticTraits.js';
+import {
+  calculateEpigeneticTraits,
+  getTraitDefinition,
+  getTraitsByType,
+  checkTraitConflict,
+} from '../utils/epigeneticTraits.js';
 
 describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
   describe('Edge Cases', () => {
@@ -43,7 +48,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['bold'],
         damBondScore: 100,
         damStressLevel: 50,
-        seed: 12345
+        seed: 12345,
       });
 
       // Test with minimum bonding
@@ -52,7 +57,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['bold'],
         damBondScore: 0,
         damStressLevel: 50,
-        seed: 12345
+        seed: 12345,
       });
 
       // Maximum bonding should generally produce more positive traits
@@ -66,7 +71,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['bold'],
         damBondScore: 50,
         damStressLevel: 100,
-        seed: 12345
+        seed: 12345,
       });
 
       // Test with minimum stress
@@ -75,11 +80,13 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['bold'],
         damBondScore: 50,
         damStressLevel: 0,
-        seed: 12345
+        seed: 12345,
       });
 
       // Minimum stress should generally produce more positive traits
-      expect(minStressResult.positive.length).toBeGreaterThanOrEqual(maxStressResult.positive.length);
+      expect(minStressResult.positive.length).toBeGreaterThanOrEqual(
+        maxStressResult.positive.length
+      );
     });
 
     it('should handle empty trait arrays', () => {
@@ -88,7 +95,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: [],
         damBondScore: 50,
         damStressLevel: 50,
-        seed: 12345
+        seed: 12345,
       });
 
       // Should still produce some traits based on environmental factors
@@ -105,13 +112,14 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['athletic', 'resilient'],
         damBondScore: 85,
         damStressLevel: 15,
-        seed: 12345
+        seed: 12345,
       });
 
       // Should have a good chance of inheriting complementary traits
       const allTraits = [...result.positive, ...result.hidden];
       const hasIntelligenceRelatedTrait = allTraits.some(trait =>
-        ['intelligent', 'trainability_boost'].includes(trait));
+        ['intelligent', 'trainability_boost'].includes(trait)
+      );
 
       expect(hasIntelligenceRelatedTrait).toBe(true);
     });
@@ -122,7 +130,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['nervous'],
         damBondScore: 50,
         damStressLevel: 50,
-        seed: 12345
+        seed: 12345,
       });
 
       const allTraits = [...result.positive, ...result.negative, ...result.hidden];
@@ -142,7 +150,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['bold', 'athletic'],
         damBondScore: 95,
         damStressLevel: 5,
-        seed: 12345
+        seed: 12345,
       });
 
       const poorResult = calculateEpigeneticTraits({
@@ -150,7 +158,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['bold', 'athletic'],
         damBondScore: 15,
         damStressLevel: 85,
-        seed: 12345
+        seed: 12345,
       });
 
       // Ideal conditions should produce more positive traits
@@ -167,7 +175,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         damTraits: ['resilient'],
         sireTraits: ['bold'],
         damBondScore: 75,
-        damStressLevel: 25
+        damStressLevel: 25,
       };
 
       for (let i = 0; i < 50; i++) {
@@ -175,10 +183,12 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
       }
 
       // Count trait occurrences
-      const resilientCount = results.filter(r =>
-        r.positive.includes('resilient') || r.hidden.includes('resilient')).length;
-      const boldCount = results.filter(r =>
-        r.positive.includes('bold') || r.hidden.includes('bold')).length;
+      const resilientCount = results.filter(
+        r => r.positive.includes('resilient') || r.hidden.includes('resilient')
+      ).length;
+      const boldCount = results.filter(
+        r => r.positive.includes('bold') || r.hidden.includes('bold')
+      ).length;
 
       // Should have reasonable inheritance rates (at least 20%)
       expect(resilientCount).toBeGreaterThan(10);
@@ -194,7 +204,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         damTraits: ['resilient', 'intelligent'],
         sireTraits: ['bold', 'athletic'],
         damBondScore: 95, // High bond score to increase positive trait chances
-        damStressLevel: 5 // Low stress to increase positive trait chances
+        damStressLevel: 5, // Low stress to increase positive trait chances
       };
 
       // Run 100 tests with different seeds to increase chance of rare traits
@@ -206,7 +216,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
       const allTraits = results.flatMap(result => [
         ...result.positive,
         ...result.negative,
-        ...result.hidden
+        ...result.hidden,
       ]);
 
       // Check if we have at least one trait that's not in the input traits
@@ -229,7 +239,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
           damTraits: ['resilient'],
           sireTraits: ['bold'],
           damStressLevel: 50,
-          seed: 12345
+          seed: 12345,
         });
       }).toThrow('Missing required breeding parameters');
 
@@ -239,7 +249,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
           damTraits: ['resilient'],
           sireTraits: ['bold'],
           damBondScore: 50,
-          seed: 12345
+          seed: 12345,
         });
       }).toThrow('Missing required breeding parameters');
     });
@@ -252,7 +262,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
           sireTraits: ['bold'],
           damBondScore: 'high',
           damStressLevel: 50,
-          seed: 12345
+          seed: 12345,
         });
       }).toThrow('Bond scores and stress levels must be numbers');
 
@@ -263,7 +273,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
           sireTraits: ['bold'],
           damBondScore: 50,
           damStressLevel: 'low',
-          seed: 12345
+          seed: 12345,
         });
       }).toThrow('Bond scores and stress levels must be numbers');
     });
@@ -276,7 +286,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         sireTraits: ['bold'],
         damBondScore: 50,
         damStressLevel: 50,
-        seed: 54321
+        seed: 54321,
       };
 
       const result1 = calculateEpigeneticTraits(params);
@@ -293,7 +303,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         damTraits: ['resilient', 'bold', 'intelligent'],
         sireTraits: ['athletic', 'calm', 'nervous'],
         damBondScore: 75,
-        damStressLevel: 25
+        damStressLevel: 25,
       };
 
       // Test multiple seed combinations to ensure we get different results
@@ -326,7 +336,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
       expect(resilientDef).toEqual({
         type: 'positive',
         rarity: 'common',
-        conflicts: ['fragile']
+        conflicts: ['fragile'],
       });
 
       const nervousDef = getTraitDefinition('nervous');
@@ -334,7 +344,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
       expect(nervousDef).toEqual({
         type: 'negative',
         rarity: 'common',
-        conflicts: ['bold', 'calm']
+        conflicts: ['bold', 'calm'],
       });
     });
 
@@ -349,7 +359,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
       expect(legendaryDef).toEqual({
         type: 'positive',
         rarity: 'legendary',
-        conflicts: []
+        conflicts: [],
       });
     });
   });
@@ -427,7 +437,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         damTraits: ['resilient'],
         sireTraits: ['bold'],
         damStressLevel: 50,
-        seed: 12345
+        seed: 12345,
       };
 
       // Test boundary values
@@ -446,7 +456,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
         damTraits: ['resilient'],
         sireTraits: ['bold'],
         damBondScore: 50,
-        seed: 12345
+        seed: 12345,
       };
 
       // Test boundary values
@@ -464,37 +474,42 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
       const baseParams = {
         damTraits: ['resilient'],
         sireTraits: ['bold'],
-        seed: 12345
+        seed: 12345,
       };
 
       // Test out-of-bounds bond scores
-      expect(() => calculateEpigeneticTraits({
-        ...baseParams,
-        damBondScore: -1,
-        damStressLevel: 50
-      })).toThrow('Bond scores must be between 0-100');
+      expect(() =>
+        calculateEpigeneticTraits({
+          ...baseParams,
+          damBondScore: -1,
+          damStressLevel: 50,
+        })
+      ).toThrow('Bond scores must be between 0-100');
 
-      expect(() => calculateEpigeneticTraits({
-        ...baseParams,
-        damBondScore: 101,
-        damStressLevel: 50
-      })).toThrow('Bond scores must be between 0-100');
+      expect(() =>
+        calculateEpigeneticTraits({
+          ...baseParams,
+          damBondScore: 101,
+          damStressLevel: 50,
+        })
+      ).toThrow('Bond scores must be between 0-100');
 
       // Test out-of-bounds stress levels
-      expect(() => calculateEpigeneticTraits({
-        ...baseParams,
-        damBondScore: 50,
-        damStressLevel: -1
-      })).toThrow('stress levels between 0-100');
+      expect(() =>
+        calculateEpigeneticTraits({
+          ...baseParams,
+          damBondScore: 50,
+          damStressLevel: -1,
+        })
+      ).toThrow('stress levels between 0-100');
 
-      expect(() => calculateEpigeneticTraits({
-        ...baseParams,
-        damBondScore: 50,
-        damStressLevel: 101
-      })).toThrow('stress levels between 0-100');
+      expect(() =>
+        calculateEpigeneticTraits({
+          ...baseParams,
+          damBondScore: 50,
+          damStressLevel: 101,
+        })
+      ).toThrow('stress levels between 0-100');
     });
   });
 });
-
-
-

@@ -10,12 +10,12 @@ import {
   getHorseTraits,
   getTraitDefinitions,
   getDiscoveryStatus,
-  batchDiscoverTraits
+  batchDiscoverTraits,
 } from '../controllers/traitController.js';
 import {
   analyzeHorseTraitImpact,
   compareTraitImpactAcrossDisciplines,
-  getTraitCompetitionEffects
+  getTraitCompetitionEffects,
 } from '../controllers/traitCompetitionController.js';
 import logger from '../utils/logger.js';
 
@@ -31,7 +31,7 @@ const handleValidationErrors = (req, res, next) => {
     return res.status(400).json({
       success: false,
       message: 'Validation failed',
-      errors: errors.array()
+      errors: errors.array(),
     });
   }
   next();
@@ -113,20 +113,16 @@ const handleValidationErrors = (req, res, next) => {
  *       500:
  *         description: Internal server error
  */
-router.post('/discover/:horseId', [
-  param('horseId')
-    .isInt({ min: 1 })
-    .withMessage('Horse ID must be a positive integer'),
-  body('checkEnrichment')
-    .optional()
-    .isBoolean()
-    .withMessage('checkEnrichment must be a boolean'),
-  body('forceCheck')
-    .optional()
-    .isBoolean()
-    .withMessage('forceCheck must be a boolean'),
-  handleValidationErrors
-], discoverTraits);
+router.post(
+  '/discover/:horseId',
+  [
+    param('horseId').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
+    body('checkEnrichment').optional().isBoolean().withMessage('checkEnrichment must be a boolean'),
+    body('forceCheck').optional().isBoolean().withMessage('forceCheck must be a boolean'),
+    handleValidationErrors,
+  ],
+  discoverTraits
+);
 
 /**
  * @swagger
@@ -185,12 +181,14 @@ router.post('/discover/:horseId', [
  *       500:
  *         description: Internal server error
  */
-router.get('/horse/:horseId', [
-  param('horseId')
-    .isInt({ min: 1 })
-    .withMessage('Horse ID must be a positive integer'),
-  handleValidationErrors
-], getHorseTraits);
+router.get(
+  '/horse/:horseId',
+  [
+    param('horseId').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
+    handleValidationErrors,
+  ],
+  getHorseTraits
+);
 
 /**
  * @swagger
@@ -229,13 +227,17 @@ router.get('/horse/:horseId', [
  *       500:
  *         description: Internal server error
  */
-router.get('/definitions', [
-  query('type')
-    .optional()
-    .isIn(['positive', 'negative', 'all'])
-    .withMessage('Type must be positive, negative, or all'),
-  handleValidationErrors
-], getTraitDefinitions);
+router.get(
+  '/definitions',
+  [
+    query('type')
+      .optional()
+      .isIn(['positive', 'negative', 'all'])
+      .withMessage('Type must be positive, negative, or all'),
+    handleValidationErrors,
+  ],
+  getTraitDefinitions
+);
 
 /**
  * @swagger
@@ -285,12 +287,14 @@ router.get('/definitions', [
  *       500:
  *         description: Internal server error
  */
-router.get('/discovery-status/:horseId', [
-  param('horseId')
-    .isInt({ min: 1 })
-    .withMessage('Horse ID must be a positive integer'),
-  handleValidationErrors
-], getDiscoveryStatus);
+router.get(
+  '/discovery-status/:horseId',
+  [
+    param('horseId').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
+    handleValidationErrors,
+  ],
+  getDiscoveryStatus
+);
 
 /**
  * @swagger
@@ -345,22 +349,23 @@ router.get('/discovery-status/:horseId', [
  *       500:
  *         description: Internal server error
  */
-router.post('/batch-discover', [
-  body('horseIds')
-    .isArray({ min: 1, max: 10 })
-    .withMessage('horseIds must be an array with 1-10 elements')
-    .custom((value) => {
-      if (!value.every(id => Number.isInteger(id) && id > 0)) {
-        throw new Error('All horse IDs must be positive integers');
-      }
-      return true;
-    }),
-  body('checkEnrichment')
-    .optional()
-    .isBoolean()
-    .withMessage('checkEnrichment must be a boolean'),
-  handleValidationErrors
-], batchDiscoverTraits);
+router.post(
+  '/batch-discover',
+  [
+    body('horseIds')
+      .isArray({ min: 1, max: 10 })
+      .withMessage('horseIds must be an array with 1-10 elements')
+      .custom(value => {
+        if (!value.every(id => Number.isInteger(id) && id > 0)) {
+          throw new Error('All horse IDs must be positive integers');
+        }
+        return true;
+      }),
+    body('checkEnrichment').optional().isBoolean().withMessage('checkEnrichment must be a boolean'),
+    handleValidationErrors,
+  ],
+  batchDiscoverTraits
+);
 
 /**
  * @swagger
@@ -417,17 +422,29 @@ router.post('/batch-discover', [
  *       500:
  *         description: Internal server error
  */
-router.get('/competition-impact/:horseId', [
-  param('horseId')
-    .isInt({ min: 1 })
-    .withMessage('Horse ID must be a positive integer'),
-  query('discipline')
-    .notEmpty()
-    .withMessage('Discipline is required')
-    .isIn(['Dressage', 'Show Jumping', 'Cross Country', 'Racing', 'Endurance', 'Reining', 'Driving', 'Trail', 'Eventing'])
-    .withMessage('Invalid discipline'),
-  handleValidationErrors
-], analyzeHorseTraitImpact);
+router.get(
+  '/competition-impact/:horseId',
+  [
+    param('horseId').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
+    query('discipline')
+      .notEmpty()
+      .withMessage('Discipline is required')
+      .isIn([
+        'Dressage',
+        'Show Jumping',
+        'Cross Country',
+        'Racing',
+        'Endurance',
+        'Reining',
+        'Driving',
+        'Trail',
+        'Eventing',
+      ])
+      .withMessage('Invalid discipline'),
+    handleValidationErrors,
+  ],
+  analyzeHorseTraitImpact
+);
 
 /**
  * @swagger
@@ -473,12 +490,14 @@ router.get('/competition-impact/:horseId', [
  *       500:
  *         description: Internal server error
  */
-router.get('/competition-comparison/:horseId', [
-  param('horseId')
-    .isInt({ min: 1 })
-    .withMessage('Horse ID must be a positive integer'),
-  handleValidationErrors
-], compareTraitImpactAcrossDisciplines);
+router.get(
+  '/competition-comparison/:horseId',
+  [
+    param('horseId').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
+    handleValidationErrors,
+  ],
+  compareTraitImpactAcrossDisciplines
+);
 
 /**
  * @swagger
@@ -529,16 +548,30 @@ router.get('/competition-comparison/:horseId', [
  *       500:
  *         description: Internal server error
  */
-router.get('/competition-effects', [
-  query('type')
-    .optional()
-    .isIn(['positive', 'negative', 'all'])
-    .withMessage('Type must be positive, negative, or all'),
-  query('discipline')
-    .optional()
-    .isIn(['Dressage', 'Show Jumping', 'Cross Country', 'Racing', 'Endurance', 'Reining', 'Driving', 'Trail', 'Eventing'])
-    .withMessage('Invalid discipline'),
-  handleValidationErrors
-], getTraitCompetitionEffects);
+router.get(
+  '/competition-effects',
+  [
+    query('type')
+      .optional()
+      .isIn(['positive', 'negative', 'all'])
+      .withMessage('Type must be positive, negative, or all'),
+    query('discipline')
+      .optional()
+      .isIn([
+        'Dressage',
+        'Show Jumping',
+        'Cross Country',
+        'Racing',
+        'Endurance',
+        'Reining',
+        'Driving',
+        'Trail',
+        'Eventing',
+      ])
+      .withMessage('Invalid discipline'),
+    handleValidationErrors,
+  ],
+  getTraitCompetitionEffects
+);
 
 export default router;

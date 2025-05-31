@@ -1,7 +1,44 @@
+/**
+ * 🧪 UNIT TEST: Generate Mock Shows - Competition Data Generation Utilities
+ *
+ * This test validates the mock show generation utilities used for testing
+ * and development purposes to create realistic competition data.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Mock show generation: Create realistic competition shows with proper constraints
+ * - Discipline validation: Only use valid disciplines from statMap configuration
+ * - Level constraints: levelMin (1-7), levelMax (levelMin+1 to levelMin+3, max 10)
+ * - Financial constraints: entryFee (100-500), prize (500-2000), integer values
+ * - Date constraints: runDate within ±30 days of current date
+ * - ID generation: Sequential unique IDs starting from 1
+ * - Name generation: Realistic show names including discipline information
+ * - Variety validation: Multiple disciplines and names across generated shows
+ * - Override functionality: Allow custom properties while maintaining constraints
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. generateMockShows() - Bulk show generation with count parameter
+ * 2. generateSingleMockShow() - Single show generation with override options
+ * 3. Input validation - Count validation, type checking, boundary conditions
+ * 4. Constraint enforcement - Level, financial, date, and discipline constraints
+ * 5. Variety generation - Multiple disciplines and names across shows
+ * 6. Integration validation - Compatibility with statMap discipline configuration
+ * 7. Override functionality - Custom property setting while maintaining constraints
+ * 8. Edge cases - Zero count, negative count, invalid input handling
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete utility function testing, constraint validation, data generation
+ * ✅ REAL: Integration with statMap, discipline validation, business rule enforcement
+ * 🔧 MOCK: None - pure utility function testing with real business logic
+ *
+ * 💡 TEST STRATEGY: Unit testing of utility functions with comprehensive
+ *    constraint validation and integration testing with configuration systems
+ */
+
+import { jest, describe, it, expect } from '@jest/globals';
 import { generateMockShows, generateSingleMockShow } from '../utils/generateMockShows.js';
 import { getAllDisciplines } from '../utils/statMap.js';
 
-describe('generateMockShows', () => {
+describe('🎪 UNIT: Generate Mock Shows - Competition Data Generation Utilities', () => {
   const validDisciplines = getAllDisciplines();
 
   describe('generateMockShows', () => {
@@ -165,7 +202,7 @@ describe('generateMockShows', () => {
         levelMin: 3,
         levelMax: 6,
         entryFee: 200,
-        prize: 1000
+        prize: 1000,
       };
 
       const show = generateSingleMockShow(overrides);

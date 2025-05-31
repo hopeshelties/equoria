@@ -24,7 +24,9 @@ export const authenticateToken = (req, res, next) => {
 
     jwt.verify(token, secret, (err, user) => {
       if (err) {
-        logger.warn(`[auth] Invalid token for ${req.method} ${req.path} from ${req.ip}: ${err.message}`);
+        logger.warn(
+          `[auth] Invalid token for ${req.method} ${req.path} from ${req.ip}: ${err.message}`
+        );
 
         if (err.name === 'TokenExpiredError') {
           throw new AppError('Token expired', 401);
@@ -44,7 +46,7 @@ export const authenticateToken = (req, res, next) => {
       return res.status(error.statusCode).json({
         success: false,
         message: error.message,
-        status: error.status
+        status: error.status,
       });
     }
 
@@ -52,7 +54,7 @@ export const authenticateToken = (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: 'Authentication error',
-      status: 'error'
+      status: 'error',
     });
   }
 };
@@ -101,18 +103,22 @@ export const requireRole = (...roles) => {
       }
 
       if (!req.user.role || !roles.includes(req.user.role)) {
-        logger.warn(`[auth] User ${req.user.id} with role '${req.user.role}' attempted to access ${req.method} ${req.path} (requires: ${roles.join(', ')})`);
+        logger.warn(
+          `[auth] User ${req.user.id} with role '${req.user.role}' attempted to access ${req.method} ${req.path} (requires: ${roles.join(', ')})`
+        );
         throw new AppError('Insufficient permissions', 403);
       }
 
-      logger.info(`[auth] Authorized user ${req.user.id} with role '${req.user.role}' for ${req.method} ${req.path}`);
+      logger.info(
+        `[auth] Authorized user ${req.user.id} with role '${req.user.role}' for ${req.method} ${req.path}`
+      );
       next();
     } catch (error) {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({
           success: false,
           message: error.message,
-          status: error.status
+          status: error.status,
         });
       }
 
@@ -120,7 +126,7 @@ export const requireRole = (...roles) => {
       return res.status(500).json({
         success: false,
         message: 'Authorization error',
-        status: 'error'
+        status: 'error',
       });
     }
   };
@@ -141,12 +147,12 @@ export const generateToken = (payload, expiresIn = '24h') => {
 /**
  * Generate Refresh Token
  */
-export const generateRefreshToken = (payload) => {
+export const generateRefreshToken = payload => {
   // Add timestamp and random component to ensure uniqueness
   const uniquePayload = {
     ...payload,
     timestamp: Date.now(),
-    random: Math.random().toString(36).substring(2)
+    random: Math.random().toString(36).substring(2),
   };
   return generateToken(uniquePayload, '7d');
 };

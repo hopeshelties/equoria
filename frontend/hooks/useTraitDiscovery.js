@@ -5,7 +5,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 /**
  * Custom hook for trait discovery functionality
@@ -17,7 +18,7 @@ export function useTraitDiscovery(horseId, options = {}) {
   const {
     autoCheck = false,
     checkInterval = 30000, // 30 seconds
-    enableRealTime = true
+    enableRealTime = true,
   } = options;
 
   // State management
@@ -27,14 +28,14 @@ export function useTraitDiscovery(horseId, options = {}) {
     lastDiscovery: null,
     discoveredTraits: [],
     discoveryHistory: [],
-    error: null
+    error: null,
   });
 
   const [discoveryStatus, setDiscoveryStatus] = useState({
     canDiscover: false,
     hiddenTraitCount: 0,
     metConditions: [],
-    currentStats: null
+    currentStats: null,
   });
 
   /**
@@ -44,9 +45,11 @@ export function useTraitDiscovery(horseId, options = {}) {
     if (!horseId) return;
 
     try {
-      setDiscoveryState(prev => ({ ...prev, isLoading: true, error: null }));
+      setDiscoveryState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const response = await fetch(`${API_BASE_URL}/traits/discovery-status/${horseId}`);
+      const response = await fetch(
+        `${API_BASE_URL}/traits/discovery-status/${horseId}`
+      );
       const data = await response.json();
 
       if (data.success) {
@@ -55,77 +58,93 @@ export function useTraitDiscovery(horseId, options = {}) {
           hiddenTraitCount: data.data.traitCounts.hidden,
           metConditions: data.data.discoveryConditions.met || [],
           enrichmentConditions: data.data.discoveryConditions.enrichment || [],
-          currentStats: data.data.currentStats
+          currentStats: data.data.currentStats,
         });
       } else {
         throw new Error(data.message || 'Failed to fetch discovery status');
       }
     } catch (error) {
       console.error('Error fetching discovery status:', error);
-      setDiscoveryState(prev => ({ 
-        ...prev, 
-        error: error.message || 'Failed to fetch discovery status' 
+      setDiscoveryState((prev) => ({
+        ...prev,
+        error: error.message || 'Failed to fetch discovery status',
       }));
     } finally {
-      setDiscoveryState(prev => ({ ...prev, isLoading: false }));
+      setDiscoveryState((prev) => ({ ...prev, isLoading: false }));
     }
   }, [horseId]);
 
   /**
    * Trigger trait discovery for the horse
    */
-  const discoverTraits = useCallback(async (options = {}) => {
-    if (!horseId) return null;
+  const discoverTraits = useCallback(
+    async (options = {}) => {
+      if (!horseId) return null;
 
-    try {
-      setDiscoveryState(prev => ({ ...prev, isDiscovering: true, error: null }));
-
-      const response = await fetch(`${API_BASE_URL}/traits/discover/${horseId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          checkEnrichment: options.checkEnrichment !== false,
-          forceCheck: options.forceCheck || false
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        const discoveryResult = {
-          timestamp: new Date().toISOString(),
-          revealed: data.data.revealed || [],
-          conditions: data.data.conditions || [],
-          message: data.message
-        };
-
-        setDiscoveryState(prev => ({
+      try {
+        setDiscoveryState((prev) => ({
           ...prev,
-          lastDiscovery: discoveryResult,
-          discoveredTraits: [...prev.discoveredTraits, ...discoveryResult.revealed],
-          discoveryHistory: [discoveryResult, ...prev.discoveryHistory.slice(0, 9)] // Keep last 10
+          isDiscovering: true,
+          error: null,
         }));
 
-        // Refresh discovery status
-        await fetchDiscoveryStatus();
+        const response = await fetch(
+          `${API_BASE_URL}/traits/discover/${horseId}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              checkEnrichment: options.checkEnrichment !== false,
+              forceCheck: options.forceCheck || false,
+            }),
+          }
+        );
 
-        return discoveryResult;
-      } else {
-        throw new Error(data.message || 'Discovery failed');
+        const data = await response.json();
+
+        if (data.success) {
+          const discoveryResult = {
+            timestamp: new Date().toISOString(),
+            revealed: data.data.revealed || [],
+            conditions: data.data.conditions || [],
+            message: data.message,
+          };
+
+          setDiscoveryState((prev) => ({
+            ...prev,
+            lastDiscovery: discoveryResult,
+            discoveredTraits: [
+              ...prev.discoveredTraits,
+              ...discoveryResult.revealed,
+            ],
+            discoveryHistory: [
+              discoveryResult,
+              ...prev.discoveryHistory.slice(0, 9),
+            ], // Keep last 10
+          }));
+
+          // Refresh discovery status
+          await fetchDiscoveryStatus();
+
+          return discoveryResult;
+        } else {
+          throw new Error(data.message || 'Discovery failed');
+        }
+      } catch (error) {
+        console.error('Error discovering traits:', error);
+        setDiscoveryState((prev) => ({
+          ...prev,
+          error: error.message || 'Discovery failed',
+        }));
+        return null;
+      } finally {
+        setDiscoveryState((prev) => ({ ...prev, isDiscovering: false }));
       }
-    } catch (error) {
-      console.error('Error discovering traits:', error);
-      setDiscoveryState(prev => ({ 
-        ...prev, 
-        error: error.message || 'Discovery failed' 
-      }));
-      return null;
-    } finally {
-      setDiscoveryState(prev => ({ ...prev, isDiscovering: false }));
-    }
-  }, [horseId, fetchDiscoveryStatus]);
+    },
+    [horseId, fetchDiscoveryStatus]
+  );
 
   /**
    * Get all traits for the horse
@@ -144,9 +163,9 @@ export function useTraitDiscovery(horseId, options = {}) {
       }
     } catch (error) {
       console.error('Error fetching horse traits:', error);
-      setDiscoveryState(prev => ({ 
-        ...prev, 
-        error: error.message || 'Failed to fetch traits' 
+      setDiscoveryState((prev) => ({
+        ...prev,
+        error: error.message || 'Failed to fetch traits',
       }));
       return null;
     }
@@ -156,7 +175,7 @@ export function useTraitDiscovery(horseId, options = {}) {
    * Clear discovery error
    */
   const clearError = useCallback(() => {
-    setDiscoveryState(prev => ({ ...prev, error: null }));
+    setDiscoveryState((prev) => ({ ...prev, error: null }));
   }, []);
 
   /**
@@ -169,13 +188,13 @@ export function useTraitDiscovery(horseId, options = {}) {
       lastDiscovery: null,
       discoveredTraits: [],
       discoveryHistory: [],
-      error: null
+      error: null,
     });
     setDiscoveryStatus({
       canDiscover: false,
       hiddenTraitCount: 0,
       metConditions: [],
-      currentStats: null
+      currentStats: null,
     });
   }, []);
 
@@ -208,14 +227,20 @@ export function useTraitDiscovery(horseId, options = {}) {
             timestamp: data.timestamp,
             revealed: data.revealed || [],
             conditions: data.conditions || [],
-            message: data.message || 'Traits discovered!'
+            message: data.message || 'Traits discovered!',
           };
 
-          setDiscoveryState(prev => ({
+          setDiscoveryState((prev) => ({
             ...prev,
             lastDiscovery: discoveryResult,
-            discoveredTraits: [...prev.discoveredTraits, ...discoveryResult.revealed],
-            discoveryHistory: [discoveryResult, ...prev.discoveryHistory.slice(0, 9)]
+            discoveredTraits: [
+              ...prev.discoveredTraits,
+              ...discoveryResult.revealed,
+            ],
+            discoveryHistory: [
+              discoveryResult,
+              ...prev.discoveryHistory.slice(0, 9),
+            ],
           }));
 
           // Refresh discovery status
@@ -236,22 +261,24 @@ export function useTraitDiscovery(horseId, options = {}) {
     // State
     ...discoveryState,
     discoveryStatus,
-    
+
     // Actions
     discoverTraits,
     fetchDiscoveryStatus,
     fetchHorseTraits,
     clearError,
     resetDiscovery,
-    
+
     // Computed values
     hasNewDiscoveries: discoveryState.discoveredTraits.length > 0,
     canDiscover: discoveryStatus.canDiscover && !discoveryState.isDiscovering,
     discoveryProgress: {
-      total: discoveryStatus.hiddenTraitCount + discoveryState.discoveredTraits.length,
+      total:
+        discoveryStatus.hiddenTraitCount +
+        discoveryState.discoveredTraits.length,
       discovered: discoveryState.discoveredTraits.length,
-      remaining: discoveryStatus.hiddenTraitCount
-    }
+      remaining: discoveryStatus.hiddenTraitCount,
+    },
   };
 }
 
@@ -266,55 +293,58 @@ export function useBatchTraitDiscovery(horseIds = []) {
     results: [],
     errors: [],
     progress: 0,
-    error: null
+    error: null,
   });
 
-  const batchDiscover = useCallback(async (options = {}) => {
-    if (!horseIds.length) return;
+  const batchDiscover = useCallback(
+    async (options = {}) => {
+      if (!horseIds.length) return;
 
-    try {
-      setBatchState(prev => ({ 
-        ...prev, 
-        isProcessing: true, 
-        error: null,
-        progress: 0 
-      }));
-
-      const response = await fetch(`${API_BASE_URL}/traits/batch-discover`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          horseIds,
-          checkEnrichment: options.checkEnrichment !== false
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setBatchState(prev => ({
+      try {
+        setBatchState((prev) => ({
           ...prev,
-          results: data.data.results || [],
-          errors: data.data.errors || [],
-          progress: 100
+          isProcessing: true,
+          error: null,
+          progress: 0,
         }));
-        return data.data;
-      } else {
-        throw new Error(data.message || 'Batch discovery failed');
+
+        const response = await fetch(`${API_BASE_URL}/traits/batch-discover`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            horseIds,
+            checkEnrichment: options.checkEnrichment !== false,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setBatchState((prev) => ({
+            ...prev,
+            results: data.data.results || [],
+            errors: data.data.errors || [],
+            progress: 100,
+          }));
+          return data.data;
+        } else {
+          throw new Error(data.message || 'Batch discovery failed');
+        }
+      } catch (error) {
+        console.error('Error in batch discovery:', error);
+        setBatchState((prev) => ({
+          ...prev,
+          error: error.message || 'Batch discovery failed',
+        }));
+        return null;
+      } finally {
+        setBatchState((prev) => ({ ...prev, isProcessing: false }));
       }
-    } catch (error) {
-      console.error('Error in batch discovery:', error);
-      setBatchState(prev => ({ 
-        ...prev, 
-        error: error.message || 'Batch discovery failed' 
-      }));
-      return null;
-    } finally {
-      setBatchState(prev => ({ ...prev, isProcessing: false }));
-    }
-  }, [horseIds]);
+    },
+    [horseIds]
+  );
 
   const resetBatch = useCallback(() => {
     setBatchState({
@@ -322,7 +352,7 @@ export function useBatchTraitDiscovery(horseIds = []) {
       results: [],
       errors: [],
       progress: 0,
-      error: null
+      error: null,
     });
   }, []);
 
@@ -330,9 +360,10 @@ export function useBatchTraitDiscovery(horseIds = []) {
     ...batchState,
     batchDiscover,
     resetBatch,
-    totalRevealed: batchState.results.reduce((sum, result) => 
-      sum + (result.revealed?.length || 0), 0
-    )
+    totalRevealed: batchState.results.reduce(
+      (sum, result) => sum + (result.revealed?.length || 0),
+      0
+    ),
   };
 }
 

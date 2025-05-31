@@ -11,7 +11,7 @@ async function seedUserWithHorses() {
 
     // Check if test user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: 'test@example.com' }
+      where: { email: 'test@example.com' },
     });
 
     if (existingUser) {
@@ -32,9 +32,9 @@ async function seedUserWithHorses() {
         xp: 2500,
         settings: {
           darkMode: true,
-          notifications: true
-        }
-      }
+          notifications: true,
+        },
+      },
     });
 
     logger.info(`✅ Created test user: ${testUser.name} (ID: ${testUser.id})`);
@@ -45,8 +45,8 @@ async function seedUserWithHorses() {
       breed = await prisma.breed.create({
         data: {
           name: 'Thoroughbred',
-          description: 'A hot-blooded horse breed best known for its use in horse racing.'
-        }
+          description: 'A hot-blooded horse breed best known for its use in horse racing.',
+        },
       });
       logger.info(`✅ Created breed: ${breed.name}`);
     }
@@ -63,9 +63,9 @@ async function seedUserWithHorses() {
           healthStatus: 'Good',
           disciplineScores: {
             Racing: 15,
-            Dressage: 10
-          }
-        }
+            Dressage: 10,
+          },
+        },
       }),
       prisma.horse.create({
         data: {
@@ -77,9 +77,9 @@ async function seedUserWithHorses() {
           healthStatus: 'Good',
           disciplineScores: {
             'Show Jumping': 20,
-            'Cross Country': 12
-          }
-        }
+            'Cross Country': 12,
+          },
+        },
       }),
       prisma.horse.create({
         data: {
@@ -88,9 +88,9 @@ async function seedUserWithHorses() {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id,
           sex: 'colt',
-          healthStatus: 'Good'
-        }
-      })
+          healthStatus: 'Good',
+        },
+      }),
     ]);
 
     logger.info(`✅ Created ${horses.length} horses for test user:`);
@@ -100,7 +100,6 @@ async function seedUserWithHorses() {
 
     logger.info('🎉 User and horse seeding completed successfully!');
     return true;
-
   } catch (error) {
     logger.error('❌ Error seeding user and horses:', error);
     return false;
@@ -109,7 +108,7 @@ async function seedUserWithHorses() {
 
 // Run the seeding function
 seedUserWithHorses()
-  .then((success) => {
+  .then(success => {
     if (success) {
       logger.info('✅ Seeding completed successfully');
       process.exit(0);
@@ -118,11 +117,11 @@ seedUserWithHorses()
       process.exit(1);
     }
   })
-  .catch((error) => {
+  .catch(error => {
     logger.error('❌ Seeding error:', error);
     process.exit(1);
   })
-  .finally(async() => {
+  .finally(async () => {
     await prisma.$disconnect();
   });
 

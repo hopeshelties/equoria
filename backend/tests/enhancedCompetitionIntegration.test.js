@@ -1,3 +1,42 @@
+/**
+ * 🧪 INTEGRATION TEST: Enhanced Competition Integration - Trait Scoring Validation
+ *
+ * This test validates the integration between competition scoring and trait systems
+ * to ensure trait bonuses are properly applied in competition calculations.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Trait bonus integration: Discipline affinity traits provide competitive advantages
+ * - Score calculation accuracy: Competition scores include trait bonuses correctly
+ * - Discipline matching: Only matching discipline traits provide bonuses
+ * - Random variance handling: Luck modifiers create score variation while preserving trait advantages
+ * - Edge case handling: Missing epigenetic modifiers handled gracefully
+ * - Score consistency: Results within expected ranges with appropriate variance
+ * - Trait advantage demonstration: Horses with traits can achieve higher maximum scores
+ * - Integration reliability: Trait system works consistently across multiple runs
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. calculateCompetitionScore() - Complete scoring with trait integration
+ * 2. Trait bonus application: +5 bonuses for matching discipline affinity traits
+ * 3. Discipline coverage: Racing, Show Jumping, Dressage, Cross Country
+ * 4. Non-matching scenarios: Wrong discipline traits provide no consistent advantage
+ * 5. Missing field handling: Graceful behavior with missing epigenetic modifiers
+ * 6. Score variance: Random luck modifiers create appropriate score variation
+ * 7. Maximum potential: Trait horses can achieve higher peak scores
+ * 8. Statistical validation: Multiple runs to verify trait advantages
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete competition scoring, trait calculations, random variance
+ * ✅ REAL: Statistical validation, score range verification, integration testing
+ * 🔧 MOCK: None - pure integration testing with real scoring algorithms
+ *
+ * 💡 TEST STRATEGY: Integration testing with statistical validation to ensure
+ *    trait bonuses provide meaningful competitive advantages in scoring
+ *
+ * ⚠️  NOTE: Tests use multiple runs to find trait advantages, which may indicate
+ *    inconsistent trait bonus application that should be investigated.
+ */
+
+import { jest, describe, it, expect } from '@jest/globals';
 import { calculateCompetitionScore } from '../utils/competitionScore.js';
 
 // Simple integration test to verify the trait scoring works
@@ -12,22 +51,21 @@ const createTestHorse = (overrides = {}) => ({
   coordination: 50,
   boldness: 45,
   balance: 50,
-  stress_level: 20,
+  stressLevel: 20,
   health: 'Good',
   tack: {
     saddleBonus: 5,
-    bridleBonus: 3
+    bridleBonus: 3,
   },
-  epigenetic_modifiers: {
+  epigeneticModifiers: {
     positive: [],
     negative: [],
-    hidden: []
+    hidden: [],
   },
-  ...overrides
+  ...overrides,
 });
 
-describe('Enhanced Competition Integration Tests', () => {
-
+describe('🏆 INTEGRATION: Enhanced Competition Integration - Trait Scoring Validation', () => {
   describe('Basic Integration Tests', () => {
     it('should successfully import and use calculateCompetitionScore function', () => {
       const horse = createTestHorse();
@@ -43,16 +81,16 @@ describe('Enhanced Competition Integration Tests', () => {
         { name: 'Racing', trait: 'discipline_affinity_racing' },
         { name: 'Show Jumping', trait: 'discipline_affinity_show_jumping' },
         { name: 'Dressage', trait: 'discipline_affinity_dressage' },
-        { name: 'Cross Country', trait: 'discipline_affinity_cross_country' }
+        { name: 'Cross Country', trait: 'discipline_affinity_cross_country' },
       ];
 
       disciplines.forEach(({ name, trait }) => {
         const horseWithTrait = createTestHorse({
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [trait],
             negative: [],
-            hidden: []
-          }
+            hidden: [],
+          },
         });
 
         const horseWithoutTrait = createTestHorse();
@@ -75,11 +113,11 @@ describe('Enhanced Competition Integration Tests', () => {
 
     it('should not apply trait bonus when trait does not match discipline', () => {
       const horseWithRacingTrait = createTestHorse({
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: ['discipline_affinity_racing'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       });
 
       const horseWithoutTrait = createTestHorse();
@@ -101,9 +139,9 @@ describe('Enhanced Competition Integration Tests', () => {
       expect(traitWins).toBeLessThan(totalRuns);
     });
 
-    it('should handle horses with missing epigenetic_modifiers', () => {
+    it('should handle horses with missing epigeneticModifiers', () => {
       const horseWithoutModifiers = createTestHorse();
-      delete horseWithoutModifiers.epigenetic_modifiers;
+      delete horseWithoutModifiers.epigeneticModifiers;
 
       expect(() => {
         calculateCompetitionScore(horseWithoutModifiers, 'Racing');
@@ -116,11 +154,11 @@ describe('Enhanced Competition Integration Tests', () => {
 
     it('should provide consistent scoring results with variance', () => {
       const horse = createTestHorse({
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: ['discipline_affinity_racing'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       });
 
       // Run the same scoring multiple times
@@ -145,11 +183,11 @@ describe('Enhanced Competition Integration Tests', () => {
       // This test verifies that the integration is working by checking
       // that horses with traits can potentially score higher than those without
       const horseWithTrait = createTestHorse({
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: ['discipline_affinity_racing'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       });
 
       const horseWithoutTrait = createTestHorse();

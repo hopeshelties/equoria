@@ -10,15 +10,17 @@ const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
-  debug: jest.fn()
+  debug: jest.fn(),
 };
 
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the function after mocking
-const { applyEpigeneticTraitsAtBirth } = await import(join(__dirname, '../utils/applyEpigeneticTraitsAtBirth.js'));
+const { applyEpigeneticTraitsAtBirth } = await import(
+  join(__dirname, '../utils/applyEpigeneticTraitsAtBirth.js')
+);
 
 describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
   let mockRandom;
@@ -41,14 +43,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Premium Mare',
-        stressLevel: 15 // Low stress
+        stressLevel: 15, // Low stress
       };
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
         feedQuality: 85, // Premium feed
-        stressLevel: 15
+        stressLevel: 15,
       });
 
       expect(result.positive).toContain('resilient');
@@ -62,14 +64,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Premium Mare',
-        stressLevel: 20 // Low stress (at threshold)
+        stressLevel: 20, // Low stress (at threshold)
       };
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
         feedQuality: 80, // Premium feed (at threshold)
-        stressLevel: 20
+        stressLevel: 20,
       });
 
       expect(result.positive).toContain('people_trusting');
@@ -85,14 +87,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Optimal Mare',
-        stressLevel: 10 // Very low stress
+        stressLevel: 10, // Very low stress
       };
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
         feedQuality: 95, // Excellent feed
-        stressLevel: 10
+        stressLevel: 10,
       });
 
       expect(result.positive).toContain('resilient');
@@ -106,14 +108,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Stressed Mare',
-        stressLevel: 50 // High stress
+        stressLevel: 50, // High stress
       };
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
         feedQuality: 85, // Good feed but stress too high
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.positive).not.toContain('resilient');
@@ -126,14 +128,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Underfed Mare',
-        stressLevel: 15 // Low stress
+        stressLevel: 15, // Low stress
       };
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage: [],
         feedQuality: 60, // Poor feed quality
-        stressLevel: 15
+        stressLevel: 15,
       });
 
       expect(result.positive).not.toContain('resilient');
@@ -149,7 +151,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Inbred Mare',
-        stressLevel: 50
+        stressLevel: 50,
       };
 
       const lineage = [
@@ -157,14 +159,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
         { id: 100, name: 'Common Ancestor' }, // Same ID repeated
         { id: 100, name: 'Common Ancestor' },
         { id: 100, name: 'Common Ancestor' }, // 4 occurrences = high inbreeding
-        { id: 101, name: 'Other Horse' }
+        { id: 101, name: 'Other Horse' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).toContain('fragile');
@@ -177,7 +179,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Inbred Mare',
-        stressLevel: 50
+        stressLevel: 50,
       };
 
       const lineage = [
@@ -185,14 +187,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
         { id: 200, name: 'Common Ancestor' }, // Same ID repeated
         { id: 200, name: 'Common Ancestor' }, // 3 occurrences = moderate inbreeding
         { id: 201, name: 'Other Horse' },
-        { id: 202, name: 'Another Horse' }
+        { id: 202, name: 'Another Horse' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).toContain('reactive');
@@ -205,21 +207,21 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Inbred Mare',
-        stressLevel: 50
+        stressLevel: 50,
       };
 
       const lineage = [
         { id: 300, name: 'Common Ancestor' },
         { id: 300, name: 'Common Ancestor' },
         { id: 300, name: 'Common Ancestor' }, // 3 occurrences = moderate inbreeding
-        { id: 301, name: 'Different Horse' }
+        { id: 301, name: 'Different Horse' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).toContain('low_immunity');
@@ -235,7 +237,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Severely Inbred Mare',
-        stressLevel: 50
+        stressLevel: 50,
       };
 
       const lineage = [
@@ -243,14 +245,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
         { id: 400, name: 'Common Ancestor' },
         { id: 400, name: 'Common Ancestor' },
         { id: 400, name: 'Common Ancestor' },
-        { id: 400, name: 'Common Ancestor' } // 5 occurrences = very high inbreeding
+        { id: 400, name: 'Common Ancestor' }, // 5 occurrences = very high inbreeding
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).toContain('fragile');
@@ -264,21 +266,21 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Diverse Mare',
-        stressLevel: 50
+        stressLevel: 50,
       };
 
       const lineage = [
         { id: 501, name: 'Horse 1' },
         { id: 502, name: 'Horse 2' },
         { id: 503, name: 'Horse 3' },
-        { id: 504, name: 'Horse 4' } // All different IDs
+        { id: 504, name: 'Horse 4' }, // All different IDs
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 50
+        stressLevel: 50,
       });
 
       expect(result.negative).not.toContain('fragile');
@@ -295,21 +297,21 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Racing Mare',
-        stressLevel: 30
+        stressLevel: 30,
       };
 
       const lineage = [
         { id: 601, name: 'Racing Champion 1', mostCompetedDiscipline: 'Racing' },
         { id: 602, name: 'Racing Champion 2', mostCompetedDiscipline: 'Racing' },
         { id: 603, name: 'Racing Champion 3', mostCompetedDiscipline: 'Racing' }, // 3 racing ancestors
-        { id: 604, name: 'Dressage Horse', mostCompetedDiscipline: 'Dressage' }
+        { id: 604, name: 'Dressage Horse', mostCompetedDiscipline: 'Dressage' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 60,
-        stressLevel: 30
+        stressLevel: 30,
       });
 
       expect(result.positive).toContain('discipline_affinity_racing');
@@ -324,7 +326,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Legacy Mare',
-        stressLevel: 25
+        stressLevel: 25,
       };
 
       const lineage = [
@@ -332,14 +334,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
         { id: 702, name: 'Show Jumper 2', mostCompetedDiscipline: 'Show Jumping' },
         { id: 703, name: 'Show Jumper 3', mostCompetedDiscipline: 'Show Jumping' },
         { id: 704, name: 'Show Jumper 4', mostCompetedDiscipline: 'Show Jumping' }, // 4 jumping ancestors
-        { id: 705, name: 'Racing Horse', mostCompetedDiscipline: 'Racing' }
+        { id: 705, name: 'Racing Horse', mostCompetedDiscipline: 'Racing' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 65,
-        stressLevel: 25
+        stressLevel: 25,
       });
 
       expect(result.positive).toContain('discipline_affinity_show_jumping');
@@ -352,7 +354,7 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Dressage Mare',
-        stressLevel: 35
+        stressLevel: 35,
       };
 
       const lineage = [
@@ -360,14 +362,14 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
         { id: 802, name: 'Dressage Master 2', mostCompetedDiscipline: 'Dressage' },
         { id: 803, name: 'Dressage Master 3', mostCompetedDiscipline: 'Dressage' }, // 3 dressage ancestors
         { id: 804, name: 'Trail Horse', mostCompetedDiscipline: 'Trail' },
-        { id: 805, name: 'Endurance Horse', mostCompetedDiscipline: 'Endurance' }
+        { id: 805, name: 'Endurance Horse', mostCompetedDiscipline: 'Endurance' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 70,
-        stressLevel: 35
+        stressLevel: 35,
       });
 
       expect(result.positive).toContain('discipline_affinity_dressage');
@@ -379,24 +381,26 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Mixed Mare',
-        stressLevel: 40
+        stressLevel: 40,
       };
 
       const lineage = [
         { id: 901, name: 'Racing Horse', mostCompetedDiscipline: 'Racing' },
         { id: 902, name: 'Dressage Horse', mostCompetedDiscipline: 'Dressage' },
         { id: 903, name: 'Show Jumper', mostCompetedDiscipline: 'Show Jumping' },
-        { id: 904, name: 'Trail Horse', mostCompetedDiscipline: 'Trail' } // All different disciplines
+        { id: 904, name: 'Trail Horse', mostCompetedDiscipline: 'Trail' }, // All different disciplines
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 55,
-        stressLevel: 40
+        stressLevel: 40,
       });
 
-      expect(result.positive.filter(trait => trait.startsWith('discipline_affinity_'))).toHaveLength(0);
+      expect(
+        result.positive.filter(trait => trait.startsWith('discipline_affinity_'))
+      ).toHaveLength(0);
       expect(result.positive).not.toContain('legacy_talent');
     });
 
@@ -406,24 +410,26 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Unknown Mare',
-        stressLevel: 45
+        stressLevel: 45,
       };
 
       const lineage = [
         { id: 1001, name: 'Horse 1' }, // No discipline field
         { id: 1002, name: 'Horse 2' }, // No discipline field
         { id: 1003, name: 'Horse 3' }, // No discipline field
-        { id: 1004, name: 'Horse 4' }  // No discipline field
+        { id: 1004, name: 'Horse 4' }, // No discipline field
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 50,
-        stressLevel: 45
+        stressLevel: 45,
       });
 
-      expect(result.positive.filter(trait => trait.startsWith('discipline_affinity_'))).toHaveLength(0);
+      expect(
+        result.positive.filter(trait => trait.startsWith('discipline_affinity_'))
+      ).toHaveLength(0);
       expect(result.positive).not.toContain('legacy_talent');
     });
   });
@@ -440,21 +446,21 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Test Mare',
-        stressLevel: 15
+        stressLevel: 15,
       };
 
       const lineage = [
         { id: 1101, name: 'Racing Horse 1', mostCompetedDiscipline: 'Racing' },
         { id: 1102, name: 'Racing Horse 2', mostCompetedDiscipline: 'Racing' },
         { id: 1103, name: 'Racing Horse 3', mostCompetedDiscipline: 'Racing' },
-        { id: 1104, name: 'Racing Horse 4', mostCompetedDiscipline: 'Racing' }
+        { id: 1104, name: 'Racing Horse 4', mostCompetedDiscipline: 'Racing' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 85,
-        stressLevel: 15
+        stressLevel: 15,
       });
 
       // Should get positive traits from optimal conditions and racing lineage
@@ -472,21 +478,21 @@ describe('applyEpigeneticTraitsAtBirth - Unit Tests', () => {
       const mare = {
         id: 1,
         name: 'Unlucky Mare',
-        stressLevel: 10 // Optimal conditions
+        stressLevel: 10, // Optimal conditions
       };
 
       const lineage = [
         { id: 1201, name: 'Racing Horse 1', mostCompetedDiscipline: 'Racing' },
         { id: 1202, name: 'Racing Horse 2', mostCompetedDiscipline: 'Racing' },
         { id: 1203, name: 'Racing Horse 3', mostCompetedDiscipline: 'Racing' },
-        { id: 1204, name: 'Racing Horse 4', mostCompetedDiscipline: 'Racing' }
+        { id: 1204, name: 'Racing Horse 4', mostCompetedDiscipline: 'Racing' },
       ];
 
       const result = applyEpigeneticTraitsAtBirth({
         mare,
         lineage,
         feedQuality: 95, // Optimal conditions
-        stressLevel: 10
+        stressLevel: 10,
       });
 
       // No traits should be assigned due to high random values

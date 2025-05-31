@@ -1,4 +1,3 @@
-
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -11,13 +10,13 @@ const __dirname = dirname(__filename);
 jest.unstable_mockModule(join(__dirname, '../../db/index.js'), () => ({
   default: {
     user: {
-      findUnique: jest.fn()
+      findUnique: jest.fn(),
     },
     horse: {
-      findMany: jest.fn()
+      findMany: jest.fn(),
     },
-    $disconnect: jest.fn()
-  }
+    $disconnect: jest.fn(),
+  },
 }));
 
 // Now import the app and the mocked modules
@@ -33,15 +32,15 @@ describe('Horse Routes Integration Tests', () => {
         id: 1,
         name: 'Adult Horse 1',
         age: 4,
-        playerId: 'test-player-uuid-123' // Changed from ownerId
+        playerId: 'test-player-uuid-123', // Changed from ownerId
       },
       {
         id: 2,
         name: 'Adult Horse 2',
         age: 5,
-        playerId: 'test-player-uuid-123' // Changed from ownerId
-      }
-    ]
+        playerId: 'test-player-uuid-123', // Changed from ownerId
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -60,19 +59,18 @@ describe('Horse Routes Integration Tests', () => {
     });
 
     mockPrisma.horse.findMany.mockImplementation(({ where }) => {
-      if (where?.playerId === 'test-player-uuid-123') { // Changed from ownerId to playerId
+      if (where?.playerId === 'test-player-uuid-123') {
+        // Changed from ownerId to playerId
         return Promise.resolve(mockPlayer.horses);
       }
       return Promise.resolve([]);
     });
   });
   describe('GET /api/horses/trainable/:playerId', () => {
-    it('should return trainable horses for valid player ID', async() => {
+    it('should return trainable horses for valid player ID', async () => {
       const playerId = 'test-player-uuid-123';
 
-      const response = await request(app)
-        .get(`/api/horses/trainable/${playerId}`)
-        .expect(200);
+      const response = await request(app).get(`/api/horses/trainable/${playerId}`).expect(200);
 
       expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('message');
@@ -90,42 +88,35 @@ describe('Horse Routes Integration Tests', () => {
       });
     });
 
-    it('should return empty array for non-existent player', async() => {
+    it('should return empty array for non-existent player', async () => {
       const playerId = 'nonexistent-player-uuid-456';
 
-      const response = await request(app)
-        .get(`/api/horses/trainable/${playerId}`)
-        .expect(200);
+      const response = await request(app).get(`/api/horses/trainable/${playerId}`).expect(200);
 
       expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('data', []);
     });
 
-    it('should return validation error for invalid player ID', async() => {
-      await request(app)
-        .get('/api/horses/trainable/')
-        .expect(404); // Route not found for empty player ID
+    it('should return validation error for invalid player ID', async () => {
+      await request(app).get('/api/horses/trainable/').expect(404); // Route not found for empty player ID
     });
 
-    it('should return validation error for player ID that is too long', async() => {
+    it('should return validation error for player ID that is too long', async () => {
       const longPlayerId = 'a'.repeat(51); // Exceeds 50 character limit
 
-      const response = await request(app)
-        .get(`/api/horses/trainable/${longPlayerId}`)
-        .expect(400);
+      const response = await request(app).get(`/api/horses/trainable/${longPlayerId}`).expect(400);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('message', 'Validation failed');
       expect(response.body).toHaveProperty('errors');
     });
 
-    it('should handle server errors gracefully', async() => {
+    it('should handle server errors gracefully', async () => {
       // This test would require mocking the controller to throw an error
       // For now, we'll just verify the endpoint exists and responds
       const playerId = 'test-player-uuid-123';
 
-      const response = await request(app)
-        .get(`/api/horses/trainable/${playerId}`);
+      const response = await request(app).get(`/api/horses/trainable/${playerId}`);
 
       expect([200, 500]).toContain(response.status);
     });

@@ -16,13 +16,13 @@ jest.unstable_mockModule(join(__dirname, '../../db/index.js'), () => ({
   default: {
     horse: {
       findUnique: jest.fn(),
-      update: jest.fn()
+      update: jest.fn(),
     },
     breed: {
-      findUnique: jest.fn()
+      findUnique: jest.fn(),
     },
-    $disconnect: jest.fn()
-  }
+    $disconnect: jest.fn(),
+  },
 }));
 
 // Now import the app and the mocked modules
@@ -38,7 +38,7 @@ describe('Trait Routes Integration Tests', () => {
     testBreed = {
       id: 1,
       name: `Test Breed for Traits ${Date.now()}`,
-      description: 'Test breed for trait discovery testing'
+      description: 'Test breed for trait discovery testing',
     };
 
     testHorse = {
@@ -51,8 +51,8 @@ describe('Trait Routes Integration Tests', () => {
       epigenetic_modifiers: {
         positive: ['resilient'],
         negative: [],
-        hidden: ['bold', 'trainability_boost']
-      }
+        hidden: ['bold', 'trainability_boost'],
+      },
     };
   });
 
@@ -77,8 +77,8 @@ describe('Trait Routes Integration Tests', () => {
           ...data,
           epigenetic_modifiers: {
             ...testHorse.epigenetic_modifiers,
-            ...data.epigenetic_modifiers
-          }
+            ...data.epigenetic_modifiers,
+          },
         });
       }
       return Promise.resolve(null);
@@ -88,12 +88,12 @@ describe('Trait Routes Integration Tests', () => {
   });
 
   describe('POST /api/traits/discover/:horseId', () => {
-    it('should trigger trait discovery successfully', async() => {
+    it('should trigger trait discovery successfully', async () => {
       const response = await request(app)
         .post(`/api/traits/discover/${testHorse.id}`)
         .send({
           checkEnrichment: true,
-          forceCheck: false
+          forceCheck: false,
         })
         .expect(200);
 
@@ -108,33 +108,27 @@ describe('Trait Routes Integration Tests', () => {
       expect(response.body.data.revealed.length).toBeGreaterThan(0);
     });
 
-    it('should return validation error for invalid horse ID', async() => {
-      const response = await request(app)
-        .post('/api/traits/discover/invalid')
-        .send({})
-        .expect(400);
+    it('should return validation error for invalid horse ID', async () => {
+      const response = await request(app).post('/api/traits/discover/invalid').send({}).expect(400);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Validation failed');
       expect(response.body.errors).toBeDefined();
     });
 
-    it('should return 404 for non-existent horse', async() => {
-      const response = await request(app)
-        .post('/api/traits/discover/99999')
-        .send({})
-        .expect(404);
+    it('should return 404 for non-existent horse', async () => {
+      const response = await request(app).post('/api/traits/discover/99999').send({}).expect(404);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Horse not found');
     });
 
-    it('should handle optional parameters correctly', async() => {
+    it('should handle optional parameters correctly', async () => {
       const response = await request(app)
         .post(`/api/traits/discover/${testHorse.id}`)
         .send({
           checkEnrichment: false,
-          forceCheck: true
+          forceCheck: true,
         })
         .expect(200);
 
@@ -144,10 +138,8 @@ describe('Trait Routes Integration Tests', () => {
   });
 
   describe('GET /api/traits/horse/:horseId', () => {
-    it('should get horse traits successfully', async() => {
-      const response = await request(app)
-        .get(`/api/traits/horse/${testHorse.id}`)
-        .expect(200);
+    it('should get horse traits successfully', async () => {
+      const response = await request(app).get(`/api/traits/horse/${testHorse.id}`).expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('horseId', testHorse.id);
@@ -173,19 +165,15 @@ describe('Trait Routes Integration Tests', () => {
       }
     });
 
-    it('should return validation error for invalid horse ID', async() => {
-      const response = await request(app)
-        .get('/api/traits/horse/invalid')
-        .expect(400);
+    it('should return validation error for invalid horse ID', async () => {
+      const response = await request(app).get('/api/traits/horse/invalid').expect(400);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should return 404 for non-existent horse', async() => {
-      const response = await request(app)
-        .get('/api/traits/horse/99999')
-        .expect(404);
+    it('should return 404 for non-existent horse', async () => {
+      const response = await request(app).get('/api/traits/horse/99999').expect(404);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Horse not found');
@@ -193,10 +181,8 @@ describe('Trait Routes Integration Tests', () => {
   });
 
   describe('GET /api/traits/definitions', () => {
-    it('should get all trait definitions', async() => {
-      const response = await request(app)
-        .get('/api/traits/definitions')
-        .expect(200);
+    it('should get all trait definitions', async () => {
+      const response = await request(app).get('/api/traits/definitions').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('traits');
@@ -215,10 +201,8 @@ describe('Trait Routes Integration Tests', () => {
       }
     });
 
-    it('should filter traits by type', async() => {
-      const response = await request(app)
-        .get('/api/traits/definitions?type=positive')
-        .expect(200);
+    it('should filter traits by type', async () => {
+      const response = await request(app).get('/api/traits/definitions?type=positive').expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.filter).toBe('positive');
@@ -230,10 +214,8 @@ describe('Trait Routes Integration Tests', () => {
       });
     });
 
-    it('should return validation error for invalid type', async() => {
-      const response = await request(app)
-        .get('/api/traits/definitions?type=invalid')
-        .expect(400);
+    it('should return validation error for invalid type', async () => {
+      const response = await request(app).get('/api/traits/definitions?type=invalid').expect(400);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Validation failed');
@@ -241,7 +223,7 @@ describe('Trait Routes Integration Tests', () => {
   });
 
   describe('GET /api/traits/discovery-status/:horseId', () => {
-    it('should get discovery status successfully', async() => {
+    it('should get discovery status successfully', async () => {
       const response = await request(app)
         .get(`/api/traits/discovery-status/${testHorse.id}`)
         .expect(200);
@@ -271,19 +253,15 @@ describe('Trait Routes Integration Tests', () => {
       expect(Array.isArray(discoveryConditions.enrichment)).toBe(true);
     });
 
-    it('should return validation error for invalid horse ID', async() => {
-      const response = await request(app)
-        .get('/api/traits/discovery-status/invalid')
-        .expect(400);
+    it('should return validation error for invalid horse ID', async () => {
+      const response = await request(app).get('/api/traits/discovery-status/invalid').expect(400);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should return 404 for non-existent horse', async() => {
-      const response = await request(app)
-        .get('/api/traits/discovery-status/99999')
-        .expect(404);
+    it('should return 404 for non-existent horse', async () => {
+      const response = await request(app).get('/api/traits/discovery-status/99999').expect(404);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Horse not found');
@@ -291,12 +269,12 @@ describe('Trait Routes Integration Tests', () => {
   });
 
   describe('POST /api/traits/batch-discover', () => {
-    it('should process batch discovery successfully', async() => {
+    it('should process batch discovery successfully', async () => {
       const response = await request(app)
         .post('/api/traits/batch-discover')
         .send({
           horseIds: [testHorse.id],
-          checkEnrichment: true
+          checkEnrichment: true,
         })
         .expect(200);
 
@@ -313,11 +291,11 @@ describe('Trait Routes Integration Tests', () => {
       expect(summary).toHaveProperty('totalRevealed');
     });
 
-    it('should return validation error for empty horse IDs array', async() => {
+    it('should return validation error for empty horse IDs array', async () => {
       const response = await request(app)
         .post('/api/traits/batch-discover')
         .send({
-          horseIds: []
+          horseIds: [],
         })
         .expect(400);
 
@@ -325,13 +303,13 @@ describe('Trait Routes Integration Tests', () => {
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should return validation error for too many horse IDs', async() => {
+    it('should return validation error for too many horse IDs', async () => {
       const tooManyIds = Array.from({ length: 11 }, (_, i) => i + 1);
 
       const response = await request(app)
         .post('/api/traits/batch-discover')
         .send({
-          horseIds: tooManyIds
+          horseIds: tooManyIds,
         })
         .expect(400);
 
@@ -339,11 +317,11 @@ describe('Trait Routes Integration Tests', () => {
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should return validation error for invalid horse IDs', async() => {
+    it('should return validation error for invalid horse IDs', async () => {
       const response = await request(app)
         .post('/api/traits/batch-discover')
         .send({
-          horseIds: ['invalid', 'ids']
+          horseIds: ['invalid', 'ids'],
         })
         .expect(400);
 
@@ -351,11 +329,11 @@ describe('Trait Routes Integration Tests', () => {
       expect(response.body.message).toBe('Validation failed');
     });
 
-    it('should handle mix of valid and invalid horse IDs', async() => {
+    it('should handle mix of valid and invalid horse IDs', async () => {
       const response = await request(app)
         .post('/api/traits/batch-discover')
         .send({
-          horseIds: [testHorse.id, 99999] // One valid, one invalid
+          horseIds: [testHorse.id, 99999], // One valid, one invalid
         })
         .expect(200);
 

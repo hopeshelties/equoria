@@ -21,7 +21,13 @@ describe('Groom Routes Integration Tests', () => {
   });
 
   it('should validate interaction types', () => {
-    const validInteractionTypes = ['daily_care', 'feeding', 'grooming', 'exercise', 'medical_check'];
+    const validInteractionTypes = [
+      'daily_care',
+      'feeding',
+      'grooming',
+      'exercise',
+      'medical_check',
+    ];
 
     expect(validInteractionTypes).toContain('daily_care');
     expect(validInteractionTypes).toContain('feeding');
@@ -45,8 +51,4 @@ describe('Groom Routes Integration Tests', () => {
     expect(testRate).toBeGreaterThanOrEqual(minRate);
     expect(testRate).toBeLessThanOrEqual(maxRate);
   });
-
-
-
-
 });

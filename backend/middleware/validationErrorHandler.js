@@ -14,13 +14,13 @@ export function handleValidationErrors(req, res, next) {
     logger.warn('Validation errors occurred', {
       url: req.originalUrl,
       method: req.method,
-      errors: errorArray
+      errors: errorArray,
     });
 
     return res.status(400).json({
       success: false,
       message: errorArray[0].msg, // Use the first error message
-      errors: errorArray
+      errors: errorArray,
     });
   }
 

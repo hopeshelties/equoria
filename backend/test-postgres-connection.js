@@ -2,7 +2,7 @@
 import { Client } from 'pg';
 
 const client = new Client({
-  connectionString: 'postgresql://postgres:JimpkpNnVF2o%23DaX1Qx0@localhost:5432/postgres'
+  connectionString: 'postgresql://postgres:JimpkpNnVF2o%23DaX1Qx0@localhost:5432/postgres',
 });
 
 async function testConnection() {

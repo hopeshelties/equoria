@@ -8,7 +8,7 @@ import {
   calculateTraitCompetitionImpact,
   getTraitCompetitionEffect,
   getAllTraitCompetitionEffects,
-  hasSpecializedEffect
+  hasSpecializedEffect,
 } from '../utils/traitCompetitionImpact.js';
 
 describe('Trait Competition Impact System', () => {
@@ -19,7 +19,7 @@ describe('Trait Competition Impact System', () => {
       const horse = {
         id: 1,
         name: 'Plain Horse',
-        epigenetic_modifiers: { positive: [], negative: [], hidden: [] }
+        epigenetic_modifiers: { positive: [], negative: [], hidden: [] },
       };
 
       const result = calculateTraitCompetitionImpact(horse, 'Dressage', baseScore);
@@ -38,8 +38,8 @@ describe('Trait Competition Impact System', () => {
         epigenetic_modifiers: {
           positive: ['bold', 'resilient'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateTraitCompetitionImpact(horse, 'Show Jumping', baseScore);
@@ -63,8 +63,8 @@ describe('Trait Competition Impact System', () => {
         epigenetic_modifiers: {
           positive: [],
           negative: ['nervous', 'fragile'],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateTraitCompetitionImpact(horse, 'Show Jumping', baseScore);
@@ -88,8 +88,8 @@ describe('Trait Competition Impact System', () => {
         epigenetic_modifiers: {
           positive: ['intelligent', 'calm'],
           negative: ['stubborn'],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateTraitCompetitionImpact(horse, 'Dressage', baseScore);
@@ -121,8 +121,8 @@ describe('Trait Competition Impact System', () => {
         epigenetic_modifiers: {
           positive: ['bold'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const horseManyTraits = {
@@ -131,21 +131,28 @@ describe('Trait Competition Impact System', () => {
         epigenetic_modifiers: {
           positive: ['bold', 'resilient', 'intelligent', 'calm', 'athletic'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const resultFew = calculateTraitCompetitionImpact(horseFewTraits, 'Show Jumping', baseScore);
-      const resultMany = calculateTraitCompetitionImpact(horseManyTraits, 'Show Jumping', baseScore);
+      const resultMany = calculateTraitCompetitionImpact(
+        horseManyTraits,
+        'Show Jumping',
+        baseScore
+      );
 
       // Many traits should have diminishing returns applied
       expect(resultMany.appliedTraits).toHaveLength(5);
       expect(resultFew.appliedTraits).toHaveLength(1);
 
       // The per-trait effect should be reduced for the horse with many traits
-      const manyTraitsRawModifier = resultMany.appliedTraits.reduce((sum, trait) => sum + trait.modifier, 0);
+      const manyTraitsRawModifier = resultMany.appliedTraits.reduce(
+        (sum, trait) => sum + trait.modifier,
+        0
+      );
       expect(resultMany.totalScoreModifier).toBeLessThan(manyTraitsRawModifier);
-      expect(resultMany.totalScoreModifier).toBeCloseTo(manyTraitsRawModifier * 0.80, 2); // 5+ traits = 80% effectiveness
+      expect(resultMany.totalScoreModifier).toBeCloseTo(manyTraitsRawModifier * 0.8, 2); // 5+ traits = 80% effectiveness
     });
 
     it('should handle legendary traits correctly', () => {
@@ -155,8 +162,8 @@ describe('Trait Competition Impact System', () => {
         epigenetic_modifiers: {
           positive: ['legendary_bloodline'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateTraitCompetitionImpact(horse, 'Racing', baseScore);
@@ -167,7 +174,7 @@ describe('Trait Competition Impact System', () => {
       const legendaryTrait = result.appliedTraits[0];
       expect(legendaryTrait.name).toBe('legendary_bloodline');
       expect(legendaryTrait.isSpecialized).toBe(true);
-      expect(legendaryTrait.modifier).toBe(0.10); // 10% for Racing
+      expect(legendaryTrait.modifier).toBe(0.1); // 10% for Racing
       expect(result.finalScoreAdjustment).toBe(10); // 100 * 0.10
     });
 
@@ -178,8 +185,8 @@ describe('Trait Competition Impact System', () => {
         epigenetic_modifiers: {
           positive: ['athletic'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const resultSpecialized = calculateTraitCompetitionImpact(horse, 'Cross Country', baseScore);
@@ -198,7 +205,7 @@ describe('Trait Competition Impact System', () => {
       const horse = {
         id: 1,
         name: 'Horse Without Traits',
-        epigenetic_modifiers: null
+        epigenetic_modifiers: null,
       };
 
       const result = calculateTraitCompetitionImpact(horse, 'Dressage', baseScore);
@@ -215,8 +222,8 @@ describe('Trait Competition Impact System', () => {
         epigenetic_modifiers: {
           positive: ['unknown_trait', 'bold'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateTraitCompetitionImpact(horse, 'Show Jumping', baseScore);
@@ -287,32 +294,32 @@ describe('Trait Competition Impact System', () => {
         trait: 'bold',
         discipline: 'Show Jumping',
         expectedModifier: 0.06,
-        description: 'Bold should excel at Show Jumping'
+        description: 'Bold should excel at Show Jumping',
       },
       {
         trait: 'intelligent',
         discipline: 'Dressage',
         expectedModifier: 0.06,
-        description: 'Intelligent should excel at Dressage'
+        description: 'Intelligent should excel at Dressage',
       },
       {
         trait: 'athletic',
         discipline: 'Racing',
         expectedModifier: 0.07,
-        description: 'Athletic should excel at Racing'
+        description: 'Athletic should excel at Racing',
       },
       {
         trait: 'nervous',
         discipline: 'Show Jumping',
         expectedModifier: -0.05,
-        description: 'Nervous should struggle with Show Jumping'
+        description: 'Nervous should struggle with Show Jumping',
       },
       {
         trait: 'stubborn',
         discipline: 'Dressage',
         expectedModifier: -0.06,
-        description: 'Stubborn should struggle with Dressage'
-      }
+        description: 'Stubborn should struggle with Dressage',
+      },
     ];
 
     testCases.forEach(({ trait, discipline, expectedModifier, description }) => {
@@ -323,8 +330,8 @@ describe('Trait Competition Impact System', () => {
           epigenetic_modifiers: {
             positive: expectedModifier > 0 ? [trait] : [],
             negative: expectedModifier < 0 ? [trait] : [],
-            hidden: []
-          }
+            hidden: [],
+          },
         };
 
         const result = calculateTraitCompetitionImpact(horse, discipline, 100);
@@ -368,19 +375,25 @@ describe('Trait Competition Impact System', () => {
         id: 1,
         name: 'Overpowered Horse',
         epigenetic_modifiers: {
-          positive: ['bold', 'resilient', 'intelligent', 'calm', 'athletic', 'trainability_boost', 'legendary_bloodline'],
+          positive: [
+            'bold',
+            'resilient',
+            'intelligent',
+            'calm',
+            'athletic',
+            'trainability_boost',
+            'legendary_bloodline',
+          ],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateTraitCompetitionImpact(horse, 'Show Jumping', 100);
 
       // Even with many powerful traits, the total modifier should be reasonable
-      expect(result.totalScoreModifier).toBeLessThanOrEqual(0.50); // Max 50% bonus
+      expect(result.totalScoreModifier).toBeLessThanOrEqual(0.5); // Max 50% bonus
       expect(result.finalScoreAdjustment).toBeLessThanOrEqual(50); // Max 50 point bonus
     });
   });
 });
-
-

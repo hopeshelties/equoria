@@ -34,7 +34,9 @@ for (const key of requiredVars) {
 
 // Always check for missing/problematic vars, regardless of NODE_ENV
 if (problematicVars.length > 0) {
-  throw new Error(`[config] Problematic required environment variables for ${NODE_ENV} environment: ${problematicVars.join('; ')}. Please check your .env or env.test file.`);
+  throw new Error(
+    `[config] Problematic required environment variables for ${NODE_ENV} environment: ${problematicVars.join('; ')}. Please check your .env or env.test file.`
+  );
 }
 
 const {
@@ -43,7 +45,7 @@ const {
   JWT_SECRET,
   JWT_REFRESH_SECRET,
   ALLOWED_ORIGINS,
-  NODE_ENV: ENV
+  NODE_ENV: ENV,
 } = process.env;
 
 const config = {
@@ -53,8 +55,10 @@ const config = {
   jwtSecret: JWT_SECRET,
   jwtRefreshSecret: JWT_REFRESH_SECRET,
   allowedOrigins: ALLOWED_ORIGINS
-    ? ALLOWED_ORIGINS.split(',').map(origin => origin.trim()).filter(origin => origin)
-    : []
+    ? ALLOWED_ORIGINS.split(',')
+        .map(origin => origin.trim())
+        .filter(origin => origin)
+    : [],
 };
 
 export default config;

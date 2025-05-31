@@ -7,7 +7,7 @@ import {
   Alert,
   RefreshControl,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -30,11 +30,14 @@ const FoalDevelopmentTab = ({ foalId }) => {
     try {
       const response = await fetch(`/api/foals/${foalId}/development`);
       const data = await response.json();
-      
+
       if (data.success) {
         setDevelopmentData(data.data);
       } else {
-        Alert.alert('Error', data.message || 'Failed to load foal development data');
+        Alert.alert(
+          'Error',
+          data.message || 'Failed to load foal development data'
+        );
       }
     } catch (error) {
       console.error('Error fetching foal development data:', error);
@@ -61,7 +64,7 @@ const FoalDevelopmentTab = ({ foalId }) => {
   // Complete an activity
   const completeActivity = async (activityType) => {
     setCompletingActivity(activityType);
-    
+
     try {
       const response = await fetch(`/api/foals/${foalId}/activity`, {
         method: 'POST',
@@ -70,9 +73,9 @@ const FoalDevelopmentTab = ({ foalId }) => {
         },
         body: JSON.stringify({ activityType }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setDevelopmentData(data.data);
         Alert.alert('Activity Completed!', data.message);
@@ -90,19 +93,21 @@ const FoalDevelopmentTab = ({ foalId }) => {
   // Progress bar component
   const ProgressBar = ({ current, max, label, color = '#3B82F6' }) => {
     const progress = Math.min(current / max, 1);
-    
+
     return (
       <View className="mb-4">
         <View className="flex-row justify-between items-center mb-2">
           <Text className="text-sm font-medium text-gray-700">{label}</Text>
-          <Text className="text-sm text-gray-500">{current}/{max}</Text>
+          <Text className="text-sm text-gray-500">
+            {current}/{max}
+          </Text>
         </View>
         <View className="h-3 bg-gray-200 rounded-full overflow-hidden">
-          <View 
+          <View
             className="h-full rounded-full"
-            style={{ 
+            style={{
               width: `${progress * 100}%`,
-              backgroundColor: color 
+              backgroundColor: color,
             }}
           />
         </View>
@@ -113,18 +118,18 @@ const FoalDevelopmentTab = ({ foalId }) => {
   // Meter component for bonding and stress levels
   const Meter = ({ value, label, color, maxValue = 100 }) => {
     const percentage = Math.min(value / maxValue, 1);
-    
+
     return (
       <View className="flex-1 mx-2">
         <Text className="text-center text-sm font-medium text-gray-700 mb-2">
           {label}
         </Text>
         <View className="h-32 w-8 bg-gray-200 rounded-full mx-auto relative overflow-hidden">
-          <View 
+          <View
             className="absolute bottom-0 w-full rounded-full"
-            style={{ 
+            style={{
               height: `${percentage * 100}%`,
-              backgroundColor: color 
+              backgroundColor: color,
             }}
           />
         </View>
@@ -139,8 +144,8 @@ const FoalDevelopmentTab = ({ foalId }) => {
   const ActivityCard = ({ activity, onPress, disabled }) => (
     <TouchableOpacity
       className={`p-4 rounded-lg border-2 mb-3 ${
-        disabled 
-          ? 'bg-gray-100 border-gray-300' 
+        disabled
+          ? 'bg-gray-100 border-gray-300'
           : 'bg-white border-blue-300 shadow-sm'
       }`}
       onPress={onPress}
@@ -150,14 +155,18 @@ const FoalDevelopmentTab = ({ foalId }) => {
     >
       <View className="flex-row justify-between items-start">
         <View className="flex-1">
-          <Text className={`font-semibold text-base ${
-            disabled ? 'text-gray-500' : 'text-gray-800'
-          }`}>
+          <Text
+            className={`font-semibold text-base ${
+              disabled ? 'text-gray-500' : 'text-gray-800'
+            }`}
+          >
             {activity.name}
           </Text>
-          <Text className={`text-sm mt-1 ${
-            disabled ? 'text-gray-400' : 'text-gray-600'
-          }`}>
+          <Text
+            className={`text-sm mt-1 ${
+              disabled ? 'text-gray-400' : 'text-gray-600'
+            }`}
+          >
             {activity.description}
           </Text>
           <View className="flex-row mt-2">
@@ -165,7 +174,10 @@ const FoalDevelopmentTab = ({ foalId }) => {
               Bonding: +{activity.bondingRange[0]}-{activity.bondingRange[1]}
             </Text>
             <Text className="text-xs text-orange-600">
-              Stress: {activity.stressRange[0] >= 0 ? '+' : ''}{activity.stressRange[0]} to {activity.stressRange[1] >= 0 ? '+' : ''}{activity.stressRange[1]}
+              Stress: {activity.stressRange[0] >= 0 ? '+' : ''}
+              {activity.stressRange[0]} to{' '}
+              {activity.stressRange[1] >= 0 ? '+' : ''}
+              {activity.stressRange[1]}
             </Text>
           </View>
         </View>
@@ -180,29 +192,43 @@ const FoalDevelopmentTab = ({ foalId }) => {
   const ActivityLogItem = ({ activity }) => {
     const getOutcomeColor = (outcome) => {
       switch (outcome) {
-        case 'excellent': return 'text-green-600';
-        case 'success': return 'text-blue-600';
-        case 'challenging': return 'text-orange-600';
-        default: return 'text-gray-600';
+        case 'excellent':
+          return 'text-green-600';
+        case 'success':
+          return 'text-blue-600';
+        case 'challenging':
+          return 'text-orange-600';
+        default:
+          return 'text-gray-600';
       }
     };
 
     const formatDate = (dateString) => {
       const date = new Date(dateString);
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
+      return (
+        date.toLocaleDateString() +
+        ' ' +
+        date.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      );
     };
 
     return (
       <View className="p-3 bg-gray-50 rounded-lg mb-2">
         <View className="flex-row justify-between items-start mb-1">
           <Text className="font-medium text-gray-800">
-            Day {activity.day}: {activity.activityType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            Day {activity.day}:{' '}
+            {activity.activityType
+              .replace(/_/g, ' ')
+              .replace(/\b\w/g, (l) => l.toUpperCase())}
           </Text>
-          <Text className={`text-sm font-medium ${getOutcomeColor(activity.outcome)}`}>
-            {activity.outcome.charAt(0).toUpperCase() + activity.outcome.slice(1)}
+          <Text
+            className={`text-sm font-medium ${getOutcomeColor(activity.outcome)}`}
+          >
+            {activity.outcome.charAt(0).toUpperCase() +
+              activity.outcome.slice(1)}
           </Text>
         </View>
         <Text className="text-sm text-gray-600 mb-2">
@@ -211,10 +237,12 @@ const FoalDevelopmentTab = ({ foalId }) => {
         <View className="flex-row justify-between">
           <View className="flex-row">
             <Text className="text-xs text-green-600 mr-3">
-              Bonding: {activity.bondingChange >= 0 ? '+' : ''}{activity.bondingChange}
+              Bonding: {activity.bondingChange >= 0 ? '+' : ''}
+              {activity.bondingChange}
             </Text>
             <Text className="text-xs text-orange-600">
-              Stress: {activity.stressChange >= 0 ? '+' : ''}{activity.stressChange}
+              Stress: {activity.stressChange >= 0 ? '+' : ''}
+              {activity.stressChange}
             </Text>
           </View>
           <Text className="text-xs text-gray-400">
@@ -240,7 +268,7 @@ const FoalDevelopmentTab = ({ foalId }) => {
         <Text className="text-lg text-gray-600 text-center">
           No foal development data available
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           className="mt-4 px-6 py-3 bg-blue-500 rounded-lg"
           onPress={fetchDevelopmentData}
         >
@@ -250,10 +278,11 @@ const FoalDevelopmentTab = ({ foalId }) => {
     );
   }
 
-  const { foal, development, activityHistory, availableActivities } = developmentData;
+  const { foal, development, activityHistory, availableActivities } =
+    developmentData;
 
   return (
-    <ScrollView 
+    <ScrollView
       className="flex-1 bg-gray-50"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -278,15 +307,15 @@ const FoalDevelopmentTab = ({ foalId }) => {
           <Text className="text-lg font-bold text-gray-800 mb-4">
             Development Progress
           </Text>
-          <ProgressBar 
-            current={development.currentDay} 
-            max={development.maxDay} 
+          <ProgressBar
+            current={development.currentDay}
+            max={development.maxDay}
             label="Development Day"
             color="#10B981"
           />
           <Text className="text-sm text-gray-600 text-center">
-            Day {development.currentDay} of {development.maxDay} 
-            ({development.maxDay - development.currentDay} days remaining)
+            Day {development.currentDay} of {development.maxDay}(
+            {development.maxDay - development.currentDay} days remaining)
           </Text>
         </View>
 
@@ -296,14 +325,14 @@ const FoalDevelopmentTab = ({ foalId }) => {
             Current Status
           </Text>
           <View className="flex-row justify-center">
-            <Meter 
-              value={development.bondingLevel} 
-              label="Bonding" 
+            <Meter
+              value={development.bondingLevel}
+              label="Bonding"
               color="#10B981"
             />
-            <Meter 
-              value={development.stressLevel} 
-              label="Stress" 
+            <Meter
+              value={development.stressLevel}
+              label="Stress"
               color="#EF4444"
             />
           </View>
@@ -358,4 +387,4 @@ const FoalDevelopmentTab = ({ foalId }) => {
   );
 };
 
-export default FoalDevelopmentTab; 
+export default FoalDevelopmentTab;

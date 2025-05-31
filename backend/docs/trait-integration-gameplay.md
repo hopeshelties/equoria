@@ -9,6 +9,7 @@ The trait integration system seamlessly incorporates horse traits into all major
 ### 1. Training System Integration
 
 #### **Stat Gain Chance Modifiers**
+
 - **Base Chance**: 15% for stat gains during training
 - **Trait Effects**: `statGainChanceModifier` can increase/decrease probability
 - **Implementation**: Applied in `trainingController.js`
@@ -22,6 +23,7 @@ if (traitEffects.statGainChanceModifier) {
 ```
 
 #### **Training XP Multipliers**
+
 - **Base XP**: 5 points per training session
 - **Trait Effects**: `trainingXpModifier` multiplies XP gained
 - **Implementation**: Calculated after discipline score updates
@@ -35,6 +37,7 @@ if (traitEffects.trainingXpModifier) {
 ```
 
 #### **Stat Boost Enhancement**
+
 - **Base Gain**: 1-3 stat points when gain occurs
 - **Trait Effects**: `baseStatBoost` adds extra points
 - **Implementation**: Applied when stat gain is triggered
@@ -50,6 +53,7 @@ if (traitEffects.baseStatBoost) {
 ### 2. Competition System Integration
 
 #### **Stress Response During Competition**
+
 - **Base Impact**: 0.2% score reduction per stress point
 - **Trait Effects**: `competitionStressResistance` reduces impact
 - **Implementation**: Applied in `simulateCompetition.js`
@@ -58,12 +62,13 @@ if (traitEffects.baseStatBoost) {
 // Example: Resilient trait (15% stress resistance)
 let stressImpactPercent = baseStressLevel * 0.002;
 if (traitEffects.competitionStressResistance) {
-  stressImpactPercent *= (1 - traitEffects.competitionStressResistance);
+  stressImpactPercent *= 1 - traitEffects.competitionStressResistance;
 }
 const competitionStressImpact = scoreAfterHealth * stressImpactPercent;
 ```
 
 #### **Competition Score Modifiers**
+
 - **Existing System**: Already implemented via `calculateTraitCompetitionImpact`
 - **Integration**: Works alongside stress response system
 - **Cumulative Effects**: Stress resistance + trait bonuses/penalties
@@ -71,6 +76,7 @@ const competitionStressImpact = scoreAfterHealth * stressImpactPercent;
 ### 3. Bonding System Integration
 
 #### **Activity-Based Bonding Modifiers**
+
 - **Grooming**: Enhanced by `groomingBondingBonus` trait effect
 - **Training**: Enhanced by `trainingBondingBonus` trait effect
 - **General**: Modified by `bondingBonus` and `bondingPenalty` effects
@@ -83,6 +89,7 @@ const traitEffects = getCombinedTraitEffects(['social']);
 ```
 
 #### **Trait-Specific Bonding Behavior**
+
 - **Social Horses**: Faster bonding across all activities
 - **Antisocial Horses**: Slower bonding, prefer isolation
 - **Calm Horses**: Steady, reliable bonding progress
@@ -91,6 +98,7 @@ const traitEffects = getCombinedTraitEffects(['social']);
 ### 4. Temperament Drift Suppression
 
 #### **Drift Prevention**
+
 - **Suppressing Traits**: `resilient`, `calm` prevent temperament changes
 - **Trait Effect**: `suppressTemperamentDrift` boolean flag
 - **Implementation**: Checked before drift probability calculation
@@ -101,12 +109,13 @@ if (traitEffects.suppressTemperamentDrift) {
   return {
     driftOccurred: false,
     reason: 'Suppressed by traits',
-    suppressingTraits: ['resilient']
+    suppressingTraits: ['resilient'],
   };
 }
 ```
 
 #### **Drift Probability Reduction**
+
 - **Stability Traits**: Reduce drift probability even if not completely suppressing
 - **Environmental Factors**: Stress, health, bonding still influence drift
 - **Balanced System**: Traits provide resistance, not immunity
@@ -114,6 +123,7 @@ if (traitEffects.suppressTemperamentDrift) {
 ## Implementation Details
 
 ### File Structure
+
 ```
 backend/
 ├── controllers/
@@ -131,21 +141,25 @@ backend/
 ### Key Functions
 
 #### **Training Integration**
+
 - `trainHorse()` - Main training function with trait integration
 - `updateHorseStat()` - Stat modification with trait bonuses
 - `getCombinedTraitEffects()` - Trait effect aggregation
 
 #### **Competition Integration**
+
 - `simulateCompetition()` - Competition with stress response
 - `calculateTraitCompetitionImpact()` - Existing trait system
 - Stress calculation with trait resistance
 
 #### **Bonding Integration**
+
 - `calculateBondingChange()` - Activity bonding with trait modifiers
 - `applyBondingChange()` - Bonding application with trait effects
 - `getBondingEfficiency()` - Trait-based bonding analysis
 
 #### **Temperament Integration**
+
 - `calculateTemperamentDrift()` - Drift calculation with suppression
 - `isTemperamentStable()` - Stability check based on traits
 - Environmental factor analysis with trait resistance
@@ -155,6 +169,7 @@ backend/
 ### Positive Trait Integration
 
 #### **Eager Learner**
+
 ```javascript
 {
   trainingXpModifier: 0.25,        // +25% training XP
@@ -165,6 +180,7 @@ backend/
 ```
 
 #### **Social**
+
 ```javascript
 {
   bondingBonus: 0.25,              // +25% faster bonding
@@ -175,6 +191,7 @@ backend/
 ```
 
 #### **Resilient**
+
 ```javascript
 {
   suppressTemperamentDrift: true,   // Prevents temperament drift
@@ -187,6 +204,7 @@ backend/
 ### Negative Trait Integration
 
 #### **Antisocial**
+
 ```javascript
 {
   bondingPenalty: 0.30,            // 30% slower bonding
@@ -197,6 +215,7 @@ backend/
 ```
 
 #### **Nervous**
+
 ```javascript
 {
   trainingStressIncrease: 0.25,    // 25% more training stress
@@ -209,11 +228,13 @@ backend/
 ## Performance Considerations
 
 ### Efficient Trait Processing
+
 - **Single Calculation**: Traits processed once per action
 - **Cached Effects**: Combined trait effects calculated efficiently
 - **Minimal Overhead**: Integration adds <5ms to operations
 
 ### Memory Usage
+
 - **Lightweight Objects**: Trait effects stored as simple objects
 - **No Persistent State**: Effects calculated on-demand
 - **Garbage Collection**: Temporary objects cleaned up automatically
@@ -221,12 +242,14 @@ backend/
 ## Testing Coverage
 
 ### Unit Tests
+
 - **Trait Effect Calculation**: All trait combinations tested
 - **Integration Points**: Each system integration verified
 - **Edge Cases**: Error handling and boundary conditions
 - **Performance**: Response time validation
 
 ### Integration Tests
+
 - **End-to-End Workflows**: Complete training/competition cycles
 - **Cross-System Effects**: Trait effects across multiple systems
 - **Real-World Scenarios**: Practical gameplay situations
@@ -234,6 +257,7 @@ backend/
 ## Usage Examples
 
 ### Training Session with Traits
+
 ```javascript
 // Horse with eager_learner trait
 const result = await trainHorse(horseId, 'Racing');
@@ -246,6 +270,7 @@ const result = await trainHorse(horseId, 'Racing');
 ```
 
 ### Competition with Stress Management
+
 ```javascript
 // Horse with resilient trait in high-stress competition
 const competitionResult = simulateCompetition(show, horses);
@@ -257,6 +282,7 @@ const competitionResult = simulateCompetition(show, horses);
 ```
 
 ### Bonding Activity with Social Traits
+
 ```javascript
 // Social horse during grooming session
 const bondingResult = calculateBondingChange(horse, 'grooming', { duration: 60 });
@@ -269,6 +295,7 @@ const bondingResult = calculateBondingChange(horse, 'grooming', { duration: 60 }
 ```
 
 ### Temperament Stability
+
 ```javascript
 // Resilient horse under stress
 const driftResult = calculateTemperamentDrift(horse, { stressLevel: 80 });
@@ -282,12 +309,14 @@ const driftResult = calculateTemperamentDrift(horse, { stressLevel: 80 });
 ## Future Enhancements
 
 ### Planned Features
+
 1. **Dynamic Trait Discovery**: Traits revealed through gameplay
 2. **Trait Synergies**: Bonus effects for trait combinations
 3. **Environmental Interactions**: Location-based trait modifiers
 4. **Seasonal Effects**: Time-based trait variations
 
 ### Performance Optimizations
+
 1. **Trait Effect Caching**: Pre-calculated common combinations
 2. **Batch Processing**: Multiple horses processed together
 3. **Lazy Loading**: Effects calculated only when needed
@@ -296,19 +325,23 @@ const driftResult = calculateTemperamentDrift(horse, { stressLevel: 80 });
 ## API Reference
 
 ### Core Functions
+
 - `getCombinedTraitEffects(traits)` - Calculate combined trait effects
 - `calculateBondingChange(horse, activity, data)` - Bonding with traits
 - `calculateTemperamentDrift(horse, factors)` - Temperament with suppression
 - `updateHorseStat(horseId, stat, amount)` - Stat updates with bonuses
 
 ### Integration Points
+
 - Training: `trainingController.trainHorse()`
 - Competition: `simulateCompetition.js` stress response
 - Bonding: `bondingModifiers.js` activity modifiers
 - Temperament: `temperamentDrift.js` stability system
 
 ### Return Objects
+
 All integration functions return detailed objects with:
+
 - Original values and modified values
 - Applied trait effects and modifiers
 - Breakdown of calculations

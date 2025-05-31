@@ -36,7 +36,6 @@ import { jest, describe, it, expect } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
 describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation', () => {
-
   const createTestHorse = (id, name, overrides = {}) => ({
     id,
     name,
@@ -49,20 +48,20 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
     trainingScore: 50,
     tack: {
       saddleBonus: 5,
-      bridleBonus: 3
+      bridleBonus: 3,
     },
     health: 'Good',
     stressLevel: 20,
     rider: {
       bonusPercent: 0,
-      penaltyPercent: 0
+      penaltyPercent: 0,
     },
     epigeneticModifiers: {
       positive: [],
       negative: [],
-      hidden: []
+      hidden: [],
     },
-    ...overrides
+    ...overrides,
   });
 
   it('should demonstrate trait match fairness for Show Jumping competition', () => {
@@ -78,7 +77,7 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
     const showJumpingEvent = {
       id: 'test-show-jumping',
       name: 'Test Show Jumping Competition',
-      discipline: 'Show Jumping'
+      discipline: 'Show Jumping',
     };
 
     for (let batch = 0; batch < batches; batch++) {
@@ -90,16 +89,16 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
             epigeneticModifiers: {
               positive: ['discipline_affinity_show_jumping'], // Matches event discipline
               negative: [],
-              hidden: []
-            }
+              hidden: [],
+            },
           }),
           createTestHorse(2, 'RegularHorse', {
             epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
-              hidden: []
-            }
-          })
+              hidden: [],
+            },
+          }),
         ];
 
         const results = simulateCompetition(horses, showJumpingEvent);
@@ -128,7 +127,7 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
     const racingEvent = {
       id: 'test-racing',
       name: 'Test Racing Competition',
-      discipline: 'Racing'
+      discipline: 'Racing',
     };
 
     for (let batch = 0; batch < batches; batch++) {
@@ -140,16 +139,16 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
             epigeneticModifiers: {
               positive: ['discipline_affinity_racing'], // Matches event discipline
               negative: [],
-              hidden: []
-            }
+              hidden: [],
+            },
           }),
           createTestHorse(2, 'RegularHorse', {
             epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
-              hidden: []
-            }
-          })
+              hidden: [],
+            },
+          }),
         ];
 
         const results = simulateCompetition(horses, racingEvent);
@@ -176,7 +175,7 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
     const dressageEvent = {
       id: 'test-dressage',
       name: 'Test Dressage Competition',
-      discipline: 'Dressage'
+      discipline: 'Dressage',
     };
 
     for (let batch = 0; batch < batches; batch++) {
@@ -188,16 +187,16 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
             epigeneticModifiers: {
               positive: ['discipline_affinity_dressage'], // Matches event discipline
               negative: [],
-              hidden: []
-            }
+              hidden: [],
+            },
           }),
           createTestHorse(2, 'RegularHorse', {
             epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
-              hidden: []
-            }
-          })
+              hidden: [],
+            },
+          }),
         ];
 
         const results = simulateCompetition(horses, dressageEvent);
@@ -224,7 +223,7 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
     const crossCountryEvent = {
       id: 'test-cross-country',
       name: 'Test Cross Country Competition',
-      discipline: 'Cross Country'
+      discipline: 'Cross Country',
     };
 
     for (let batch = 0; batch < batches; batch++) {
@@ -236,16 +235,16 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
             epigeneticModifiers: {
               positive: ['discipline_affinity_cross_country'], // Matches event discipline
               negative: [],
-              hidden: []
-            }
+              hidden: [],
+            },
           }),
           createTestHorse(2, 'RegularHorse', {
             epigeneticModifiers: {
               positive: [], // No matching trait
               negative: [],
-              hidden: []
-            }
-          })
+              hidden: [],
+            },
+          }),
         ];
 
         const results = simulateCompetition(horses, crossCountryEvent);
@@ -271,7 +270,7 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
     const showJumpingEvent = {
       id: 'test-show-jumping-large',
       name: 'Large Sample Show Jumping Test',
-      discipline: 'Show Jumping'
+      discipline: 'Show Jumping',
     };
 
     for (let i = 0; i < totalRuns; i++) {
@@ -280,16 +279,16 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
           epigeneticModifiers: {
             positive: ['discipline_affinity_show_jumping'],
             negative: [],
-            hidden: []
-          }
+            hidden: [],
+          },
         }),
         createTestHorse(2, 'RegularHorse', {
           epigeneticModifiers: {
             positive: [],
             negative: [],
-            hidden: []
-          }
-        })
+            hidden: [],
+          },
+        }),
       ];
 
       const results = simulateCompetition(horses, showJumpingEvent);
@@ -301,7 +300,7 @@ describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation',
 
     // With larger sample, expect win rate between 55-75%
     const winRate = totalWins / totalRuns;
-    expect(winRate).toBeGreaterThan(0.50); // Better than random
+    expect(winRate).toBeGreaterThan(0.5); // Better than random
     expect(winRate).toBeLessThan(0.85); // Not overly dominant
     expect(totalWins).toBeGreaterThanOrEqual(55); // At least 55% win rate
   });

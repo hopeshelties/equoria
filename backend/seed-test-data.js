@@ -21,13 +21,15 @@ async function seedTestData() {
     const thoroughbredBreed = await prisma.breed.upsert({
       where: { name: 'Thoroughbred' },
       update: {},
-      create: { name: 'Thoroughbred', description: 'Test Thoroughbred breed' }
+      create: { name: 'Thoroughbred', description: 'Test Thoroughbred breed' },
     });
     // eslint-disable-next-line no-console
     console.log(`✅ Breed: ${thoroughbredBreed.name} (ID: ${thoroughbredBreed.id})`);
 
     // Create test player
-    const existingPlayer = await prisma.user.findUnique({ where: { email: 'test-player@example.com' } });
+    const existingPlayer = await prisma.user.findUnique({
+      where: { email: 'test-player@example.com' },
+    });
 
     let testPlayer;
     if (existingPlayer) {
@@ -43,7 +45,7 @@ async function seedTestData() {
         money: 1000,
         level: 5,
         xp: 2500,
-        settings: { darkMode: true, notifications: true }
+        settings: { darkMode: true, notifications: true },
       };
 
       testPlayer = await createUser(playerData);
@@ -75,7 +77,7 @@ async function seedTestData() {
       total_earnings: 8500,
       for_sale: false,
       health_status: 'Excellent',
-      last_vetted_date: new Date('2024-06-01')
+      last_vetted_date: new Date('2024-06-01'),
     };
 
     const horse2Data = {
@@ -103,7 +105,7 @@ async function seedTestData() {
       stud_fee: 750,
       for_sale: false,
       health_status: 'Very Good',
-      last_vetted_date: new Date('2024-05-20')
+      last_vetted_date: new Date('2024-05-20'),
     };
 
     // Check if horses already exist

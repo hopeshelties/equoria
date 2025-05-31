@@ -12,7 +12,7 @@ import {
   recordInteraction,
   getPlayerGrooms,
   hireGroom,
-  getGroomDefinitions
+  getGroomDefinitions,
 } from '../controllers/groomController.js';
 import logger from '../utils/logger.js';
 
@@ -28,7 +28,7 @@ const handleValidationErrors = (req, res, next) => {
     return res.status(400).json({
       success: false,
       message: 'Validation failed',
-      errors: errors.array()
+      errors: errors.array(),
     });
   }
   next();
@@ -83,23 +83,23 @@ const handleValidationErrors = (req, res, next) => {
  *       500:
  *         description: Internal server error
  */
-router.post('/assign', [
-  body('foalId')
-    .isInt({ min: 1 })
-    .withMessage('foalId must be a positive integer'),
-  body('groomId')
-    .isInt({ min: 1 })
-    .withMessage('groomId must be a positive integer'),
-  body('priority')
-    .optional()
-    .isInt({ min: 1, max: 5 })
-    .withMessage('priority must be an integer between 1 and 5'),
-  body('notes')
-    .optional()
-    .isLength({ max: 500 })
-    .withMessage('notes must be 500 characters or less'),
-  handleValidationErrors
-], assignGroom);
+router.post(
+  '/assign',
+  [
+    body('foalId').isInt({ min: 1 }).withMessage('foalId must be a positive integer'),
+    body('groomId').isInt({ min: 1 }).withMessage('groomId must be a positive integer'),
+    body('priority')
+      .optional()
+      .isInt({ min: 1, max: 5 })
+      .withMessage('priority must be an integer between 1 and 5'),
+    body('notes')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('notes must be 500 characters or less'),
+    handleValidationErrors,
+  ],
+  assignGroom
+);
 
 /**
  * @swagger
@@ -123,12 +123,14 @@ router.post('/assign', [
  *       500:
  *         description: Internal server error
  */
-router.post('/ensure-default/:foalId', [
-  param('foalId')
-    .isInt({ min: 1 })
-    .withMessage('foalId must be a positive integer'),
-  handleValidationErrors
-], ensureDefaultAssignment);
+router.post(
+  '/ensure-default/:foalId',
+  [
+    param('foalId').isInt({ min: 1 }).withMessage('foalId must be a positive integer'),
+    handleValidationErrors,
+  ],
+  ensureDefaultAssignment
+);
 
 /**
  * @swagger
@@ -152,12 +154,14 @@ router.post('/ensure-default/:foalId', [
  *       500:
  *         description: Internal server error
  */
-router.get('/assignments/:foalId', [
-  param('foalId')
-    .isInt({ min: 1 })
-    .withMessage('foalId must be a positive integer'),
-  handleValidationErrors
-], getFoalAssignments);
+router.get(
+  '/assignments/:foalId',
+  [
+    param('foalId').isInt({ min: 1 }).withMessage('foalId must be a positive integer'),
+    handleValidationErrors,
+  ],
+  getFoalAssignments
+);
 
 /**
  * @swagger
@@ -212,29 +216,31 @@ router.get('/assignments/:foalId', [
  *       500:
  *         description: Internal server error
  */
-router.post('/interact', [
-  body('foalId')
-    .isInt({ min: 1 })
-    .withMessage('foalId must be a positive integer'),
-  body('groomId')
-    .isInt({ min: 1 })
-    .withMessage('groomId must be a positive integer'),
-  body('interactionType')
-    .isIn(['daily_care', 'feeding', 'grooming', 'exercise', 'medical_check'])
-    .withMessage('interactionType must be one of: daily_care, feeding, grooming, exercise, medical_check'),
-  body('duration')
-    .isInt({ min: 5, max: 480 })
-    .withMessage('duration must be between 5 and 480 minutes'),
-  body('assignmentId')
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage('assignmentId must be a positive integer'),
-  body('notes')
-    .optional()
-    .isLength({ max: 500 })
-    .withMessage('notes must be 500 characters or less'),
-  handleValidationErrors
-], recordInteraction);
+router.post(
+  '/interact',
+  [
+    body('foalId').isInt({ min: 1 }).withMessage('foalId must be a positive integer'),
+    body('groomId').isInt({ min: 1 }).withMessage('groomId must be a positive integer'),
+    body('interactionType')
+      .isIn(['daily_care', 'feeding', 'grooming', 'exercise', 'medical_check'])
+      .withMessage(
+        'interactionType must be one of: daily_care, feeding, grooming, exercise, medical_check'
+      ),
+    body('duration')
+      .isInt({ min: 5, max: 480 })
+      .withMessage('duration must be between 5 and 480 minutes'),
+    body('assignmentId')
+      .optional()
+      .isInt({ min: 1 })
+      .withMessage('assignmentId must be a positive integer'),
+    body('notes')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('notes must be 500 characters or less'),
+    handleValidationErrors,
+  ],
+  recordInteraction
+);
 
 /**
  * @swagger
@@ -255,12 +261,11 @@ router.post('/interact', [
  *       500:
  *         description: Internal server error
  */
-router.get('/player/:playerId', [
-  param('playerId')
-    .notEmpty()
-    .withMessage('playerId is required'),
-  handleValidationErrors
-], getPlayerGrooms);
+router.get(
+  '/player/:playerId',
+  [param('playerId').notEmpty().withMessage('playerId is required'), handleValidationErrors],
+  getPlayerGrooms
+);
 
 /**
  * @swagger
@@ -322,37 +327,35 @@ router.get('/player/:playerId', [
  *       500:
  *         description: Internal server error
  */
-router.post('/hire', [
-  body('name')
-    .isLength({ min: 2, max: 100 })
-    .withMessage('name must be between 2 and 100 characters'),
-  body('speciality')
-    .isIn(['foal_care', 'general', 'training', 'medical'])
-    .withMessage('speciality must be one of: foal_care, general, training, medical'),
-  body('experience')
-    .optional()
-    .isInt({ min: 1, max: 20 })
-    .withMessage('experience must be between 1 and 20 years'),
-  body('skill_level')
-    .isIn(['novice', 'intermediate', 'expert', 'master'])
-    .withMessage('skill_level must be one of: novice, intermediate, expert, master'),
-  body('personality')
-    .isIn(['gentle', 'energetic', 'patient', 'strict'])
-    .withMessage('personality must be one of: gentle, energetic, patient, strict'),
-  body('hourly_rate')
-    .optional()
-    .isFloat({ min: 5, max: 100 })
-    .withMessage('hourly_rate must be between 5 and 100'),
-  body('bio')
-    .optional()
-    .isLength({ max: 500 })
-    .withMessage('bio must be 500 characters or less'),
-  body('availability')
-    .optional()
-    .isObject()
-    .withMessage('availability must be an object'),
-  handleValidationErrors
-], hireGroom);
+router.post(
+  '/hire',
+  [
+    body('name')
+      .isLength({ min: 2, max: 100 })
+      .withMessage('name must be between 2 and 100 characters'),
+    body('speciality')
+      .isIn(['foal_care', 'general', 'training', 'medical'])
+      .withMessage('speciality must be one of: foal_care, general, training, medical'),
+    body('experience')
+      .optional()
+      .isInt({ min: 1, max: 20 })
+      .withMessage('experience must be between 1 and 20 years'),
+    body('skill_level')
+      .isIn(['novice', 'intermediate', 'expert', 'master'])
+      .withMessage('skill_level must be one of: novice, intermediate, expert, master'),
+    body('personality')
+      .isIn(['gentle', 'energetic', 'patient', 'strict'])
+      .withMessage('personality must be one of: gentle, energetic, patient, strict'),
+    body('hourly_rate')
+      .optional()
+      .isFloat({ min: 5, max: 100 })
+      .withMessage('hourly_rate must be between 5 and 100'),
+    body('bio').optional().isLength({ max: 500 }).withMessage('bio must be 500 characters or less'),
+    body('availability').optional().isObject().withMessage('availability must be an object'),
+    handleValidationErrors,
+  ],
+  hireGroom
+);
 
 /**
  * @swagger

@@ -12,69 +12,76 @@ const TraitDisplayExample = () => {
   const examples = {
     complete: {
       title: 'Complete Horse Profile',
-      description: 'A mature horse with discovered positive and negative traits, plus hidden ones',
+      description:
+        'A mature horse with discovered positive and negative traits, plus hidden ones',
       traits: {
         positive: ['resilient', 'bold', 'intelligent'],
         negative: ['nervous', 'stubborn'],
-        hidden: ['trainability_boost', 'athletic']
+        hidden: ['trainability_boost', 'athletic'],
       },
-      horseName: 'Thunder'
+      horseName: 'Thunder',
     },
-    
+
     positive_only: {
       title: 'Champion Horse',
       description: 'A well-bred horse with only positive traits discovered',
       traits: {
         positive: ['athletic', 'calm', 'intelligent', 'bold'],
         negative: [],
-        hidden: ['trainability_boost']
+        hidden: ['trainability_boost'],
       },
-      horseName: 'Champion'
+      horseName: 'Champion',
     },
-    
+
     negative_heavy: {
       title: 'Challenging Horse',
       description: 'A horse with behavioral challenges that need management',
       traits: {
         positive: ['resilient'],
         negative: ['aggressive', 'nervous', 'stubborn', 'lazy'],
-        hidden: ['calm']
+        hidden: ['calm'],
       },
-      horseName: 'Rebel'
+      horseName: 'Rebel',
     },
-    
+
     young_horse: {
       title: 'Young Horse',
       description: 'A young horse with mostly undiscovered traits',
       traits: {
         positive: ['bold'],
         negative: [],
-        hidden: ['intelligent', 'athletic', 'nervous', 'trainability_boost', 'calm']
+        hidden: [
+          'intelligent',
+          'athletic',
+          'nervous',
+          'trainability_boost',
+          'calm',
+        ],
       },
-      horseName: 'Starlight'
+      horseName: 'Starlight',
     },
-    
+
     empty: {
       title: 'New Horse',
       description: 'A newly acquired horse with no traits discovered yet',
       traits: {
         positive: [],
         negative: [],
-        hidden: []
+        hidden: [],
       },
-      horseName: 'Mystery'
+      horseName: 'Mystery',
     },
-    
+
     unknown_traits: {
       title: 'Rare Traits',
       description: 'A horse with some unknown/custom traits',
       traits: {
         positive: ['fire_resistance', 'weather_immunity'],
         negative: ['water_phobia'],
-        hidden: ['legendary_bloodline']
+        hidden: ['legendary_bloodline'],
       },
-      horseName: 'Phoenix'
-    }
+      horseName: 'Phoenix',
+    },
   };
 
   const currentExample = examples[selectedExample];
@@ -93,7 +100,8 @@ const TraitDisplayExample = () => {
           TraitDisplay Component Examples
         </Text>
         <Text className="text-gray-600">
-          Explore different configurations and use cases for the TraitDisplay component
+          Explore different configurations and use cases for the TraitDisplay
+          component
         </Text>
       </View>
 
@@ -107,15 +115,17 @@ const TraitDisplayExample = () => {
             <TouchableOpacity
               key={key}
               className={`mr-3 px-4 py-2 rounded-lg ${
-                selectedExample === key 
-                  ? 'bg-blue-500' 
+                selectedExample === key
+                  ? 'bg-blue-500'
                   : 'bg-white border border-gray-300'
               }`}
               onPress={() => setSelectedExample(key)}
             >
-              <Text className={`font-medium ${
-                selectedExample === key ? 'text-white' : 'text-gray-700'
-              }`}>
+              <Text
+                className={`font-medium ${
+                  selectedExample === key ? 'text-white' : 'text-gray-700'
+                }`}
+              >
                 {example.title}
               </Text>
             </TouchableOpacity>
@@ -128,10 +138,8 @@ const TraitDisplayExample = () => {
         <Text className="text-lg font-semibold text-blue-800 mb-2">
           {currentExample.title}
         </Text>
-        <Text className="text-blue-700">
-          {currentExample.description}
-        </Text>
-        
+        <Text className="text-blue-700">{currentExample.description}</Text>
+
         {/* Trait Summary */}
         <View className="mt-3 flex-row flex-wrap">
           <View className="mr-4 mb-2">
@@ -164,11 +172,11 @@ const TraitDisplayExample = () => {
         <Text className="text-white font-semibold mb-3">Usage Code:</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <Text className="text-green-400 font-mono text-sm">
-{`<TraitDisplay
+            {`<TraitDisplay
   traits={{
-    positive: [${currentExample.traits.positive.map(t => `'${t}'`).join(', ')}],
-    negative: [${currentExample.traits.negative.map(t => `'${t}'`).join(', ')}],
-    hidden: [${currentExample.traits.hidden.map(t => `'${t}'`).join(', ')}]
+    positive: [${currentExample.traits.positive.map((t) => `'${t}'`).join(', ')}],
+    negative: [${currentExample.traits.negative.map((t) => `'${t}'`).join(', ')}],
+    hidden: [${currentExample.traits.hidden.map((t) => `'${t}'`).join(', ')}]
   }}
   horseName="${currentExample.horseName}"
   onTraitPress={(traitKey, traitInfo) => {
@@ -184,25 +192,31 @@ const TraitDisplayExample = () => {
         <Text className="text-lg font-semibold text-yellow-800 mb-3">
           Implementation Notes:
         </Text>
-        
+
         <View className="space-y-2">
           <Text className="text-yellow-700">
-            • <Text className="font-medium">Positive traits</Text> are displayed with green badges
+            • <Text className="font-medium">Positive traits</Text> are displayed
+            with green badges
           </Text>
           <Text className="text-yellow-700">
-            • <Text className="font-medium">Negative traits</Text> are displayed with red badges
+            • <Text className="font-medium">Negative traits</Text> are displayed
+            with red badges
           </Text>
           <Text className="text-yellow-700">
-            • <Text className="font-medium">Hidden traits</Text> show as "???" placeholders
+            • <Text className="font-medium">Hidden traits</Text> show as "???"
+            placeholders
           </Text>
           <Text className="text-yellow-700">
-            • <Text className="font-medium">Tap any trait</Text> to view detailed description in modal
+            • <Text className="font-medium">Tap any trait</Text> to view
+            detailed description in modal
           </Text>
           <Text className="text-yellow-700">
-            • <Text className="font-medium">Accessibility</Text> features include proper labels and hints
+            • <Text className="font-medium">Accessibility</Text> features
+            include proper labels and hints
           </Text>
           <Text className="text-yellow-700">
-            • <Text className="font-medium">Unknown traits</Text> are handled gracefully with auto-generated names
+            • <Text className="font-medium">Unknown traits</Text> are handled
+            gracefully with auto-generated names
           </Text>
         </View>
       </View>
@@ -212,16 +226,19 @@ const TraitDisplayExample = () => {
         <Text className="text-lg font-semibold text-green-800 mb-3">
           Integration Tips:
         </Text>
-        
+
         <View className="space-y-2">
           <Text className="text-green-700">
-            • Use the <Text className="font-mono bg-green-100 px-1">onTraitPress</Text> callback for analytics or additional UI
+            • Use the{' '}
+            <Text className="font-mono bg-green-100 px-1">onTraitPress</Text>{' '}
+            callback for analytics or additional UI
           </Text>
           <Text className="text-green-700">
             • The component handles empty/missing trait arrays gracefully
           </Text>
           <Text className="text-green-700">
-            • Trait definitions can be extended by modifying the internal dictionary
+            • Trait definitions can be extended by modifying the internal
+            dictionary
           </Text>
           <Text className="text-green-700">
             • The component is fully responsive and works on all screen sizes
@@ -235,4 +252,4 @@ const TraitDisplayExample = () => {
   );
 };
 
-export default TraitDisplayExample; 
+export default TraitDisplayExample;

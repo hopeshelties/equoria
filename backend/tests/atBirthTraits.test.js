@@ -4,7 +4,6 @@ import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals
  * Tests for trait application during horse creation based on breeding conditions
  */
 
-
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -15,26 +14,26 @@ const __dirname = dirname(__filename);
 const mockPrisma = {
   horse: {
     findUnique: jest.fn(),
-    findMany: jest.fn()
+    findMany: jest.fn(),
   },
   competitionResult: {
-    findMany: jest.fn()
-  }
+    findMany: jest.fn(),
+  },
 };
 
 const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
-  warn: jest.fn()
+  warn: jest.fn(),
 };
 
 // Mock the imports
 jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
-  default: mockPrisma
+  default: mockPrisma,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the functions after mocking
@@ -48,7 +47,7 @@ const {
   evaluateTraitConditions,
   checkLineageForDisciplineAffinity,
   getMostCommonDisciplineFromHistory,
-  getHighestScoringDiscipline
+  getHighestScoringDiscipline,
 } = await import(join(__dirname, '../utils/atBirthTraits.js'));
 
 describe('At-Birth Traits System', () => {
@@ -117,19 +116,19 @@ describe('At-Birth Traits System', () => {
       const conditions = {
         mareStressMax: 20,
         feedQualityMin: 80,
-        noInbreeding: true
+        noInbreeding: true,
       };
 
       const goodConditions = {
         mareStress: 15,
         feedQuality: 85,
-        noInbreeding: true
+        noInbreeding: true,
       };
 
       const badConditions = {
         mareStress: 25,
         feedQuality: 85,
-        noInbreeding: true
+        noInbreeding: true,
       };
 
       expect(evaluateTraitConditions(conditions, goodConditions)).toBe(true);
@@ -138,10 +137,10 @@ describe('At-Birth Traits System', () => {
   });
 
   describe('assessFeedQuality', () => {
-    it('should return feed quality based on mare health status', async() => {
+    it('should return feed quality based on mare health status', async () => {
       const mare = {
         healthStatus: 'Excellent',
-        totalEarnings: 50000
+        totalEarnings: 50000,
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mare);
@@ -151,11 +150,11 @@ describe('At-Birth Traits System', () => {
       expect(quality).toBeGreaterThan(80);
       expect(mockPrisma.horse.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
-        select: { healthStatus: true, totalEarnings: true }
+        select: { healthStatus: true, totalEarnings: true },
       });
     });
 
-    it('should return default quality for missing mare', async() => {
+    it('should return default quality for missing mare', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       const quality = await assessFeedQuality(999);
@@ -163,10 +162,10 @@ describe('At-Birth Traits System', () => {
       expect(quality).toBe(50);
     });
 
-    it('should adjust quality based on earnings', async() => {
+    it('should adjust quality based on earnings', async () => {
       const highEarningMare = {
         healthStatus: 'Good',
-        totalEarnings: 150000
+        totalEarnings: 150000,
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(highEarningMare);
@@ -178,27 +177,27 @@ describe('At-Birth Traits System', () => {
   });
 
   describe('getAncestors', () => {
-    it('should return empty array for no generations', async() => {
+    it('should return empty array for no generations', async () => {
       const ancestors = await getAncestors([1, 2], 0);
       expect(ancestors).toEqual([]);
     });
 
-    it('should return empty array for empty horse IDs', async() => {
+    it('should return empty array for empty horse IDs', async () => {
       const ancestors = await getAncestors([], 3);
       expect(ancestors).toEqual([]);
     });
 
-    it('should get immediate parents', async() => {
+    it('should get immediate parents', async () => {
       const horses = [
         { id: 1, name: 'Horse1', sireId: 3, damId: 4 },
-        { id: 2, name: 'Horse2', sireId: 5, damId: 6 }
+        { id: 2, name: 'Horse2', sireId: 5, damId: 6 },
       ];
 
       const parents = [
         { id: 3, name: 'Sire1', sireId: null, damId: null },
         { id: 4, name: 'Dam1', sireId: null, damId: null },
         { id: 5, name: 'Sire2', sireId: null, damId: null },
-        { id: 6, name: 'Dam2', sireId: null, damId: null }
+        { id: 6, name: 'Dam2', sireId: null, damId: null },
       ];
 
       mockPrisma.horse.findMany
@@ -214,15 +213,15 @@ describe('At-Birth Traits System', () => {
   });
 
   describe('detectInbreeding', () => {
-    it('should detect no inbreeding when no common ancestors', async() => {
+    it('should detect no inbreeding when no common ancestors', async () => {
       const sireAncestors = [
         { id: 10, name: 'SireGrandpa', sireId: null, damId: null },
-        { id: 11, name: 'SireGrandma', sireId: null, damId: null }
+        { id: 11, name: 'SireGrandma', sireId: null, damId: null },
       ];
 
       const damAncestors = [
         { id: 20, name: 'DamGrandpa', sireId: null, damId: null },
-        { id: 21, name: 'DamGrandma', sireId: null, damId: null }
+        { id: 21, name: 'DamGrandma', sireId: null, damId: null },
       ];
 
       // Mock the recursive calls to getAncestors
@@ -241,16 +240,22 @@ describe('At-Birth Traits System', () => {
       expect(result.inbreedingCoefficient).toBe(0);
     });
 
-    it('should detect inbreeding when common ancestors exist', async() => {
+    it('should detect inbreeding when common ancestors exist', async () => {
       const commonAncestor = { id: 100, name: 'CommonAncestor', sireId: null, damId: null };
 
       // Mock the recursive calls for getAncestors
       mockPrisma.horse.findMany
         .mockResolvedValueOnce([{ id: 1, name: 'Sire', sireId: 100, damId: 11 }]) // Sire's immediate parents
-        .mockResolvedValueOnce([commonAncestor, { id: 11, name: 'SireGrandma', sireId: null, damId: null }]) // Sire's ancestors
+        .mockResolvedValueOnce([
+          commonAncestor,
+          { id: 11, name: 'SireGrandma', sireId: null, damId: null },
+        ]) // Sire's ancestors
         .mockResolvedValueOnce([]) // No further sire ancestors
         .mockResolvedValueOnce([{ id: 2, name: 'Dam', sireId: 100, damId: 21 }]) // Dam's immediate parents
-        .mockResolvedValueOnce([commonAncestor, { id: 21, name: 'DamGrandma', sireId: null, damId: null }]) // Dam's ancestors
+        .mockResolvedValueOnce([
+          commonAncestor,
+          { id: 21, name: 'DamGrandma', sireId: null, damId: null },
+        ]) // Dam's ancestors
         .mockResolvedValueOnce([]); // No further dam ancestors
 
       const result = await detectInbreeding(1, 2);
@@ -263,18 +268,18 @@ describe('At-Birth Traits System', () => {
   });
 
   describe('analyzeLineage', () => {
-    it('should detect discipline specialization', async() => {
+    it('should detect discipline specialization', async () => {
       const ancestors = [
         { id: 10, name: 'Ancestor1' },
         { id: 11, name: 'Ancestor2' },
-        { id: 12, name: 'Ancestor3' }
+        { id: 12, name: 'Ancestor3' },
       ];
 
       const competitionResults = [
         { discipline: 'Racing', placement: '1st' },
         { discipline: 'Racing', placement: '2nd' },
         { discipline: 'Racing', placement: '1st' },
-        { discipline: 'Dressage', placement: '3rd' }
+        { discipline: 'Dressage', placement: '3rd' },
       ];
 
       // Mock getAncestors call
@@ -293,7 +298,7 @@ describe('At-Birth Traits System', () => {
       expect(result.specializationStrength).toBeGreaterThan(0.6);
     });
 
-    it('should handle no competition history', async() => {
+    it('should handle no competition history', async () => {
       mockPrisma.horse.findMany
         .mockResolvedValueOnce([])
         .mockResolvedValueOnce([])
@@ -313,7 +318,7 @@ describe('At-Birth Traits System', () => {
     const mockMare = {
       stressLevel: 25,
       bondScore: 75,
-      healthStatus: 'Good'
+      healthStatus: 'Good',
     };
 
     beforeEach(() => {
@@ -322,7 +327,7 @@ describe('At-Birth Traits System', () => {
       mockPrisma.competitionResult.findMany.mockResolvedValue([]);
     });
 
-    it('should apply positive traits for optimal breeding conditions', async() => {
+    it('should apply positive traits for optimal breeding conditions', async () => {
       // Mock low random values to ensure trait application
       Math.random.mockReturnValue(0.1);
 
@@ -330,7 +335,7 @@ describe('At-Birth Traits System', () => {
         sireId: 1,
         damId: 2,
         mareStress: 15,
-        feedQuality: 85
+        feedQuality: 85,
       };
 
       const result = await applyEpigeneticTraitsAtBirth(breedingData);
@@ -345,14 +350,14 @@ describe('At-Birth Traits System', () => {
       expect(result.traits.positive.length).toBeGreaterThan(0);
     });
 
-    it('should apply negative traits for poor breeding conditions', async() => {
+    it('should apply negative traits for poor breeding conditions', async () => {
       Math.random.mockReturnValue(0.1);
 
       const breedingData = {
         sireId: 1,
         damId: 2,
         mareStress: 80,
-        feedQuality: 25
+        feedQuality: 25,
       };
 
       const result = await applyEpigeneticTraitsAtBirth(breedingData);
@@ -361,7 +366,7 @@ describe('At-Birth Traits System', () => {
       expect(result.traits.negative.length).toBeGreaterThan(0);
     });
 
-    it('should apply inbred trait when inbreeding detected', async() => {
+    it('should apply inbred trait when inbreeding detected', async () => {
       Math.random.mockReturnValue(0.1);
 
       // Simplify the test by directly mocking the inbreeding analysis result
@@ -369,7 +374,7 @@ describe('At-Birth Traits System', () => {
       const mockMareWithInbreeding = {
         stressLevel: 25,
         bondScore: 75,
-        healthStatus: 'Good'
+        healthStatus: 'Good',
       };
 
       mockPrisma.horse.findUnique.mockResolvedValue(mockMareWithInbreeding);
@@ -380,7 +385,7 @@ describe('At-Birth Traits System', () => {
 
       const breedingData = {
         sireId: 1,
-        damId: 2
+        damId: 2,
       };
 
       // We need to test this differently - let's check if the conditions work
@@ -398,19 +403,21 @@ describe('At-Birth Traits System', () => {
       const conditionsWithInbreeding = {
         inbreedingDetected: true,
         mareStress: 25,
-        feedQuality: 70
+        feedQuality: 70,
       };
       const conditionsWithoutInbreeding = {
         inbreedingDetected: false,
         mareStress: 25,
-        feedQuality: 70
+        feedQuality: 70,
       };
 
       expect(evaluateTraitConditions(inbredTraitConditions, conditionsWithInbreeding)).toBe(true);
-      expect(evaluateTraitConditions(inbredTraitConditions, conditionsWithoutInbreeding)).toBe(false);
+      expect(evaluateTraitConditions(inbredTraitConditions, conditionsWithoutInbreeding)).toBe(
+        false
+      );
     });
 
-    it('should apply specialized lineage trait when discipline specialization detected', async() => {
+    it('should apply specialized lineage trait when discipline specialization detected', async () => {
       Math.random.mockReturnValue(0.1);
 
       // Mock discipline specialization
@@ -418,7 +425,7 @@ describe('At-Birth Traits System', () => {
       const racingResults = [
         { discipline: 'Racing', placement: '1st' },
         { discipline: 'Racing', placement: '1st' },
-        { discipline: 'Racing', placement: '2nd' }
+        { discipline: 'Racing', placement: '2nd' },
       ];
 
       mockPrisma.horse.findMany
@@ -431,7 +438,7 @@ describe('At-Birth Traits System', () => {
       const breedingData = {
         sireId: 1,
         damId: 2,
-        mareStress: 30
+        mareStress: 30,
       };
 
       const result = await applyEpigeneticTraitsAtBirth(breedingData);
@@ -440,39 +447,45 @@ describe('At-Birth Traits System', () => {
       expect(result.breedingAnalysis.lineage.disciplineSpecialization).toBe(true);
     });
 
-    it('should handle missing mare gracefully', async() => {
+    it('should handle missing mare gracefully', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       const breedingData = {
         sireId: 1,
-        damId: 999
+        damId: 999,
       };
 
-      await expect(applyEpigeneticTraitsAtBirth(breedingData)).rejects.toThrow('Mare with ID 999 not found');
+      await expect(applyEpigeneticTraitsAtBirth(breedingData)).rejects.toThrow(
+        'Mare with ID 999 not found'
+      );
     });
 
-    it('should require both sire and dam IDs', async() => {
-      await expect(applyEpigeneticTraitsAtBirth({ sireId: 1 })).rejects.toThrow('Both sireId and damId are required');
-      await expect(applyEpigeneticTraitsAtBirth({ damId: 2 })).rejects.toThrow('Both sireId and damId are required');
+    it('should require both sire and dam IDs', async () => {
+      await expect(applyEpigeneticTraitsAtBirth({ sireId: 1 })).rejects.toThrow(
+        'Both sireId and damId are required'
+      );
+      await expect(applyEpigeneticTraitsAtBirth({ damId: 2 })).rejects.toThrow(
+        'Both sireId and damId are required'
+      );
     });
 
-    it('should use mare stress level from database when not provided', async() => {
+    it('should use mare stress level from database when not provided', async () => {
       Math.random.mockReturnValue(0.9); // High value to prevent trait application
 
       const breedingData = {
         sireId: 1,
-        damId: 2
+        damId: 2,
       };
 
       await applyEpigeneticTraitsAtBirth(breedingData);
 
       expect(mockPrisma.horse.findUnique).toHaveBeenCalledWith({
         where: { id: 2 },
-        select: { stressLevel: true, bondScore: true, healthStatus: true }
+        select: { stressLevel: true, bondScore: true, healthStatus: true },
       });
     });
 
-    it('should move traits to hidden when many traits are applied', async() => {
+    it('should move traits to hidden when many traits are applied', async () => {
       // Mock to apply many traits
       Math.random
         .mockReturnValueOnce(0.1) // Apply first trait
@@ -484,7 +497,7 @@ describe('At-Birth Traits System', () => {
         sireId: 1,
         damId: 2,
         mareStress: 15,
-        feedQuality: 85
+        feedQuality: 85,
       };
 
       const result = await applyEpigeneticTraitsAtBirth(breedingData);
@@ -495,7 +508,7 @@ describe('At-Birth Traits System', () => {
       expect(totalTraits).toBeGreaterThan(0);
     });
 
-    it('should handle errors in lineage analysis gracefully', async() => {
+    it('should handle errors in lineage analysis gracefully', async () => {
       Math.random.mockReturnValue(0.1);
 
       // Mock database error
@@ -503,7 +516,7 @@ describe('At-Birth Traits System', () => {
 
       const breedingData = {
         sireId: 1,
-        damId: 2
+        damId: 2,
       };
 
       // Should not throw, but continue with default analysis
@@ -522,7 +535,7 @@ describe('At-Birth Traits System', () => {
         { id: 2, name: 'Horse2', discipline: 'Show Jumping' },
         { id: 3, name: 'Horse3', discipline: 'Show Jumping' },
         { id: 4, name: 'Horse4', discipline: 'Dressage' },
-        { id: 5, name: 'Horse5', discipline: 'Racing' }
+        { id: 5, name: 'Horse5', discipline: 'Racing' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -534,8 +547,8 @@ describe('At-Birth Traits System', () => {
       expect(result.totalWithDisciplines).toBe(5);
       expect(result.disciplineBreakdown).toEqual({
         'Show Jumping': 3,
-        'Dressage': 1,
-        'Racing': 1
+        Dressage: 1,
+        Racing: 1,
       });
     });
 
@@ -545,7 +558,7 @@ describe('At-Birth Traits System', () => {
         { id: 2, name: 'Horse2', discipline: 'Show Jumping' },
         { id: 3, name: 'Horse3', discipline: 'Dressage' },
         { id: 4, name: 'Horse4', discipline: 'Racing' },
-        { id: 5, name: 'Horse5', discipline: 'Racing' }
+        { id: 5, name: 'Horse5', discipline: 'Racing' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -565,24 +578,22 @@ describe('At-Birth Traits System', () => {
           competitionHistory: [
             { discipline: 'Racing', placement: '1st' },
             { discipline: 'Racing', placement: '2nd' },
-            { discipline: 'Dressage', placement: '3rd' }
-          ]
+            { discipline: 'Dressage', placement: '3rd' },
+          ],
         },
         {
           id: 2,
           name: 'Horse2',
           competitionHistory: [
             { discipline: 'Racing', placement: '1st' },
-            { discipline: 'Racing', placement: '1st' }
-          ]
+            { discipline: 'Racing', placement: '1st' },
+          ],
         },
         {
           id: 3,
           name: 'Horse3',
-          competitionHistory: [
-            { discipline: 'Racing', placement: '2nd' }
-          ]
-        }
+          competitionHistory: [{ discipline: 'Racing', placement: '2nd' }],
+        },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -597,23 +608,23 @@ describe('At-Birth Traits System', () => {
         {
           id: 1,
           name: 'Horse1',
-          disciplineScores: { 'Show Jumping': 85, 'Dressage': 60, 'Racing': 45 }
+          disciplineScores: { 'Show Jumping': 85, Dressage: 60, Racing: 45 },
         },
         {
           id: 2,
           name: 'Horse2',
-          disciplineScores: { 'Show Jumping': 90, 'Dressage': 70 }
+          disciplineScores: { 'Show Jumping': 90, Dressage: 70 },
         },
         {
           id: 3,
           name: 'Horse3',
-          disciplineScores: { 'Show Jumping': 85, 'Racing': 75 } // Show Jumping is higher
+          disciplineScores: { 'Show Jumping': 85, Racing: 75 }, // Show Jumping is higher
         },
         {
           id: 4,
           name: 'Horse4',
-          disciplineScores: { 'Dressage': 95, 'Racing': 65 }
-        }
+          disciplineScores: { Dressage: 95, Racing: 65 },
+        },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -641,7 +652,7 @@ describe('At-Birth Traits System', () => {
       const ancestors = [
         { id: 1, name: 'Horse1' },
         { id: 2, name: 'Horse2' },
-        { id: 3, name: 'Horse3' }
+        { id: 3, name: 'Horse3' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -658,18 +669,18 @@ describe('At-Birth Traits System', () => {
           name: 'Horse1',
           discipline: 'Show Jumping',
           competitionHistory: [{ discipline: 'Racing', placement: '1st' }],
-          disciplineScores: { 'Dressage': 95 }
+          disciplineScores: { Dressage: 95 },
         },
         {
           id: 2,
           name: 'Horse2',
-          discipline: 'Show Jumping'
+          discipline: 'Show Jumping',
         },
         {
           id: 3,
           name: 'Horse3',
-          discipline: 'Show Jumping'
-        }
+          discipline: 'Show Jumping',
+        },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -687,15 +698,15 @@ describe('At-Birth Traits System', () => {
           name: 'Horse2',
           competitionHistory: [
             { discipline: 'Racing', placement: '1st' },
-            { discipline: 'Racing', placement: '2nd' }
-          ]
+            { discipline: 'Racing', placement: '2nd' },
+          ],
         },
         {
           id: 3,
           name: 'Horse3',
-          disciplineScores: { 'Racing': 85, 'Dressage': 60 }
+          disciplineScores: { Racing: 85, Dressage: 60 },
         },
-        { id: 4, name: 'Horse4', discipline: 'Show Jumping' }
+        { id: 4, name: 'Horse4', discipline: 'Show Jumping' },
       ];
 
       const result = checkLineageForDisciplineAffinity(ancestors);
@@ -713,7 +724,7 @@ describe('At-Birth Traits System', () => {
         { discipline: 'Racing', placement: '2nd' },
         { discipline: 'Racing', placement: '3rd' },
         { discipline: 'Dressage', placement: '1st' },
-        { discipline: 'Show Jumping', placement: '2nd' }
+        { discipline: 'Show Jumping', placement: '2nd' },
       ];
 
       const result = getMostCommonDisciplineFromHistory(competitionHistory);
@@ -732,10 +743,7 @@ describe('At-Birth Traits System', () => {
     });
 
     it('should handle competitions without discipline field', () => {
-      const competitionHistory = [
-        { placement: '1st' },
-        { placement: '2nd' }
-      ];
+      const competitionHistory = [{ placement: '1st' }, { placement: '2nd' }];
 
       const result = getMostCommonDisciplineFromHistory(competitionHistory);
       expect(result).toBeNull();
@@ -745,9 +753,9 @@ describe('At-Birth Traits System', () => {
   describe('getHighestScoringDiscipline', () => {
     it('should return the discipline with the highest score', () => {
       const disciplineScores = {
-        'Racing': 75,
-        'Dressage': 90,
-        'Show Jumping': 65
+        Racing: 75,
+        Dressage: 90,
+        'Show Jumping': 65,
       };
 
       const result = getHighestScoringDiscipline(disciplineScores);
@@ -767,9 +775,9 @@ describe('At-Birth Traits System', () => {
 
     it('should handle non-numeric scores', () => {
       const disciplineScores = {
-        'Racing': 'high',
-        'Dressage': 90,
-        'Show Jumping': 'medium'
+        Racing: 'high',
+        Dressage: 90,
+        'Show Jumping': 'medium',
       };
 
       const result = getHighestScoringDiscipline(disciplineScores);
@@ -779,9 +787,9 @@ describe('At-Birth Traits System', () => {
 
     it('should handle all non-numeric scores', () => {
       const disciplineScores = {
-        'Racing': 'high',
-        'Dressage': 'medium',
-        'Show Jumping': 'low'
+        Racing: 'high',
+        Dressage: 'medium',
+        'Show Jumping': 'low',
       };
 
       const result = getHighestScoringDiscipline(disciplineScores);

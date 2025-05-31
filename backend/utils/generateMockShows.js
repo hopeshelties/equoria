@@ -16,9 +16,26 @@ function generateMockShows(count = 10) {
   // Word banks for generating realistic show names
   const seasons = ['Spring', 'Summer', 'Fall', 'Winter', 'Autumn'];
   const adjectives = [
-    'Classic', 'Championship', 'Premier', 'Elite', 'Grand', 'Royal', 'National',
-    'Regional', 'Open', 'Invitational', 'Masters', 'Thunder', 'Lightning',
-    'Golden', 'Silver', 'Diamond', 'Emerald', 'Sunset', 'Dawn', 'Midnight'
+    'Classic',
+    'Championship',
+    'Premier',
+    'Elite',
+    'Grand',
+    'Royal',
+    'National',
+    'Regional',
+    'Open',
+    'Invitational',
+    'Masters',
+    'Thunder',
+    'Lightning',
+    'Golden',
+    'Silver',
+    'Diamond',
+    'Emerald',
+    'Sunset',
+    'Dawn',
+    'Midnight',
   ];
 
   for (let i = 0; i < count; i++) {
@@ -55,7 +72,7 @@ function generateMockShows(count = 10) {
       levelMax,
       entryFee,
       prize,
-      runDate
+      runDate,
     });
   }
 
@@ -72,7 +89,4 @@ function generateSingleMockShow(overrides = {}) {
   return { ...shows[0], ...overrides };
 }
 
-export {
-  generateMockShows,
-  generateSingleMockShow
-};
+export { generateMockShows, generateSingleMockShow };

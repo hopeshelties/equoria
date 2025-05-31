@@ -79,8 +79,8 @@ export async function setCooldown(horseId) {
         breed: true,
         owner: true,
         stable: true,
-        player: true
-      }
+        player: true,
+      },
     });
 
     return updatedHorse;

@@ -46,16 +46,16 @@ const mockGetResultsByHorse = jest.fn();
 const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
-  warn: jest.fn()
+  warn: jest.fn(),
 };
 
 // Mock the modules
 jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => ({
-  getResultsByHorse: mockGetResultsByHorse
+  getResultsByHorse: mockGetResultsByHorse,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the function to test after mocking
@@ -69,12 +69,12 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
     req = { params: { id: '1' } };
     res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn()
+      json: jest.fn(),
     };
   });
 
   describe('getHorseHistory', () => {
-    it('should return horse competition history successfully', async() => {
+    it('should return horse competition history successfully', async () => {
       const mockResults = [
         {
           id: 1,
@@ -85,7 +85,7 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
           prizeWon: 1000,
           statGains: '{"stat":"stamina","gain":1}',
           runDate: new Date('2025-06-01'),
-          createdAt: new Date('2025-06-01T10:00:00Z')
+          createdAt: new Date('2025-06-01T10:00:00Z'),
         },
         {
           id: 2,
@@ -96,8 +96,8 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
           prizeWon: 0,
           statGains: null,
           runDate: new Date('2025-05-25'),
-          createdAt: new Date('2025-05-25T14:30:00Z')
-        }
+          createdAt: new Date('2025-05-25T14:30:00Z'),
+        },
       ];
 
       mockGetResultsByHorse.mockResolvedValue(mockResults);
@@ -119,7 +119,7 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
             prize: 1000,
             statGain: { stat: 'stamina', gain: 1 },
             runDate: new Date('2025-06-01'),
-            createdAt: new Date('2025-06-01T10:00:00Z')
+            createdAt: new Date('2025-06-01T10:00:00Z'),
           },
           {
             id: 2,
@@ -130,13 +130,13 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
             prize: 0,
             statGain: null,
             runDate: new Date('2025-05-25'),
-            createdAt: new Date('2025-05-25T14:30:00Z')
-          }
-        ]
+            createdAt: new Date('2025-05-25T14:30:00Z'),
+          },
+        ],
       });
     });
 
-    it('should return empty array when horse has no competition history', async() => {
+    it('should return empty array when horse has no competition history', async () => {
       mockGetResultsByHorse.mockResolvedValue([]);
 
       await getHorseHistory(req, res);
@@ -146,11 +146,11 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Found 0 competition results for horse 1',
-        data: []
+        data: [],
       });
     });
 
-    it('should handle invalid horse ID (non-numeric)', async() => {
+    it('should handle invalid horse ID (non-numeric)', async () => {
       req.params.id = 'invalid';
 
       await getHorseHistory(req, res);
@@ -160,11 +160,11 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Invalid horse ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     });
 
-    it('should handle invalid horse ID (negative number)', async() => {
+    it('should handle invalid horse ID (negative number)', async () => {
       req.params.id = '-1';
 
       await getHorseHistory(req, res);
@@ -174,11 +174,11 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Invalid horse ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     });
 
-    it('should handle invalid horse ID (zero)', async() => {
+    it('should handle invalid horse ID (zero)', async () => {
       req.params.id = '0';
 
       await getHorseHistory(req, res);
@@ -188,11 +188,11 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Invalid horse ID. Must be a positive integer.',
-        data: null
+        data: null,
       });
     });
 
-    it('should handle database errors gracefully', async() => {
+    it('should handle database errors gracefully', async () => {
       const dbError = new Error('Database connection failed');
       mockGetResultsByHorse.mockRejectedValue(dbError);
 
@@ -204,11 +204,11 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Internal server error while retrieving horse history',
-        data: null
+        data: null,
       });
     });
 
-    it('should properly parse stat gains JSON', async() => {
+    it('should properly parse stat gains JSON', async () => {
       const mockResults = [
         {
           id: 1,
@@ -219,8 +219,8 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
           prizeWon: 500,
           statGains: '{"stat":"speed","gain":1}',
           runDate: new Date('2025-05-15'),
-          createdAt: new Date('2025-05-15T12:00:00Z')
-        }
+          createdAt: new Date('2025-05-15T12:00:00Z'),
+        },
       ];
 
       mockGetResultsByHorse.mockResolvedValue(mockResults);
@@ -240,13 +240,13 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
             prize: 500,
             statGain: { stat: 'speed', gain: 1 },
             runDate: new Date('2025-05-15'),
-            createdAt: new Date('2025-05-15T12:00:00Z')
-          }
-        ]
+            createdAt: new Date('2025-05-15T12:00:00Z'),
+          },
+        ],
       });
     });
 
-    it('should handle malformed stat gains JSON gracefully', async() => {
+    it('should handle malformed stat gains JSON gracefully', async () => {
       const mockResults = [
         {
           id: 1,
@@ -257,8 +257,8 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
           prizeWon: 500,
           statGains: 'invalid json',
           runDate: new Date('2025-05-15'),
-          createdAt: new Date('2025-05-15T12:00:00Z')
-        }
+          createdAt: new Date('2025-05-15T12:00:00Z'),
+        },
       ];
 
       mockGetResultsByHorse.mockResolvedValue(mockResults);
@@ -270,11 +270,11 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Internal server error while retrieving horse history',
-        data: null
+        data: null,
       });
     });
 
-    it('should handle large horse ID numbers', async() => {
+    it('should handle large horse ID numbers', async () => {
       req.params.id = '999999';
       mockGetResultsByHorse.mockResolvedValue([]);
 
@@ -285,11 +285,11 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Found 0 competition results for horse 999999',
-        data: []
+        data: [],
       });
     });
 
-    it('should maintain order from database query (newest first)', async() => {
+    it('should maintain order from database query (newest first)', async () => {
       const mockResults = [
         {
           id: 3,
@@ -300,7 +300,7 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
           prizeWon: 300,
           statGains: null,
           runDate: new Date('2025-06-10'),
-          createdAt: new Date('2025-06-10T16:00:00Z')
+          createdAt: new Date('2025-06-10T16:00:00Z'),
         },
         {
           id: 1,
@@ -311,8 +311,8 @@ describe('📚 UNIT: Horse History Controller - Competition History Retrieval', 
           prizeWon: 500,
           statGains: '{"stat":"agility","gain":1}',
           runDate: new Date('2025-05-20'),
-          createdAt: new Date('2025-05-20T10:00:00Z')
-        }
+          createdAt: new Date('2025-05-20T10:00:00Z'),
+        },
       ];
 
       mockGetResultsByHorse.mockResolvedValue(mockResults);

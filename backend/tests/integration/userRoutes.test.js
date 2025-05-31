@@ -21,10 +21,11 @@ const mockLevelUpUserIfNeeded = jest.fn();
 const mockLogger = {
   info: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn()
+  error: jest.fn(),
 };
 
-jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({ // Changed path to userModel.js
+jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
+  // Changed path to userModel.js
   getUserById: mockGetUserById,
   getUserByEmail: mockGetUserByEmail,
   getUserWithHorses: mockGetUserWithHorses,
@@ -32,17 +33,18 @@ jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({ 
   updateUser: mockUpdateUser,
   deleteUser: mockDeleteUser,
   addXpToUser: mockAddXpToUser, // Assumed new function name
-  levelUpUserIfNeeded: mockLevelUpUserIfNeeded // Assumed new function name
+  levelUpUserIfNeeded: mockLevelUpUserIfNeeded, // Assumed new function name
 }));
 
 jest.unstable_mockModule(join(__dirname, '../../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import app after mocking
 const app = (await import('../../app.js')).default;
 
-describe('User Routes Integration Tests', () => { // Changed from User Routes'
+describe('User Routes Integration Tests', () => {
+  // Changed from User Routes'
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetUserById.mockClear();
@@ -58,15 +60,18 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
     mockLogger.error.mockClear();
   });
 
-  describe('GET /api/user/:id/progress', () => { // Changed route from /api/player to /api/user
-    it('should return user progress successfully', async() => { // Changed from 'player progress'
-      const mockUser = { // Changed from mockPlayer
+  describe('GET /api/user/:id/progress', () => {
+    // Changed route from /api/player to /api/user
+    it('should return user progress successfully', async () => {
+      // Changed from 'player progress'
+      const mockUser = {
+        // Changed from mockPlayer
         id: 'test-user-123', // Changed from 'test-player-123'
         username: 'Integration Test User', // Changed from 'Integration Test Player'
         level: 5,
         xp: 75,
         email: 'integration@test.com',
-        money: 3000
+        money: 3000,
       };
 
       mockGetUserById.mockResolvedValue(mockUser); // Changed from mockGetPlayerById
@@ -83,14 +88,15 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
           name: 'Integration Test User', // Changed from 'Integration Test Player'
           level: 5,
           xp: 75,
-          xpToNextLevel: 25
-        }
+          xpToNextLevel: 25,
+        },
       });
 
       expect(mockGetUserById).toHaveBeenCalledWith('test-user-123'); // Changed from mockGetPlayerById
     });
 
-    it('should return 404 for non-existent user', async() => { // Changed from 'non-existent player'
+    it('should return 404 for non-existent user', async () => {
+      // Changed from 'non-existent player'
       mockGetUserById.mockResolvedValue(null); // Changed from mockGetPlayerById
 
       const response = await request(app)
@@ -99,17 +105,15 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
 
       expect(response.body).toEqual({
         success: false,
-        message: 'User not found' // Changed from 'Player not found'
+        message: 'User not found', // Changed from 'Player not found'
       });
     });
 
-    it('should return validation error for empty user ID', async() => {
-      const _response = await request(app)
-        .get('/api/user//progress')
-        .expect(404); // Route not found for empty ID
+    it('should return validation error for empty user ID', async () => {
+      const _response = await request(app).get('/api/user//progress').expect(404); // Route not found for empty ID
     });
 
-    it('should return validation error for invalid user ID format', async() => {
+    it('should return validation error for invalid user ID format', async () => {
       // Single character "a" is actually valid (min: 1, max: 50)
       // So let's test with an empty string by using a different approach
       // or test that a valid short ID actually works
@@ -121,60 +125,56 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
 
       expect(response.body).toEqual({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     });
 
-    it('should return validation error for extremely long user ID', async() => {
+    it('should return validation error for extremely long user ID', async () => {
       const longId = 'a'.repeat(51); // 51 characters, exceeds limit
 
-      const response = await request(app)
-        .get(`/api/user/${longId}/progress`)
-        .expect(400);
+      const response = await request(app).get(`/api/user/${longId}/progress`).expect(400);
 
       expect(response.body).toEqual({
         success: false,
         message: 'Validation failed',
         errors: expect.arrayContaining([
           expect.objectContaining({
-            msg: 'User ID must be between 1 and 50 characters'
-          })
-        ])
+            msg: 'User ID must be between 1 and 50 characters',
+          }),
+        ]),
       });
     });
 
-    it('should handle database errors gracefully', async() => {
+    it('should handle database errors gracefully', async () => {
       mockGetUserById.mockRejectedValue(new Error('Database connection failed'));
 
-      const response = await request(app)
-        .get('/api/user/test-user-123/progress')
-        .expect(500);
+      const response = await request(app).get('/api/user/test-user-123/progress').expect(500);
 
       expect(response.body).toEqual({
         success: false,
         message: 'Internal server error',
-        error: expect.any(String)
+        error: expect.any(String),
       });
     });
 
-    it('should calculate xpToNextLevel correctly for edge cases', async() => {
+    it('should calculate xpToNextLevel correctly for edge cases', async () => {
       const testCases = [
         {
           user: { id: 'u1', name: 'User1', level: 1, xp: 0 },
-          expectedXpToNext: 100
+          expectedXpToNext: 100,
         },
         {
           user: { id: 'u2', name: 'User2', level: 1, xp: 99 },
-          expectedXpToNext: 1
+          expectedXpToNext: 1,
         },
         {
           user: { id: 'u3', name: 'User3', level: 2, xp: 0 },
-          expectedXpToNext: 100
+          expectedXpToNext: 100,
         },
         {
           user: { id: 'u4', name: 'User4', level: 3, xp: 50 },
-          expectedXpToNext: 50
-        }
+          expectedXpToNext: 50,
+        },
       ];
 
       for (const testCase of testCases) {
@@ -190,7 +190,7 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
       }
     });
 
-    it('should only return required fields in response', async() => {
+    it('should only return required fields in response', async () => {
       const mockUser = {
         id: 'test-user-456',
         name: 'Detailed User',
@@ -200,14 +200,12 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
         money: 5000,
         settings: { theme: 'dark', notifications: true },
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       mockGetUserById.mockResolvedValue(mockUser);
 
-      const response = await request(app)
-        .get('/api/user/test-user-456/progress')
-        .expect(200);
+      const response = await request(app).get('/api/user/test-user-456/progress').expect(200);
 
       // Verify only required fields are present
       expect(response.body.data).toEqual({
@@ -215,7 +213,7 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
         name: 'Detailed User',
         level: 8,
         xp: 42,
-        xpToNextLevel: 58 // 100 - (42 % 100) = 58
+        xpToNextLevel: 58, // 100 - (42 % 100) = 58
       });
 
       // Verify sensitive/unnecessary fields are not included
@@ -226,28 +224,28 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
       expect(response.body.data).not.toHaveProperty('updatedAt');
     });
 
-    it('should handle special characters in user ID', async() => {
+    it('should handle special characters in user ID', async () => {
       const specialId = 'user-123_test';
       const mockUser = {
         id: specialId,
         name: 'Special User',
         level: 2,
-        xp: 25
+        xp: 25,
       };
 
       mockGetUserById.mockResolvedValue(mockUser);
 
-      const response = await request(app)
-        .get(`/api/user/${specialId}/progress`)
-        .expect(200);
+      const response = await request(app).get(`/api/user/${specialId}/progress`).expect(200);
 
       expect(response.body.data.userId).toBe(specialId);
       expect(mockGetUserById).toHaveBeenCalledWith(specialId);
     });
   });
 
-  describe('GET /api/user/:id', () => { // Changed route
-    it('should return a user by ID', async() => { // Changed from 'player'
+  describe('GET /api/user/:id', () => {
+    // Changed route
+    it('should return a user by ID', async () => {
+      // Changed from 'player'
       const mockUser = { id: 'test-user-123', username: 'Test User', email: 'test@example.com' }; // Changed from mockPlayer
       mockGetUserById.mockResolvedValue(mockUser); // Changed from mockGetPlayerById
 
@@ -259,7 +257,8 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
       expect(mockGetUserById).toHaveBeenCalledWith('test-user-123'); // Changed from mockGetPlayerById
     });
 
-    it('should return 404 if user not found', async() => { // Changed from 'player'
+    it('should return 404 if user not found', async () => {
+      // Changed from 'player'
       mockGetUserById.mockResolvedValue(null); // Changed from mockGetPlayerById
       const response = await request(app)
         .get('/api/user/unknown') // Changed route
@@ -268,8 +267,10 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
     });
   });
 
-  describe('POST /api/user', () => { // Changed route
-    it('should create a new user', async() => { // Changed from 'player'
+  describe('POST /api/user', () => {
+    // Changed route
+    it('should create a new user', async () => {
+      // Changed from 'player'
       const userData = { username: 'NewUser', email: 'new@example.com', password: 'password123' };
       const mockCreatedUser = { id: 'new-user-456', ...userData }; // Changed from mockCreatedPlayer
       mockCreateUser.mockResolvedValue(mockCreatedUser); // Changed from mockCreatePlayer
@@ -283,7 +284,8 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
       expect(mockCreateUser).toHaveBeenCalledWith(userData); // Changed from mockCreatePlayer
     });
 
-    it('should return 400 for invalid user data', async() => { // Changed from 'player'
+    it('should return 400 for invalid user data', async () => {
+      // Changed from 'player'
       const response = await request(app) // Keep response to allow for future assertions if needed
         .post('/api/user') // Changed route
         .send({ username: 'Bad' }) // Invalid data
@@ -294,8 +296,10 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
     });
   });
 
-  describe('PUT /api/user/:id', () => { // Changed route
-    it('should update an existing user', async() => { // Changed from 'player'
+  describe('PUT /api/user/:id', () => {
+    // Changed route
+    it('should update an existing user', async () => {
+      // Changed from 'player'
       const updates = { money: 1500 };
       const mockUpdatedUser = { id: 'test-user-123', username: 'Test User', money: 1500 }; // Changed from mockUpdatedPlayer
       mockUpdateUser.mockResolvedValue(mockUpdatedUser); // Changed from mockUpdatePlayer
@@ -310,7 +314,8 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
       expect(mockUpdateUser).toHaveBeenCalledWith('test-user-123', updates); // Changed from mockUpdatePlayer
     });
 
-    it('should return 404 if user to update is not found', async() => { // Changed from 'player'
+    it('should return 404 if user to update is not found', async () => {
+      // Changed from 'player'
       mockGetUserById.mockResolvedValue(null); // Simulate user not found for the initial check
       mockUpdateUser.mockResolvedValue(null); // Or mockUpdateUser to indicate not found
 
@@ -322,8 +327,10 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
     });
   });
 
-  describe('DELETE /api/user/:id', () => { // Changed route
-    it('should delete a user', async() => { // Changed from 'player'
+  describe('DELETE /api/user/:id', () => {
+    // Changed route
+    it('should delete a user', async () => {
+      // Changed from 'player'
       mockDeleteUser.mockResolvedValue({ id: 'test-user-123' }); // Changed from mockDeletePlayer
       mockGetUserById.mockResolvedValue({ id: 'test-user-123' }); // Ensure user exists for deletion
 
@@ -334,7 +341,8 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
       expect(mockDeleteUser).toHaveBeenCalledWith('test-user-123'); // Changed from mockDeletePlayer
     });
 
-    it('should return 404 if user to delete is not found', async() => { // Changed from 'player'
+    it('should return 404 if user to delete is not found', async () => {
+      // Changed from 'player'
       mockGetUserById.mockResolvedValue(null); // Simulate user not found
       mockDeleteUser.mockResolvedValue(null);
 
@@ -346,8 +354,10 @@ describe('User Routes Integration Tests', () => { // Changed from User Routes'
   });
 
   // Example for XP and Leveling - adjust routes and logic as per your actual userController
-  describe('POST /api/user/:id/add-xp', () => { // Changed route
-    it('should add XP to a user and potentially level them up', async() => { // Changed from 'player'
+  describe('POST /api/user/:id/add-xp', () => {
+    // Changed route
+    it('should add XP to a user and potentially level them up', async () => {
+      // Changed from 'player'
       const xpData = { amount: 50 };
       const mockUserAfterXp = { id: 'test-user-123', xp: 125, level: 5 };
       mockAddXpToUser.mockResolvedValue(mockUserAfterXp); // Changed from mockAddXp

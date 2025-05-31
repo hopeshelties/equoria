@@ -13,61 +13,61 @@ import { getTraitDefinition } from './epigeneticTraits.js';
 const DISCOVERY_CONDITIONS = {
   // Bonding-based discoveries
   HIGH_BOND: {
-    condition: (horse) => horse.bond_score >= 80,
+    condition: horse => horse.bond_score >= 80,
     description: 'Strong bond formed',
-    priority: 'high'
+    priority: 'high',
   },
 
   EXCELLENT_BOND: {
-    condition: (horse) => horse.bond_score >= 95,
+    condition: horse => horse.bond_score >= 95,
     description: 'Exceptional bond achieved',
-    priority: 'legendary'
+    priority: 'legendary',
   },
 
   // Stress-based discoveries
   LOW_STRESS: {
-    condition: (horse) => horse.stress_level <= 20,
+    condition: horse => horse.stress_level <= 20,
     description: 'Stress levels minimized',
-    priority: 'medium'
+    priority: 'medium',
   },
 
   MINIMAL_STRESS: {
-    condition: (horse) => horse.stress_level <= 5,
+    condition: horse => horse.stress_level <= 5,
     description: 'Perfect stress management',
-    priority: 'high'
+    priority: 'high',
   },
 
   // Combined conditions
   PERFECT_CARE: {
-    condition: (horse) => horse.bond_score >= 80 && horse.stress_level <= 20,
+    condition: horse => horse.bond_score >= 80 && horse.stress_level <= 20,
     description: 'Perfect care conditions achieved',
-    priority: 'legendary'
+    priority: 'legendary',
   },
 
   // Age-based discoveries
   MATURE_BOND: {
-    condition: (horse) => horse.age >= 2 && horse.bond_score >= 70,
+    condition: horse => horse.age >= 2 && horse.bond_score >= 70,
     description: 'Mature relationship developed',
-    priority: 'medium'
+    priority: 'medium',
   },
 
   // Training-based discoveries (requires training data)
   CONSISTENT_TRAINING: {
-    condition: async(horse) => {
+    condition: async horse => {
       const recentTraining = await prisma.trainingLog.count({
         where: {
           horseId: horse.id,
           trainedAt: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days
-          }
-        }
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+          },
+        },
       });
       return recentTraining >= 5;
     },
     description: 'Consistent training regimen maintained',
     priority: 'medium',
-    async: true
-  }
+    async: true,
+  },
 };
 
 /**
@@ -78,29 +78,36 @@ const ENRICHMENT_DISCOVERIES = {
     activities: ['social_interaction', 'group_play'],
     minCount: 3,
     description: 'Socialization activities completed',
-    priority: 'medium'
+    priority: 'medium',
   },
 
   MENTAL_STIMULATION_COMPLETE: {
     activities: ['puzzle_feeding', 'obstacle_course'],
     minCount: 2,
     description: 'Mental stimulation activities completed',
-    priority: 'high'
+    priority: 'high',
   },
 
   PHYSICAL_DEVELOPMENT_COMPLETE: {
     activities: ['free_exercise', 'controlled_movement'],
     minCount: 4,
     description: 'Physical development activities completed',
-    priority: 'medium'
+    priority: 'medium',
   },
 
   ALL_ENRICHMENT_COMPLETE: {
-    activities: ['social_interaction', 'group_play', 'puzzle_feeding', 'obstacle_course', 'free_exercise', 'controlled_movement'],
+    activities: [
+      'social_interaction',
+      'group_play',
+      'puzzle_feeding',
+      'obstacle_course',
+      'free_exercise',
+      'controlled_movement',
+    ],
     minCount: 6,
     description: 'All enrichment activities completed',
-    priority: 'legendary'
-  }
+    priority: 'legendary',
+  },
 };
 
 /**
@@ -120,11 +127,13 @@ export async function revealTraits(horseId, options = {}) {
       where: { id: horseId },
       include: {
         breed: true,
-        foalActivities: options.checkEnrichment ? {
-          orderBy: { createdAt: 'desc' },
-          take: 20
-        } : false
-      }
+        foalActivities: options.checkEnrichment
+          ? {
+              orderBy: { createdAt: 'desc' },
+              take: 20,
+            }
+          : false,
+      },
     });
 
     if (!horse) {
@@ -141,7 +150,7 @@ export async function revealTraits(horseId, options = {}) {
         success: true,
         revealed: [],
         conditions: [],
-        message: 'No hidden traits available for discovery'
+        message: 'No hidden traits available for discovery',
       };
     }
 
@@ -162,7 +171,7 @@ export async function revealTraits(horseId, options = {}) {
         success: true,
         revealed: [],
         conditions: [],
-        message: 'No discovery conditions currently met'
+        message: 'No discovery conditions currently met',
       };
     }
 
@@ -170,34 +179,39 @@ export async function revealTraits(horseId, options = {}) {
     const traitsToReveal = selectTraitsToReveal(hiddenTraits, allConditions);
 
     if (traitsToReveal.length === 0) {
-      logger.info(`[traitDiscovery.revealTraits] No suitable traits selected for revelation for horse ${horseId}`);
+      logger.info(
+        `[traitDiscovery.revealTraits] No suitable traits selected for revelation for horse ${horseId}`
+      );
       return {
         success: true,
         revealed: [],
         conditions: allConditions,
-        message: 'Discovery conditions met but no suitable traits found'
+        message: 'Discovery conditions met but no suitable traits found',
       };
     }
 
     // Update horse traits in database
     const updatedTraits = await updateHorseTraits(horseId, currentTraits, traitsToReveal);
 
-    logger.info(`[traitDiscovery.revealTraits] Successfully revealed ${traitsToReveal.length} traits for horse ${horseId}: ${traitsToReveal.join(', ')}`);
+    logger.info(
+      `[traitDiscovery.revealTraits] Successfully revealed ${traitsToReveal.length} traits for horse ${horseId}: ${traitsToReveal.join(', ')}`
+    );
 
     return {
       success: true,
       revealed: traitsToReveal.map(trait => ({
         trait,
         definition: getTraitDefinition(trait),
-        discoveryReason: getDiscoveryReason(trait, allConditions)
+        discoveryReason: getDiscoveryReason(trait, allConditions),
       })),
       conditions: allConditions,
       updatedTraits,
-      message: `Discovered ${traitsToReveal.length} new trait${traitsToReveal.length > 1 ? 's' : ''}!`
+      message: `Discovered ${traitsToReveal.length} new trait${traitsToReveal.length > 1 ? 's' : ''}!`,
     };
-
   } catch (error) {
-    logger.error(`[traitDiscovery.revealTraits] Error revealing traits for horse ${horseId}: ${error.message}`);
+    logger.error(
+      `[traitDiscovery.revealTraits] Error revealing traits for horse ${horseId}: ${error.message}`
+    );
     throw error;
   }
 }
@@ -225,11 +239,13 @@ async function checkDiscoveryConditions(horse) {
           name: conditionName,
           description: condition.description,
           priority: condition.priority,
-          type: 'condition'
+          type: 'condition',
         });
       }
     } catch (error) {
-      logger.warn(`[traitDiscovery.checkDiscoveryConditions] Error checking condition ${conditionName}: ${error.message}`);
+      logger.warn(
+        `[traitDiscovery.checkDiscoveryConditions] Error checking condition ${conditionName}: ${error.message}`
+      );
     }
   }
 
@@ -262,7 +278,7 @@ function checkEnrichmentDiscoveries(activities) {
         priority: discovery.priority,
         type: 'enrichment',
         completedCount,
-        requiredCount: discovery.minCount
+        requiredCount: discovery.minCount,
       });
     }
   }
@@ -287,18 +303,30 @@ function selectTraitsToReveal(hiddenTraits, conditions) {
 
   // Reveal traits based on condition priority and trait rarity
   for (const condition of sortedConditions) {
-    if (traitsToReveal.length >= 3) {break;} // Limit revelations per check
+    if (traitsToReveal.length >= 3) {
+      break;
+    } // Limit revelations per check
 
     const suitableTraits = hiddenTraits.filter(trait => {
-      if (traitsToReveal.includes(trait)) {return false;}
+      if (traitsToReveal.includes(trait)) {
+        return false;
+      }
 
       const traitDef = getTraitDefinition(trait);
-      if (!traitDef) {return false;}
+      if (!traitDef) {
+        return false;
+      }
 
       // Match trait rarity to condition priority
-      if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') {return true;}
-      if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) {return true;}
-      if (condition.priority === 'medium' && ['common', 'rare'].includes(traitDef.rarity)) {return true;}
+      if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') {
+        return true;
+      }
+      if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) {
+        return true;
+      }
+      if (condition.priority === 'medium' && ['common', 'rare'].includes(traitDef.rarity)) {
+        return true;
+      }
 
       return traitDef.rarity === 'common';
     });
@@ -324,7 +352,7 @@ async function updateHorseTraits(horseId, currentTraits, traitsToReveal) {
   const updatedTraits = {
     positive: [...(currentTraits.positive || [])],
     negative: [...(currentTraits.negative || [])],
-    hidden: [...(currentTraits.hidden || [])]
+    hidden: [...(currentTraits.hidden || [])],
   };
 
   // Move traits from hidden to appropriate visible category
@@ -347,8 +375,8 @@ async function updateHorseTraits(horseId, currentTraits, traitsToReveal) {
   await prisma.horse.update({
     where: { id: horseId },
     data: {
-      epigenetic_modifiers: updatedTraits
-    }
+      epigenetic_modifiers: updatedTraits,
+    },
   });
 
   return updatedTraits;
@@ -362,12 +390,18 @@ async function updateHorseTraits(horseId, currentTraits, traitsToReveal) {
  */
 function getDiscoveryReason(trait, conditions) {
   const traitDef = getTraitDefinition(trait);
-  if (!traitDef) {return 'Unknown discovery condition';}
+  if (!traitDef) {
+    return 'Unknown discovery condition';
+  }
 
   // Find the most relevant condition
   const relevantCondition = conditions.find(condition => {
-    if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') {return true;}
-    if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) {return true;}
+    if (condition.priority === 'legendary' && traitDef.rarity === 'legendary') {
+      return true;
+    }
+    if (condition.priority === 'high' && ['rare', 'legendary'].includes(traitDef.rarity)) {
+      return true;
+    }
     return condition.priority === 'medium' || condition.priority === 'low';
   });
 
@@ -378,5 +412,5 @@ export {
   DISCOVERY_CONDITIONS,
   ENRICHMENT_DISCOVERIES,
   checkDiscoveryConditions,
-  checkEnrichmentDiscoveries
+  checkEnrichmentDiscoveries,
 };

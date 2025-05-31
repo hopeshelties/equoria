@@ -9,14 +9,16 @@ const __dirname = dirname(__filename);
 const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
-  warn: jest.fn()
+  warn: jest.fn(),
 };
 
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
-const { _addTraitSafely, _removeTraitSafely, _getAllTraits } = await import(join(__dirname, '../utils/horseModelTraitHelpers.js'));
+const { _addTraitSafely, _removeTraitSafely, _getAllTraits } = await import(
+  join(__dirname, '../utils/horseModelTraitHelpers.js')
+);
 
 describe('horseModelTraitHelpers utilities', () => {
   beforeEach(() => {
@@ -28,7 +30,7 @@ describe('horseModelTraitHelpers utilities', () => {
       const traits = {
         positive: ['agile'],
         negative: [],
-        hidden: []
+        hidden: [],
       };
 
       const traitToAdd = 'strong';
@@ -45,7 +47,7 @@ describe('horseModelTraitHelpers utilities', () => {
       const traits = {
         positive: ['agile'],
         negative: [],
-        hidden: []
+        hidden: [],
       };
 
       const traitToAdd = 'agile';
@@ -62,7 +64,7 @@ describe('horseModelTraitHelpers utilities', () => {
       const traits = {
         positive: ['agile', 'strong'],
         negative: [],
-        hidden: []
+        hidden: [],
       };
 
       const traitToRemove = 'strong';
@@ -78,7 +80,7 @@ describe('horseModelTraitHelpers utilities', () => {
       const traits = {
         positive: ['agile'],
         negative: [],
-        hidden: []
+        hidden: [],
       };
 
       const traitToRemove = 'strong';
@@ -95,7 +97,7 @@ describe('horseModelTraitHelpers utilities', () => {
       const traits = {
         positive: ['agile'],
         negative: ['timid'],
-        hidden: ['secretive']
+        hidden: ['secretive'],
       };
 
       const result = _getAllTraits(traits);
@@ -107,7 +109,7 @@ describe('horseModelTraitHelpers utilities', () => {
       const traits = {
         positive: [],
         negative: [],
-        hidden: []
+        hidden: [],
       };
 
       const result = _getAllTraits(traits);

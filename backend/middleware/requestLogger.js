@@ -15,12 +15,12 @@ export const requestLogger = (req, res, next) => {
     userAgent: req.get('User-Agent'),
     contentType: req.get('Content-Type'),
     contentLength: req.get('Content-Length'),
-    userId: req.user?.id || 'anonymous'
+    userId: req.user?.id || 'anonymous',
   });
 
   // Override res.end to log response
   const originalEnd = res.end;
-  res.end = function(chunk, encoding) {
+  res.end = function (chunk, encoding) {
     const duration = Date.now() - start;
 
     logger.info(`[${req.method}] ${req.originalUrl} - ${res.statusCode}`, {
@@ -29,7 +29,7 @@ export const requestLogger = (req, res, next) => {
       statusCode: res.statusCode,
       duration: `${duration}ms`,
       ip: req.ip,
-      userId: req.user?.id || 'anonymous'
+      userId: req.user?.id || 'anonymous',
     });
 
     originalEnd.call(this, chunk, encoding);
@@ -53,7 +53,7 @@ export const errorRequestLogger = (err, req, res, next) => {
     userId: req.user?.id || 'anonymous',
     body: req.body,
     params: req.params,
-    query: req.query
+    query: req.query,
   });
 
   next(err);

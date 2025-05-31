@@ -1,29 +1,12 @@
 {
   "eslint.enable": true,
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact"
-  ],
-  "eslint.workingDirectories": [
-    {
-      "directory": "./backend",
-      "changeProcessCWD": true
-    }
-  ],
-  "eslint.run": "onType",
-  "eslint.autoFixOnSave": false,
-  "eslint.format.enable": true,
-  "eslint.lintTask.enable": true,
-  "eslint.experimental.useFlatConfig": true,
+  "eslint.validate": ["javascript", "javascriptreact"],
+  "eslint.options": {
+    "configFile": "C:/Users/heirr/OneDrive/Desktop/Equoria/.eslintrc.json"
+  },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "files.associations": {
-    "*.js": "javascript",
-    "*.mjs": "javascript"
-  },
-  "javascript.preferences.includePackageJsonAutoImports": "auto",
-  "typescript.preferences.includePackageJsonAutoImports": "auto",
-  "problems.decorations.enabled": true,
-  "problems.showCurrentInStatus": true
+  "eslint.probe": ["javascript", "javascriptreact", "jsx"],
+  "eslint.debug": true
 }

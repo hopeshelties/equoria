@@ -5,6 +5,7 @@
 This guide provides manual testing steps for the newly implemented competition API endpoints.
 
 ### **Prerequisites**
+
 1. Backend server running (`npm run dev`)
 2. Database seeded with test data
 3. Valid authentication token
@@ -13,6 +14,7 @@ This guide provides manual testing steps for the newly implemented competition A
 ### **API Endpoints to Test**
 
 #### **1. GET /api/competition/disciplines**
+
 **Purpose:** Get all available competition disciplines
 
 ```bash
@@ -20,6 +22,7 @@ curl -X GET http://localhost:3000/api/competition/disciplines
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -32,6 +35,7 @@ curl -X GET http://localhost:3000/api/competition/disciplines
 ```
 
 #### **2. GET /api/competition/eligibility/:horseId/:discipline**
+
 **Purpose:** Check horse eligibility for a specific discipline
 
 ```bash
@@ -40,6 +44,7 @@ curl -X GET http://localhost:3000/api/competition/eligibility/1/Racing \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -61,6 +66,7 @@ curl -X GET http://localhost:3000/api/competition/eligibility/1/Racing \
 ```
 
 #### **3. POST /api/competition/enter**
+
 **Purpose:** Enter a horse in a competition
 
 ```bash
@@ -74,6 +80,7 @@ curl -X POST http://localhost:3000/api/competition/enter \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -92,6 +99,7 @@ curl -X POST http://localhost:3000/api/competition/enter \
 ```
 
 #### **4. POST /api/competition/execute**
+
 **Purpose:** Execute a competition (host only)
 
 ```bash
@@ -104,6 +112,7 @@ curl -X POST http://localhost:3000/api/competition/execute \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -136,6 +145,7 @@ curl -X POST http://localhost:3000/api/competition/execute \
 ```
 
 #### **5. GET /api/leaderboard/competition**
+
 **Purpose:** Get competition leaderboards with filtering
 
 ```bash
@@ -153,6 +163,7 @@ curl -X GET "http://localhost:3000/api/leaderboard/competition?metric=placements
 ```
 
 **Expected Response:**
+
 ```json
 {
   "success": true,
@@ -187,12 +198,14 @@ curl -X GET "http://localhost:3000/api/leaderboard/competition?metric=placements
 ### **Error Cases to Test**
 
 #### **1. Invalid Authentication**
+
 ```bash
 curl -X GET http://localhost:3000/api/competition/eligibility/1/Racing
 # Expected: 401 Unauthorized
 ```
 
 #### **2. Invalid Horse Ownership**
+
 ```bash
 curl -X GET http://localhost:3000/api/competition/eligibility/999/Racing \
   -H "Authorization: Bearer YOUR_TOKEN"
@@ -200,6 +213,7 @@ curl -X GET http://localhost:3000/api/competition/eligibility/999/Racing \
 ```
 
 #### **3. Invalid Discipline**
+
 ```bash
 curl -X GET http://localhost:3000/api/competition/eligibility/1/InvalidDiscipline \
   -H "Authorization: Bearer YOUR_TOKEN"
@@ -207,6 +221,7 @@ curl -X GET http://localhost:3000/api/competition/eligibility/1/InvalidDisciplin
 ```
 
 #### **4. Duplicate Entry**
+
 ```bash
 # Enter horse twice in same show
 curl -X POST http://localhost:3000/api/competition/enter \
@@ -217,6 +232,7 @@ curl -X POST http://localhost:3000/api/competition/enter \
 ```
 
 #### **5. Non-host Execution**
+
 ```bash
 curl -X POST http://localhost:3000/api/competition/execute \
   -H "Authorization: Bearer NON_HOST_TOKEN" \
@@ -228,6 +244,7 @@ curl -X POST http://localhost:3000/api/competition/execute \
 ### **Validation Tests**
 
 #### **1. Invalid Input Validation**
+
 ```bash
 curl -X POST http://localhost:3000/api/competition/enter \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -237,6 +254,7 @@ curl -X POST http://localhost:3000/api/competition/enter \
 ```
 
 #### **2. Missing Required Fields**
+
 ```bash
 curl -X POST http://localhost:3000/api/competition/enter \
   -H "Authorization: Bearer YOUR_TOKEN" \

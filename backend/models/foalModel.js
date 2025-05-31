@@ -23,8 +23,8 @@ async function getFoalDevelopment(foalId) {
       include: {
         breed: true,
         user: true,
-        stable: true
-      }
+        stable: true,
+      },
     });
 
     if (!foal) {
@@ -38,7 +38,7 @@ async function getFoalDevelopment(foalId) {
 
     // Get foal development record or create default
     let development = await prisma.foalDevelopment.findUnique({
-      where: { foalId: parsedFoalId }
+      where: { foalId: parsedFoalId },
     });
 
     if (!development) {
@@ -49,8 +49,8 @@ async function getFoalDevelopment(foalId) {
           currentDay: 0,
           bondingLevel: 50,
           stressLevel: 20,
-          completedActivities: {}
-        }
+          completedActivities: {},
+        },
       });
     }
 
@@ -58,10 +58,12 @@ async function getFoalDevelopment(foalId) {
     const activityHistory = await prisma.foalActivity.findMany({
       where: { foalId: parsedFoalId },
       orderBy: { createdAt: 'desc' },
-      take: 20 // Last 20 activities
+      take: 20, // Last 20 activities
     });
 
-    logger.info(`[foalModel.getFoalDevelopment] Retrieved development data for foal ${parsedFoalId}`);
+    logger.info(
+      `[foalModel.getFoalDevelopment] Retrieved development data for foal ${parsedFoalId}`
+    );
 
     return {
       foal: {
@@ -69,14 +71,14 @@ async function getFoalDevelopment(foalId) {
         name: foal.name,
         age: foal.age,
         breed: foal.breed?.name || 'Unknown',
-        owner: foal.user?.firstName || 'Unknown'
+        owner: foal.user?.firstName || 'Unknown',
       },
       development: {
         currentDay: development.currentDay,
         bondingLevel: development.bondingLevel,
         stressLevel: development.stressLevel,
         completedActivities: development.completedActivities || {},
-        maxDay: 6 // Foal development period is 7 days (0-6)
+        maxDay: 6, // Foal development period is 7 days (0-6)
       },
       activityHistory: activityHistory.map(activity => ({
         id: activity.id,
@@ -86,11 +88,13 @@ async function getFoalDevelopment(foalId) {
         bondingChange: activity.bondingChange,
         stressChange: activity.stressChange,
         description: activity.description,
-        timestamp: activity.createdAt
+        timestamp: activity.createdAt,
       })),
-      availableActivities: getAvailableActivities(development.currentDay, development.completedActivities || {})
+      availableActivities: getAvailableActivities(
+        development.currentDay,
+        development.completedActivities || {}
+      ),
     };
-
   } catch (error) {
     logger.error(`[foalModel.getFoalDevelopment] Error: ${error.message}`);
     throw error;
@@ -122,7 +126,9 @@ async function completeEnrichmentActivity(foalId, day, activity) {
       throw new Error('Activity is required and must be a string');
     }
 
-    logger.info(`[foalModel.completeEnrichmentActivity] Processing enrichment activity "${activity}" for foal ${parsedFoalId} on day ${parsedDay}`);
+    logger.info(
+      `[foalModel.completeEnrichmentActivity] Processing enrichment activity "${activity}" for foal ${parsedFoalId} on day ${parsedDay}`
+    );
 
     // Get foal and verify it exists
     const foal = await prisma.horse.findUnique({
@@ -132,8 +138,8 @@ async function completeEnrichmentActivity(foalId, day, activity) {
         name: true,
         age: true,
         bond_score: true,
-        stress_level: true
-      }
+        stress_level: true,
+      },
     });
 
     if (!foal) {
@@ -147,14 +153,18 @@ async function completeEnrichmentActivity(foalId, day, activity) {
 
     // Validate activity is appropriate for the given day
     const availableActivities = getAvailableActivities(parsedDay, {});
-    const activityDefinition = availableActivities.find(a =>
-      a.type === activity || a.name === activity ||
-      a.type.toLowerCase().replace('_', ' ') === activity.toLowerCase() ||
-      a.name.toLowerCase() === activity.toLowerCase()
+    const activityDefinition = availableActivities.find(
+      a =>
+        a.type === activity ||
+        a.name === activity ||
+        a.type.toLowerCase().replace('_', ' ') === activity.toLowerCase() ||
+        a.name.toLowerCase() === activity.toLowerCase()
     );
 
     if (!activityDefinition) {
-      throw new Error(`Activity "${activity}" is not appropriate for day ${parsedDay}. Available activities: ${availableActivities.map(a => a.name).join(', ')}`);
+      throw new Error(
+        `Activity "${activity}" is not appropriate for day ${parsedDay}. Available activities: ${availableActivities.map(a => a.name).join(', ')}`
+      );
     }
 
     // Calculate activity outcome
@@ -173,8 +183,8 @@ async function completeEnrichmentActivity(foalId, day, activity) {
       where: { id: parsedFoalId },
       data: {
         bond_score: newBondScore,
-        stress_level: newStressLevel
-      }
+        stress_level: newStressLevel,
+      },
     });
 
     // Record activity in foal_training_history
@@ -185,33 +195,34 @@ async function completeEnrichmentActivity(foalId, day, activity) {
         activity: activityDefinition.name,
         outcome: outcome.result,
         bondChange: outcome.bondingChange,
-        stressChange: outcome.stressChange
-      }
+        stressChange: outcome.stressChange,
+      },
     });
 
-    logger.info(`[foalModel.completeEnrichmentActivity] Activity completed successfully. Bond: ${currentBondScore} -> ${newBondScore}, Stress: ${currentStressLevel} -> ${newStressLevel}`);
+    logger.info(
+      `[foalModel.completeEnrichmentActivity] Activity completed successfully. Bond: ${currentBondScore} -> ${newBondScore}, Stress: ${currentStressLevel} -> ${newStressLevel}`
+    );
 
     return {
       success: true,
       foal: {
         id: foal.id,
-        name: foal.name
+        name: foal.name,
       },
       activity: {
         name: activityDefinition.name,
         day: parsedDay,
         outcome: outcome.result,
-        description: outcome.description
+        description: outcome.description,
       },
       levels: {
         bond_score: newBondScore,
         stress_level: newStressLevel,
         bond_change: outcome.bondingChange,
-        stress_change: outcome.stressChange
+        stress_change: outcome.stressChange,
       },
-      training_record_id: trainingRecord.id
+      training_record_id: trainingRecord.id,
     };
-
   } catch (error) {
     logger.error(`[foalModel.completeEnrichmentActivity] Error: ${error.message}`);
     throw error;
@@ -236,11 +247,13 @@ async function completeActivity(foalId, activityType) {
       throw new Error('Activity type is required');
     }
 
-    logger.info(`[foalModel.completeActivity] Completing activity ${activityType} for foal ${parsedFoalId}`);
+    logger.info(
+      `[foalModel.completeActivity] Completing activity ${activityType} for foal ${parsedFoalId}`
+    );
 
     // Get current development status
     const development = await prisma.foalDevelopment.findUnique({
-      where: { foalId: parsedFoalId }
+      where: { foalId: parsedFoalId },
     });
 
     if (!development) {
@@ -248,7 +261,10 @@ async function completeActivity(foalId, activityType) {
     }
 
     // Check if activity is available for current day
-    const availableActivities = getAvailableActivities(development.currentDay, development.completedActivities || {});
+    const availableActivities = getAvailableActivities(
+      development.currentDay,
+      development.completedActivities || {}
+    );
     const activity = availableActivities.find(a => a.type === activityType);
 
     if (!activity) {
@@ -265,16 +281,22 @@ async function completeActivity(foalId, activityType) {
     }
     completedActivities[development.currentDay].push(activityType);
 
-    const newBondingLevel = Math.max(0, Math.min(100, development.bondingLevel + outcome.bondingChange));
-    const newStressLevel = Math.max(0, Math.min(100, development.stressLevel + outcome.stressChange));
+    const newBondingLevel = Math.max(
+      0,
+      Math.min(100, development.bondingLevel + outcome.bondingChange)
+    );
+    const newStressLevel = Math.max(
+      0,
+      Math.min(100, development.stressLevel + outcome.stressChange)
+    );
 
     const updatedDevelopment = await prisma.foalDevelopment.update({
       where: { foalId: parsedFoalId },
       data: {
         bondingLevel: newBondingLevel,
         stressLevel: newStressLevel,
-        completedActivities
-      }
+        completedActivities,
+      },
     });
 
     // Log the activity
@@ -286,15 +308,14 @@ async function completeActivity(foalId, activityType) {
         outcome: outcome.result,
         bondingChange: outcome.bondingChange,
         stressChange: outcome.stressChange,
-        description: outcome.description
-      }
+        description: outcome.description,
+      },
     });
 
     logger.info(`[foalModel.completeActivity] Activity completed: ${outcome.result}`);
 
     // Return updated development data
     return await getFoalDevelopment(parsedFoalId);
-
   } catch (error) {
     logger.error(`[foalModel.completeActivity] Error: ${error.message}`);
     throw error;
@@ -316,7 +337,7 @@ async function advanceDay(foalId) {
     logger.info(`[foalModel.advanceDay] Advancing day for foal ${parsedFoalId}`);
 
     const development = await prisma.foalDevelopment.findUnique({
-      where: { foalId: parsedFoalId }
+      where: { foalId: parsedFoalId },
     });
 
     if (!development) {
@@ -331,14 +352,15 @@ async function advanceDay(foalId) {
     await prisma.foalDevelopment.update({
       where: { foalId: parsedFoalId },
       data: {
-        currentDay: development.currentDay + 1
-      }
+        currentDay: development.currentDay + 1,
+      },
     });
 
-    logger.info(`[foalModel.advanceDay] Foal ${parsedFoalId} advanced to day ${development.currentDay + 1}`);
+    logger.info(
+      `[foalModel.advanceDay] Foal ${parsedFoalId} advanced to day ${development.currentDay + 1}`
+    );
 
     return await getFoalDevelopment(parsedFoalId);
-
   } catch (error) {
     logger.error(`[foalModel.advanceDay] Error: ${error.message}`);
     throw error;
@@ -353,42 +375,181 @@ async function advanceDay(foalId) {
  */
 function getAvailableActivities(currentDay, completedActivities = {}) {
   const allActivities = {
-    0: [ // Day 0 - Birth and initial bonding
-      { type: 'gentle_touch', name: 'Gentle Touch', description: 'Softly touch and stroke the foal', bondingRange: [3, 7], stressRange: [-2, 1] },
-      { type: 'quiet_presence', name: 'Quiet Presence', description: 'Sit quietly near the foal', bondingRange: [1, 4], stressRange: [-3, 0] },
-      { type: 'soft_voice', name: 'Soft Voice', description: 'Speak gently to the foal', bondingRange: [2, 5], stressRange: [-1, 2] }
+    0: [
+      // Day 0 - Birth and initial bonding
+      {
+        type: 'gentle_touch',
+        name: 'Gentle Touch',
+        description: 'Softly touch and stroke the foal',
+        bondingRange: [3, 7],
+        stressRange: [-2, 1],
+      },
+      {
+        type: 'quiet_presence',
+        name: 'Quiet Presence',
+        description: 'Sit quietly near the foal',
+        bondingRange: [1, 4],
+        stressRange: [-3, 0],
+      },
+      {
+        type: 'soft_voice',
+        name: 'Soft Voice',
+        description: 'Speak gently to the foal',
+        bondingRange: [2, 5],
+        stressRange: [-1, 2],
+      },
     ],
-    1: [ // Day 1 - Basic interaction
-      { type: 'feeding_assistance', name: 'Feeding Assistance', description: 'Help with feeding routine', bondingRange: [4, 8], stressRange: [-1, 3] },
-      { type: 'grooming_intro', name: 'Grooming Introduction', description: 'Introduce basic grooming', bondingRange: [3, 6], stressRange: [0, 4] },
-      { type: 'play_interaction', name: 'Play Interaction', description: 'Gentle play and interaction', bondingRange: [5, 9], stressRange: [-2, 2] }
+    1: [
+      // Day 1 - Basic interaction
+      {
+        type: 'feeding_assistance',
+        name: 'Feeding Assistance',
+        description: 'Help with feeding routine',
+        bondingRange: [4, 8],
+        stressRange: [-1, 3],
+      },
+      {
+        type: 'grooming_intro',
+        name: 'Grooming Introduction',
+        description: 'Introduce basic grooming',
+        bondingRange: [3, 6],
+        stressRange: [0, 4],
+      },
+      {
+        type: 'play_interaction',
+        name: 'Play Interaction',
+        description: 'Gentle play and interaction',
+        bondingRange: [5, 9],
+        stressRange: [-2, 2],
+      },
     ],
-    2: [ // Day 2 - Movement and exploration
-      { type: 'walking_practice', name: 'Walking Practice', description: 'Encourage walking and movement', bondingRange: [3, 7], stressRange: [1, 5] },
-      { type: 'environment_exploration', name: 'Environment Exploration', description: 'Explore the stable area', bondingRange: [4, 8], stressRange: [0, 3] },
-      { type: 'social_introduction', name: 'Social Introduction', description: 'Meet other horses safely', bondingRange: [2, 6], stressRange: [2, 6] }
+    2: [
+      // Day 2 - Movement and exploration
+      {
+        type: 'walking_practice',
+        name: 'Walking Practice',
+        description: 'Encourage walking and movement',
+        bondingRange: [3, 7],
+        stressRange: [1, 5],
+      },
+      {
+        type: 'environment_exploration',
+        name: 'Environment Exploration',
+        description: 'Explore the stable area',
+        bondingRange: [4, 8],
+        stressRange: [0, 3],
+      },
+      {
+        type: 'social_introduction',
+        name: 'Social Introduction',
+        description: 'Meet other horses safely',
+        bondingRange: [2, 6],
+        stressRange: [2, 6],
+      },
     ],
-    3: [ // Day 3 - Learning and training basics
-      { type: 'halter_introduction', name: 'Halter Introduction', description: 'Introduce wearing a halter', bondingRange: [3, 7], stressRange: [2, 6] },
-      { type: 'leading_practice', name: 'Leading Practice', description: 'Practice being led', bondingRange: [5, 9], stressRange: [1, 4] },
-      { type: 'handling_exercises', name: 'Handling Exercises', description: 'Practice being handled', bondingRange: [4, 8], stressRange: [0, 3] },
-      { type: 'trailer_exposure', name: 'Trailer Exposure', description: 'Introduce the foal to a horse trailer', bondingRange: [2, 6], stressRange: [3, 7] }
+    3: [
+      // Day 3 - Learning and training basics
+      {
+        type: 'halter_introduction',
+        name: 'Halter Introduction',
+        description: 'Introduce wearing a halter',
+        bondingRange: [3, 7],
+        stressRange: [2, 6],
+      },
+      {
+        type: 'leading_practice',
+        name: 'Leading Practice',
+        description: 'Practice being led',
+        bondingRange: [5, 9],
+        stressRange: [1, 4],
+      },
+      {
+        type: 'handling_exercises',
+        name: 'Handling Exercises',
+        description: 'Practice being handled',
+        bondingRange: [4, 8],
+        stressRange: [0, 3],
+      },
+      {
+        type: 'trailer_exposure',
+        name: 'Trailer Exposure',
+        description: 'Introduce the foal to a horse trailer',
+        bondingRange: [2, 6],
+        stressRange: [3, 7],
+      },
     ],
-    4: [ // Day 4 - Advanced interaction
-      { type: 'obstacle_introduction', name: 'Obstacle Introduction', description: 'Navigate simple obstacles', bondingRange: [4, 8], stressRange: [2, 5] },
-      { type: 'grooming_advanced', name: 'Advanced Grooming', description: 'More thorough grooming session', bondingRange: [5, 9], stressRange: [-1, 2] },
-      { type: 'training_games', name: 'Training Games', description: 'Fun learning activities', bondingRange: [6, 10], stressRange: [0, 3] }
+    4: [
+      // Day 4 - Advanced interaction
+      {
+        type: 'obstacle_introduction',
+        name: 'Obstacle Introduction',
+        description: 'Navigate simple obstacles',
+        bondingRange: [4, 8],
+        stressRange: [2, 5],
+      },
+      {
+        type: 'grooming_advanced',
+        name: 'Advanced Grooming',
+        description: 'More thorough grooming session',
+        bondingRange: [5, 9],
+        stressRange: [-1, 2],
+      },
+      {
+        type: 'training_games',
+        name: 'Training Games',
+        description: 'Fun learning activities',
+        bondingRange: [6, 10],
+        stressRange: [0, 3],
+      },
     ],
-    5: [ // Day 5 - Confidence building
-      { type: 'confidence_building', name: 'Confidence Building', description: 'Activities to build confidence', bondingRange: [5, 9], stressRange: [-2, 1] },
-      { type: 'new_experiences', name: 'New Experiences', description: 'Introduce new sights and sounds', bondingRange: [3, 7], stressRange: [1, 4] },
-      { type: 'independence_practice', name: 'Independence Practice', description: 'Practice being independent', bondingRange: [4, 8], stressRange: [0, 3] }
+    5: [
+      // Day 5 - Confidence building
+      {
+        type: 'confidence_building',
+        name: 'Confidence Building',
+        description: 'Activities to build confidence',
+        bondingRange: [5, 9],
+        stressRange: [-2, 1],
+      },
+      {
+        type: 'new_experiences',
+        name: 'New Experiences',
+        description: 'Introduce new sights and sounds',
+        bondingRange: [3, 7],
+        stressRange: [1, 4],
+      },
+      {
+        type: 'independence_practice',
+        name: 'Independence Practice',
+        description: 'Practice being independent',
+        bondingRange: [4, 8],
+        stressRange: [0, 3],
+      },
     ],
-    6: [ // Day 6 - Final preparation
-      { type: 'final_assessment', name: 'Final Assessment', description: 'Evaluate development progress', bondingRange: [3, 7], stressRange: [-1, 2] },
-      { type: 'graduation_ceremony', name: 'Graduation Ceremony', description: 'Celebrate completion', bondingRange: [7, 12], stressRange: [-3, 0] },
-      { type: 'future_planning', name: 'Future Planning', description: 'Plan next steps', bondingRange: [2, 5], stressRange: [-2, 1] }
-    ]
+    6: [
+      // Day 6 - Final preparation
+      {
+        type: 'final_assessment',
+        name: 'Final Assessment',
+        description: 'Evaluate development progress',
+        bondingRange: [3, 7],
+        stressRange: [-1, 2],
+      },
+      {
+        type: 'graduation_ceremony',
+        name: 'Graduation Ceremony',
+        description: 'Celebrate completion',
+        bondingRange: [7, 12],
+        stressRange: [-3, 0],
+      },
+      {
+        type: 'future_planning',
+        name: 'Future Planning',
+        description: 'Plan next steps',
+        bondingRange: [2, 5],
+        stressRange: [-2, 1],
+      },
+    ],
   };
 
   const dayActivities = allActivities[currentDay] || [];
@@ -404,8 +565,12 @@ function getAvailableActivities(currentDay, completedActivities = {}) {
  * @returns {Object} - Activity outcome
  */
 function calculateActivityOutcome(activity) {
-  const bondingChange = Math.floor(Math.random() * (activity.bondingRange[1] - activity.bondingRange[0] + 1)) + activity.bondingRange[0];
-  const stressChange = Math.floor(Math.random() * (activity.stressRange[1] - activity.stressRange[0] + 1)) + activity.stressRange[0];
+  const bondingChange =
+    Math.floor(Math.random() * (activity.bondingRange[1] - activity.bondingRange[0] + 1)) +
+    activity.bondingRange[0];
+  const stressChange =
+    Math.floor(Math.random() * (activity.stressRange[1] - activity.stressRange[0] + 1)) +
+    activity.stressRange[0];
 
   let result = 'success';
   let description = `${activity.description} completed successfully.`;
@@ -423,7 +588,7 @@ function calculateActivityOutcome(activity) {
     result,
     description,
     bondingChange,
-    stressChange
+    stressChange,
   };
 }
 
@@ -432,5 +597,5 @@ export {
   completeActivity,
   advanceDay,
   getAvailableActivities,
-  completeEnrichmentActivity
+  completeEnrichmentActivity,
 };

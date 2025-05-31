@@ -42,7 +42,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
   let foal;
   let assignedGroom;
 
-  beforeAll(async() => {
+  beforeAll(async () => {
     // Clean up any existing test data
     await cleanupTestData();
 
@@ -50,7 +50,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
     jest.spyOn(Math, 'random').mockReturnValue(0.5);
   });
 
-  afterAll(async() => {
+  afterAll(async () => {
     // Restore mocks
     jest.restoreAllMocks();
 
@@ -63,19 +63,19 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
     try {
       // Delete in correct order to respect foreign key constraints
       await prisma.groomAssignment.deleteMany({
-        where: { foal: { name: { startsWith: 'Integration Test' } } }
+        where: { foal: { name: { startsWith: 'Integration Test' } } },
       });
 
       await prisma.groom.deleteMany({
-        where: { name: { startsWith: 'Integration Test' } }
+        where: { name: { startsWith: 'Integration Test' } },
       });
 
       await prisma.horse.deleteMany({
-        where: { name: { startsWith: 'Integration Test' } }
+        where: { name: { startsWith: 'Integration Test' } },
       });
 
       await prisma.user.deleteMany({
-        where: { email: 'integration-test@example.com' }
+        where: { email: 'integration-test@example.com' },
       });
     } catch (error) {
       console.warn('Cleanup warning (can be ignored):', error.message);
@@ -83,20 +83,17 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
   }
 
   describe('🔐 STEP 1: User Registration & Authentication', () => {
-    it('should register user and obtain authentication token', async() => {
+    it('should register user and obtain authentication token', async () => {
       const userData = {
         username: 'integrationtester',
         firstName: 'Integration',
         lastName: 'Tester',
         email: 'integration-test@example.com',
         password: 'TestPassword123',
-        money: 5000 // Enough for breeding operations
+        money: 5000, // Enough for breeding operations
       };
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(userData)
-        .expect(201);
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201);
 
       expect(response.body.status).toBe('success');
       expect(response.body.data.user.email).toBe(userData.email);
@@ -108,7 +105,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
 
       // VERIFY: User exists in database
       const dbUser = await prisma.user.findUnique({
-        where: { id: testUser.id }
+        where: { id: testUser.id },
       });
       expect(dbUser).toBeTruthy();
       expect(dbUser.email).toBe(userData.email);
@@ -116,15 +113,15 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
   });
 
   describe('🐴 STEP 2: Horse Creation (Breeding Stock)', () => {
-    it('should create mare with quality traits', async() => {
+    it('should create mare with quality traits', async () => {
       // Ensure we have a breed
       let breed = await prisma.breed.findFirst();
       if (!breed) {
         breed = await prisma.breed.create({
           data: {
             name: 'Integration Test Thoroughbred',
-            description: 'Test breed for integration testing'
-          }
+            description: 'Test breed for integration testing',
+          },
         });
       }
 
@@ -141,14 +138,14 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
           dateOfBirth: new Date('2019-01-01'),
           disciplineScores: {
             Racing: 85,
-            Dressage: 78
+            Dressage: 78,
           },
           epigeneticModifiers: {
             positive: ['fast', 'intelligent', 'calm', 'resilient'],
             negative: [],
-            hidden: ['strong_heart']
-          }
-        }
+            hidden: ['strong_heart'],
+          },
+        },
       });
 
       expect(mare.name).toBe('Integration Test Mare');
@@ -157,7 +154,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
       expect(mare.ownerId).toBe(testUser.id);
     });
 
-    it('should create stallion with complementary traits', async() => {
+    it('should create stallion with complementary traits', async () => {
       const breed = await prisma.breed.findFirst();
 
       // Create stallion with proper schema fields (matching working tests)
@@ -173,14 +170,14 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
           dateOfBirth: new Date('2018-01-01'),
           disciplineScores: {
             Racing: 90,
-            'Show Jumping': 82
+            'Show Jumping': 82,
           },
           epigeneticModifiers: {
             positive: ['powerful', 'brave', 'athletic', 'people_trusting'],
             negative: [],
-            hidden: ['endurance']
-          }
-        }
+            hidden: ['endurance'],
+          },
+        },
       });
 
       expect(stallion.name).toBe('Integration Test Stallion');
@@ -191,7 +188,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
   });
 
   describe('🤱 STEP 3: Breeding Process & Foal Birth', () => {
-    it('should create foal with inherited and epigenetic traits', async() => {
+    it('should create foal with inherited and epigenetic traits', async () => {
       const breed = await prisma.breed.findFirst();
 
       // Create foal (simulating breeding result) with proper schema fields
@@ -211,28 +208,30 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
           epigeneticModifiers: {
             positive: [], // Will be populated by trait application
             negative: [],
-            hidden: []
-          }
-        }
+            hidden: [],
+          },
+        },
       });
 
       // APPLY AT-BIRTH TRAITS (Real business logic, no mocking)
-      const { applyEpigeneticTraitsAtBirth } = await import('../../utils/applyEpigeneticTraitsAtBirth.js');
+      const { applyEpigeneticTraitsAtBirth } = await import(
+        '../../utils/applyEpigeneticTraitsAtBirth.js'
+      );
 
       const lineage = [mare, stallion]; // Simplified lineage
       const epigeneticTraits = applyEpigeneticTraitsAtBirth({
         mare: { stressLevel: 20 }, // Low stress
         lineage,
         feedQuality: 85, // Premium feed
-        stressLevel: 20
+        stressLevel: 20,
       });
 
       // Update foal with epigenetic traits
       foal = await prisma.horse.update({
         where: { id: foal.id },
         data: {
-          epigeneticModifiers: epigeneticTraits
-        }
+          epigeneticModifiers: epigeneticTraits,
+        },
       });
 
       // VERIFY: Foal has proper relationships and traits
@@ -247,7 +246,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
   });
 
   describe('👥 STEP 4: Groom Assignment & Care', () => {
-    it('should assign specialized foal care groom to newborn', async() => {
+    it('should assign specialized foal care groom to newborn', async () => {
       // Import groom system (real business logic)
       const { ensureDefaultGroomAssignment } = await import('../../utils/groomSystem.js');
 
@@ -260,7 +259,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
       // VERIFY: Assignment exists in database
       const dbAssignment = await prisma.groomAssignment.findFirst({
         where: { foalId: foal.id },
-        include: { groom: true }
+        include: { groom: true },
       });
 
       expect(dbAssignment).toBeTruthy();
@@ -269,7 +268,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
       assignedGroom = dbAssignment.groom;
     });
 
-    it('should record groom interaction with foal', async() => {
+    it('should record groom interaction with foal', async () => {
       // Import groom system
       const { recordGroomInteraction } = await import('../../utils/groomSystem.js');
 
@@ -278,7 +277,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
         groomId: assignedGroom.id,
         interactionType: 'daily_care',
         duration: 60, // 1 hour
-        notes: 'Initial care for newborn foal'
+        notes: 'Initial care for newborn foal',
       };
 
       const interactionResult = await recordGroomInteraction(
@@ -296,8 +295,8 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
       const dbInteraction = await prisma.groomInteraction.findFirst({
         where: {
           foalId: foal.id,
-          groomId: assignedGroom.id
-        }
+          groomId: assignedGroom.id,
+        },
       });
 
       expect(dbInteraction).toBeTruthy();
@@ -307,7 +306,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
   });
 
   describe('📈 STEP 5: Foal Development Tracking', () => {
-    it('should track foal development progress', async() => {
+    it('should track foal development progress', async () => {
       // Get foal development data
       const { getFoalDevelopment } = await import('../../models/foalModel.js');
 
@@ -319,7 +318,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
 
       // VERIFY: Development record exists in database
       const dbDevelopment = await prisma.foalDevelopment.findUnique({
-        where: { foalId: foal.id }
+        where: { foalId: foal.id },
       });
 
       expect(dbDevelopment).toBeTruthy();
@@ -328,7 +327,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
   });
 
   describe('🎯 STEP 6: End-to-End Workflow Validation', () => {
-    it('should validate complete breeding workflow integrity', async() => {
+    it('should validate complete breeding workflow integrity', async () => {
       // VERIFY: Complete family tree exists
       const foalWithFamily = await prisma.horse.findUnique({
         where: { id: foal.id },
@@ -336,11 +335,11 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
           sire: true,
           dam: true,
           groomAssignments: {
-            include: { groom: true }
+            include: { groom: true },
           },
           groomInteractions: true,
-          foalDevelopment: true
-        }
+          foalDevelopment: true,
+        },
       });
 
       // Family relationships
@@ -364,7 +363,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
       expect(foalWithFamily.userId).toBe(testUser.id);
     });
 
-    it('should validate business rules are enforced throughout workflow', async() => {
+    it('should validate business rules are enforced throughout workflow', async () => {
       // Age validation
       expect(foal.age).toBe(0); // Newborn
       expect(mare.age).toBeGreaterThanOrEqual(3); // Breeding age

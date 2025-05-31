@@ -8,7 +8,7 @@ import prisma from '../db/index.js';
 /**
  * Register a new user and create a corresponding player record.
  */
-export const register = async(req, res, next) => {
+export const register = async (req, res, next) => {
   // eslint-disable-next-line no-console
   console.log('REGISTER BODY:', req.body); // TEMPORARY FOR DEBUGGING
   try {
@@ -22,11 +22,8 @@ export const register = async(req, res, next) => {
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email },
-          { username }
-        ]
-      }
+        OR: [{ email }, { username }],
+      },
     });
 
     if (existingUser) {
@@ -47,7 +44,6 @@ export const register = async(req, res, next) => {
       _constructedName = lastName;
     }
 
-
     // Create user
     const user = await prisma.user.create({
       data: {
@@ -55,12 +51,12 @@ export const register = async(req, res, next) => {
         email,
         password: hashedPassword,
         firstName: firstName || null, // Set to null if not provided
-        lastName: lastName || null,   // Set to null if not provided
+        lastName: lastName || null, // Set to null if not provided
         money: money === undefined ? 1000 : money, // Default starting money if not provided
-        level: level === undefined ? 1 : level,    // Default starting level if not provided
-        xp: xp === undefined ? 0 : xp,       // Default starting XP if not provided
-        settings: settings || {} // Default empty settings object
-      }
+        level: level === undefined ? 1 : level, // Default starting level if not provided
+        xp: xp === undefined ? 0 : xp, // Default starting XP if not provided
+        settings: settings || {}, // Default empty settings object
+      },
     });
 
     // Generate tokens based on the User identity
@@ -72,8 +68,8 @@ export const register = async(req, res, next) => {
       data: {
         token: refreshTokenValue,
         userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
-      }
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      },
     });
 
     res.status(201).json({
@@ -88,11 +84,11 @@ export const register = async(req, res, next) => {
           lastName: user.lastName,
           money: user.money,
           level: user.level,
-          xp: user.xp
+          xp: user.xp,
         },
         token,
-        refreshToken: refreshTokenValue
-      }
+        refreshToken: refreshTokenValue,
+      },
     });
   } catch (error) {
     logger.error('[authController.register] Error registering user:', error);
@@ -103,7 +99,7 @@ export const register = async(req, res, next) => {
 /**
  * Login user
  */
-export const login = async(req, res, next) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -112,7 +108,7 @@ export const login = async(req, res, next) => {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
       // include: { player: true } // Player data not typically returned on login by default
     });
 
@@ -133,8 +129,8 @@ export const login = async(req, res, next) => {
       data: {
         token: refreshTokenValue,
         userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
-      }
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      },
     });
 
     res.status(200).json({
@@ -144,11 +140,11 @@ export const login = async(req, res, next) => {
         user: {
           id: user.id,
           username: user.username,
-          email: user.email
+          email: user.email,
         },
         token,
-        refreshToken: refreshTokenValue
-      }
+        refreshToken: refreshTokenValue,
+      },
     });
   } catch (error) {
     logger.error('[authController.login] Error logging in user:', error);
@@ -162,7 +158,7 @@ export const login = async(req, res, next) => {
 /**
  * Refresh access token
  */
-export const refreshToken = async(req, res, next) => {
+export const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken: providedRefreshToken } = req.body; // Renamed to avoid conflict
 
@@ -172,7 +168,7 @@ export const refreshToken = async(req, res, next) => {
 
     const storedToken = await prisma.refreshToken.findFirst({
       where: { token: providedRefreshToken },
-      include: { user: true }
+      include: { user: true },
     });
 
     if (!storedToken) {
@@ -192,8 +188,8 @@ export const refreshToken = async(req, res, next) => {
       status: 'success',
       message: 'Token refreshed successfully',
       data: {
-        token
-      }
+        token,
+      },
     });
   } catch (error) {
     logger.error('[authController.refreshToken] Error refreshing token:', error);
@@ -207,7 +203,7 @@ export const refreshToken = async(req, res, next) => {
 /**
  * Get current user profile
  */
-export const getProfile = async(req, res, next) => {
+export const getProfile = async (req, res, next) => {
   try {
     if (!req.user || !req.user.id) {
       throw new AppError('Authentication error, user not found in request', 401);
@@ -222,8 +218,8 @@ export const getProfile = async(req, res, next) => {
         firstName: true,
         lastName: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
     if (!user) {
@@ -232,7 +228,7 @@ export const getProfile = async(req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      data: { user }
+      data: { user },
     });
   } catch (error) {
     logger.error('[authController.getProfile] Error retrieving profile:', error);
@@ -246,7 +242,7 @@ export const getProfile = async(req, res, next) => {
 /**
  * Update user profile
  */
-export const updateProfile = async(req, res, next) => {
+export const updateProfile = async (req, res, next) => {
   try {
     const { username, email } = req.body;
 
@@ -258,14 +254,11 @@ export const updateProfile = async(req, res, next) => {
     // Check for existing username or email
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email: email || '' },
-          { username: username || '' }
-        ],
+        OR: [{ email: email || '' }, { username: username || '' }],
         NOT: {
-          id: req.user.id
-        }
-      }
+          id: req.user.id,
+        },
+      },
     });
 
     if (existingUser) {
@@ -277,20 +270,20 @@ export const updateProfile = async(req, res, next) => {
       where: { id: req.user.id },
       data: {
         username: username || undefined,
-        email: email || undefined
+        email: email || undefined,
       },
       select: {
         id: true,
         username: true,
         email: true,
         createdAt: true,
-        updatedAt: true
-      }
+        updatedAt: true,
+      },
     });
 
     res.status(200).json({
       status: 'success',
-      data: { user: updatedUser }
+      data: { user: updatedUser },
     });
   } catch (error) {
     logger.error('[authController.updateProfile] Error updating profile:', error);
@@ -301,19 +294,19 @@ export const updateProfile = async(req, res, next) => {
 /**
  * Logout user
  */
-export const logout = async(req, res, next) => {
+export const logout = async (req, res, next) => {
   try {
     // const { refreshToken: _unusedRefreshToken } = req.body; // Marked as unused if not needed for specific token invalidation
 
     if (req.user && req.user.id) {
       await prisma.refreshToken.deleteMany({
-        where: { userId: req.user.id }
+        where: { userId: req.user.id },
       });
     }
 
     res.status(200).json({
       status: 'success',
-      message: 'Logout successful'
+      message: 'Logout successful',
     });
   } catch (error) {
     logger.error('[authController.logout] Error logging out user:', error);

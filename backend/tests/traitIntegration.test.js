@@ -23,8 +23,8 @@ describe('Trait Integration During Gameplay', () => {
         epigenetic_modifiers: {
           positive: ['social', 'calm'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateBondingChange(horse, 'grooming', { duration: 60 });
@@ -42,8 +42,8 @@ describe('Trait Integration During Gameplay', () => {
         epigenetic_modifiers: {
           positive: [],
           negative: ['antisocial', 'nervous'],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateBondingChange(horse, 'training', { success: true });
@@ -61,8 +61,8 @@ describe('Trait Integration During Gameplay', () => {
         epigenetic_modifiers: {
           positive: ['social'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateBondingChange(horse, 'competition', { placement: '1st' });
@@ -81,13 +81,13 @@ describe('Trait Integration During Gameplay', () => {
         epigenetic_modifiers: {
           positive: ['resilient'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateTemperamentDrift(horse, {
         stressLevel: 80,
-        recentCompetition: true
+        recentCompetition: true,
       });
 
       expect(result.driftOccurred).toBe(false);
@@ -103,8 +103,8 @@ describe('Trait Integration During Gameplay', () => {
         epigenetic_modifiers: {
           positive: [],
           negative: ['nervous'],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       // Mock high random value to force drift
@@ -113,7 +113,7 @@ describe('Trait Integration During Gameplay', () => {
       const result = calculateTemperamentDrift(horse, {
         stressLevel: 90,
         recentCompetition: true,
-        bondScore: 20
+        bondScore: 20,
       });
 
       expect(result.driftProbability).toBeGreaterThan(0);
@@ -128,13 +128,13 @@ describe('Trait Integration During Gameplay', () => {
         epigenetic_modifiers: {
           positive: ['calm'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateTemperamentDrift(horse, {
         stressLevel: 60,
-        recentTraining: true
+        recentTraining: true,
       });
 
       // Calm trait should completely suppress temperament drift
@@ -201,7 +201,7 @@ describe('Trait Integration During Gameplay', () => {
     it('should handle missing trait data gracefully', () => {
       const horse = {
         id: 1,
-        name: 'Horse Without Traits'
+        name: 'Horse Without Traits',
         // No epigenetic_modifiers field
       };
 
@@ -215,7 +215,7 @@ describe('Trait Integration During Gameplay', () => {
     it('should handle malformed trait data', () => {
       const horse = {
         id: 1,
-        epigenetic_modifiers: 'invalid_data' // Should be an object
+        epigenetic_modifiers: 'invalid_data', // Should be an object
       };
 
       const result = calculateBondingChange(horse, 'training', { success: true });
@@ -230,8 +230,8 @@ describe('Trait Integration During Gameplay', () => {
         epigenetic_modifiers: {
           positive: ['social'],
           negative: [],
-          hidden: []
-        }
+          hidden: [],
+        },
       };
 
       const result = calculateBondingChange(horse, 'invalid_activity', {});

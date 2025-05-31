@@ -10,7 +10,6 @@
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
 describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => {
-
   // Create a minimal test horse for demonstration
   function createDemoHorse(id, name, disciplineAffinityTrait = null) {
     const horse = {
@@ -29,8 +28,8 @@ describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => 
       epigenetic_modifiers: {
         positive: disciplineAffinityTrait ? [disciplineAffinityTrait] : [],
         negative: [],
-        hidden: []
-      }
+        hidden: [],
+      },
     };
     return horse;
   }
@@ -42,13 +41,17 @@ describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => 
 
     try {
       // Create two identical horses, one with discipline affinity trait
-      const horseWithAffinity = createDemoHorse(1, 'JumpSpecialist', 'discipline_affinity_show_jumping');
+      const horseWithAffinity = createDemoHorse(
+        1,
+        'JumpSpecialist',
+        'discipline_affinity_show_jumping'
+      );
       const horseWithoutAffinity = createDemoHorse(2, 'RegularHorse');
 
       const show = {
         id: 1,
         name: 'Show Jumping Competition',
-        discipline: 'Show Jumping'
+        discipline: 'Show Jumping',
       };
 
       // Run competition simulation
@@ -91,8 +94,8 @@ describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => 
       epigenetic_modifiers: {
         positive: [affinityTrait], // Contains 'discipline_affinity_show_jumping'
         negative: [],
-        hidden: []
-      }
+        hidden: [],
+      },
     };
 
     // Horse without the trait
@@ -110,14 +113,14 @@ describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => 
       epigenetic_modifiers: {
         positive: [], // Empty - no discipline affinity trait
         negative: [],
-        hidden: []
-      }
+        hidden: [],
+      },
     };
 
     const show = {
       id: 1,
       name: 'Show Jumping Test',
-      discipline: 'Show Jumping'
+      discipline: 'Show Jumping',
     };
 
     // Verify the trait check logic works as specified in TASK 9
@@ -140,7 +143,7 @@ describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => 
       { discipline: 'Racing', trait: 'discipline_affinity_racing' },
       { discipline: 'Dressage', trait: 'discipline_affinity_dressage' },
       { discipline: 'Cross Country', trait: 'discipline_affinity_cross_country' },
-      { discipline: 'Endurance', trait: 'discipline_affinity_endurance' }
+      { discipline: 'Endurance', trait: 'discipline_affinity_endurance' },
     ];
 
     testCases.forEach(({ discipline, trait }) => {
@@ -150,7 +153,7 @@ describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => 
       const show = {
         id: 1,
         name: `${discipline} Competition`,
-        discipline
+        discipline,
       };
 
       const results = simulateCompetition([horseWithAffinity, horseWithoutAffinity], show);
@@ -165,13 +168,17 @@ describe('TASK 9: Integration Example - Discipline Affinity Trait Bonus', () => 
 
   it('should not apply bonus when trait does not match discipline', () => {
     // Horse has racing affinity but competing in dressage
-    const horseWithWrongAffinity = createDemoHorse(1, 'RacingSpecialist', 'discipline_affinity_racing');
+    const horseWithWrongAffinity = createDemoHorse(
+      1,
+      'RacingSpecialist',
+      'discipline_affinity_racing'
+    );
     const regularHorse = createDemoHorse(2, 'RegularHorse');
 
     const show = {
       id: 1,
       name: 'Dressage Competition',
-      discipline: 'Dressage' // Different from horse's racing affinity
+      discipline: 'Dressage', // Different from horse's racing affinity
     };
 
     const results = simulateCompetition([horseWithWrongAffinity, regularHorse], show);

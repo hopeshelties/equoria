@@ -1,4 +1,3 @@
-
 /**
  * 🧪 UNIT TEST: Competition Rewards System - Prize & Stat Gain Calculations
  *
@@ -39,34 +38,33 @@ import {
   getRelevantStats,
   calculateStatGains,
   calculateEntryFees,
-  hasValidRider
+  hasValidRider,
 } from '../utils/competitionRewards.js';
 
 describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations', () => {
-
   describe('calculatePrizeDistribution', () => {
     it('should calculate correct prize distribution for 1000 prize pool', () => {
       const distribution = calculatePrizeDistribution(1000);
 
-      expect(distribution.first).toBe(500);   // 50%
-      expect(distribution.second).toBe(300);  // 30%
-      expect(distribution.third).toBe(200);   // 20%
+      expect(distribution.first).toBe(500); // 50%
+      expect(distribution.second).toBe(300); // 30%
+      expect(distribution.third).toBe(200); // 20%
     });
 
     it('should handle odd prize amounts with rounding', () => {
       const distribution = calculatePrizeDistribution(1001);
 
-      expect(distribution.first).toBe(501);   // 50.05% rounded
-      expect(distribution.second).toBe(300);  // 30.03% rounded
-      expect(distribution.third).toBe(200);   // 20.02% rounded
+      expect(distribution.first).toBe(501); // 50.05% rounded
+      expect(distribution.second).toBe(300); // 30.03% rounded
+      expect(distribution.third).toBe(200); // 20.02% rounded
     });
 
     it('should handle small prize amounts', () => {
       const distribution = calculatePrizeDistribution(10);
 
-      expect(distribution.first).toBe(5);     // 50%
-      expect(distribution.second).toBe(3);    // 30%
-      expect(distribution.third).toBe(2);     // 20%
+      expect(distribution.first).toBe(5); // 50%
+      expect(distribution.second).toBe(3); // 30%
+      expect(distribution.third).toBe(2); // 20%
     });
 
     it('should handle zero prize pool', () => {
@@ -101,9 +99,18 @@ describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations
 
     it('should handle all supported disciplines', () => {
       const disciplines = [
-        'Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Hunter',
-        'Barrel Racing', 'Reining', 'Cutting', 'Trail', 'Western Pleasure',
-        'English Pleasure', 'Driving'
+        'Racing',
+        'Show Jumping',
+        'Dressage',
+        'Cross Country',
+        'Hunter',
+        'Barrel Racing',
+        'Reining',
+        'Cutting',
+        'Trail',
+        'Western Pleasure',
+        'English Pleasure',
+        'Driving',
       ];
 
       disciplines.forEach(discipline => {
@@ -173,11 +180,12 @@ describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations
 
     it('should select random stat from relevant discipline stats', () => {
       // Test multiple times to verify randomness
-      Math.random = jest.fn()
+      Math.random = jest
+        .fn()
         .mockReturnValueOnce(0.05) // Pass chance check
-        .mockReturnValueOnce(0.0)  // Select first stat
+        .mockReturnValueOnce(0.0) // Select first stat
         .mockReturnValueOnce(0.05) // Pass chance check
-        .mockReturnValueOnce(0.5)  // Select middle stat
+        .mockReturnValueOnce(0.5) // Select middle stat
         .mockReturnValueOnce(0.05) // Pass chance check
         .mockReturnValueOnce(0.9); // Select last stat
 
@@ -185,9 +193,9 @@ describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations
       const statGain2 = calculateStatGains('1st', 'Racing');
       const statGain3 = calculateStatGains('1st', 'Racing');
 
-      expect(statGain1.stat).toBe('speed');    // First stat
-      expect(statGain2.stat).toBe('stamina');  // Middle stat
-      expect(statGain3.stat).toBe('focus');    // Last stat
+      expect(statGain1.stat).toBe('speed'); // First stat
+      expect(statGain2.stat).toBe('stamina'); // Middle stat
+      expect(statGain3.stat).toBe('focus'); // Last stat
     });
   });
 
@@ -220,8 +228,8 @@ describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations
         name: 'TestHorse',
         rider: {
           name: 'John Doe',
-          skill: 85
-        }
+          skill: 85,
+        },
       };
 
       expect(hasValidRider(horse)).toBe(true);
@@ -231,7 +239,7 @@ describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations
       const horse = {
         id: 1,
         name: 'TestHorse',
-        rider: null
+        rider: null,
       };
 
       expect(hasValidRider(horse)).toBe(false);
@@ -240,7 +248,7 @@ describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations
     it('should return false for horse with undefined rider', () => {
       const horse = {
         id: 1,
-        name: 'TestHorse'
+        name: 'TestHorse',
         // rider is undefined
       };
 
@@ -251,7 +259,7 @@ describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations
       const horse = {
         id: 1,
         name: 'TestHorse',
-        rider: 'string-rider'
+        rider: 'string-rider',
       };
 
       expect(hasValidRider(horse)).toBe(false);
@@ -261,7 +269,7 @@ describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations
       const horse = {
         id: 1,
         name: 'TestHorse',
-        rider: {}
+        rider: {},
       };
 
       // Empty object is still a valid object - business logic may allow this

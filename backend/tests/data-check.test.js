@@ -40,16 +40,16 @@ import { jest, describe, it, expect, afterAll } from '@jest/globals';
 import prisma from '../db/index.js';
 
 describe('🔍 INTEGRATION: Database Data Check - Live Data Validation & Debugging', () => {
-  afterAll(async() => {
+  afterAll(async () => {
     await prisma.$disconnect();
   });
 
-  it('should check what users exist', async() => {
+  it('should check what users exist', async () => {
     const users = await prisma.user.findMany({
       select: {
         id: true,
-        email: true // Select only id and email
-      }
+        email: true, // Select only id and email
+      },
     });
     console.log('Users in database:', JSON.stringify(users, null, 2));
     expect(Array.isArray(users)).toBe(true);
@@ -70,7 +70,7 @@ describe('🔍 INTEGRATION: Database Data Check - Live Data Validation & Debuggi
     }
   });
 
-  it('should check what players exist (using user table)', async() => {
+  it('should check what players exist (using user table)', async () => {
     const players = await prisma.user.findMany({
       select: {
         id: true,
@@ -81,8 +81,8 @@ describe('🔍 INTEGRATION: Database Data Check - Live Data Validation & Debuggi
         role: true,
         money: true,
         level: true,
-        xp: true
-      }
+        xp: true,
+      },
     });
     console.log('Players in database (from user table):', JSON.stringify(players, null, 2));
     expect(Array.isArray(players)).toBe(true);
@@ -100,17 +100,17 @@ describe('🔍 INTEGRATION: Database Data Check - Live Data Validation & Debuggi
     }
   });
 
-  it('should check what horses exist', async() => {
+  it('should check what horses exist', async () => {
     const horses = await prisma.horse.findMany({
       include: {
         user: {
           select: {
             id: true,
             username: true,
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
     console.log('Horses in database:', JSON.stringify(horses, null, 2));
     expect(Array.isArray(horses)).toBe(true);

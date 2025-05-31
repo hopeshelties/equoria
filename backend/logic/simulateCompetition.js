@@ -44,7 +44,7 @@ function simulateCompetition(horses, show) {
       const baseScore = getStatScore(horse, show.discipline);
 
       // 2. Add legacy trait bonus (+5 if horse trait matches show discipline)
-      const legacyTraitBonus = (horse.trait === show.discipline) ? 5 : 0;
+      const legacyTraitBonus = horse.trait === show.discipline ? 5 : 0;
 
       // 2.5. TASK 9: Add discipline affinity trait bonus (+5 if horse has matching discipline_affinity trait)
       let disciplineAffinityBonus = 0;
@@ -53,7 +53,9 @@ function simulateCompetition(horses, show) {
 
       if (horse.epigenetic_modifiers?.positive?.includes(affinityTrait)) {
         disciplineAffinityBonus = 5;
-        logger.info(`[simulateCompetition] Horse ${horse.name}: Discipline affinity bonus applied for ${affinityTrait} (+5 points)`);
+        logger.info(
+          `[simulateCompetition] Horse ${horse.name}: Discipline affinity bonus applied for ${affinityTrait} (+5 points)`
+        );
       }
 
       // 3. Add training score (0-100, default to 0 if not provided)
@@ -65,7 +67,8 @@ function simulateCompetition(horses, show) {
       const tackBonus = saddleBonus + bridleBonus;
 
       // 5. Calculate subtotal before percentage modifiers
-      const subtotal = baseScore + legacyTraitBonus + disciplineAffinityBonus + trainingScore + tackBonus;
+      const subtotal =
+        baseScore + legacyTraitBonus + disciplineAffinityBonus + trainingScore + tackBonus;
 
       // 6. Apply rider modifiers (bonus and penalty as percentages)
       const riderBonusPercent = (horse.rider && horse.rider.bonusPercent) || 0;
@@ -91,19 +94,23 @@ function simulateCompetition(horses, show) {
 
         // Apply trait-based stress resistance
         if (traitEffects.competitionStressResistance) {
-          stressImpactPercent *= (1 - traitEffects.competitionStressResistance);
-          logger.info(`[simulateCompetition] Horse ${horse.name}: Stress resistance applied, ${(traitEffects.competitionStressResistance * 100).toFixed(1)}% reduction`);
+          stressImpactPercent *= 1 - traitEffects.competitionStressResistance;
+          logger.info(
+            `[simulateCompetition] Horse ${horse.name}: Stress resistance applied, ${(traitEffects.competitionStressResistance * 100).toFixed(1)}% reduction`
+          );
         }
 
         // Apply stress reduction from calm/resilient traits
         if (traitEffects.trainingStressReduction) {
-          stressImpactPercent *= (1 - traitEffects.trainingStressReduction * 0.5); // Half effect in competition
+          stressImpactPercent *= 1 - traitEffects.trainingStressReduction * 0.5; // Half effect in competition
         }
 
         competitionStressImpact = scoreAfterHealth * stressImpactPercent;
 
         if (competitionStressImpact > 0) {
-          logger.info(`[simulateCompetition] Horse ${horse.name}: Stress impact -${competitionStressImpact.toFixed(1)} points (${baseStressLevel} stress level)`);
+          logger.info(
+            `[simulateCompetition] Horse ${horse.name}: Stress impact -${competitionStressImpact.toFixed(1)} points (${baseStressLevel} stress level)`
+          );
         }
       }
 
@@ -115,11 +122,13 @@ function simulateCompetition(horses, show) {
 
       // Log trait impact for analysis
       if (traitImpact.appliedTraits.length > 0) {
-        logger.info(`[simulateCompetition] Horse ${horse.name}: ${traitImpact.appliedTraits.length} traits applied, ${(traitImpact.totalScoreModifier * 100).toFixed(1)}% modifier, ${traitImpact.finalScoreAdjustment.toFixed(1)} point adjustment`);
+        logger.info(
+          `[simulateCompetition] Horse ${horse.name}: ${traitImpact.appliedTraits.length} traits applied, ${(traitImpact.totalScoreModifier * 100).toFixed(1)}% modifier, ${traitImpact.finalScoreAdjustment.toFixed(1)} point adjustment`
+        );
       }
 
       // 9. Apply random luck modifier (±1–10% random factor)
-      const randomLuckPercent = (Math.random() * 0.18) - 0.09; // Random between -0.09 and +0.09 (-9% to +9%)
+      const randomLuckPercent = Math.random() * 0.18 - 0.09; // Random between -0.09 and +0.09 (-9% to +9%)
       const finalScore = scoreAfterTraits * (1 + randomLuckPercent);
 
       return {
@@ -139,19 +148,18 @@ function simulateCompetition(horses, show) {
             type: trait.type,
             modifier: Math.round(trait.modifier * 1000) / 10, // Convert to percentage with 1 decimal
             specialized: trait.isSpecialized,
-            description: trait.description
-          }))
+            description: trait.description,
+          })),
         },
         // NEW: Include stress impact details
         stressDetails: {
           baseStressLevel,
           stressImpact: Math.round(competitionStressImpact * 10) / 10,
-          stressResistanceApplied: !!(traitImpact.appliedTraits.some(t =>
+          stressResistanceApplied: !!traitImpact.appliedTraits.some(t =>
             ['resilient', 'calm'].includes(t.traitName)
-          ))
-        }
+          ),
+        },
       };
-
     } catch (error) {
       // If there's an error calculating score for a horse, give them a score of 0
       logger.warn(`Error calculating score for horse ${horse.id || 'unknown'}: ${error.message}`);
@@ -159,7 +167,7 @@ function simulateCompetition(horses, show) {
         horseId: horse.id,
         name: horse.name || 'Unknown',
         score: 0,
-        placement: null
+        placement: null,
       };
     }
   });
@@ -178,6 +186,4 @@ function simulateCompetition(horses, show) {
   return results;
 }
 
-export {
-  simulateCompetition
-};
+export { simulateCompetition };

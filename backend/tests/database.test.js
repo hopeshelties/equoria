@@ -36,22 +36,22 @@ import { jest, describe, it, expect, afterAll } from '@jest/globals';
 import prisma from '../db/index.js';
 
 describe('🔌 INTEGRATION: Database Connection - Core Infrastructure Validation', () => {
-  afterAll(async() => {
+  afterAll(async () => {
     await prisma.$disconnect();
   });
 
-  it('should connect to the database', async() => {
+  it('should connect to the database', async () => {
     const result = await prisma.$queryRaw`SELECT 1 as test`;
     expect(result).toBeDefined();
     expect(result[0].test).toBe(1);
   });
 
-  it('should be able to query the User table', async() => {
+  it('should be able to query the User table', async () => {
     const users = await prisma.user.findMany({
       select: {
         id: true,
-        email: true // Select only id and email
-      }
+        email: true, // Select only id and email
+      },
     });
     expect(Array.isArray(users)).toBe(true);
 
@@ -69,16 +69,16 @@ describe('🔌 INTEGRATION: Database Connection - Core Infrastructure Validation
     expect(users).toBeDefined();
   });
 
-  it('should be able to perform basic database operations', async() => {
+  it('should be able to perform basic database operations', async () => {
     // Test database write capability with a simple count query
     const userCount = await prisma.user.count();
     expect(typeof userCount).toBe('number');
     expect(userCount).toBeGreaterThanOrEqual(0);
   });
 
-  it('should handle database errors gracefully', async() => {
+  it('should handle database errors gracefully', async () => {
     // Test error handling with an invalid query
-    await expect(async() => {
+    await expect(async () => {
       await prisma.$queryRaw`SELECT * FROM nonexistent_table`;
     }).rejects.toThrow();
   });

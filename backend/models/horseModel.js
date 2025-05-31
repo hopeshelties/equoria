@@ -37,7 +37,7 @@ async function createHorse(horseData) {
       sale_price,
       health_status,
       last_vetted_date,
-      tack
+      tack,
     } = horseData;
 
     // Validate required fields
@@ -49,7 +49,7 @@ async function createHorse(horseData) {
     }
     if (!breedId && !breed) {
       throw new Error('Either breedId or breed connection is required');
-    }    // Prepare breed relationship
+    } // Prepare breed relationship
     let breedRelation = {};
     if (breed && typeof breed === 'object' && breed.connect) {
       // Special case for "Test Horse" - convert breed.connect to breedId
@@ -66,8 +66,10 @@ async function createHorse(horseData) {
       // Handle case where breed is passed as a number (treat as breedId)
       breedRelation = { breedId: breed };
     } else {
-      throw new Error('Invalid breed format. Use breedId (number) or breed: { connect: { id: number } }');
-    }// Prepare user relationship if provided
+      throw new Error(
+        'Invalid breed format. Use breedId (number) or breed: { connect: { id: number } }'
+      );
+    } // Prepare user relationship if provided
     let userRelation = {};
     if (userId) {
       // Special case for 'Full Horse' to match test expectations
@@ -90,39 +92,54 @@ async function createHorse(horseData) {
     }
 
     // Apply at-birth traits if this is a newborn with parents
-    let epigeneticModifiers = horseData.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
+    let epigeneticModifiers = horseData.epigeneticModifiers || {
+      positive: [],
+      negative: [],
+      hidden: [],
+    };
 
     if (age === 0 && sireId && damId) {
       try {
-        logger.info(`[horseModel.createHorse] Applying at-birth traits for newborn with sire ${sireId} and dam ${damId}`);
+        logger.info(
+          `[horseModel.createHorse] Applying at-birth traits for newborn with sire ${sireId} and dam ${damId}`
+        );
 
         const atBirthResult = await applyEpigeneticTraitsAtBirth({
           sireId,
           damId,
           mareStress: horseData.mareStress,
-          feedQuality: horseData.feedQuality
+          feedQuality: horseData.feedQuality,
         });
 
         // Merge at-birth traits with any existing traits
         epigeneticModifiers = {
-          positive: [...(epigeneticModifiers.positive || []), ...(atBirthResult.traits.positive || [])],
-          negative: [...(epigeneticModifiers.negative || []), ...(atBirthResult.traits.negative || [])],
-          hidden: [...(epigeneticModifiers.hidden || []), ...(atBirthResult.traits.hidden || [])]
+          positive: [
+            ...(epigeneticModifiers.positive || []),
+            ...(atBirthResult.traits.positive || []),
+          ],
+          negative: [
+            ...(epigeneticModifiers.negative || []),
+            ...(atBirthResult.traits.negative || []),
+          ],
+          hidden: [...(epigeneticModifiers.hidden || []), ...(atBirthResult.traits.hidden || [])],
         };
 
-        logger.info(`[horseModel.createHorse] Applied at-birth traits: ${JSON.stringify(atBirthResult.traits)}`);
+        logger.info(
+          `[horseModel.createHorse] Applied at-birth traits: ${JSON.stringify(atBirthResult.traits)}`
+        );
 
         // Log breeding analysis for debugging
         if (atBirthResult.breedingAnalysis) {
           const analysis = atBirthResult.breedingAnalysis;
-          logger.info(`[horseModel.createHorse] Breeding analysis - Lineage specialization: ${analysis.lineage.disciplineSpecialization}, Inbreeding: ${analysis.inbreeding.inbreedingDetected}`);
+          logger.info(
+            `[horseModel.createHorse] Breeding analysis - Lineage specialization: ${analysis.lineage.disciplineSpecialization}, Inbreeding: ${analysis.inbreeding.inbreedingDetected}`
+          );
         }
-
       } catch (error) {
         logger.error(`[horseModel.createHorse] Error applying at-birth traits: ${error.message}`);
         // Continue with horse creation even if trait application fails
       }
-    }    // Create horse with all provided fields
+    } // Create horse with all provided fields
     const horse = await prisma.horse.create({
       data: {
         name,
@@ -157,16 +174,18 @@ async function createHorse(horseData) {
         ...(health_status && { health_status }),
         ...(last_vetted_date && { last_vetted_date: new Date(last_vetted_date) }),
         ...(tack && { tack }),
-        epigeneticModifiers
+        epigeneticModifiers,
       },
       include: {
         breed: true,
         user: true,
-        stable: true
-      }
+        stable: true,
+      },
     });
 
-    logger.info(`[horseModel.createHorse] Successfully created horse: ${horse.name} (ID: ${horse.id})`);
+    logger.info(
+      `[horseModel.createHorse] Successfully created horse: ${horse.name} (ID: ${horse.id})`
+    );
     return horse;
   } catch (error) {
     logger.error('[horseModel.createHorse] Database error: %o', error);
@@ -180,18 +199,20 @@ async function getHorseById(id) {
     const numericId = parseInt(id, 10);
     if (isNaN(numericId) || numericId <= 0) {
       throw new Error('Invalid horse ID provided');
-    }    // Refactored to use Prisma client with relations
+    } // Refactored to use Prisma client with relations
     const horse = await prisma.horse.findUnique({
       where: { id: numericId },
       include: {
         breed: true,
         user: true,
-        stable: true
-      }
+        stable: true,
+      },
     });
 
     if (horse) {
-      logger.info(`[horseModel.getHorseById] Successfully found horse: ${horse.name} (ID: ${horse.id})`);
+      logger.info(
+        `[horseModel.getHorseById] Successfully found horse: ${horse.name} (ID: ${horse.id})`
+      );
     }
 
     return horse; // Returns null if not found, which is Prisma's default
@@ -225,12 +246,14 @@ async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
       throw new Error('Points to add must be a positive number');
     }
 
-    logger.info(`[horseModel.updateDisciplineScore] Updating ${discipline} score for horse ${numericId} by +${pointsToAdd}`);
+    logger.info(
+      `[horseModel.updateDisciplineScore] Updating ${discipline} score for horse ${numericId} by +${pointsToAdd}`
+    );
 
     // First, get the current horse to check if it exists and get current scores
     const currentHorse = await prisma.horse.findUnique({
       where: { id: numericId },
-      select: { disciplineScores: true }
+      select: { disciplineScores: true },
     });
 
     if (!currentHorse) {
@@ -246,23 +269,24 @@ async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
 
     const updatedScores = {
       ...currentScores,
-      [discipline]: newScore
-    };    // Update the horse with new discipline scores
+      [discipline]: newScore,
+    }; // Update the horse with new discipline scores
     const updatedHorse = await prisma.horse.update({
       where: { id: numericId },
       data: {
-        disciplineScores: updatedScores
+        disciplineScores: updatedScores,
       },
       include: {
         breed: true,
         user: true,
-        stable: true
-      }
+        stable: true,
+      },
     });
 
-    logger.info(`[horseModel.updateDisciplineScore] Successfully updated ${discipline} score for horse ${numericId}: ${currentScore} -> ${newScore}`);
+    logger.info(
+      `[horseModel.updateDisciplineScore] Successfully updated ${discipline} score for horse ${numericId}: ${currentScore} -> ${newScore}`
+    );
     return updatedHorse;
-
   } catch (error) {
     logger.error('[horseModel.updateDisciplineScore] Database error: %o', error);
     throw new Error(`Database error in updateDisciplineScore: ${error.message}`);
@@ -284,7 +308,7 @@ async function getDisciplineScores(horseId) {
 
     const horse = await prisma.horse.findUnique({
       where: { id: numericId },
-      select: { disciplineScores: true }
+      select: { disciplineScores: true },
     });
 
     if (!horse) {
@@ -292,7 +316,6 @@ async function getDisciplineScores(horseId) {
     }
 
     return horse.disciplineScores || {};
-
   } catch (error) {
     logger.error('[horseModel.getDisciplineScores] Database error: %o', error);
     throw new Error(`Database error in getDisciplineScores: ${error.message}`);
@@ -309,14 +332,17 @@ async function getDisciplineScores(horseId) {
  */
 async function incrementDisciplineScore(horseId, discipline, amount = 5) {
   try {
-    logger.info(`[horseModel.incrementDisciplineScore] Incrementing ${discipline} score for horse ${horseId} by +${amount}`);
+    logger.info(
+      `[horseModel.incrementDisciplineScore] Incrementing ${discipline} score for horse ${horseId} by +${amount}`
+    );
 
     // Use the existing updateDisciplineScore function with specified amount
     const updatedHorse = await updateDisciplineScore(horseId, discipline, amount);
 
-    logger.info(`[horseModel.incrementDisciplineScore] Successfully incremented ${discipline} score for horse ${horseId}`);
+    logger.info(
+      `[horseModel.incrementDisciplineScore] Successfully incremented ${discipline} score for horse ${horseId}`
+    );
     return updatedHorse;
-
   } catch (error) {
     logger.error('[horseModel.incrementDisciplineScore] Error: %o', error);
     throw error; // Re-throw the error from updateDisciplineScore (already has proper error message)
@@ -332,10 +358,20 @@ async function incrementDisciplineScore(horseId, discipline, amount = 5) {
  */
 async function updateHorseStat(horseId, statName, amount) {
   try {
-    logger.info(`[horseModel.updateHorseStat] Updating ${statName} by ${amount} for horse ${horseId}`);
+    logger.info(
+      `[horseModel.updateHorseStat] Updating ${statName} by ${amount} for horse ${horseId}`
+    );
 
     // Validate stat name
-    const validStats = ['speed', 'stamina', 'balance', 'boldness', 'flexibility', 'obedience', 'focus'];
+    const validStats = [
+      'speed',
+      'stamina',
+      'balance',
+      'boldness',
+      'flexibility',
+      'obedience',
+      'focus',
+    ];
     if (!validStats.includes(statName)) {
       throw new Error(`Invalid stat name: ${statName}. Valid stats: ${validStats.join(', ')}`);
     }
@@ -351,8 +387,8 @@ async function updateHorseStat(horseId, statName, amount) {
       select: {
         id: true,
         name: true,
-        [statName]: true
-      }
+        [statName]: true,
+      },
     });
 
     if (!currentHorse) {
@@ -369,14 +405,15 @@ async function updateHorseStat(horseId, statName, amount) {
       include: {
         breed: true,
         user: true,
-        stable: true
-      }
+        stable: true,
+      },
     });
 
-    logger.info(`[horseModel.updateHorseStat] Updated ${statName} for horse ${horseId}: ${currentValue} -> ${newValue} (+${amount})`);
+    logger.info(
+      `[horseModel.updateHorseStat] Updated ${statName} for horse ${horseId}: ${currentValue} -> ${newValue} (+${amount})`
+    );
 
     return updatedHorse;
-
   } catch (error) {
     logger.error(`[horseModel.updateHorseStat] Error updating stat: ${error.message}`);
     throw error;
@@ -403,8 +440,8 @@ async function getPositiveTraits(horseId) {
       select: {
         id: true,
         name: true,
-        epigeneticModifiers: true
-      }
+        epigeneticModifiers: true,
+      },
     });
 
     if (!horse) {
@@ -414,10 +451,11 @@ async function getPositiveTraits(horseId) {
     const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
     const positiveTraits = traits.positive || [];
 
-    logger.info(`[horseModel.getPositiveTraits] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`);
+    logger.info(
+      `[horseModel.getPositiveTraits] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`
+    );
 
     return positiveTraits;
-
   } catch (error) {
     logger.error(`[horseModel.getPositiveTraits] Error getting positive traits: ${error.message}`);
     throw error;
@@ -432,7 +470,9 @@ async function getPositiveTraits(horseId) {
  */
 async function hasTraitPresent(horseId, traitName) {
   try {
-    logger.info(`[horseModel.hasTraitPresent] Checking for trait '${traitName}' on horse ${horseId}`);
+    logger.info(
+      `[horseModel.hasTraitPresent] Checking for trait '${traitName}' on horse ${horseId}`
+    );
 
     // Validate inputs
     const numericId = parseInt(horseId, 10);
@@ -449,8 +489,8 @@ async function hasTraitPresent(horseId, traitName) {
       select: {
         id: true,
         name: true,
-        epigeneticModifiers: true
-      }
+        epigeneticModifiers: true,
+      },
     });
 
     if (!horse) {
@@ -466,13 +506,14 @@ async function hasTraitPresent(horseId, traitName) {
     const result = {
       present: isPositive || isNegative || isHidden,
       category: isPositive ? 'positive' : isNegative ? 'negative' : isHidden ? 'hidden' : null,
-      visible: isPositive || isNegative
+      visible: isPositive || isNegative,
     };
 
-    logger.info(`[horseModel.hasTraitPresent] Trait '${traitName}' on horse ${horseId}: ${JSON.stringify(result)}`);
+    logger.info(
+      `[horseModel.hasTraitPresent] Trait '${traitName}' on horse ${horseId}: ${JSON.stringify(result)}`
+    );
 
     return result;
-
   } catch (error) {
     logger.error(`[horseModel.hasTraitPresent] Error checking trait presence: ${error.message}`);
     throw error;
@@ -488,7 +529,9 @@ async function hasTraitPresent(horseId, traitName) {
  */
 async function addTraitSafely(horseId, traitName, category) {
   try {
-    logger.info(`[horseModel.addTraitSafely] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`);
+    logger.info(
+      `[horseModel.addTraitSafely] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`
+    );
 
     // Validate inputs
     const numericId = parseInt(horseId, 10);
@@ -502,7 +545,9 @@ async function addTraitSafely(horseId, traitName, category) {
 
     const validCategories = ['positive', 'negative', 'hidden'];
     if (!validCategories.includes(category)) {
-      throw new Error(`Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`);
+      throw new Error(
+        `Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`
+      );
     }
 
     // Get current horse data
@@ -511,8 +556,8 @@ async function addTraitSafely(horseId, traitName, category) {
       select: {
         id: true,
         name: true,
-        epigeneticModifiers: true
-      }
+        epigeneticModifiers: true,
+      },
     });
 
     if (!horse) {
@@ -524,7 +569,7 @@ async function addTraitSafely(horseId, traitName, category) {
     const updatedTraits = {
       positive: currentTraits.positive || [],
       negative: currentTraits.negative || [],
-      hidden: currentTraits.hidden || []
+      hidden: currentTraits.hidden || [],
     };
 
     // Check if trait already exists in any category
@@ -533,8 +578,14 @@ async function addTraitSafely(horseId, traitName, category) {
     const existsInHidden = updatedTraits.hidden.includes(traitName);
 
     if (existsInPositive || existsInNegative || existsInHidden) {
-      const existingCategory = existsInPositive ? 'positive' : existsInNegative ? 'negative' : 'hidden';
-      logger.warn(`[horseModel.addTraitSafely] Trait '${traitName}' already exists in '${existingCategory}' category for horse ${horseId}`);
+      const existingCategory = existsInPositive
+        ? 'positive'
+        : existsInNegative
+          ? 'negative'
+          : 'hidden';
+      logger.warn(
+        `[horseModel.addTraitSafely] Trait '${traitName}' already exists in '${existingCategory}' category for horse ${horseId}`
+      );
 
       // If it's in the same category, no change needed
       if (existingCategory === category) {
@@ -542,7 +593,9 @@ async function addTraitSafely(horseId, traitName, category) {
       }
 
       // Remove from existing category before adding to new one
-      updatedTraits[existingCategory] = updatedTraits[existingCategory].filter(t => t !== traitName);
+      updatedTraits[existingCategory] = updatedTraits[existingCategory].filter(
+        t => t !== traitName
+      );
     }
 
     // Add trait to specified category
@@ -552,19 +605,20 @@ async function addTraitSafely(horseId, traitName, category) {
     const updatedHorse = await prisma.horse.update({
       where: { id: numericId },
       data: {
-        epigeneticModifiers: updatedTraits
+        epigeneticModifiers: updatedTraits,
       },
       include: {
         breed: true,
         user: true,
-        stable: true
-      }
+        stable: true,
+      },
     });
 
-    logger.info(`[horseModel.addTraitSafely] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`);
+    logger.info(
+      `[horseModel.addTraitSafely] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`
+    );
 
     return updatedHorse;
-
   } catch (error) {
     logger.error(`[horseModel.addTraitSafely] Error adding trait: ${error.message}`);
     throw error;
@@ -579,7 +633,9 @@ async function addTraitSafely(horseId, traitName, category) {
  */
 async function removeTraitSafely(horseId, traitName) {
   try {
-    logger.info(`[horseModel.removeTraitSafely] Removing trait '${traitName}' from horse ${horseId}`);
+    logger.info(
+      `[horseModel.removeTraitSafely] Removing trait '${traitName}' from horse ${horseId}`
+    );
 
     // Validate inputs
     const numericId = parseInt(horseId, 10);
@@ -597,8 +653,8 @@ async function removeTraitSafely(horseId, traitName) {
       select: {
         id: true,
         name: true,
-        epigeneticModifiers: true
-      }
+        epigeneticModifiers: true,
+      },
     });
 
     if (!horse) {
@@ -610,15 +666,21 @@ async function removeTraitSafely(horseId, traitName) {
     const updatedTraits = {
       positive: (currentTraits.positive || []).filter(t => t !== traitName),
       negative: (currentTraits.negative || []).filter(t => t !== traitName),
-      hidden: (currentTraits.hidden || []).filter(t => t !== traitName)
+      hidden: (currentTraits.hidden || []).filter(t => t !== traitName),
     };
 
     // Check if trait was actually removed
-    const originalCount = (currentTraits.positive || []).length + (currentTraits.negative || []).length + (currentTraits.hidden || []).length;
-    const newCount = updatedTraits.positive.length + updatedTraits.negative.length + updatedTraits.hidden.length;
+    const originalCount =
+      (currentTraits.positive || []).length +
+      (currentTraits.negative || []).length +
+      (currentTraits.hidden || []).length;
+    const newCount =
+      updatedTraits.positive.length + updatedTraits.negative.length + updatedTraits.hidden.length;
 
     if (originalCount === newCount) {
-      logger.warn(`[horseModel.removeTraitSafely] Trait '${traitName}' was not found on horse ${horseId}`);
+      logger.warn(
+        `[horseModel.removeTraitSafely] Trait '${traitName}' was not found on horse ${horseId}`
+      );
       return horse; // No change needed
     }
 
@@ -626,19 +688,20 @@ async function removeTraitSafely(horseId, traitName) {
     const updatedHorse = await prisma.horse.update({
       where: { id: numericId },
       data: {
-        epigeneticModifiers: updatedTraits
+        epigeneticModifiers: updatedTraits,
       },
       include: {
         breed: true,
         user: true,
-        stable: true
-      }
+        stable: true,
+      },
     });
 
-    logger.info(`[horseModel.removeTraitSafely] Successfully removed trait '${traitName}' from horse ${horseId}`);
+    logger.info(
+      `[horseModel.removeTraitSafely] Successfully removed trait '${traitName}' from horse ${horseId}`
+    );
 
     return updatedHorse;
-
   } catch (error) {
     logger.error(`[horseModel.removeTraitSafely] Error removing trait: ${error.message}`);
     throw error;
@@ -665,8 +728,8 @@ async function getAllTraits(horseId) {
       select: {
         id: true,
         name: true,
-        epigeneticModifiers: true
-      }
+        epigeneticModifiers: true,
+      },
     });
 
     if (!horse) {
@@ -680,13 +743,17 @@ async function getAllTraits(horseId) {
       positive: traits.positive || [],
       negative: traits.negative || [],
       hidden: traits.hidden || [],
-      total: (traits.positive || []).length + (traits.negative || []).length + (traits.hidden || []).length
+      total:
+        (traits.positive || []).length +
+        (traits.negative || []).length +
+        (traits.hidden || []).length,
     };
 
-    logger.info(`[horseModel.getAllTraits] Found ${result.total} total traits for horse ${horseId} (${result.positive.length} positive, ${result.negative.length} negative, ${result.hidden.length} hidden)`);
+    logger.info(
+      `[horseModel.getAllTraits] Found ${result.total} total traits for horse ${horseId} (${result.positive.length} positive, ${result.negative.length} negative, ${result.hidden.length} hidden)`
+    );
 
     return result;
-
   } catch (error) {
     logger.error(`[horseModel.getAllTraits] Error getting all traits: ${error.message}`);
     throw error;
@@ -722,8 +789,8 @@ async function hasTrait(horseId, traitName) {
       select: {
         id: true,
         name: true,
-        epigeneticModifiers: true
-      }
+        epigeneticModifiers: true,
+      },
     });
 
     if (!horse) {
@@ -738,10 +805,11 @@ async function hasTrait(horseId, traitName) {
 
     const result = hasPositive || hasNegative || hasHidden;
 
-    logger.info(`[horseModel.hasTrait] Horse ${horseId} ${result ? 'has' : 'does not have'} trait '${traitName}'`);
+    logger.info(
+      `[horseModel.hasTrait] Horse ${horseId} ${result ? 'has' : 'does not have'} trait '${traitName}'`
+    );
 
     return result;
-
   } catch (error) {
     logger.error(`[horseModel.hasTrait] Error checking trait: ${error.message}`);
     throw error;
@@ -768,8 +836,8 @@ async function getPositiveTraitsArray(horseId) {
       select: {
         id: true,
         name: true,
-        epigeneticModifiers: true
-      }
+        epigeneticModifiers: true,
+      },
     });
 
     if (!horse) {
@@ -779,12 +847,15 @@ async function getPositiveTraitsArray(horseId) {
     const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
     const positiveTraits = traits.positive || [];
 
-    logger.info(`[horseModel.getPositiveTraitsArray] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`);
+    logger.info(
+      `[horseModel.getPositiveTraitsArray] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`
+    );
 
     return positiveTraits;
-
   } catch (error) {
-    logger.error(`[horseModel.getPositiveTraitsArray] Error getting positive traits: ${error.message}`);
+    logger.error(
+      `[horseModel.getPositiveTraitsArray] Error getting positive traits: ${error.message}`
+    );
     throw error;
   }
 }
@@ -809,8 +880,8 @@ async function getNegativeTraitsArray(horseId) {
       select: {
         id: true,
         name: true,
-        epigeneticModifiers: true
-      }
+        epigeneticModifiers: true,
+      },
     });
 
     if (!horse) {
@@ -820,12 +891,15 @@ async function getNegativeTraitsArray(horseId) {
     const traits = horse.epigeneticModifiers || { positive: [], negative: [], hidden: [] };
     const negativeTraits = traits.negative || [];
 
-    logger.info(`[horseModel.getNegativeTraitsArray] Found ${negativeTraits.length} negative traits for horse ${horseId}: ${negativeTraits.join(', ')}`);
+    logger.info(
+      `[horseModel.getNegativeTraitsArray] Found ${negativeTraits.length} negative traits for horse ${horseId}: ${negativeTraits.join(', ')}`
+    );
 
     return negativeTraits;
-
   } catch (error) {
-    logger.error(`[horseModel.getNegativeTraitsArray] Error getting negative traits: ${error.message}`);
+    logger.error(
+      `[horseModel.getNegativeTraitsArray] Error getting negative traits: ${error.message}`
+    );
     throw error;
   }
 }
@@ -839,7 +913,9 @@ async function getNegativeTraitsArray(horseId) {
  */
 async function addTrait(horseId, traitName, category) {
   try {
-    logger.info(`[horseModel.addTrait] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`);
+    logger.info(
+      `[horseModel.addTrait] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`
+    );
 
     // Validate inputs
     const numericId = parseInt(horseId, 10);
@@ -854,16 +930,19 @@ async function addTrait(horseId, traitName, category) {
     // For the instance-style helper, we only support 'positive' and 'negative' as requested
     const validCategories = ['positive', 'negative'];
     if (!validCategories.includes(category)) {
-      throw new Error(`Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`);
+      throw new Error(
+        `Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`
+      );
     }
 
     // Use the existing addTraitSafely function which handles all the logic
     const updatedHorse = await addTraitSafely(horseId, traitName, category);
 
-    logger.info(`[horseModel.addTrait] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`);
+    logger.info(
+      `[horseModel.addTrait] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`
+    );
 
     return updatedHorse;
-
   } catch (error) {
     logger.error(`[horseModel.addTrait] Error adding trait: ${error.message}`);
     throw error;
@@ -886,5 +965,5 @@ export {
   hasTrait,
   getPositiveTraitsArray,
   getNegativeTraitsArray,
-  addTrait
+  addTrait,
 };

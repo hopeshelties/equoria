@@ -46,40 +46,40 @@ const __dirname = dirname(__filename);
 const mockPrisma = {
   horse: {
     findUnique: jest.fn(),
-    update: jest.fn()
+    update: jest.fn(),
   },
   groom: {
     findUnique: jest.fn(),
     findFirst: jest.fn(),
     create: jest.fn(),
-    findMany: jest.fn()
+    findMany: jest.fn(),
   },
   groomAssignment: {
     findFirst: jest.fn(),
     updateMany: jest.fn(),
     create: jest.fn(),
-    findMany: jest.fn()
+    findMany: jest.fn(),
   },
   groomInteraction: {
     create: jest.fn(),
-    findMany: jest.fn()
-  }
+    findMany: jest.fn(),
+  },
 };
 
 const mockLogger = {
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
-  debug: jest.fn()
+  debug: jest.fn(),
 };
 
 // Mock the imports
 jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
-  default: mockPrisma
+  default: mockPrisma,
 }));
 
 jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
-  default: mockLogger
+  default: mockLogger,
 }));
 
 // Import the module under test
@@ -89,7 +89,7 @@ const {
   calculateGroomInteractionEffects,
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
-  PERSONALITY_TRAITS
+  PERSONALITY_TRAITS,
 } = await import(join(__dirname, '../utils/groomSystem.js'));
 
 describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', () => {
@@ -101,7 +101,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
     const mockFoal = {
       id: 1,
       name: 'Test Foal',
-      age: 1
+      age: 1,
     };
 
     const mockGroom = {
@@ -110,10 +110,10 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       speciality: 'foalCare',
       skillLevel: 'intermediate',
       isActive: true,
-      availability: { monday: true, tuesday: true }
+      availability: { monday: true, tuesday: true },
     };
 
-    it('should assign groom to foal successfully', async() => {
+    it('should assign groom to foal successfully', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue(mockGroom);
       mockPrisma.groomAssignment.findFirst.mockResolvedValue(null); // No existing assignment
@@ -125,7 +125,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         priority: 1,
         isActive: true,
         groom: mockGroom,
-        foal: mockFoal
+        foal: mockFoal,
       });
 
       const result = await assignGroomToFoal(1, 1, 'player-1');
@@ -141,54 +141,62 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
           priority: 1,
           notes: null,
           isDefault: false,
-          isActive: true
+          isActive: true,
         },
         include: {
           groom: true,
           foal: {
-            select: { id: true, name: true }
-          }
-        }
+            select: { id: true, name: true },
+          },
+        },
       });
     });
 
-    it('should throw error when foal not found', async() => {
+    it('should throw error when foal not found', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
-      await expect(assignGroomToFoal(999, 1, 'player-1')).rejects.toThrow('Foal with ID 999 not found');
+      await expect(assignGroomToFoal(999, 1, 'player-1')).rejects.toThrow(
+        'Foal with ID 999 not found'
+      );
     });
 
-    it('should throw error when groom not found', async() => {
+    it('should throw error when groom not found', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue(null);
 
-      await expect(assignGroomToFoal(1, 999, 'player-1')).rejects.toThrow('Groom with ID 999 not found');
+      await expect(assignGroomToFoal(1, 999, 'player-1')).rejects.toThrow(
+        'Groom with ID 999 not found'
+      );
     });
 
-    it('should throw error when groom is not active', async() => {
+    it('should throw error when groom is not active', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue({
         ...mockGroom,
-        isActive: false
+        isActive: false,
       });
 
-      await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow('Groom Sarah Johnson is not currently active');
+      await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow(
+        'Groom Sarah Johnson is not currently active'
+      );
     });
 
-    it('should throw error when groom already assigned', async() => {
+    it('should throw error when groom already assigned', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue(mockGroom);
       mockPrisma.groomAssignment.findFirst.mockResolvedValue({
         id: 1,
         foalId: 1,
         groomId: 1,
-        isActive: true
+        isActive: true,
       });
 
-      await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow('Groom Sarah Johnson is already assigned to this foal');
+      await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow(
+        'Groom Sarah Johnson is already assigned to this foal'
+      );
     });
 
-    it('should deactivate existing primary assignments when assigning new primary', async() => {
+    it('should deactivate existing primary assignments when assigning new primary', async () => {
       mockPrisma.horse.findUnique.mockResolvedValue(mockFoal);
       mockPrisma.groom.findUnique.mockResolvedValue(mockGroom);
       mockPrisma.groomAssignment.findFirst.mockResolvedValue(null);
@@ -200,7 +208,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         priority: 1,
         isActive: true,
         groom: mockGroom,
-        foal: mockFoal
+        foal: mockFoal,
       });
 
       await assignGroomToFoal(1, 1, 'player-1', { priority: 1 });
@@ -209,18 +217,18 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         where: {
           foalId: 1,
           priority: 1,
-          isActive: true
+          isActive: true,
         },
         data: {
           isActive: false,
-          endDate: expect.any(Date)
-        }
+          endDate: expect.any(Date),
+        },
       });
     });
   });
 
   describe('ensureDefaultGroomAssignment', () => {
-    it('should return existing assignment if one exists', async() => {
+    it('should return existing assignment if one exists', async () => {
       const existingAssignment = {
         id: 1,
         foalId: 1,
@@ -228,8 +236,8 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         isActive: true,
         groom: {
           id: 1,
-          name: 'Sarah Johnson'
-        }
+          name: 'Sarah Johnson',
+        },
       };
 
       mockPrisma.groomAssignment.findFirst.mockResolvedValue(existingAssignment);
@@ -241,14 +249,14 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       expect(result.assignment).toEqual(existingAssignment);
     });
 
-    it('should create default assignment if none exists', async() => {
+    it('should create default assignment if none exists', async () => {
       mockPrisma.groomAssignment.findFirst.mockResolvedValue(null);
       mockPrisma.groom.findFirst.mockResolvedValue(null); // No existing groom
       mockPrisma.groom.create.mockResolvedValue({
         id: 1,
         name: 'Sarah Johnson',
         speciality: 'foalCare',
-        userId: 'player-1'
+        userId: 'player-1',
       });
 
       mockPrisma.horse.findUnique.mockResolvedValue({ id: 1, name: 'Test Foal', age: 1 });
@@ -256,13 +264,13 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         id: 1,
         name: 'Sarah Johnson',
         speciality: 'foalCare',
-        isActive: true
+        isActive: true,
       });
       mockPrisma.groomAssignment.create.mockResolvedValue({
         id: 1,
         foalId: 1,
         groomId: 1,
-        isDefault: true
+        isDefault: true,
       });
 
       const result = await ensureDefaultGroomAssignment(1, 'player-1');
@@ -280,14 +288,14 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       skillLevel: 'intermediate',
       personality: 'gentle',
       experience: 5,
-      hourlyRate: 18.0
+      hourlyRate: 18.0,
     };
 
     const mockFoal = {
       id: 1,
       name: 'Test Foal',
       bondScore: 50,
-      stressLevel: 20
+      stressLevel: 20,
     };
 
     it('should calculate bonding and stress effects correctly', () => {
@@ -311,20 +319,44 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       const foalCareGroom = { ...mockGroom, speciality: 'foalCare' };
       const generalGroom = { ...mockGroom, speciality: 'general' };
 
-      const foalCareEffects = calculateGroomInteractionEffects(foalCareGroom, mockFoal, 'dailyCare', 60);
-      const generalEffects = calculateGroomInteractionEffects(generalGroom, mockFoal, 'dailyCare', 60);
+      const foalCareEffects = calculateGroomInteractionEffects(
+        foalCareGroom,
+        mockFoal,
+        'dailyCare',
+        60
+      );
+      const generalEffects = calculateGroomInteractionEffects(
+        generalGroom,
+        mockFoal,
+        'dailyCare',
+        60
+      );
 
-      expect(foalCareEffects.modifiers.specialty).toBeGreaterThan(generalEffects.modifiers.specialty);
+      expect(foalCareEffects.modifiers.specialty).toBeGreaterThan(
+        generalEffects.modifiers.specialty
+      );
     });
 
     it('should apply skill level modifiers correctly', () => {
       const expertGroom = { ...mockGroom, skillLevel: 'expert' };
       const noviceGroom = { ...mockGroom, skillLevel: 'novice' };
 
-      const expertEffects = calculateGroomInteractionEffects(expertGroom, mockFoal, 'dailyCare', 60);
-      const noviceEffects = calculateGroomInteractionEffects(noviceGroom, mockFoal, 'dailyCare', 60);
+      const expertEffects = calculateGroomInteractionEffects(
+        expertGroom,
+        mockFoal,
+        'dailyCare',
+        60
+      );
+      const noviceEffects = calculateGroomInteractionEffects(
+        noviceGroom,
+        mockFoal,
+        'dailyCare',
+        60
+      );
 
-      expect(expertEffects.modifiers.skillLevel).toBeGreaterThan(noviceEffects.modifiers.skillLevel);
+      expect(expertEffects.modifiers.skillLevel).toBeGreaterThan(
+        noviceEffects.modifiers.skillLevel
+      );
       expect(expertEffects.cost).toBeGreaterThan(noviceEffects.cost);
     });
 
@@ -332,10 +364,17 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       const experiencedGroom = { ...mockGroom, experience: 15 };
       const newGroom = { ...mockGroom, experience: 1 };
 
-      const experiencedEffects = calculateGroomInteractionEffects(experiencedGroom, mockFoal, 'dailyCare', 60);
+      const experiencedEffects = calculateGroomInteractionEffects(
+        experiencedGroom,
+        mockFoal,
+        'dailyCare',
+        60
+      );
       const newGroomEffects = calculateGroomInteractionEffects(newGroom, mockFoal, 'dailyCare', 60);
 
-      expect(experiencedEffects.modifiers.experience).toBeGreaterThan(newGroomEffects.modifiers.experience);
+      expect(experiencedEffects.modifiers.experience).toBeGreaterThan(
+        newGroomEffects.modifiers.experience
+      );
     });
 
     it('should scale effects with duration', () => {
@@ -393,10 +432,12 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
   });
 
   describe('Error Handling', () => {
-    it('should handle database errors gracefully', async() => {
+    it('should handle database errors gracefully', async () => {
       mockPrisma.horse.findUnique.mockRejectedValue(new Error('Database connection failed'));
 
-      await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow('Database connection failed');
+      await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow(
+        'Database connection failed'
+      );
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
@@ -408,10 +449,15 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         skillLevel: 'invalid_level',
         personality: 'invalid_personality',
         experience: 5,
-        hourlyRate: 18.0
+        hourlyRate: 18.0,
       };
 
-      const effects = calculateGroomInteractionEffects(invalidGroom, { id: 1, bondScore: 50 }, 'dailyCare', 60);
+      const effects = calculateGroomInteractionEffects(
+        invalidGroom,
+        { id: 1, bondScore: 50 },
+        'dailyCare',
+        60
+      );
 
       expect(effects).toHaveProperty('bondingChange');
       expect(effects).toHaveProperty('stressChange');

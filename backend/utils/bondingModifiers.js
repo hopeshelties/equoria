@@ -14,28 +14,28 @@ const BASE_BONDING_RATES = {
   grooming: {
     baseChange: 2,
     timeMultiplier: 0.5, // Per 30 minutes
-    maxPerSession: 50 // Increased to allow trait bonuses
+    maxPerSession: 50, // Increased to allow trait bonuses
   },
   training: {
     baseChange: 1,
     successMultiplier: 1.5,
-    maxPerSession: 25 // Increased to allow trait bonuses
+    maxPerSession: 25, // Increased to allow trait bonuses
   },
   feeding: {
     baseChange: 1,
     qualityMultiplier: 0.5,
-    maxPerSession: 15 // Increased to allow trait bonuses
+    maxPerSession: 15, // Increased to allow trait bonuses
   },
   competition: {
     baseChange: 2,
     placementMultiplier: 1.0, // 1st = 3x, 2nd = 2x, 3rd = 1.5x
-    maxPerEvent: 30 // Increased to allow trait bonuses
+    maxPerEvent: 30, // Increased to allow trait bonuses
   },
   interaction: {
     baseChange: 1,
     durationMultiplier: 0.25, // Per 15 minutes
-    maxPerSession: 20 // Increased to allow trait bonuses
-  }
+    maxPerSession: 20, // Increased to allow trait bonuses
+  },
 };
 
 /**
@@ -47,7 +47,9 @@ const BASE_BONDING_RATES = {
  */
 export function calculateBondingChange(horse, activity, activityData = {}) {
   try {
-    logger.debug(`[bondingModifiers] Calculating bonding change for horse ${horse.id}, activity: ${activity}`);
+    logger.debug(
+      `[bondingModifiers] Calculating bonding change for horse ${horse.id}, activity: ${activity}`
+    );
 
     // Get trait effects
     const traits = horse.epigenetic_modifiers || { positive: [], negative: [], hidden: [] };
@@ -68,25 +70,33 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
 
     // Positive trait effects
     if (traitEffects.bondingBonus) {
-      bondingChange *= (1 + traitEffects.bondingBonus);
-      logger.debug(`[bondingModifiers] Bonding bonus applied: +${(traitEffects.bondingBonus * 100).toFixed(1)}%`);
+      bondingChange *= 1 + traitEffects.bondingBonus;
+      logger.debug(
+        `[bondingModifiers] Bonding bonus applied: +${(traitEffects.bondingBonus * 100).toFixed(1)}%`
+      );
     }
 
     // Specific trait bonuses
     if (traitEffects.groomingBondingBonus && activity === 'grooming') {
-      bondingChange *= (1 + traitEffects.groomingBondingBonus);
-      logger.debug(`[bondingModifiers] Grooming bonding bonus applied: +${(traitEffects.groomingBondingBonus * 100).toFixed(1)}%`);
+      bondingChange *= 1 + traitEffects.groomingBondingBonus;
+      logger.debug(
+        `[bondingModifiers] Grooming bonding bonus applied: +${(traitEffects.groomingBondingBonus * 100).toFixed(1)}%`
+      );
     }
 
     if (traitEffects.trainingBondingBonus && activity === 'training') {
-      bondingChange *= (1 + traitEffects.trainingBondingBonus);
-      logger.debug(`[bondingModifiers] Training bonding bonus applied: +${(traitEffects.trainingBondingBonus * 100).toFixed(1)}%`);
+      bondingChange *= 1 + traitEffects.trainingBondingBonus;
+      logger.debug(
+        `[bondingModifiers] Training bonding bonus applied: +${(traitEffects.trainingBondingBonus * 100).toFixed(1)}%`
+      );
     }
 
     // Negative trait effects
     if (traitEffects.bondingPenalty) {
-      bondingChange *= (1 - traitEffects.bondingPenalty);
-      logger.debug(`[bondingModifiers] Bonding penalty applied: -${(traitEffects.bondingPenalty * 100).toFixed(1)}%`);
+      bondingChange *= 1 - traitEffects.bondingPenalty;
+      logger.debug(
+        `[bondingModifiers] Bonding penalty applied: -${(traitEffects.bondingPenalty * 100).toFixed(1)}%`
+      );
     }
 
     // Note: Individual trait bonuses (social, calm, etc.) are now handled through traitEffects
@@ -101,7 +111,9 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
 
     // Handle NaN values
     if (isNaN(bondingChange)) {
-      logger.error(`[bondingModifiers] Bonding change became NaN for horse ${horse.id}, activity: ${activity}`);
+      logger.error(
+        `[bondingModifiers] Bonding change became NaN for horse ${horse.id}, activity: ${activity}`
+      );
       bondingChange = originalChange; // Fallback to original change
     }
 
@@ -114,19 +126,22 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
       traitModifier: originalChange > 0 ? bondingChange / originalChange : 1,
       appliedTraits: allTraits.filter(trait => {
         const effects = getCombinedTraitEffects([trait]);
-        return effects.bondingBonus ||
-               effects.bondingPenalty ||
-               (effects.groomingBondingBonus && activity === 'grooming') ||
-               (effects.trainingBondingBonus && activity === 'training');
+        return (
+          effects.bondingBonus ||
+          effects.bondingPenalty ||
+          (effects.groomingBondingBonus && activity === 'grooming') ||
+          (effects.trainingBondingBonus && activity === 'training')
+        );
       }),
       activity,
-      activityData
+      activityData,
     };
 
-    logger.info(`[bondingModifiers] Bonding change for horse ${horse.id}: ${originalChange} -> ${bondingChange} (${((result.traitModifier - 1) * 100).toFixed(1)}% trait modifier)`);
+    logger.info(
+      `[bondingModifiers] Bonding change for horse ${horse.id}: ${originalChange} -> ${bondingChange} (${((result.traitModifier - 1) * 100).toFixed(1)}% trait modifier)`
+    );
 
     return result;
-
   } catch (error) {
     logger.error(`[bondingModifiers] Error calculating bonding change: ${error.message}`);
     return {
@@ -135,7 +150,7 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
       traitModifier: 1,
       appliedTraits: [],
       activity,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -151,48 +166,48 @@ function calculateBaseBondingChange(activity, activityData, baseRate) {
   let change = baseRate.baseChange;
 
   switch (activity) {
-  case 'grooming': {
-    const duration = activityData.duration || 30; // minutes
-    change = baseRate.baseChange + (duration * baseRate.timeMultiplier);
-    break;
-  }
-
-  case 'training': {
-    const success = activityData.success || false;
-    if (success) {
-      change *= baseRate.successMultiplier;
+    case 'grooming': {
+      const duration = activityData.duration || 30; // minutes
+      change = baseRate.baseChange + duration * baseRate.timeMultiplier;
+      break;
     }
-    break;
-  }
 
-  case 'feeding': {
-    const quality = activityData.feedQuality || 50; // 0-100
-    const qualityBonus = (quality - 50) * baseRate.qualityMultiplier / 50;
-    change += qualityBonus;
-    break;
-  }
-
-  case 'competition': {
-    const { placement } = activityData;
-    if (placement === '1st') {
-      change *= 3;
-    } else if (placement === '2nd') {
-      change *= 2;
-    } else if (placement === '3rd') {
-      change *= 1.5;
+    case 'training': {
+      const success = activityData.success || false;
+      if (success) {
+        change *= baseRate.successMultiplier;
+      }
+      break;
     }
-    break;
-  }
 
-  case 'interaction': {
-    const interactionDuration = activityData.duration || 15; // minutes
-    change = baseRate.baseChange + (interactionDuration * baseRate.durationMultiplier);
-    break;
-  }
+    case 'feeding': {
+      const quality = activityData.feedQuality || 50; // 0-100
+      const qualityBonus = ((quality - 50) * baseRate.qualityMultiplier) / 50;
+      change += qualityBonus;
+      break;
+    }
 
-  default:
-    // Use base change as-is
-    break;
+    case 'competition': {
+      const { placement } = activityData;
+      if (placement === '1st') {
+        change *= 3;
+      } else if (placement === '2nd') {
+        change *= 2;
+      } else if (placement === '3rd') {
+        change *= 1.5;
+      }
+      break;
+    }
+
+    case 'interaction': {
+      const interactionDuration = activityData.duration || 15; // minutes
+      change = baseRate.baseChange + interactionDuration * baseRate.durationMultiplier;
+      break;
+    }
+
+    default:
+      // Use base change as-is
+      break;
   }
 
   return Math.max(0, change);
@@ -210,9 +225,14 @@ export function applyBondingChange(horse, activity, activityData = {}) {
     const currentBondScore = horse.bond_score || 50;
     const bondingResult = calculateBondingChange(horse, activity, activityData);
 
-    const newBondScore = Math.min(100, Math.max(0, currentBondScore + bondingResult.modifiedChange));
+    const newBondScore = Math.min(
+      100,
+      Math.max(0, currentBondScore + bondingResult.modifiedChange)
+    );
 
-    logger.info(`[bondingModifiers] Applied bonding change to horse ${horse.id}: ${currentBondScore} -> ${newBondScore} (+${bondingResult.modifiedChange})`);
+    logger.info(
+      `[bondingModifiers] Applied bonding change to horse ${horse.id}: ${currentBondScore} -> ${newBondScore} (+${bondingResult.modifiedChange})`
+    );
 
     return {
       success: true,
@@ -222,9 +242,8 @@ export function applyBondingChange(horse, activity, activityData = {}) {
       traitModifier: bondingResult.traitModifier,
       appliedTraits: bondingResult.appliedTraits,
       activity,
-      activityData
+      activityData,
     };
-
   } catch (error) {
     logger.error(`[bondingModifiers] Error applying bonding change: ${error.message}`);
     return {
@@ -232,7 +251,7 @@ export function applyBondingChange(horse, activity, activityData = {}) {
       error: error.message,
       oldBondScore: horse.bond_score || 50,
       newBondScore: horse.bond_score || 50,
-      bondingChange: 0
+      bondingChange: 0,
     };
   }
 }
@@ -252,12 +271,12 @@ export function getBondingEfficiency(horse) {
 
   // Apply trait modifiers
   if (traitEffects.bondingBonus) {
-    efficiency *= (1 + traitEffects.bondingBonus);
+    efficiency *= 1 + traitEffects.bondingBonus;
     modifiers.push(`Bonding bonus: +${(traitEffects.bondingBonus * 100).toFixed(1)}%`);
   }
 
   if (traitEffects.bondingPenalty) {
-    efficiency *= (1 - traitEffects.bondingPenalty);
+    efficiency *= 1 - traitEffects.bondingPenalty;
     modifiers.push(`Bonding penalty: -${(traitEffects.bondingPenalty * 100).toFixed(1)}%`);
   }
 
@@ -288,7 +307,7 @@ export function getBondingEfficiency(horse) {
     modifiers,
     appliedTraits: allTraits.filter(trait =>
       ['social', 'antisocial', 'calm', 'nervous'].includes(trait)
-    )
+    ),
   };
 }
 
@@ -311,7 +330,7 @@ export function simulateBondingProgression(horse, activities) {
       activity: activity.type,
       bondingChange: result.modifiedChange,
       bondScore: currentBondScore,
-      traitModifier: result.traitModifier
+      traitModifier: result.traitModifier,
     });
   });
 
@@ -320,6 +339,7 @@ export function simulateBondingProgression(horse, activities) {
     finalBondScore: currentBondScore,
     totalChange: currentBondScore - (horse.bond_score || 50),
     progression,
-    averageTraitModifier: progression.reduce((sum, p) => sum + p.traitModifier, 0) / progression.length
+    averageTraitModifier:
+      progression.reduce((sum, p) => sum + p.traitModifier, 0) / progression.length,
   };
 }

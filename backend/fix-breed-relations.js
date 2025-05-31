@@ -16,7 +16,7 @@ const filesToFix = [
   'tests/cronJobsIntegration.test.js',
   'seed/userSeed.js',
   'seed/horseSeed.js',
-  'models/horseModel.test.js'
+  'models/horseModel.test.js',
 ];
 
 function fixBreedIdInFile(filePath) {
@@ -51,9 +51,9 @@ function fixBreedIdInFile(filePath) {
 
       // Add ownerId: 1 to the horse data
       const trimmedData = horseData.trim();
-      const newData = trimmedData.endsWith(',') ?
-        `${trimmedData}\n      ownerId: 1` :
-        `${trimmedData},\n      ownerId: 1`;
+      const newData = trimmedData.endsWith(',')
+        ? `${trimmedData}\n      ownerId: 1`
+        : `${trimmedData},\n      ownerId: 1`;
 
       changesMade++;
       return `createHorse({\n      ${newData}\n    })`;

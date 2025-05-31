@@ -1,5 +1,9 @@
 // 🎯 Updated import from userModel.js to userModel.js and function names
-import { createUser, getUserById, getUserWithHorses } from '../../backend/models/userModel.js';
+import {
+  createUser,
+  getUserById,
+  getUserWithHorses,
+} from '../../backend/models/userModel.js';
 import { createHorse } from '../../backend/models/horseModel.js';
 
 // Mock the database and logger
@@ -52,7 +56,7 @@ describe('User Integration Tests', () => {
         money: 500,
         level: 3,
         xp: 1000,
-        settings: { darkMode: true, notifications: true }
+        settings: { darkMode: true, notifications: true },
       };
 
       const mockCreatedUser = {
@@ -89,14 +93,18 @@ describe('User Integration Tests', () => {
         money: 500,
         level: 3,
         xp: 1000,
-        settings: { darkMode: true, notifications: true }
+        settings: { darkMode: true, notifications: true },
       };
 
       // 🎯 Changed prisma.player.create to prisma.user.create
-      prisma.user.create.mockRejectedValue(new Error('Database connection failed'));
+      prisma.user.create.mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       // 🎯 Changed createPlayer to createUser and error message
-      await expect(createUser(userData)).rejects.toThrow('Database error in createUser: Database connection failed');
+      await expect(createUser(userData)).rejects.toThrow(
+        'Database error in createUser: Database connection failed'
+      );
     });
   });
 
@@ -238,7 +246,7 @@ describe('User Integration Tests', () => {
       const result = await getUserWithHorses(userId);
 
       expect(result.horses).toHaveLength(2);
-      expect(result.horses.map(h => h.name)).toEqual(['Starlight', 'Comet']);
+      expect(result.horses.map((h) => h.name)).toEqual(['Starlight', 'Comet']);
     });
   });
 
@@ -254,11 +262,11 @@ describe('User Integration Tests', () => {
         money: 500,
         level: 3,
         xp: 1000,
-        settings: { 
-          darkMode: true, 
+        settings: {
+          darkMode: true,
           notifications: true,
           soundEnabled: false,
-          autoSave: true
+          autoSave: true,
         },
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -307,7 +315,7 @@ describe('User Integration Tests', () => {
             showProfile: false,
             allowMessages: true,
           },
-        }
+        },
       };
 
       const mockCreatedUser = {
@@ -366,7 +374,7 @@ describe('User Integration Tests', () => {
     test('should confirm cascade behavior or integrity constraints', async () => {
       // 🎯 Changed playerId to userId and type to Int
       const userId = 1;
-      
+
       const mockUserWithHorses = {
         id: userId,
         // 🎯 Horse data should use userId
@@ -383,7 +391,7 @@ describe('User Integration Tests', () => {
       const result = await getUserWithHorses(userId);
 
       expect(result.horses).toHaveLength(2);
-      result.horses.forEach(horse => {
+      result.horses.forEach((horse) => {
         // 🎯 Check horse.userId
         expect(horse.userId).toBe(userId);
       });
@@ -404,12 +412,16 @@ describe('User Integration Tests', () => {
         userId: testUserId, // 🎯 Link horse to user via userId
         // ... other horse fields
       };
-      const mockCreatedHorse = { id: 3, ...horseData, createdAt: new Date(), updatedAt: new Date() };
+      const mockCreatedHorse = {
+        id: 3,
+        ...horseData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
       prisma.horse.create.mockResolvedValue(mockCreatedHorse);
       // Mock user retrieval if createHorse checks for user existence
       // prisma.user.findUnique.mockResolvedValue({ id: testUserId, name: 'Test User', ... });
-
 
       const result = await createHorse(horseData);
 
@@ -418,7 +430,7 @@ describe('User Integration Tests', () => {
       });
       expect(result).toEqual(mockCreatedHorse);
       // 🎯 Verify horse is linked to the correct userId
-      expect(result.userId).toBe(testUserId); 
+      expect(result.userId).toBe(testUserId);
     });
   });
 });

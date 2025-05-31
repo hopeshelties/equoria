@@ -1,4 +1,3 @@
-
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -10,11 +9,13 @@ const __dirname = dirname(__filename);
 jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
   getUserById: jest.fn(),
   getUserWithHorses: jest.fn(),
-  getUserByEmail: jest.fn()
+  getUserByEmail: jest.fn(),
 }));
 
 // Import the mocked functions
-const { getUserById, getUserWithHorses, getUserByEmail } = await import('../../models/userModel.js');
+const { getUserById, getUserWithHorses, getUserByEmail } = await import(
+  '../../models/userModel.js'
+);
 
 describe('User Integration Tests - Mocked Database', () => {
   const testUserId = 'test-user-uuid-123';
@@ -33,8 +34,8 @@ describe('User Integration Tests - Mocked Database', () => {
       darkMode: true,
       notifications: true,
       soundEnabled: false,
-      autoSave: true
-    }
+      autoSave: true,
+    },
   };
 
   const mockHorses = [
@@ -42,14 +43,14 @@ describe('User Integration Tests - Mocked Database', () => {
       id: 1,
       name: 'Comet',
       userId: testUserId,
-      breed: { name: 'Thoroughbred' }
+      breed: { name: 'Thoroughbred' },
     },
     {
       id: 2,
       name: 'Starlight',
       userId: testUserId,
-      breed: { name: 'Thoroughbred' }
-    }
+      breed: { name: 'Thoroughbred' },
+    },
   ];
 
   beforeEach(() => {
@@ -60,12 +61,12 @@ describe('User Integration Tests - Mocked Database', () => {
     getUserByEmail.mockResolvedValue(mockUser);
     getUserWithHorses.mockResolvedValue({
       ...mockUser,
-      horses: mockHorses
+      horses: mockHorses,
     });
   });
 
   describe('User Retrieval from Seeded Data', () => {
-    test('should retrieve the seeded user by ID', async() => {
+    test('should retrieve the seeded user by ID', async () => {
       const user = await getUserById(testUserId);
 
       expect(user).toBeDefined();
@@ -77,7 +78,7 @@ describe('User Integration Tests - Mocked Database', () => {
       expect(user.xp).toBe(1000);
     });
 
-    test('should retrieve the seeded user by email', async() => {
+    test('should retrieve the seeded user by email', async () => {
       const user = await getUserByEmail(testUserEmail);
 
       expect(user).toBeDefined();
@@ -86,7 +87,7 @@ describe('User Integration Tests - Mocked Database', () => {
       expect(user.email).toBe(testUserEmail);
     });
 
-    test('should return null for non-existent user', async() => {
+    test('should return null for non-existent user', async () => {
       getUserById.mockResolvedValueOnce(null);
 
       const user = await getUserById('nonexistent-uuid-456');
@@ -96,7 +97,7 @@ describe('User Integration Tests - Mocked Database', () => {
   });
 
   describe('User with Horses Relationship', () => {
-    test('should retrieve user with their 2 horses', async() => {
+    test('should retrieve user with their 2 horses', async () => {
       const userWithHorses = await getUserWithHorses(testUserId);
 
       expect(userWithHorses).toBeDefined();
@@ -114,7 +115,7 @@ describe('User Integration Tests - Mocked Database', () => {
       });
     });
 
-    test('should include breed information for horses', async() => {
+    test('should include breed information for horses', async () => {
       const userWithHorses = await getUserWithHorses(testUserId);
 
       expect(userWithHorses.horses).toHaveLength(2);
@@ -127,7 +128,7 @@ describe('User Integration Tests - Mocked Database', () => {
   });
 
   describe('JSON Settings Field', () => {
-    test('should confirm JSON settings field exists and includes darkMode = true', async() => {
+    test('should confirm JSON settings field exists and includes darkMode = true', async () => {
       const user = await getUserById(testUserId);
 
       expect(user.settings).toBeDefined();
@@ -140,7 +141,7 @@ describe('User Integration Tests - Mocked Database', () => {
   });
 
   describe('Database Constraints', () => {
-    test('should confirm unique email constraint', async() => {
+    test('should confirm unique email constraint', async () => {
       // This test verifies that the unique constraint on email is working
       // by checking that only one user exists with the test email
       const user = await getUserByEmail(testUserEmail);

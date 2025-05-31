@@ -6,9 +6,7 @@ import AppError from './AppError.js';
  */
 class NotFoundError extends AppError {
   constructor(resource = 'Resource', id = null) {
-    const message = id
-      ? `${resource} with ID ${id} not found`
-      : `${resource} not found`;
+    const message = id ? `${resource} with ID ${id} not found` : `${resource} not found`;
 
     super(message, 404);
 

@@ -9,18 +9,18 @@ describe('Error Handler Middleware', () => {
       originalUrl: '/test',
       method: 'GET',
       ip: '127.0.0.1',
-      get: () => 'test-user-agent'
+      get: () => 'test-user-agent',
     };
 
     res = {
-      status: (code) => {
+      status: code => {
         statusCode = code;
         return res;
       },
-      json: (data) => {
+      json: data => {
         responseData = data;
         return res;
-      }
+      },
     };
 
     next = () => {};
@@ -36,7 +36,7 @@ describe('Error Handler Middleware', () => {
     expect(statusCode).toBe(400);
     expect(responseData).toEqual({
       success: false,
-      error: 'Test error'
+      error: 'Test error',
     });
   });
 
@@ -48,7 +48,7 @@ describe('Error Handler Middleware', () => {
     expect(statusCode).toBe(500);
     expect(responseData).toEqual({
       success: false,
-      error: 'Generic error'
+      error: 'Generic error',
     });
   });
 
@@ -61,7 +61,7 @@ describe('Error Handler Middleware', () => {
     expect(statusCode).toBe(400);
     expect(responseData).toEqual({
       success: false,
-      error: 'Duplicate field value entered'
+      error: 'Duplicate field value entered',
     });
   });
 
@@ -74,7 +74,7 @@ describe('Error Handler Middleware', () => {
     expect(statusCode).toBe(404);
     expect(responseData).toEqual({
       success: false,
-      error: 'Record not found'
+      error: 'Record not found',
     });
   });
 
@@ -90,7 +90,7 @@ describe('Error Handler Middleware', () => {
     expect(responseData).toEqual({
       success: false,
       error: 'Test error',
-      stack: 'Error stack trace'
+      stack: 'Error stack trace',
     });
 
     process.env.NODE_ENV = originalEnv;
@@ -107,7 +107,7 @@ describe('Error Handler Middleware', () => {
 
     expect(responseData).toEqual({
       success: false,
-      error: 'Test error'
+      error: 'Test error',
     });
 
     process.env.NODE_ENV = originalEnv;
