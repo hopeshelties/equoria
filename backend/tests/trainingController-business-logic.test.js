@@ -113,10 +113,10 @@ describe('Training Controller Business Logic Tests', () => {
         breedId: breed.id,
         userId: testUser.id,
         sex: 'Mare',
-        date_of_birth: new Date('2020-01-01'),
-        health_status: 'Excellent',
+        dateOfBirth: new Date('2020-01-01'),
+        healthStatus: 'Excellent',
         disciplineScores: {}, // No previous training
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -131,10 +131,10 @@ describe('Training Controller Business Logic Tests', () => {
         breedId: breed.id,
         userId: testUser.id,
         sex: 'Colt',
-        date_of_birth: new Date('2022-01-01'),
-        health_status: 'Excellent',
+        dateOfBirth: new Date('2022-01-01'),
+        healthStatus: 'Excellent',
         disciplineScores: {},
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -149,12 +149,12 @@ describe('Training Controller Business Logic Tests', () => {
         breedId: breed.id,
         userId: testUser.id,
         sex: 'Stallion',
-        date_of_birth: new Date('2019-01-01'),
-        health_status: 'Excellent',
+        dateOfBirth: new Date('2019-01-01'),
+        healthStatus: 'Excellent',
         disciplineScores: {
           Racing: 10 // Has some previous training
         },
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -170,10 +170,10 @@ describe('Training Controller Business Logic Tests', () => {
         breedId: breed.id,
         userId: userWithHorses.id,
         sex: 'Mare',
-        date_of_birth: new Date('2018-01-01'),
-        health_status: 'Good',
+        dateOfBirth: new Date('2018-01-01'),
+        healthStatus: 'Good',
         disciplineScores: {},
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -188,10 +188,10 @@ describe('Training Controller Business Logic Tests', () => {
         breedId: breed.id,
         userId: userWithHorses.id,
         sex: 'Stallion',
-        date_of_birth: new Date('2021-01-01'),
-        health_status: 'Fair',
+        dateOfBirth: new Date('2021-01-01'),
+        healthStatus: 'Fair',
         disciplineScores: {},
-        epigenetic_modifiers: {
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: []
@@ -294,10 +294,10 @@ describe('Training Controller Business Logic Tests', () => {
           breedId: (await prisma.breed.findFirst()).id,
           userId: testUser.id,
           sex: 'Mare',
-          date_of_birth: new Date('2020-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2020-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: {},
-          epigenetic_modifiers: {
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: []
@@ -573,8 +573,8 @@ describe('Training Controller Business Logic Tests', () => {
           breedId: (await prisma.breed.findFirst()).id,
           userId: xpUser.id,
           sex: 'Gelding',
-          date_of_birth: new Date('2020-01-01'),
-          health_status: 'Excellent',
+          dateOfBirth: new Date('2020-01-01'),
+          healthStatus: 'Excellent',
           disciplineScores: {}
         }
       });

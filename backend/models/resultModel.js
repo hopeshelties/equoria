@@ -200,9 +200,66 @@ async function getResultById(resultId) {
   }
 }
 
+/**
+ * Create a new competition result (alias for saveResult)
+ * @param {Object} resultData - Competition result data
+ * @returns {Object} Created result
+ */
+async function createResult(resultData) {
+  return await saveResult(resultData);
+}
+
+/**
+ * Get results by user ID
+ * @param {string} userId - User ID
+ * @param {Object} options - Query options
+ * @returns {Array} Competition results for user's horses
+ */
+async function getResultsByUser(userId, options = {}) {
+  try {
+    const { limit = 50, offset = 0, discipline = null } = options;
+
+    const whereClause = {
+      horse: {
+        userId: userId
+      }
+    };
+
+    if (discipline) {
+      whereClause.discipline = discipline;
+    }
+
+    const results = await prisma.competitionResult.findMany({
+      where: whereClause,
+      include: {
+        horse: {
+          include: {
+            breed: true
+          }
+        },
+        show: true
+      },
+      orderBy: {
+        runDate: 'desc'
+      },
+      take: Math.min(limit, 100),
+      skip: Math.max(offset, 0)
+    });
+
+    logger.info(`[resultModel.getResultsByUser] Retrieved ${results.length} results for user ${userId}`);
+    return results;
+
+  } catch (error) {
+    logger.error(`[resultModel.getResultsByUser] Error getting results for user ${userId}: ${error.message}`);
+    throw error;
+  }
+}
+
 export {
   saveResult,
+  createResult,
   getResultsByHorse,
   getResultsByShow,
-  getResultById
-}; 
+  getResultById,
+  getResultsByUser
+};

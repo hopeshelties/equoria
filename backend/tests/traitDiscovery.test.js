@@ -12,21 +12,21 @@ describe('Trait Discovery System', () => {
   it('should handle trait discovery logic', () => {
     // Test the core discovery conditions logic without database dependencies
     const mockHorse = {
-      bond_score: 85,
-      stress_level: 15,
+      bondScore: 85,
+      stressLevel: 15,
       age: 1
     };
 
     // Test high bond condition
-    const hasHighBond = mockHorse.bond_score >= 80;
+    const hasHighBond = mockHorse.bondScore >= 80;
     expect(hasHighBond).toBe(true);
 
     // Test low stress condition
-    const hasLowStress = mockHorse.stress_level <= 20;
+    const hasLowStress = mockHorse.stressLevel <= 20;
     expect(hasLowStress).toBe(true);
 
     // Test perfect care condition
-    const hasPerfectCare = mockHorse.bond_score >= 80 && mockHorse.stress_level <= 20;
+    const hasPerfectCare = mockHorse.bondScore >= 80 && mockHorse.stressLevel <= 20;
     expect(hasPerfectCare).toBe(true);
   });
 

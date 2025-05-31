@@ -60,7 +60,7 @@ async function seedUserWithHorses() {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id,
           sex: 'stallion',
-          health_status: 'Good',
+          healthStatus: 'Good',
           disciplineScores: {
             Racing: 15,
             Dressage: 10
@@ -74,7 +74,7 @@ async function seedUserWithHorses() {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id,
           sex: 'mare',
-          health_status: 'Good',
+          healthStatus: 'Good',
           disciplineScores: {
             'Show Jumping': 20,
             'Cross Country': 12
@@ -88,7 +88,7 @@ async function seedUserWithHorses() {
           breed: { connect: { id: breed.id } },
           ownerId: testUser.id,
           sex: 'colt',
-          health_status: 'Good'
+          healthStatus: 'Good'
         }
       })
     ]);

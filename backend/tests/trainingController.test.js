@@ -1,7 +1,6 @@
 import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { addXpToUser } from '../models/horseModel.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +20,7 @@ const mockUpdateHorseStat = jest.fn();
 // Mock the userModel functions
 const mockGetUserWithHorses = jest.fn();
 const mockAddXpToUser = jest.fn();
+const mockLevelUpIfNeeded = jest.fn();
 
 jest.unstable_mockModule(join(__dirname, '../models/trainingModel.js'), () => ({
   getHorseAge: mockGetHorseAge,
@@ -37,7 +37,8 @@ jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
 
 jest.unstable_mockModule(join(__dirname, '../models/userModel.js'), () => ({
   getUserWithHorses: mockGetUserWithHorses,
-  addXpToUser: mockAddXpToUser
+  addXpToUser: mockAddXpToUser,
+  levelUpIfNeeded: mockLevelUpIfNeeded
 }));
 
 // Import the module after mocking
@@ -48,6 +49,7 @@ describe('trainingController', () => {
     jest.clearAllMocks();
     mockGetUserWithHorses.mockClear();
     mockAddXpToUser.mockClear();
+    mockLevelUpIfNeeded.mockClear();
   });
 
   describe('canTrain', () => {
@@ -196,7 +198,7 @@ describe('trainingController', () => {
         name: 'Test Horse',
         speed: 15 // Updated stat
       });
-      mockAddXp.mockResolvedValue({
+      mockAddXpToUser.mockResolvedValue({
         id: 'test-player-123',
         xp: 105,
         level: 2,
@@ -225,7 +227,7 @@ describe('trainingController', () => {
       expect(result.traitEffects.appliedTraits).toEqual([]);
 
       // Verify both XP functions are called (as requested in task)
-      expect(mockAddXp).toHaveBeenCalledWith('test-player-123', 5);
+      expect(mockAddXpToUser).toHaveBeenCalledWith('test-player-123', 5);
       expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('test-player-123');
     });
 
@@ -299,7 +301,7 @@ describe('trainingController', () => {
       });
 
       // Mock XP system - player has 90 XP, should level up after +5 XP
-      mockAddXp.mockResolvedValue({
+      mockAddXpToUser.mockResolvedValue({
         id: 'xp-test-player',
         xp: 95,
         level: 1,
@@ -325,11 +327,11 @@ describe('trainingController', () => {
       expect(result.message).toContain('Horse trained successfully in Dressage. +5 added.');
 
       // Verify XP award system (as requested in task)
-      expect(mockAddXp).toHaveBeenCalledWith('xp-test-player', 5);
+      expect(mockAddXpToUser).toHaveBeenCalledWith('xp-test-player', 5);
       expect(mockLevelUpIfNeeded).toHaveBeenCalledWith('xp-test-player');
 
       // Verify call order: addXp should be called before levelUpIfNeeded
-      const addXpCall = mockAddXp.mock.invocationCallOrder[0];
+      const addXpCall = mockAddXpToUser.mock.invocationCallOrder[0];
       const levelUpCall = mockLevelUpIfNeeded.mock.invocationCallOrder[0];
       expect(addXpCall).toBeLessThan(levelUpCall);
     });
@@ -359,7 +361,7 @@ describe('trainingController', () => {
       });
 
       // Mock XP system error
-      mockAddXp.mockRejectedValue(new Error('XP system unavailable'));
+      mockAddXpToUser.mockRejectedValue(new Error('XP system unavailable'));
 
       const result = await trainHorse(1, 'Racing');
 
@@ -369,7 +371,7 @@ describe('trainingController', () => {
       expect(result.updatedHorse.name).toBe('Error Test Horse');
 
       // Verify XP was attempted
-      expect(mockAddXp).toHaveBeenCalledWith('error-test-player', 5);
+      expect(mockAddXpToUser).toHaveBeenCalledWith('error-test-player', 5);
       // levelUpIfNeeded should not be called if addXp fails
       expect(mockLevelUpIfNeeded).not.toHaveBeenCalled();
     });
@@ -506,7 +508,7 @@ describe('trainingController', () => {
         breed: { id: 1, name: 'Thoroughbred' },
         playerId: 'test-player-123'
       });
-      mockAddXp.mockResolvedValue({
+      mockAddXpToUser.mockResolvedValue({
         id: 'test-player-123',
         xp: 105,
         level: 2,
@@ -540,7 +542,7 @@ describe('trainingController', () => {
 
   describe('getTrainableHorses', () => {
     beforeEach(() => {
-      mockGetPlayerWithHorses.mockClear();
+      mockGetUserWithHorses.mockClear();
       mockGetAnyRecentTraining.mockClear();
     });
 
@@ -554,7 +556,7 @@ describe('trainingController', () => {
         ]
       };
 
-      mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
+      mockGetUserWithHorses.mockResolvedValue(mockPlayer);
       mockGetAnyRecentTraining
         .mockResolvedValueOnce(null) // Thunder has never trained
         .mockResolvedValueOnce(null); // Lightning has never trained
@@ -583,7 +585,7 @@ describe('trainingController', () => {
         horses: []
       };
 
-      mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
+      mockGetUserWithHorses.mockResolvedValue(mockPlayer);
 
       const result = await getTrainableHorses(playerId);
 
@@ -592,7 +594,7 @@ describe('trainingController', () => {
 
     it('should return empty array for non-existent player', async() => {
       const playerId = 'non-existent-player';
-      mockGetPlayerWithHorses.mockResolvedValue(null);
+      mockGetUserWithHorses.mockResolvedValue(null);
 
       const result = await getTrainableHorses(playerId);
 
@@ -609,7 +611,7 @@ describe('trainingController', () => {
         ]
       };
 
-      mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
+      mockGetUserWithHorses.mockResolvedValue(mockPlayer);
       mockGetAnyRecentTraining.mockResolvedValue(null); // Adult horse has never trained
 
       const result = await getTrainableHorses(playerId);
@@ -628,7 +630,7 @@ describe('trainingController', () => {
         ]
       };
 
-      mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
+      mockGetUserWithHorses.mockResolvedValue(mockPlayer);
       const twoDaysAgo = new Date(Date.now() - (2 * 24 * 60 * 60 * 1000));
       mockGetAnyRecentTraining.mockResolvedValue(twoDaysAgo); // Horse trained 2 days ago
 
@@ -647,7 +649,7 @@ describe('trainingController', () => {
         ]
       };
 
-      mockGetPlayerWithHorses.mockResolvedValue(mockPlayer);
+      mockGetUserWithHorses.mockResolvedValue(mockPlayer);
       mockGetAnyRecentTraining
         .mockRejectedValueOnce(new Error('Database error for horse 1'))
         .mockResolvedValueOnce(null); // Good horse has never trained
@@ -666,7 +668,7 @@ describe('trainingController', () => {
 
     it('should handle player model errors', async() => {
       const playerId = 'test-player-123';
-      mockGetPlayerWithHorses.mockRejectedValue(new Error('Player database error'));
+      mockGetUserWithHorses.mockRejectedValue(new Error('Player database error'));
 
       await expect(getTrainableHorses(playerId)).rejects.toThrow('Failed to get trainable horses: Player database error');
     });
@@ -713,7 +715,7 @@ describe('trainingController', () => {
       };
       mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
       mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
-      mockAddXp.mockResolvedValue({
+      mockAddXpToUser.mockResolvedValue({
         id: 'test-player-123',
         xp: 105,
         level: 2,
@@ -791,7 +793,7 @@ describe('trainingController', () => {
       };
       mockLogTrainingSession.mockResolvedValue(mockTrainingLog);
       mockIncrementDisciplineScore.mockResolvedValue(mockUpdatedHorse);
-      mockAddXp.mockResolvedValue({
+      mockAddXpToUser.mockResolvedValue({
         id: 'test-player-123',
         xp: 105,
         level: 2,
@@ -848,7 +850,7 @@ describe('trainingController', () => {
         breed: { id: 1, name: 'Warmblood' },
         playerId: 'test-player-123'
       });
-      mockAddXp.mockResolvedValue({
+      mockAddXpToUser.mockResolvedValue({
         id: 'test-player-123',
         xp: 106,
         level: 2,

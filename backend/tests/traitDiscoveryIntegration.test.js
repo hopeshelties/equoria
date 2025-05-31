@@ -22,10 +22,12 @@ describe('Trait Discovery API Integration Tests', () => {
       data: {
         name: 'High Bond Foal',
         age: 0,
+        sex: 'Filly',
         breed: { connect: { id: testBreed.id } },
-        bond_score: 85,
-        stress_level: 15,
-        epigenetic_modifiers: {
+        dateOfBirth: new Date('2024-01-01'),
+        bondScore: 85,
+        stressLevel: 15,
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: ['intelligent', 'calm', 'athletic', 'resilient', 'bold']
@@ -37,10 +39,12 @@ describe('Trait Discovery API Integration Tests', () => {
       data: {
         name: 'Low Stats Foal',
         age: 0,
+        sex: 'Colt',
         breed: { connect: { id: testBreed.id } },
-        bond_score: 30,
-        stress_level: 70,
-        epigenetic_modifiers: {
+        dateOfBirth: new Date('2024-01-01'),
+        bondScore: 30,
+        stressLevel: 70,
+        epigeneticModifiers: {
           positive: [],
           negative: [],
           hidden: ['resilient', 'nervous', 'stubborn']
@@ -52,10 +56,12 @@ describe('Trait Discovery API Integration Tests', () => {
       data: {
         name: 'Adult Horse',
         age: 5,
+        sex: 'Stallion',
         breed: { connect: { id: testBreed.id } },
-        bond_score: 90,
-        stress_level: 10,
-        epigenetic_modifiers: {
+        dateOfBirth: new Date('2019-01-01'),
+        bondScore: 90,
+        stressLevel: 10,
+        epigeneticModifiers: {
           positive: ['calm'],
           negative: [],
           hidden: []
@@ -87,34 +93,34 @@ describe('Trait Discovery API Integration Tests', () => {
     // Create some enrichment activities for foal1
     await prisma.foalTrainingHistory.create({
       data: {
-        horse_id: foal1.id,
+        horseId: foal1.id,
         day: 1,
         activity: 'gentle_handling',
         outcome: 'Gentle Touch - Successful bonding session',
-        bond_change: 5,
-        stress_change: -2
+        bondChange: 5,
+        stressChange: -2
       }
     });
 
     await prisma.foalTrainingHistory.create({
       data: {
-        horse_id: foal1.id,
+        horseId: foal1.id,
         day: 2,
         activity: 'human_interaction',
         outcome: 'Human Bonding - Positive interaction',
-        bond_change: 3,
-        stress_change: -1
+        bondChange: 3,
+        stressChange: -1
       }
     });
 
     await prisma.foalTrainingHistory.create({
       data: {
-        horse_id: foal1.id,
+        horseId: foal1.id,
         day: 3,
         activity: 'social_play',
         outcome: 'Social Time - Enjoyed playtime',
-        bond_change: 2,
-        stress_change: -1
+        bondChange: 2,
+        stressChange: -1
       }
     });
   });
@@ -124,7 +130,7 @@ describe('Trait Discovery API Integration Tests', () => {
     for (const foal of testFoals) {
       try {
         await prisma.foalTrainingHistory.deleteMany({
-          where: { horse_id: foal.id }
+          where: { horseId: foal.id }
         });
         await prisma.foalDevelopment.deleteMany({
           where: { foalId: foal.id }
@@ -400,10 +406,12 @@ describe('Trait Discovery API Integration Tests', () => {
         data: {
           name: 'Fresh Workflow Foal',
           age: 0,
+          sex: 'Filly',
           breed: { connect: { id: testBreed.id } },
-          bond_score: 85,
-          stress_level: 15,
-          epigenetic_modifiers: {
+          dateOfBirth: new Date('2024-01-01'),
+          bondScore: 85,
+          stressLevel: 15,
+          epigeneticModifiers: {
             positive: [],
             negative: [],
             hidden: ['intelligent', 'calm', 'athletic', 'resilient', 'bold']
@@ -427,12 +435,12 @@ describe('Trait Discovery API Integration Tests', () => {
       // Create some enrichment activities
       await prisma.foalTrainingHistory.create({
         data: {
-          horse_id: freshFoal.id,
+          horseId: freshFoal.id,
           day: 1,
           activity: 'gentle_handling',
           outcome: 'Gentle Touch - Successful bonding session',
-          bond_change: 5,
-          stress_change: -2
+          bondChange: 5,
+          stressChange: -2
         }
       });
 

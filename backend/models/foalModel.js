@@ -181,12 +181,12 @@ async function completeEnrichmentActivity(foalId, day, activity) {
     // Record activity in foal_training_history
     const trainingRecord = await prisma.foalTrainingHistory.create({
       data: {
-        horse_id: parsedFoalId,
+        horseId: parsedFoalId,
         day: parsedDay,
         activity: activityDefinition.name,
         outcome: outcome.result,
-        bond_change: outcome.bondingChange,
-        stress_change: outcome.stressChange
+        bondChange: outcome.bondingChange,
+        stressChange: outcome.stressChange
       }
     });
 
