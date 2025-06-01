@@ -273,14 +273,15 @@ export async function assignGroomToFoal(foalId, groomId, userId, options = {}) {
 
 /**
  * Get or create default groom assignment for a foal
+ * @deprecated This function is disabled to increase player engagement. Players must manually assign grooms.
  * @param {number} foalId - ID of the foal
  * @param {string} userId - ID of the user
  * @returns {Object} Assignment result
  */
 export async function ensureDefaultGroomAssignment(foalId, userId) {
   try {
-    logger.info(
-      `[groomSystem.ensureDefaultGroomAssignment] Checking default assignment for foal ${foalId}`,
+    logger.warn(
+      `[groomSystem.ensureDefaultGroomAssignment] DEPRECATED: Auto-assignment disabled for foal ${foalId}. Players must manually assign grooms.`,
     );
 
     // Check if foal already has an active assignment
@@ -306,19 +307,12 @@ export async function ensureDefaultGroomAssignment(foalId, userId) {
       };
     }
 
-    // Find or create default grooms for the user
-    const defaultGroom = await getOrCreateDefaultGroom(userId);
-
-    // Assign the default groom
-    const assignment = await assignGroomToFoal(foalId, defaultGroom.id, userId, {
-      priority: 1,
-      notes: 'Auto-assigned default groom',
-      isDefault: true,
-    });
-
+    // Return error - no auto-assignment to increase player engagement
     return {
-      ...assignment,
-      isNew: true,
+      success: false,
+      message: 'No groom assigned to foal. Please hire and assign a groom manually to increase bonding and reduce stress.',
+      requiresManualAssignment: true,
+      foalId,
     };
   } catch (error) {
     logger.error(`[groomSystem.ensureDefaultGroomAssignment] Error: ${error.message}`);
@@ -328,11 +322,16 @@ export async function ensureDefaultGroomAssignment(foalId, userId) {
 
 /**
  * Get or create a default groom for a user
+ * @deprecated This function is disabled to increase player engagement. Players must manually hire grooms.
  * @param {string} userId - ID of the user
  * @returns {Object} Groom object
  */
 export async function getOrCreateDefaultGroom(userId) {
   try {
+    logger.warn(
+      `[groomSystem.getOrCreateDefaultGroom] DEPRECATED: Auto-creation disabled for user ${userId}. Players must manually hire grooms.`,
+    );
+
     // Check if user already has grooms
     const existingGroom = await prisma.groom.findFirst({
       where: {
@@ -346,23 +345,72 @@ export async function getOrCreateDefaultGroom(userId) {
       return existingGroom;
     }
 
-    // Create a default foal care groom
-    const defaultGroomData = DEFAULT_GROOMS[0]; // Sarah Johnson - foal care specialist
+    // No auto-creation - throw error to force manual hiring
+    throw new Error(
+      'No foal care groom found for user. Please hire a groom manually through the hiring system to increase player engagement.',
+    );
+  } catch (error) {
+    logger.error(`[groomSystem.getOrCreateDefaultGroom] Error: ${error.message}`);
+    throw error;
+  }
+}
 
-    const newGroom = await prisma.groom.create({
-      data: {
-        ...defaultGroomData,
-        userId,
+/**
+ * Check if a foal can have a groom interaction today
+ * @param {number} foalId - ID of the foal
+ * @returns {Object} Validation result
+ */
+export async function validateFoalInteractionLimits(foalId) {
+  try {
+    // Get foal age
+    const foal = await prisma.horse.findUnique({
+      where: { id: foalId },
+      select: { id: true, age: true, name: true },
+    });
+
+    if (!foal) {
+      throw new Error(`Foal with ID ${foalId} not found`);
+    }
+
+    // Only foals 0-7 days old have daily interaction limits
+    if (foal.age > 7) {
+      return {
+        canInteract: true,
+        message: 'Horse is older than 7 days, no daily interaction limits apply',
+      };
+    }
+
+    // Check for interactions today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const todaysInteractions = await prisma.groomInteraction.findMany({
+      where: {
+        foalId,
+        timestamp: {
+          gte: today,
+          lt: tomorrow,
+        },
       },
     });
 
-    logger.info(
-      `[groomSystem.getOrCreateDefaultGroom] Created default groom ${newGroom.name} for user ${userId}`,
-    );
+    if (todaysInteractions.length > 0) {
+      return {
+        canInteract: false,
+        message: `Foal ${foal.name} (${foal.age} days old) has already had a groom interaction today. Foals can only be worked with once per day from 0-7 days old.`,
+        lastInteraction: todaysInteractions[todaysInteractions.length - 1],
+        interactionsToday: todaysInteractions.length,
+      };
+    }
 
-    return newGroom;
+    return {
+      canInteract: true,
+      message: `Foal ${foal.name} (${foal.age} days old) can have a groom interaction today`,
+    };
   } catch (error) {
-    logger.error(`[groomSystem.getOrCreateDefaultGroom] Error: ${error.message}`);
+    logger.error(`[groomSystem.validateFoalInteractionLimits] Error: ${error.message}`);
     throw error;
   }
 }
@@ -389,6 +437,18 @@ export async function recordGroomInteraction(
     logger.info(
       `[groomSystem.recordGroomInteraction] Recording interaction: Groom ${groomId} with Foal ${foalId}`,
     );
+
+    // Validate daily interaction limits for foals
+    const validationResult = await validateFoalInteractionLimits(foalId);
+    if (!validationResult.canInteract) {
+      return {
+        success: false,
+        message: validationResult.message,
+        dailyLimitReached: true,
+        lastInteraction: validationResult.lastInteraction,
+        interactionsToday: validationResult.interactionsToday,
+      };
+    }
 
     // Create the interaction record
     const interaction = await prisma.groomInteraction.create({

@@ -145,6 +145,11 @@ This file tracks current tasks and issues that need to be addressed in the Equor
   - [x] `POST /api/competition/enter` - Horse competition entry endpoint
   - [x] `GET /api/leaderboard/competition` - Competition leaderboard API
   - [x] `POST /api/competition/execute` - Competition execution endpoint
+- [ ] **Remove Groom Auto-Assignment** - Disable automatic groom assignment to increase player engagement
+  - [ ] Remove or disable `ensureDefaultGroomAssignment()` function
+  - [ ] Update breeding workflow to not auto-assign grooms to new foals
+  - [ ] Force players to manually hire and assign grooms
+  - [ ] Add daily interaction limits (once per day for foals 0-7 days old)
 - [ ] **Groom Management Workflow** - Create comprehensive integration test for groom management (NEXT PRIORITY)
 - [ ] **Stable Management Workflow** - Create integration test for stable management features
 
@@ -194,6 +199,18 @@ This file tracks current tasks and issues that need to be addressed in the Equor
   - [ ] **Integration**: Hook rewards into existing level-up system in userModel.addXpToUser()
   - [ ] **Testing**: Comprehensive testing of reward distribution and user experience
   - [ ] **Documentation**: Update game features and API documentation
+
+### Groom System Enhancements
+
+- [ ] **Groom Generation & Availability System** - Design how grooms become available for hire
+  - [ ] **Generation Mechanics**: Determine how new grooms are created (random generation, scheduled spawns, etc.)
+  - [ ] **Availability Timing**: Define how often new grooms become available (daily, weekly, event-based)
+  - [ ] **Hiring Locations**: Decide where grooms can be hired (marketplace, stable, specific locations)
+  - [ ] **Groom Lifecycle**: Determine if grooms should have limited lifetime similar to riders
+  - [ ] **Retirement System**: If limited lifetime, design retirement mechanics and replacement system
+  - [ ] **Rarity & Quality Distribution**: Balance common vs rare groom spawns
+  - [ ] **Market Dynamics**: Consider supply/demand mechanics for groom availability
+  - [ ] **Player Progression**: How groom availability scales with user level/progress
 
 ### Documentation & Maintenance
 

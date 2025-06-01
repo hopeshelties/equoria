@@ -7,6 +7,7 @@ import {
   assignGroomToFoal,
   ensureDefaultGroomAssignment,
   calculateGroomInteractionEffects,
+  validateFoalInteractionLimits,
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
   PERSONALITY_TRAITS,
@@ -169,6 +170,20 @@ export async function recordInteraction(req, res) {
         success: false,
         message: 'foalId, groomId, interactionType, and duration are required',
         data: null,
+      });
+    }
+
+    // Validate daily interaction limits for foals
+    const validationResult = await validateFoalInteractionLimits(foalId);
+    if (!validationResult.canInteract) {
+      return res.status(400).json({
+        success: false,
+        message: validationResult.message,
+        data: {
+          dailyLimitReached: true,
+          lastInteraction: validationResult.lastInteraction,
+          interactionsToday: validationResult.interactionsToday,
+        },
       });
     }
 
