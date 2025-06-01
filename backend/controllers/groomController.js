@@ -173,7 +173,7 @@ export async function recordInteraction(req, res) {
       });
     }
 
-    // Validate daily interaction limits for foals
+    // Validate daily interaction limits for all horses
     const validationResult = await validateFoalInteractionLimits(foalId);
     if (!validationResult.canInteract) {
       return res.status(400).json({

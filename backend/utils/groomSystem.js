@@ -356,29 +356,23 @@ export async function getOrCreateDefaultGroom(userId) {
 }
 
 /**
- * Check if a foal can have a groom interaction today
- * @param {number} foalId - ID of the foal
+ * Check if a horse can have a groom interaction today
+ * @param {number} foalId - ID of the horse (foal or adult)
  * @returns {Object} Validation result
  */
 export async function validateFoalInteractionLimits(foalId) {
   try {
-    // Get foal age
-    const foal = await prisma.horse.findUnique({
+    // Get horse age
+    const horse = await prisma.horse.findUnique({
       where: { id: foalId },
       select: { id: true, age: true, name: true },
     });
 
-    if (!foal) {
-      throw new Error(`Foal with ID ${foalId} not found`);
+    if (!horse) {
+      throw new Error(`Horse with ID ${foalId} not found`);
     }
 
-    // Only foals 0-7 days old have daily interaction limits
-    if (foal.age > 7) {
-      return {
-        canInteract: true,
-        message: 'Horse is older than 7 days, no daily interaction limits apply',
-      };
-    }
+    // ALL horses (regardless of age) are limited to 1 interaction per day
 
     // Check for interactions today
     const today = new Date();
@@ -399,7 +393,7 @@ export async function validateFoalInteractionLimits(foalId) {
     if (todaysInteractions.length > 0) {
       return {
         canInteract: false,
-        message: `Foal ${foal.name} (${foal.age} days old) has already had a groom interaction today. Foals can only be worked with once per day from 0-7 days old.`,
+        message: `${horse.name} (${horse.age} days old) has already had a groom interaction today. All horses can only be worked with once per day.`,
         lastInteraction: todaysInteractions[todaysInteractions.length - 1],
         interactionsToday: todaysInteractions.length,
       };
@@ -407,7 +401,7 @@ export async function validateFoalInteractionLimits(foalId) {
 
     return {
       canInteract: true,
-      message: `Foal ${foal.name} (${foal.age} days old) can have a groom interaction today`,
+      message: `${horse.name} (${horse.age} days old) can have a groom interaction today`,
     };
   } catch (error) {
     logger.error(`[groomSystem.validateFoalInteractionLimits] Error: ${error.message}`);
@@ -438,7 +432,7 @@ export async function recordGroomInteraction(
       `[groomSystem.recordGroomInteraction] Recording interaction: Groom ${groomId} with Foal ${foalId}`,
     );
 
-    // Validate daily interaction limits for foals
+    // Validate daily interaction limits for all horses
     const validationResult = await validateFoalInteractionLimits(foalId);
     if (!validationResult.canInteract) {
       return {
