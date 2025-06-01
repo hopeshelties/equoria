@@ -275,10 +275,9 @@ export async function assignGroomToFoal(foalId, groomId, userId, options = {}) {
  * Get or create default groom assignment for a foal
  * @deprecated This function is disabled to increase player engagement. Players must manually assign grooms.
  * @param {number} foalId - ID of the foal
- * @param {string} userId - ID of the user
  * @returns {Object} Assignment result
  */
-export async function ensureDefaultGroomAssignment(foalId, userId) {
+export async function ensureDefaultGroomAssignment(foalId) {
   try {
     logger.warn(
       `[groomSystem.ensureDefaultGroomAssignment] DEPRECATED: Auto-assignment disabled for foal ${foalId}. Players must manually assign grooms.`,
@@ -310,7 +309,8 @@ export async function ensureDefaultGroomAssignment(foalId, userId) {
     // Return error - no auto-assignment to increase player engagement
     return {
       success: false,
-      message: 'No groom assigned to foal. Please hire and assign a groom manually to increase bonding and reduce stress.',
+      message:
+        'No groom assigned to foal. Please hire and assign a groom manually to increase bonding and reduce stress.',
       requiresManualAssignment: true,
       foalId,
     };
