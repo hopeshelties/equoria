@@ -6,7 +6,8 @@
 import {
   calculateTraitCompetitionImpact,
   getAllTraitCompetitionEffects,
-  hasSpecializedEffect as _hasSpecializedEffect,
+  // TODO: Re-enable when specialized effects are implemented
+  // hasSpecializedEffect as _hasSpecializedEffect,
 } from '../utils/traitCompetitionImpact.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
@@ -263,7 +264,7 @@ export async function getTraitCompetitionEffects(req, res) {
     // Filter by trait type if specified
     if (type && ['positive', 'negative'].includes(type)) {
       filteredEffects = Object.fromEntries(
-        Object.entries(allEffects).filter(([_, effect]) => effect.type === type),
+        Object.entries(allEffects).filter(([, effect]) => effect.type === type),
       );
     }
 

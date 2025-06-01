@@ -111,15 +111,15 @@ console.log('\n📋 Example 4: Available At-Birth Traits');
 
 function showTraitDefinitions() {
   console.log('\nPositive Traits:');
-  Object.entries(AT_BIRTH_TRAITS.positive).forEach(([key, trait]) => {
-    console.log(`- ${trait.name}: ${trait.description}`);
+  Object.entries(AT_BIRTH_TRAITS.positive).forEach(([traitKey, trait]) => {
+    console.log(`- ${trait.name} (${traitKey}): ${trait.description}`);
     console.log(`  Probability: ${(trait.probability * 100).toFixed(0)}%`);
     console.log(`  Conditions: ${JSON.stringify(trait.conditions)}`);
   });
 
   console.log('\nNegative Traits:');
-  Object.entries(AT_BIRTH_TRAITS.negative).forEach(([key, trait]) => {
-    console.log(`- ${trait.name}: ${trait.description}`);
+  Object.entries(AT_BIRTH_TRAITS.negative).forEach(([traitKey, trait]) => {
+    console.log(`- ${trait.name} (${traitKey}): ${trait.description}`);
     console.log(`  Probability: ${(trait.probability * 100).toFixed(0)}%`);
     console.log(`  Conditions: ${JSON.stringify(trait.conditions)}`);
   });
@@ -181,36 +181,36 @@ function testBreedingScenarios() {
 function evaluateConditions(traitConditions, actualConditions) {
   for (const [condition, requirement] of Object.entries(traitConditions)) {
     switch (condition) {
-      case 'mareStressMax':
-        if (actualConditions.mareStress > requirement) {
-          return false;
-        }
-        break;
-      case 'mareStressMin':
-        if (actualConditions.mareStress < requirement) {
-          return false;
-        }
-        break;
-      case 'feedQualityMin':
-        if (actualConditions.feedQuality < requirement) {
-          return false;
-        }
-        break;
-      case 'feedQualityMax':
-        if (actualConditions.feedQuality > requirement) {
-          return false;
-        }
-        break;
-      case 'inbreedingDetected':
-        if (actualConditions.inbreedingDetected !== requirement) {
-          return false;
-        }
-        break;
-      case 'noInbreeding':
-        if (actualConditions.inbreedingDetected === requirement) {
-          return false;
-        }
-        break;
+    case 'mareStressMax':
+      if (actualConditions.mareStress > requirement) {
+        return false;
+      }
+      break;
+    case 'mareStressMin':
+      if (actualConditions.mareStress < requirement) {
+        return false;
+      }
+      break;
+    case 'feedQualityMin':
+      if (actualConditions.feedQuality < requirement) {
+        return false;
+      }
+      break;
+    case 'feedQualityMax':
+      if (actualConditions.feedQuality > requirement) {
+        return false;
+      }
+      break;
+    case 'inbreedingDetected':
+      if (actualConditions.inbreedingDetected !== requirement) {
+        return false;
+      }
+      break;
+    case 'noInbreeding':
+      if (actualConditions.inbreedingDetected === requirement) {
+        return false;
+      }
+      break;
     }
   }
   return true;

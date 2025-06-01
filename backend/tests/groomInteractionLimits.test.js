@@ -1,7 +1,7 @@
 /**
  * 🧪 UNIT TEST: Groom Interaction Daily Limits - TDD Implementation
  *
- * This test validates that ALL horses (regardless of age) are limited to 
+ * This test validates that ALL horses (regardless of age) are limited to
  * one groom interaction per day, following TDD principles with balanced mocking.
  *
  * 📋 BUSINESS RULES TESTED:

@@ -238,10 +238,9 @@ function selectNewTemperament(currentTemperament, factors) {
 /**
  * Apply temperament drift to a horse if conditions are met
  * @param {number} horseId - ID of the horse
- * @param {Object} _factors - Environmental factors (unused in current implementation)
  * @returns {Object} Result of drift application
  */
-export async function applyTemperamentDrift(horseId, _factors = {}) {
+export async function applyTemperamentDrift(horseId) {
   try {
     // This would need to be implemented with actual database operations
     // For now, return the calculation result

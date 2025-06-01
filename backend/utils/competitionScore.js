@@ -24,32 +24,32 @@ export function calculateCompetitionScore(horse, eventType) {
     let baseScore = 0;
 
     switch (normalizedEventType) {
-      case 'Racing':
-        baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
-        break;
+    case 'Racing':
+      baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
+      break;
 
-      case 'Show Jumping':
-      case 'Jumping':
-        baseScore =
+    case 'Show Jumping':
+    case 'Jumping':
+      baseScore =
           (horse.precision || horse.agility || 0) + (horse.focus || 0) + (horse.stamina || 0);
-        break;
+      break;
 
-      case 'Dressage':
-        baseScore =
+    case 'Dressage':
+      baseScore =
           (horse.precision || horse.agility || 0) +
           (horse.focus || 0) +
           (horse.coordination || horse.balance || 0);
-        break;
+      break;
 
-      case 'Cross Country':
-        baseScore = (horse.stamina || 0) + (horse.agility || 0) + (horse.boldness || 0);
-        break;
+    case 'Cross Country':
+      baseScore = (horse.stamina || 0) + (horse.agility || 0) + (horse.boldness || 0);
+      break;
 
-      default:
-        logger.warn(
-          `[calculateCompetitionScore] Unknown event type: ${normalizedEventType}, using default calculation`,
-        );
-        baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
+    default:
+      logger.warn(
+        `[calculateCompetitionScore] Unknown event type: ${normalizedEventType}, using default calculation`,
+      );
+      baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
     }
 
     logger.info(

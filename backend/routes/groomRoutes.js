@@ -4,7 +4,9 @@
  */
 
 import express from 'express';
-import { body, param, query, validationResult } from 'express-validator';
+import { body, param, validationResult } from 'express-validator';
+// TODO: Add query validation when needed for filtering/pagination
+// import { query } from 'express-validator';
 import {
   assignGroom,
   ensureDefaultAssignment,

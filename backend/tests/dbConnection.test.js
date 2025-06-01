@@ -35,7 +35,7 @@
  *    Consider consolidating if both tests serve the same purpose.
  */
 
-import { jest, describe, it, expect, afterAll } from '@jest/globals';
+import { describe, it, expect, afterAll } from '@jest/globals';
 import prisma from '../../packages/database/prismaClient.js';
 
 describe('🔌 INTEGRATION: Database Connection - Alternative Prisma Client Path Testing', () => {

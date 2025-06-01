@@ -260,71 +260,128 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
 
   describe('getTopPlayersByXP', () => {
     it('should return top players by XP for all time', async () => {
-      const req = { query: { limit: 10, offset: 0 } };
+      const req = { query: { limit: '10', offset: '0' } };
       const res = { json: jest.fn() };
-      leaderboardService.getTopPlayersByXP.mockResolvedValue([
-        { userId: 1, xp: 2000, user: { name: 'Alice' } },
-      ]);
+
+      const mockXpData = [
+        { userId: 'user1', _sum: { amount: 2000 } },
+        { userId: 'user2', _sum: { amount: 1500 } },
+      ];
+      const mockUsers = [
+        { id: 'user1', name: 'Alice' },
+        { id: 'user2', name: 'Bob' },
+      ];
+
+      mockPrisma.xpEvent.groupBy.mockResolvedValue(mockXpData);
+      mockPrisma.user.findMany.mockResolvedValue(mockUsers);
+
       await getTopPlayersByXP(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Top players by XP retrieved successfully',
-        data: [{ userId: 1, xp: 2000, user: { name: 'Alice' } }],
+        data: {
+          users: [
+            { rank: 1, userId: 'user1', name: 'Alice', totalXp: 2000 },
+            { rank: 2, userId: 'user2', name: 'Bob', totalXp: 1500 },
+          ],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 2,
+            hasMore: false,
+          },
+        },
       });
     });
 
     it('should filter by time period', async () => {
-      const req = { query: { timePeriod: 'week' } };
+      const req = { query: { period: 'week' } };
       const res = { json: jest.fn() };
-      leaderboardService.getTopPlayersByXP.mockResolvedValue([
-        { userId: 2, xp: 500, user: { name: 'Bob' } },
-      ]);
+
+      const mockXpData = [{ userId: 'user2', _sum: { amount: 500 } }];
+      const mockUsers = [{ id: 'user2', name: 'Bob' }];
+
+      mockPrisma.xpEvent.groupBy.mockResolvedValue(mockXpData);
+      mockPrisma.user.findMany.mockResolvedValue(mockUsers);
+
       await getTopPlayersByXP(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Top players by XP retrieved successfully',
-        data: [{ userId: 2, xp: 500, user: { name: 'Bob' } }],
+        message: 'Top users by XP (week) retrieved successfully',
+        data: {
+          users: [{ rank: 1, userId: 'user2', name: 'Bob', totalXp: 500 }],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 1,
+            hasMore: false,
+          },
+        },
       });
     });
 
     it('should handle invalid time periods gracefully', async () => {
-      const req = { query: { timePeriod: 'invalid_period' } };
+      const req = { query: { period: 'invalid_period' } };
       const res = { json: jest.fn() };
-      leaderboardService.getTopPlayersByXP.mockResolvedValue([]);
 
-      await getTopPlayersByXP(req, res);
-
-      expect(leaderboardService.getTopPlayersByXP).toHaveBeenCalledWith({
-        timePeriod: 'invalid_period',
-        limit: 50,
-        offset: 0,
-      });
-    });
-
-    it('should handle empty results', async () => {
-      const req = { query: { timePeriod: 'month' } };
-      const res = { json: jest.fn() };
-      leaderboardService.getTopPlayersByXP.mockResolvedValue([]);
+      mockPrisma.xpEvent.groupBy.mockResolvedValue([]);
+      mockPrisma.user.findMany.mockResolvedValue([]);
 
       await getTopPlayersByXP(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Top players by XP retrieved successfully',
-        data: [],
+        message: 'Top users by XP (invalid_period) retrieved successfully',
+        data: {
+          users: [],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 0,
+            hasMore: false,
+          },
+        },
+      });
+    });
+
+    it('should handle empty results', async () => {
+      const req = { query: { period: 'month' } };
+      const res = { json: jest.fn() };
+
+      mockPrisma.xpEvent.groupBy.mockResolvedValue([]);
+      mockPrisma.user.findMany.mockResolvedValue([]);
+
+      await getTopPlayersByXP(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Top users by XP (month) retrieved successfully',
+        data: {
+          users: [],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 0,
+            hasMore: false,
+          },
+        },
       });
     });
 
     it('should handle database errors for XP leaderboard', async () => {
       const req = { query: {} };
-      const res = { json: jest.fn() };
-      leaderboardService.getTopPlayersByXP.mockRejectedValue(new Error('Database error'));
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+      mockPrisma.xpEvent.groupBy.mockRejectedValue(new Error('Database error'));
 
       await getTopPlayersByXP(req, res);
 
+      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to retrieve XP leaderboard',
+        message: 'Failed to retrieve user XP leaderboard',
         error: 'Internal server error',
       });
     });
@@ -334,66 +391,100 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
     it('should return top horses by earnings', async () => {
       const req = { query: {} };
       const res = { json: jest.fn() };
-      leaderboardService.getTopHorsesByEarnings.mockResolvedValue([
+
+      const mockHorses = [
         {
           id: 1,
           name: 'Star',
           total_earnings: 10000,
-          breed: { name: 'Arabian' },
+          userId: 'user1',
           user: { name: 'Alice' },
+          breed: { name: 'Arabian' },
         },
-      ]);
+      ];
+
+      mockPrisma.horse.findMany.mockResolvedValue(mockHorses);
+      mockPrisma.horse.count.mockResolvedValue(1);
+
       await getTopHorsesByEarnings(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Top horses by earnings retrieved successfully',
-        data: [
-          {
-            id: 1,
-            name: 'Star',
-            total_earnings: 10000,
-            breed: { name: 'Arabian' },
-            user: { name: 'Alice' },
+        data: {
+          horses: [
+            {
+              rank: 1,
+              horseId: 1,
+              name: 'Star',
+              earnings: 10000,
+              ownerName: 'Alice',
+              breedName: 'Arabian',
+            },
+          ],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 1,
+            hasMore: false,
           },
-        ],
+        },
       });
     });
 
     it('should filter by breed', async () => {
       const req = { query: { breed: 'Thoroughbred' } };
       const res = { json: jest.fn() };
-      leaderboardService.getTopHorsesByEarnings.mockResolvedValue([
+
+      const mockHorses = [
         {
           id: 2,
           name: 'Bolt',
           total_earnings: 8000,
-          breed: { name: 'Thoroughbred' },
+          userId: 'user2',
           user: { name: 'Bob' },
+          breed: { name: 'Thoroughbred' },
         },
-      ]);
+      ];
+
+      mockPrisma.horse.findMany.mockResolvedValue(mockHorses);
+      mockPrisma.horse.count.mockResolvedValue(1);
+
       await getTopHorsesByEarnings(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Top horses by earnings retrieved successfully',
-        data: [
-          {
-            id: 2,
-            name: 'Bolt',
-            total_earnings: 8000,
-            breed: { name: 'Thoroughbred' },
-            user: { name: 'Bob' },
+        data: {
+          horses: [
+            {
+              rank: 1,
+              horseId: 2,
+              name: 'Bolt',
+              earnings: 8000,
+              ownerName: 'Bob',
+              breedName: 'Thoroughbred',
+            },
+          ],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 1,
+            hasMore: false,
           },
-        ],
+        },
       });
     });
 
     it('should handle database errors for horse earnings', async () => {
       const req = { query: {} };
-      const res = { json: jest.fn() };
-      leaderboardService.getTopHorsesByEarnings.mockRejectedValue(new Error('Database error'));
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+      mockPrisma.horse.findMany.mockRejectedValue(new Error('Database error'));
 
       await getTopHorsesByEarnings(req, res);
 
+      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Failed to retrieve horse earnings leaderboard',
@@ -406,58 +497,92 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
     it('should return top horses by wins', async () => {
       const req = { query: {} };
       const res = { json: jest.fn() };
-      leaderboardService.getTopHorsesByPerformance.mockResolvedValue([
+
+      const mockPerformanceData = [
         {
           horseId: 1,
           _count: { id: 5 },
           horse: { name: 'Star', breed: { name: 'Arabian' }, user: { name: 'Alice' } },
         },
-      ]);
+      ];
+
+      mockPrisma.competitionEntry.groupBy.mockResolvedValue(mockPerformanceData);
+
       await getTopHorsesByPerformance(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Top horses by performance retrieved successfully',
-        data: [
-          {
-            horseId: 1,
-            _count: { id: 5 },
-            horse: { name: 'Star', breed: { name: 'Arabian' }, user: { name: 'Alice' } },
+        data: {
+          horses: [
+            {
+              rank: 1,
+              horseId: 1,
+              name: 'Star',
+              wins: 5,
+              ownerName: 'Alice',
+              breedName: 'Arabian',
+            },
+          ],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 1,
+            hasMore: false,
           },
-        ],
+        },
       });
     });
 
     it('should filter by discipline', async () => {
       const req = { query: { discipline: 'Jumping' } };
       const res = { json: jest.fn() };
-      leaderboardService.getTopHorsesByPerformance.mockResolvedValue([
+
+      const mockPerformanceData = [
         {
           horseId: 2,
           _count: { id: 3 },
           horse: { name: 'Dash', breed: { name: 'Quarter Horse' }, user: { name: 'Bob' } },
         },
-      ]);
+      ];
+
+      mockPrisma.competitionEntry.groupBy.mockResolvedValue(mockPerformanceData);
+
       await getTopHorsesByPerformance(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Top horses by performance retrieved successfully',
-        data: [
-          {
-            horseId: 2,
-            _count: { id: 3 },
-            horse: { name: 'Dash', breed: { name: 'Quarter Horse' }, user: { name: 'Bob' } },
+        data: {
+          horses: [
+            {
+              rank: 1,
+              horseId: 2,
+              name: 'Dash',
+              wins: 3,
+              ownerName: 'Bob',
+              breedName: 'Quarter Horse',
+            },
+          ],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 1,
+            hasMore: false,
           },
-        ],
+        },
       });
     });
 
     it('should handle database errors for horse performance', async () => {
       const req = { query: {} };
-      const res = { json: jest.fn() };
-      leaderboardService.getTopHorsesByPerformance.mockRejectedValue(new Error('Database error'));
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+      mockPrisma.competitionEntry.groupBy.mockRejectedValue(new Error('Database error'));
 
       await getTopHorsesByPerformance(req, res);
 
+      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Failed to retrieve horse performance leaderboard',
@@ -470,26 +595,46 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
     it('should return top players by combined horse earnings', async () => {
       const req = {};
       const res = { json: jest.fn() };
-      leaderboardService.getTopPlayersByHorseEarnings.mockResolvedValue([
+
+      const mockEarningsData = [
         { userId: 1, _sum: { total_earnings: 20000 }, user: { name: 'Alice' } },
-      ]);
+      ];
+
+      mockPrisma.horse.groupBy.mockResolvedValue(mockEarningsData);
+
       await getTopPlayersByHorseEarnings(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Top players by horse earnings retrieved successfully',
-        data: [{ userId: 1, _sum: { total_earnings: 20000 }, user: { name: 'Alice' } }],
+        data: {
+          players: [
+            {
+              rank: 1,
+              userId: 1,
+              name: 'Alice',
+              totalEarnings: 20000,
+            },
+          ],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 1,
+            hasMore: false,
+          },
+        },
       });
     });
 
     it('should handle database errors for player horse earnings', async () => {
       const req = {};
-      const res = { json: jest.fn() };
-      leaderboardService.getTopPlayersByHorseEarnings.mockRejectedValue(
-        new Error('Database error'),
-      );
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+      mockPrisma.horse.groupBy.mockRejectedValue(new Error('Database error'));
 
       await getTopPlayersByHorseEarnings(req, res);
 
+      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Failed to retrieve player horse earnings leaderboard',
@@ -502,7 +647,8 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
     it('should return recent winners', async () => {
       const req = {};
       const res = { json: jest.fn() };
-      leaderboardService.getRecentWinners.mockResolvedValue([
+
+      const mockWinners = [
         {
           id: 1,
           placement: '1st',
@@ -512,44 +658,72 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
           showName: 'Spring Classic',
           prizeWon: 1000,
         },
-      ]);
+      ];
+
+      mockPrisma.competitionEntry.findMany.mockResolvedValue(mockWinners);
+
       await getRecentWinners(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Recent winners retrieved successfully',
-        data: [
-          {
-            id: 1,
-            placement: '1st',
-            horse: { name: 'Flash', user: { name: 'Alice' } },
-            competedAt: '2025-05-28',
-            discipline: 'Dressage',
-            showName: 'Spring Classic',
-            prizeWon: 1000,
+        data: {
+          winners: [
+            {
+              rank: 1,
+              entryId: 1,
+              placement: '1st',
+              horseName: 'Flash',
+              ownerName: 'Alice',
+              competedAt: '2025-05-28',
+              discipline: 'Dressage',
+              showName: 'Spring Classic',
+              prizeWon: 1000,
+            },
+          ],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 1,
+            hasMore: false,
           },
-        ],
+        },
       });
     });
 
     it('should filter by discipline', async () => {
       const req = { query: { discipline: 'Jumping' } };
       const res = { json: jest.fn() };
-      leaderboardService.getRecentWinners.mockResolvedValue([]);
+
+      mockPrisma.competitionEntry.findMany.mockResolvedValue([]);
+      mockPrisma.competitionEntry.count.mockResolvedValue(0);
+
       await getRecentWinners(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Recent winners retrieved successfully',
-        data: [],
+        data: {
+          winners: [],
+          pagination: {
+            limit: 10,
+            offset: 0,
+            total: 0,
+            hasMore: false,
+          },
+        },
       });
     });
 
     it('should handle database errors for recent winners', async () => {
       const req = {};
-      const res = { json: jest.fn() };
-      leaderboardService.getRecentWinners.mockRejectedValue(new Error('Database error'));
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+      mockPrisma.competitionEntry.findMany.mockRejectedValue(new Error('Database error'));
 
       await getRecentWinners(req, res);
 
+      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Failed to retrieve recent winners',
@@ -562,28 +736,40 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
     it('should return comprehensive leaderboard statistics', async () => {
       const req = {};
       const res = { json: jest.fn() };
-      const stats = {
-        userCount: 100,
-        horseCount: 250,
-        showCount: 50,
-        totalEarnings: 500000,
-        totalXp: 1000000,
-        averageUserLevel: 5.5,
-      };
-      leaderboardService.getLeaderboardStats.mockResolvedValue(stats);
+
+      // Mock multiple Prisma calls for stats aggregation
+      mockPrisma.user.count.mockResolvedValue(100);
+      mockPrisma.horse.count.mockResolvedValue(250);
+      mockPrisma.competitionEntry.count.mockResolvedValue(50);
+      mockPrisma.horse.aggregate.mockResolvedValue({ _sum: { total_earnings: 500000 } });
+      mockPrisma.xpEvent.aggregate.mockResolvedValue({ _sum: { amount: 1000000 } });
+      mockPrisma.user.aggregate.mockResolvedValue({ _avg: { level: 5.5 } });
+
       await getLeaderboardStats(req, res);
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Leaderboard statistics retrieved successfully',
-        data: stats,
+        data: {
+          userCount: 100,
+          horseCount: 250,
+          showCount: 50,
+          totalEarnings: 500000,
+          totalXp: 1000000,
+          averageUserLevel: 5.5,
+        },
       });
     });
 
     it('should handle database errors for stats', async () => {
       const req = {};
-      const res = { json: jest.fn() };
-      leaderboardService.getLeaderboardStats.mockRejectedValue(new Error('DB Error'));
+      const res = { json: jest.fn(), status: jest.fn().mockReturnThis() };
+
+      mockPrisma.user.count.mockRejectedValue(new Error('DB Error'));
+
       await getLeaderboardStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Failed to retrieve leaderboard statistics',

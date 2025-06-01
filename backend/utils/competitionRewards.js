@@ -1,4 +1,5 @@
-import { getStatScore } from './getStatScore.js';
+// TODO: Re-enable when stat scoring is needed for reward calculations
+// import { getStatScore } from './getStatScore.js';
 import logger from './logger.js';
 
 /**

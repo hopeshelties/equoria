@@ -34,7 +34,7 @@
  *    constraint validation and integration testing with configuration systems
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { generateMockShows, generateSingleMockShow } from '../utils/generateMockShows.js';
 import { getAllDisciplines } from '../utils/statMap.js';
 

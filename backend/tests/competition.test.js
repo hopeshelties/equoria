@@ -32,7 +32,8 @@
  *    trait advantages provide meaningful but balanced competitive benefits
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
+// Jest globals are available in test environment
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 
 describe('🏆 UNIT: Competition Trait Match Fairness - Statistical Validation', () => {

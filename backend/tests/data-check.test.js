@@ -36,7 +36,7 @@
  *    Console warnings are expected and intentional for data inspection.
  */
 
-import { jest, describe, it, expect, afterAll } from '@jest/globals';
+import { describe, it, expect, afterAll } from '@jest/globals';
 import prisma from '../db/index.js';
 
 describe('🔍 INTEGRATION: Database Data Check - Live Data Validation & Debugging', () => {

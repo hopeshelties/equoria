@@ -268,6 +268,7 @@ const foalDevelopment = {
 const foalTraits = simulateBreeding(dam, sire, foalDevelopment);
 
 console.log('\n✅ Integration complete! Foal traits calculated and ready for database storage.');
+console.log(`Final foal traits: ${JSON.stringify(foalTraits, null, 2)}`);
 
 // Example 10: Error Handling
 console.log('\n❌ Example 10: Error Handling');

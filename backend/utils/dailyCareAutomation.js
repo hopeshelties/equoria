@@ -289,7 +289,6 @@ function isGroomAvailableToday(groom) {
       return false;
     }
 
-    const today = new Date().toLocaleLowerCase();
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const todayName = dayNames[new Date().getDay()];
 

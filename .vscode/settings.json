@@ -2,11 +2,14 @@
   "eslint.enable": true,
   "eslint.validate": ["javascript"],
   "eslint.workingDirectories": [
-    "./backend"
+    {
+      "directory": "./backend",
+      "changeProcessCWD": true
+    }
   ],
-  "eslint.nodePath": "./backend/node_modules",
   "eslint.run": "onType",
   "eslint.debug": true,
+  "eslint.trace.server": "verbose",
   "eslint.alwaysShowStatus": true,
   "problems.decorations.enabled": true,
   "editor.codeActionsOnSave": {

@@ -1,5 +1,6 @@
 import express from 'express';
-import { body, validationResult } from 'express-validator';
+// TODO: Add validation when admin endpoints require input validation
+// import { body, validationResult } from 'express-validator';
 import cronJobService from '../services/cronJobs.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';

@@ -108,10 +108,10 @@ async function main() {
   }
 }
 
-main().catch(async _e => {
-  // console.error('Unhandled migration error:', _e);
-  await prisma.$disconnect().catch(_disconnectError => {
-    // console.error('Error disconnecting Prisma:', _disconnectError);
+main().catch(async e => {
+  console.error('Unhandled migration error:', e);
+  await prisma.$disconnect().catch(disconnectError => {
+    console.error('Error disconnecting Prisma:', disconnectError);
   });
   process.exit(1);
 });

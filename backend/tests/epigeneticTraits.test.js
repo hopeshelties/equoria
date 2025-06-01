@@ -34,7 +34,7 @@
  *    trait inheritance and environmental factor effects on breeding outcomes
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { calculateEpigeneticTraits } from '../utils/epigeneticTraits.js';
 
 describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait Calculation', () => {

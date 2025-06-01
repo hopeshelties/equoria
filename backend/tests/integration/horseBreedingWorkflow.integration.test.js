@@ -36,7 +36,7 @@ const { default: prisma } = await import('../../db/index.js');
 
 describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
   let testUser;
-  let authToken;
+  let _authToken;
   let mare;
   let stallion;
   let foal;

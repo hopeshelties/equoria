@@ -81,8 +81,7 @@ const createTestApp = () => {
   app.get('/api/auth/me', authenticateToken, getProfile);
 
   // Basic error handler for debugging
-  app.use((err, req, res, next) => {
-    // eslint-disable-line no-unused-vars
+  app.use((err, req, res, _next) => {
     // console.error("TEST APP ERROR HANDLER:", err); // Log the error to the console where Jest runs tests
     res.status(err.statusCode || 500).json({
       success: false,

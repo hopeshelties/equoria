@@ -33,7 +33,7 @@
  *    complete competition system mechanics and business rule compliance
  */
 
-import { jest, describe, it, expect, test, afterEach } from '@jest/globals';
+import { describe, expect, test, afterEach } from '@jest/globals';
 import {
   calculateHorseLevel,
   checkAgeRequirements,

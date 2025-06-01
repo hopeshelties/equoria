@@ -35,7 +35,7 @@
  *    to validate mathematical accuracy and business rule compliance
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import {
   calculateGroomInteractionEffects,
   GROOM_SPECIALTIES,

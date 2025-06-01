@@ -18,7 +18,7 @@
  * - Horse XP history tracking
  */
 
-import { jest, describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import prisma from '../db/index.js';
 
 describe('🐎 INTEGRATION: Horse XP System - Core Functionality Integration', () => {
@@ -115,8 +115,8 @@ describe('🐎 INTEGRATION: Horse XP System - Core Functionality Integration', (
       const { awardCompetitionXp } = await import('../models/horseXpModel.js');
 
       // Award enough XP to get stat points (100 XP = 1 stat point)
-      const result1 = await awardCompetitionXp(testHorseId, '1st', 'Racing');
-      const result2 = await awardCompetitionXp(testHorseId, '1st', 'Show Jumping');
+      const _result1 = await awardCompetitionXp(testHorseId, '1st', 'Racing');
+      const _result2 = await awardCompetitionXp(testHorseId, '1st', 'Show Jumping');
       const result3 = await awardCompetitionXp(testHorseId, '2nd', 'Dressage');
 
       // Total: 30 + 30 + 27 = 87 XP (not enough yet)

@@ -23,6 +23,7 @@ const eagerLearnerHorse = {
   },
 };
 
+console.log(`Training horse: ${eagerLearnerHorse.name} (ID: ${eagerLearnerHorse.id})`);
 const eagerLearnerEffects = getCombinedTraitEffects(['eager_learner']);
 console.log('Eager Learner Trait Effects:');
 console.log(

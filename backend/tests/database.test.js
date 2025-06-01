@@ -32,7 +32,7 @@
  *    core connectivity and basic operations work correctly for all other tests
  */
 
-import { jest, describe, it, expect, afterAll } from '@jest/globals';
+import { describe, it, expect, afterAll } from '@jest/globals';
 import prisma from '../db/index.js';
 
 describe('🔌 INTEGRATION: Database Connection - Core Infrastructure Validation', () => {

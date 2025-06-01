@@ -36,7 +36,7 @@
  *    inconsistent trait bonus application that should be investigated.
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { calculateCompetitionScore } from '../utils/competitionScore.js';
 
 // Simple integration test to verify the trait scoring works

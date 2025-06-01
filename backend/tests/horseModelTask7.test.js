@@ -120,13 +120,13 @@ describe('🐴 UNIT: Horse Model Task 7 - Instance-Style Helper Methods Validati
 
       // Invalid category (should only accept 'positive' and 'negative' for instance-style helper)
       await expect(addTrait(1, 'trait', 'invalid')).rejects.toThrow(
-        "Invalid category 'invalid'. Must be one of: positive, negative",
+        'Invalid category \'invalid\'. Must be one of: positive, negative',
       );
       await expect(addTrait(1, 'trait', 'hidden')).rejects.toThrow(
-        "Invalid category 'hidden'. Must be one of: positive, negative",
+        'Invalid category \'hidden\'. Must be one of: positive, negative',
       );
       await expect(addTrait(1, 'trait', '')).rejects.toThrow(
-        "Invalid category ''. Must be one of: positive, negative",
+        'Invalid category \'\'. Must be one of: positive, negative',
       );
     });
   });

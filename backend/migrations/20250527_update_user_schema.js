@@ -114,8 +114,8 @@ async function main() {
   }
 }
 
-main().catch(async _error => {
-  // console.error('Migration failed:', _error);
+main().catch(async error => {
+  console.error('Migration failed:', error);
   await prisma.$disconnect();
   process.exit(1);
 });

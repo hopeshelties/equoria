@@ -35,7 +35,8 @@
  */
 
 /* eslint-disable no-console */
-import { jest, describe, it, expect, beforeEach, afterAll } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterAll } from '@jest/globals';
+// Jest globals are available in test environment
 import request from 'supertest';
 import app from '../app.js';
 import { createTestUser, createLoginData } from './helpers/authHelper.js';

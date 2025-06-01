@@ -166,48 +166,48 @@ function calculateBaseBondingChange(activity, activityData, baseRate) {
   let change = baseRate.baseChange;
 
   switch (activity) {
-    case 'grooming': {
-      const duration = activityData.duration || 30; // minutes
-      change = baseRate.baseChange + duration * baseRate.timeMultiplier;
-      break;
-    }
+  case 'grooming': {
+    const duration = activityData.duration || 30; // minutes
+    change = baseRate.baseChange + duration * baseRate.timeMultiplier;
+    break;
+  }
 
-    case 'training': {
-      const success = activityData.success || false;
-      if (success) {
-        change *= baseRate.successMultiplier;
-      }
-      break;
+  case 'training': {
+    const success = activityData.success || false;
+    if (success) {
+      change *= baseRate.successMultiplier;
     }
+    break;
+  }
 
-    case 'feeding': {
-      const quality = activityData.feedQuality || 50; // 0-100
-      const qualityBonus = ((quality - 50) * baseRate.qualityMultiplier) / 50;
-      change += qualityBonus;
-      break;
+  case 'feeding': {
+    const quality = activityData.feedQuality || 50; // 0-100
+    const qualityBonus = ((quality - 50) * baseRate.qualityMultiplier) / 50;
+    change += qualityBonus;
+    break;
+  }
+
+  case 'competition': {
+    const { placement } = activityData;
+    if (placement === '1st') {
+      change *= 3;
+    } else if (placement === '2nd') {
+      change *= 2;
+    } else if (placement === '3rd') {
+      change *= 1.5;
     }
+    break;
+  }
 
-    case 'competition': {
-      const { placement } = activityData;
-      if (placement === '1st') {
-        change *= 3;
-      } else if (placement === '2nd') {
-        change *= 2;
-      } else if (placement === '3rd') {
-        change *= 1.5;
-      }
-      break;
-    }
+  case 'interaction': {
+    const interactionDuration = activityData.duration || 15; // minutes
+    change = baseRate.baseChange + interactionDuration * baseRate.durationMultiplier;
+    break;
+  }
 
-    case 'interaction': {
-      const interactionDuration = activityData.duration || 15; // minutes
-      change = baseRate.baseChange + interactionDuration * baseRate.durationMultiplier;
-      break;
-    }
-
-    default:
-      // Use base change as-is
-      break;
+  default:
+    // Use base change as-is
+    break;
   }
 
   return Math.max(0, change);

@@ -90,10 +90,9 @@ function validateInput(params) {
  * @param {string} trait - Trait to calculate probability for
  * @param {number} bondScore - Dam bonding score (0-100)
  * @param {number} stressLevel - Dam stress level (0-100)
- * @param {SeededRandom} rng - Random number generator
  * @returns {number} Probability (0-1)
  */
-function calculateInheritanceProbability(trait, bondScore, stressLevel, rng) {
+function calculateInheritanceProbability(trait, bondScore, stressLevel) {
   const traitDef = TRAIT_DEFINITIONS[trait];
   if (!traitDef) {
     return 0.3;
@@ -103,15 +102,15 @@ function calculateInheritanceProbability(trait, bondScore, stressLevel, rng) {
 
   // Adjust for trait rarity
   switch (traitDef.rarity) {
-    case 'common':
-      baseProbability = 0.5;
-      break;
-    case 'rare':
-      baseProbability = 0.15;
-      break;
-    case 'legendary':
-      baseProbability = 0.05;
-      break;
+  case 'common':
+    baseProbability = 0.5;
+    break;
+  case 'rare':
+    baseProbability = 0.15;
+    break;
+  case 'legendary':
+    baseProbability = 0.05;
+    break;
   }
 
   // Environmental modifiers
@@ -272,7 +271,7 @@ export function calculateEpigeneticTraits(params) {
 
   // Process each parent trait for inheritance
   for (const trait of allParentTraits) {
-    const probability = calculateInheritanceProbability(trait, damBondScore, damStressLevel, rng);
+    const probability = calculateInheritanceProbability(trait, damBondScore, damStressLevel);
 
     if (rng.next() < probability) {
       inheritedTraits.push(trait);

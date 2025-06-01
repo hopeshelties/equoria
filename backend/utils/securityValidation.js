@@ -20,7 +20,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
       errors.push('Horse name must be between 2 and 50 characters');
     }
     // Prevent special characters that could be used for injection
-    if (!/^[a-zA-Z0-9\s\-'\.]+$/.test(sanitized.name)) {
+    if (!/^[a-zA-Z0-9\s\-'.]+$/.test(sanitized.name)) {
       errors.push('Horse name contains invalid characters');
     }
   }
@@ -104,7 +104,7 @@ export const validateHorseData = (horseData, isUpdate = false) => {
 /**
  * Validates player data to prevent account manipulation
  */
-export const validatePlayerData = (playerData, isUpdate = false) => {
+export const validatePlayerData = playerData => {
   const errors = [];
   const sanitized = { ...playerData };
 
@@ -413,7 +413,7 @@ export const validateFileUpload = file => {
 
   // File name validation
   const fileName = file.originalname || file.name || '';
-  if (!/^[a-zA-Z0-9\-_\.\s]+$/.test(fileName)) {
+  if (!/^[a-zA-Z0-9\-_.s]+$/.test(fileName)) {
     errors.push('Invalid file name characters');
   }
 
