@@ -19,7 +19,7 @@ export const logXpEvent = async ({ userId, amount, reason }) => {
   // Changed playerId to userId
   try {
     logger.info(
-      `[xpLogModel.logXpEvent] Logging XP event: User ${userId}, Amount: ${amount}, Reason: ${reason}`
+      `[xpLogModel.logXpEvent] Logging XP event: User ${userId}, Amount: ${amount}, Reason: ${reason}`,
     ); // Changed User to User
 
     // Validate input parameters
@@ -46,7 +46,7 @@ export const logXpEvent = async ({ userId, amount, reason }) => {
     });
 
     logger.info(
-      `[xpLogModel.logXpEvent] Successfully logged XP event: ID ${xpEvent.id}, User ${xpEvent.userId}, Amount: ${xpEvent.amount}`
+      `[xpLogModel.logXpEvent] Successfully logged XP event: ID ${xpEvent.id}, User ${xpEvent.userId}, Amount: ${xpEvent.amount}`,
     ); // Changed User to User, playerId to userId
 
     return {
@@ -79,7 +79,7 @@ export const getUserXpEvents = async (userId, options = {}) => {
     const { limit = 50, offset = 0, startDate, endDate } = options;
 
     logger.info(
-      `[xpLogModel.getUserXpEvents] Getting XP events for user ${userId}, limit: ${limit}, offset: ${offset}`
+      `[xpLogModel.getUserXpEvents] Getting XP events for user ${userId}, limit: ${limit}, offset: ${offset}`,
     ); // Changed player to user, function name
 
     // Build where clause for date filters
@@ -108,7 +108,7 @@ export const getUserXpEvents = async (userId, options = {}) => {
     });
 
     logger.info(
-      `[xpLogModel.getUserXpEvents] Retrieved ${xpEvents.length} XP events for user ${userId}`
+      `[xpLogModel.getUserXpEvents] Retrieved ${xpEvents.length} XP events for user ${userId}`,
     ); // Changed player to user, function name
 
     return xpEvents;
@@ -176,7 +176,7 @@ export const getUserXpSummary = async (userId, startDate = null, endDate = null)
     };
 
     logger.info(
-      `[xpLogModel.getUserXpSummary] XP summary for user ${userId}: Gained ${xpSummary.totalGained}, Lost ${xpSummary.totalLost}, Net ${xpSummary.netTotal}`
+      `[xpLogModel.getUserXpSummary] XP summary for user ${userId}: Gained ${xpSummary.totalGained}, Lost ${xpSummary.totalLost}, Net ${xpSummary.netTotal}`,
     ); // Changed player to user, function name
 
     return xpSummary;
@@ -199,7 +199,7 @@ export const getRecentXpEvents = async (options = {}) => {
     const { limit = 100, offset = 0 } = options;
 
     logger.info(
-      `[xpLogModel.getRecentXpEvents] Getting recent XP events, limit: ${limit}, offset: ${offset}`
+      `[xpLogModel.getRecentXpEvents] Getting recent XP events, limit: ${limit}, offset: ${offset}`,
     );
 
     // Query recent XP events using Prisma
@@ -228,3 +228,7 @@ export const getRecentXpEvents = async (options = {}) => {
     throw error;
   }
 };
+
+// Backward compatibility aliases
+export const getPlayerXpEvents = getUserXpEvents;
+export const getPlayerXpSummary = getUserXpSummary;

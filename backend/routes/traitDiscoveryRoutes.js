@@ -42,7 +42,7 @@ router.post(
 
       const { foalIds } = req.body;
       logger.info(
-        `[traitDiscoveryRoutes] POST /discover/batch - Processing ${foalIds.length} foals`
+        `[traitDiscoveryRoutes] POST /discover/batch - Processing ${foalIds.length} foals`,
       );
 
       const results = await batchRevealTraits(foalIds);
@@ -69,7 +69,7 @@ router.post(
         message: 'Internal server error during batch trait discovery',
       });
     }
-  }
+  },
 );
 
 /**
@@ -93,7 +93,7 @@ router.post(
 
       const { foalId } = req.params;
       logger.info(
-        `[traitDiscoveryRoutes] POST /discover/${foalId} - Manual trait discovery triggered`
+        `[traitDiscoveryRoutes] POST /discover/${foalId} - Manual trait discovery triggered`,
       );
 
       const discoveryResults = await revealTraits(foalId);
@@ -120,7 +120,7 @@ router.post(
       });
     } catch (error) {
       logger.error(
-        `[traitDiscoveryRoutes] POST /discover/${req.params.foalId} error: ${error.message}`
+        `[traitDiscoveryRoutes] POST /discover/${req.params.foalId} error: ${error.message}`,
       );
 
       if (error.message.includes('not found')) {
@@ -142,7 +142,7 @@ router.post(
         message: 'Internal server error during trait discovery',
       });
     }
-  }
+  },
 );
 
 /**
@@ -175,7 +175,7 @@ router.get(
       });
     } catch (error) {
       logger.error(
-        `[traitDiscoveryRoutes] GET /progress/${req.params.foalId} error: ${error.message}`
+        `[traitDiscoveryRoutes] GET /progress/${req.params.foalId} error: ${error.message}`,
       );
 
       if (error.message.includes('not found')) {
@@ -190,7 +190,7 @@ router.get(
         message: 'Internal server error while getting discovery progress',
       });
     }
-  }
+  },
 );
 
 /**
@@ -252,7 +252,7 @@ router.post(
 
       const { foalId } = req.params;
       logger.info(
-        `[traitDiscoveryRoutes] POST /check-conditions/${foalId} - Checking conditions without discovery`
+        `[traitDiscoveryRoutes] POST /check-conditions/${foalId} - Checking conditions without discovery`,
       );
 
       // Get progress which includes condition checking
@@ -279,7 +279,7 @@ router.post(
             totalConditions: conditionStatus.length,
             conditionsMet: conditionStatus.filter(c => c.met).length,
             averageProgress: Math.round(
-              conditionStatus.reduce((sum, c) => sum + c.progress, 0) / conditionStatus.length
+              conditionStatus.reduce((sum, c) => sum + c.progress, 0) / conditionStatus.length,
             ),
             hiddenTraitsRemaining: progress.hiddenTraitsCount,
           },
@@ -287,7 +287,7 @@ router.post(
       });
     } catch (error) {
       logger.error(
-        `[traitDiscoveryRoutes] POST /check-conditions/${req.params.foalId} error: ${error.message}`
+        `[traitDiscoveryRoutes] POST /check-conditions/${req.params.foalId} error: ${error.message}`,
       );
 
       if (error.message.includes('not found')) {
@@ -302,7 +302,7 @@ router.post(
         message: 'Internal server error while checking conditions',
       });
     }
-  }
+  },
 );
 
 /**

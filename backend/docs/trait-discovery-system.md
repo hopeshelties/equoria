@@ -255,7 +255,7 @@ router.post(
   enrichmentDiscoveryMiddleware(),
   async (req, res) => {
     // enrichment logic...
-  }
+  },
 );
 
 // In training routes - training completion
@@ -267,7 +267,7 @@ router.post(
   trainingDiscoveryMiddleware(),
   async (req, res) => {
     // training logic...
-  }
+  },
 );
 ```
 

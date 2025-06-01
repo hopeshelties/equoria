@@ -1,8 +1,44 @@
-import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
 /**
- * At-Birth Traits System Tests
- * Tests for trait application during horse creation based on breeding conditions
+ * 🧪 UNIT TEST: At-Birth Traits System - Comprehensive Breeding Analysis Testing
+ *
+ * This test validates the complete at-birth traits system including lineage analysis,
+ * inbreeding detection, and trait application based on breeding conditions.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Trait definitions: Valid structure with name, description, conditions, probability
+ * - Condition evaluation: Mare stress, feed quality, inbreeding, multiple conditions
+ * - Feed quality assessment: Health status and earnings-based quality calculation
+ * - Ancestor retrieval: Multi-generation lineage tracking with proper recursion
+ * - Inbreeding detection: Common ancestor identification and coefficient calculation
+ * - Lineage analysis: Discipline specialization detection from competition history
+ * - Trait application: Positive traits for optimal conditions, negative for poor conditions
+ * - Hidden trait mechanics: Trait concealment when many traits are applied
+ * - Input validation: Required parameters, missing mare handling, graceful error handling
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. AT_BIRTH_TRAITS - Trait definition structure and validation
+ * 2. evaluateTraitConditions() - Condition matching logic for trait application
+ * 3. assessFeedQuality() - Feed quality calculation based on mare status and earnings
+ * 4. getAncestors() - Multi-generation ancestor retrieval with database queries
+ * 5. detectInbreeding() - Common ancestor detection and inbreeding coefficient calculation
+ * 6. analyzeLineage() - Discipline specialization analysis from competition history
+ * 7. applyEpigeneticTraitsAtBirth() - Complete trait application workflow
+ * 8. Edge cases: Missing data, empty lineage, no competition history
+ * 9. Integration testing: Database queries, trait condition evaluation, result structure
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Trait evaluation logic, condition matching, lineage analysis algorithms
+ * ✅ REAL: Inbreeding detection, discipline specialization, trait application rules
+ * 🔧 MOCK: Database operations (Prisma), Math.random() for deterministic testing, logger
+ *
+ * 💡 TEST STRATEGY: Unit testing with strategic database mocking to validate
+ *    breeding analysis algorithms while maintaining deterministic test results
+ *
+ * ⚠️  NOTE: This represents GOOD balanced mocking - mocks external dependencies
+ *    (database, randomness) while testing real breeding logic and trait calculations.
  */
+
+import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
 
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -50,7 +86,7 @@ const {
   getHighestScoringDiscipline,
 } = await import(join(__dirname, '../utils/atBirthTraits.js'));
 
-describe('At-Birth Traits System', () => {
+describe('🧬 UNIT: At-Birth Traits System - Comprehensive Breeding Analysis Testing', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset random seed for consistent testing
@@ -413,7 +449,7 @@ describe('At-Birth Traits System', () => {
 
       expect(evaluateTraitConditions(inbredTraitConditions, conditionsWithInbreeding)).toBe(true);
       expect(evaluateTraitConditions(inbredTraitConditions, conditionsWithoutInbreeding)).toBe(
-        false
+        false,
       );
     });
 
@@ -456,16 +492,16 @@ describe('At-Birth Traits System', () => {
       };
 
       await expect(applyEpigeneticTraitsAtBirth(breedingData)).rejects.toThrow(
-        'Mare with ID 999 not found'
+        'Mare with ID 999 not found',
       );
     });
 
     it('should require both sire and dam IDs', async () => {
       await expect(applyEpigeneticTraitsAtBirth({ sireId: 1 })).rejects.toThrow(
-        'Both sireId and damId are required'
+        'Both sireId and damId are required',
       );
       await expect(applyEpigeneticTraitsAtBirth({ damId: 2 })).rejects.toThrow(
-        'Both sireId and damId are required'
+        'Both sireId and damId are required',
       );
     });
 

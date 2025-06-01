@@ -85,7 +85,7 @@ async function saveResult(resultData) {
     });
 
     logger.info(
-      `[resultModel.saveResult] Successfully saved result for horse ${horseId} in show ${showId} with score ${score}`
+      `[resultModel.saveResult] Successfully saved result for horse ${horseId} in show ${showId} with score ${score}`,
     );
     return result;
   } catch (error) {
@@ -121,7 +121,7 @@ async function getResultsByHorse(horseId) {
     });
 
     logger.info(
-      `[resultModel.getResultsByHorse] Found ${results.length} results for horse ${numericId}`
+      `[resultModel.getResultsByHorse] Found ${results.length} results for horse ${numericId}`,
     );
     return results;
   } catch (error) {
@@ -157,7 +157,7 @@ async function getResultsByShow(showId) {
     });
 
     logger.info(
-      `[resultModel.getResultsByShow] Found ${results.length} results for show ${numericId}`
+      `[resultModel.getResultsByShow] Found ${results.length} results for show ${numericId}`,
     );
     return results;
   } catch (error) {
@@ -249,12 +249,12 @@ async function getResultsByUser(userId, options = {}) {
     });
 
     logger.info(
-      `[resultModel.getResultsByUser] Retrieved ${results.length} results for user ${userId}`
+      `[resultModel.getResultsByUser] Retrieved ${results.length} results for user ${userId}`,
     );
     return results;
   } catch (error) {
     logger.error(
-      `[resultModel.getResultsByUser] Error getting results for user ${userId}: ${error.message}`
+      `[resultModel.getResultsByUser] Error getting results for user ${userId}: ${error.message}`,
     );
     throw error;
   }

@@ -4,7 +4,7 @@
  */
 
 import { logger } from '../utils/logger.js';
-import { getUserById, addXpToUser } from '../models/userModel.js';
+import { getUserById, addXpToUser as modelAddXpToUser } from '../models/userModel.js';
 
 /**
  * Get user progression data
@@ -40,7 +40,7 @@ export async function getUserProgression(req, res, next) {
     const xpProgress = currentXp - xpForCurrentLevel;
     const xpNeeded = xpForNextLevel - currentXp;
     const progressPercentage = Math.round(
-      (xpProgress / (xpForNextLevel - xpForCurrentLevel)) * 100
+      (xpProgress / (xpForNextLevel - xpForCurrentLevel)) * 100,
     );
 
     const progressionData = {
@@ -54,7 +54,7 @@ export async function getUserProgression(req, res, next) {
     };
 
     logger.info(
-      `[progressionController.getUserProgression] Retrieved progression for user ${userId}`
+      `[progressionController.getUserProgression] Retrieved progression for user ${userId}`,
     );
 
     res.json({
@@ -64,7 +64,7 @@ export async function getUserProgression(req, res, next) {
     });
   } catch (error) {
     logger.error(
-      `[progressionController.getUserProgression] Error getting progression for user ${req.params.userId}: ${error.message}`
+      `[progressionController.getUserProgression] Error getting progression for user ${req.params.userId}: ${error.message}`,
     );
     next(error);
   }
@@ -95,10 +95,10 @@ export async function awardXp(req, res, next) {
       });
     }
 
-    const result = await addXpToUser(userId, amount, reason);
+    const result = await modelAddXpToUser(userId, amount, reason);
 
     logger.info(
-      `[progressionController.awardXp] Awarded ${amount} XP to user ${userId}: ${reason || 'No reason provided'}`
+      `[progressionController.awardXp] Awarded ${amount} XP to user ${userId}: ${reason || 'No reason provided'}`,
     );
 
     res.json({
@@ -108,7 +108,7 @@ export async function awardXp(req, res, next) {
     });
   } catch (error) {
     logger.error(
-      `[progressionController.awardXp] Error awarding XP to user ${req.params.userId}: ${error.message}`
+      `[progressionController.awardXp] Error awarding XP to user ${req.params.userId}: ${error.message}`,
     );
     next(error);
   }
@@ -163,7 +163,7 @@ export async function checkLevelUp(userId) {
       const levelsGained = calculatedLevel - currentLevel;
 
       logger.info(
-        `[progressionController.checkLevelUp] User ${userId} leveled up! ${currentLevel} → ${calculatedLevel}`
+        `[progressionController.checkLevelUp] User ${userId} leveled up! ${currentLevel} → ${calculatedLevel}`,
       );
 
       return {
@@ -182,8 +182,62 @@ export async function checkLevelUp(userId) {
     };
   } catch (error) {
     logger.error(
-      `[progressionController.checkLevelUp] Error checking level up for user ${userId}: ${error.message}`
+      `[progressionController.checkLevelUp] Error checking level up for user ${userId}: ${error.message}`,
     );
+    throw error;
+  }
+}
+
+/**
+ * Add XP to user (direct function for testing)
+ * @param {string} userId - User ID
+ * @param {number} amount - XP amount to add
+ * @returns {Object} Updated user data
+ */
+export async function addXpToUser(userId, amount) {
+  try {
+    if (!userId) {
+      throw new Error('User ID is required.');
+    }
+
+    if (!amount || amount <= 0) {
+      throw new Error('XP amount must be a positive number.');
+    }
+
+    const result = await modelAddXpToUser(userId, amount);
+    return result;
+  } catch (error) {
+    logger.error(`[progressionController.addXpToUser] Error: ${error.message}`);
+    throw error;
+  }
+}
+
+/**
+ * Get user progress (direct function for testing)
+ * @param {string} userId - User ID
+ * @returns {Object} User progress data
+ */
+export async function getUserProgress(userId) {
+  try {
+    if (!userId) {
+      throw new Error('Progress fetch failed: Lookup failed: User ID is required.');
+    }
+
+    const user = await getUserById(userId);
+
+    if (!user) {
+      throw new Error('Progress fetch failed: User not found.');
+    }
+
+    return {
+      valid: true,
+      userId: user.id,
+      level: user.level,
+      xp: user.xp,
+      money: user.money || 0,
+    };
+  } catch (error) {
+    logger.error(`[progressionController.getUserProgress] Error: ${error.message}`);
     throw error;
   }
 }

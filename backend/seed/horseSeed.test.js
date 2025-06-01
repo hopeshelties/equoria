@@ -99,7 +99,7 @@ describe('horseSeed', () => {
 
       expect(result).toBe(false);
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[seed] Failed to check if horse "Error Horse" exists: Database error'
+        '[seed] Failed to check if horse "Error Horse" exists: Database error',
       );
     });
   });
@@ -118,7 +118,7 @@ describe('horseSeed', () => {
       expect(mockPrisma.breed.create).not.toHaveBeenCalled();
       expect(result).toEqual(existingBreed);
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[seed] Found existing breed: Thoroughbred (ID: 1)'
+        '[seed] Found existing breed: Thoroughbred (ID: 1)',
       );
     });
 
@@ -139,7 +139,7 @@ describe('horseSeed', () => {
       });
       expect(result).toEqual(newBreed);
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[seed] Breed "Arabian" not found, creating new one.'
+        '[seed] Breed "Arabian" not found, creating new one.',
       );
       expect(mockLogger.info).toHaveBeenCalledWith('[seed] Created breed: Arabian (ID: 2)');
     });
@@ -149,7 +149,7 @@ describe('horseSeed', () => {
 
       expect(result).toBeNull();
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[seed] Breed name is undefined or null. Skipping breed creation/connection.'
+        '[seed] Breed name is undefined or null. Skipping breed creation/connection.',
       );
       expect(mockPrisma.breed.findUnique).not.toHaveBeenCalled();
       expect(mockPrisma.breed.create).not.toHaveBeenCalled();
@@ -161,7 +161,7 @@ describe('horseSeed', () => {
 
       await expect(findOrCreateBreed('Test Breed')).rejects.toThrow('Database connection failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[seed] Failed to find or create breed "Test Breed": Database connection failed'
+        '[seed] Failed to find or create breed "Test Breed": Database connection failed',
       );
     });
   });
@@ -221,10 +221,10 @@ describe('horseSeed', () => {
       await ensureReferencedRecordsExist();
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[seed] Could not ensure User ID 1. Error: Database connection failed'
+        '[seed] Could not ensure User ID 1. Error: Database connection failed',
       );
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[seed] Could not ensure User ID 2. Error: Database connection failed'
+        '[seed] Could not ensure User ID 2. Error: Database connection failed',
       );
       expect(mockLogger.info).toHaveBeenCalledWith('[seed] Ensured Stable ID 1 exists.');
       expect(mockLogger.info).toHaveBeenCalledWith('[seed] Ensured Stable ID 2 exists.');
@@ -238,10 +238,10 @@ describe('horseSeed', () => {
       await ensureReferencedRecordsExist();
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[seed] Could not ensure Stable ID 1. Error: Stable DB error'
+        '[seed] Could not ensure Stable ID 1. Error: Stable DB error',
       );
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[seed] Could not ensure Stable ID 2. Error: Stable DB error'
+        '[seed] Could not ensure Stable ID 2. Error: Stable DB error',
       );
       expect(mockLogger.info).toHaveBeenCalledWith('[seed] Ensured User ID 1 exists.');
       expect(mockLogger.info).toHaveBeenCalledWith('[seed] Ensured User ID 2 exists.');
@@ -257,7 +257,7 @@ describe('horseSeed', () => {
     it('should log a warning and return an empty array if no users are provided', async () => {
       const result = await seedHorses(mockPrisma, []);
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        'No users provided for horse seeding. Skipping horse creation.'
+        'No users provided for horse seeding. Skipping horse creation.',
       );
       expect(result).toEqual([]);
     });
@@ -346,10 +346,10 @@ describe('horseSeed', () => {
       expect(result).toContainEqual(mockHorseLightning);
       expect(result).toContainEqual(mockHorseDesertRose);
       expect(mockLogger.info).toHaveBeenCalledWith(
-        `Created horse: ${mockHorseLightning.name} for user ID: ${mockUser.id}`
+        `Created horse: ${mockHorseLightning.name} for user ID: ${mockUser.id}`,
       );
       expect(mockLogger.info).toHaveBeenCalledWith(
-        `Created horse: ${mockHorseDesertRose.name} for user ID: ${mockUser.id}`
+        `Created horse: ${mockHorseDesertRose.name} for user ID: ${mockUser.id}`,
       );
     });
 
@@ -372,7 +372,7 @@ describe('horseSeed', () => {
       await seedHorses(mockPrisma, [mockUser]);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Skipping horse Lightning Bolt due to missing breedId.')
+        expect.stringContaining('Skipping horse Lightning Bolt due to missing breedId.'),
       );
       const createCalls = mockPrisma.horse.create.mock.calls;
       const createdDesertRose = createCalls.some(call => call[0].data.name === 'Desert Rose');
@@ -390,10 +390,10 @@ describe('horseSeed', () => {
       await seedHorses(mockPrisma, [mockUser]);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error seeding horse Lightning Bolt: Failed to create horse')
+        expect.stringContaining('Error seeding horse Lightning Bolt: Failed to create horse'),
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error seeding horse Desert Rose: Failed to create horse')
+        expect.stringContaining('Error seeding horse Desert Rose: Failed to create horse'),
       );
     });
   });
@@ -415,7 +415,7 @@ describe('horseSeed', () => {
 
       expect(mockLogger.info).toHaveBeenCalledWith('[seed] Ensured User ID 1 exists.');
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Successfully seeded horse:')
+        expect.stringContaining('Successfully seeded horse:'),
       );
       expect(mockPrisma.$disconnect).toHaveBeenCalled();
     });
@@ -427,7 +427,7 @@ describe('horseSeed', () => {
       await expect(actualMain()).rejects.toThrow('Main execution DB error');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error during database seeding: Main execution DB error')
+        expect.stringContaining('Error during database seeding: Main execution DB error'),
       );
       expect(mockPrisma.$disconnect).toHaveBeenCalled();
     });

@@ -98,7 +98,7 @@ const AT_BIRTH_TRAITS = {
 async function analyzeLineage(sireId, damId) {
   try {
     logger.info(
-      `[atBirthTraits.analyzeLineage] Analyzing lineage for sire ${sireId} and dam ${damId}`
+      `[atBirthTraits.analyzeLineage] Analyzing lineage for sire ${sireId} and dam ${damId}`,
     );
 
     // Get ancestors up to 3 generations
@@ -140,11 +140,11 @@ async function analyzeLineage(sireId, damId) {
     }
 
     logger.info(
-      `[atBirthTraits.analyzeLineage] Found ${ancestors.length} ancestors, ${totalCompetitions} competitions`
+      `[atBirthTraits.analyzeLineage] Found ${ancestors.length} ancestors, ${totalCompetitions} competitions`,
     );
     if (specializedDiscipline) {
       logger.info(
-        `[atBirthTraits.analyzeLineage] Specialized discipline detected: ${specializedDiscipline} (${(maxSpecialization * 100).toFixed(1)}%)`
+        `[atBirthTraits.analyzeLineage] Specialized discipline detected: ${specializedDiscipline} (${(maxSpecialization * 100).toFixed(1)}%)`,
       );
     }
 
@@ -176,7 +176,7 @@ async function analyzeLineage(sireId, damId) {
 async function detectInbreeding(sireId, damId) {
   try {
     logger.info(
-      `[atBirthTraits.detectInbreeding] Checking for inbreeding between sire ${sireId} and dam ${damId}`
+      `[atBirthTraits.detectInbreeding] Checking for inbreeding between sire ${sireId} and dam ${damId}`,
     );
 
     // Get ancestors for both parents up to 3 generations
@@ -203,11 +203,11 @@ async function detectInbreeding(sireId, damId) {
       commonAncestors.length / Math.max(sireAncestors.length, damAncestors.length);
 
     logger.info(
-      `[atBirthTraits.detectInbreeding] Inbreeding ${inbreedingDetected ? 'detected' : 'not detected'}`
+      `[atBirthTraits.detectInbreeding] Inbreeding ${inbreedingDetected ? 'detected' : 'not detected'}`,
     );
     if (inbreedingDetected) {
       logger.info(
-        `[atBirthTraits.detectInbreeding] Common ancestors: ${commonAncestors.map(a => a.name).join(', ')}`
+        `[atBirthTraits.detectInbreeding] Common ancestors: ${commonAncestors.map(a => a.name).join(', ')}`,
       );
     }
 
@@ -286,7 +286,7 @@ async function getAncestors(horseIds, generations) {
 
     // Remove duplicates
     const uniqueAncestors = ancestors.filter(
-      (ancestor, index, self) => index === self.findIndex(a => a.id === ancestor.id)
+      (ancestor, index, self) => index === self.findIndex(a => a.id === ancestor.id),
     );
 
     return uniqueAncestors;
@@ -371,7 +371,7 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
     const { sireId, damId, mareStress, feedQuality } = breedingData;
 
     logger.info(
-      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applying at-birth traits for sire ${sireId} and dam ${damId}`
+      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applying at-birth traits for sire ${sireId} and dam ${damId}`,
     );
 
     // Validate required parameters
@@ -394,7 +394,7 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
       feedQuality !== undefined ? feedQuality : await assessFeedQuality(damId);
 
     logger.info(
-      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Mare stress: ${currentMareStress}, Feed quality: ${currentFeedQuality}`
+      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Mare stress: ${currentMareStress}, Feed quality: ${currentFeedQuality}`,
     );
 
     // Analyze lineage for specialization
@@ -413,7 +413,7 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
     };
 
     logger.info(
-      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Breeding conditions: ${JSON.stringify(conditions)}`
+      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Breeding conditions: ${JSON.stringify(conditions)}`,
     );
 
     // Evaluate traits
@@ -425,7 +425,7 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
         if (Math.random() < traitDef.probability) {
           appliedTraits.positive.push(traitKey);
           logger.info(
-            `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applied positive trait: ${traitKey}`
+            `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applied positive trait: ${traitKey}`,
           );
         }
       }
@@ -437,7 +437,7 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
         if (Math.random() < traitDef.probability) {
           appliedTraits.negative.push(traitKey);
           logger.info(
-            `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applied negative trait: ${traitKey}`
+            `[atBirthTraits.applyEpigeneticTraitsAtBirth] Applied negative trait: ${traitKey}`,
           );
         }
       }
@@ -459,12 +459,12 @@ async function applyEpigeneticTraitsAtBirth(breedingData) {
 
       appliedTraits.hidden.push(hiddenTrait);
       logger.info(
-        `[atBirthTraits.applyEpigeneticTraitsAtBirth] Moved trait to hidden: ${hiddenTrait}`
+        `[atBirthTraits.applyEpigeneticTraitsAtBirth] Moved trait to hidden: ${hiddenTrait}`,
       );
     }
 
     logger.info(
-      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Final traits: ${JSON.stringify(appliedTraits)}`
+      `[atBirthTraits.applyEpigeneticTraitsAtBirth] Final traits: ${JSON.stringify(appliedTraits)}`,
     );
 
     return {
@@ -540,7 +540,7 @@ function evaluateTraitConditions(traitConditions, actualConditions) {
 function checkLineageForDisciplineAffinity(ancestors) {
   try {
     logger.info(
-      `[atBirthTraits.checkLineageForDisciplineAffinity] Analyzing ${ancestors.length} ancestors for discipline affinity`
+      `[atBirthTraits.checkLineageForDisciplineAffinity] Analyzing ${ancestors.length} ancestors for discipline affinity`,
     );
 
     if (!ancestors || ancestors.length === 0) {
@@ -573,13 +573,13 @@ function checkLineageForDisciplineAffinity(ancestors) {
         disciplineCount[preferredDiscipline] = (disciplineCount[preferredDiscipline] || 0) + 1;
         totalAncestorsWithDisciplines++;
         logger.info(
-          `[atBirthTraits.checkLineageForDisciplineAffinity] Ancestor ${ancestor.name || ancestor.id} prefers ${preferredDiscipline}`
+          `[atBirthTraits.checkLineageForDisciplineAffinity] Ancestor ${ancestor.name || ancestor.id} prefers ${preferredDiscipline}`,
         );
       }
     }
 
     logger.info(
-      `[atBirthTraits.checkLineageForDisciplineAffinity] Discipline counts: ${JSON.stringify(disciplineCount)}`
+      `[atBirthTraits.checkLineageForDisciplineAffinity] Discipline counts: ${JSON.stringify(disciplineCount)}`,
     );
 
     // Find the most common discipline
@@ -606,7 +606,7 @@ function checkLineageForDisciplineAffinity(ancestors) {
     };
 
     logger.info(
-      `[atBirthTraits.checkLineageForDisciplineAffinity] Result: ${JSON.stringify(result)}`
+      `[atBirthTraits.checkLineageForDisciplineAffinity] Result: ${JSON.stringify(result)}`,
     );
 
     return result;

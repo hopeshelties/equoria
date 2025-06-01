@@ -129,9 +129,9 @@ export async function revealTraits(horseId, options = {}) {
         breed: true,
         foalActivities: options.checkEnrichment
           ? {
-              orderBy: { createdAt: 'desc' },
-              take: 20,
-            }
+            orderBy: { createdAt: 'desc' },
+            take: 20,
+          }
           : false,
       },
     });
@@ -180,7 +180,7 @@ export async function revealTraits(horseId, options = {}) {
 
     if (traitsToReveal.length === 0) {
       logger.info(
-        `[traitDiscovery.revealTraits] No suitable traits selected for revelation for horse ${horseId}`
+        `[traitDiscovery.revealTraits] No suitable traits selected for revelation for horse ${horseId}`,
       );
       return {
         success: true,
@@ -194,7 +194,7 @@ export async function revealTraits(horseId, options = {}) {
     const updatedTraits = await updateHorseTraits(horseId, currentTraits, traitsToReveal);
 
     logger.info(
-      `[traitDiscovery.revealTraits] Successfully revealed ${traitsToReveal.length} traits for horse ${horseId}: ${traitsToReveal.join(', ')}`
+      `[traitDiscovery.revealTraits] Successfully revealed ${traitsToReveal.length} traits for horse ${horseId}: ${traitsToReveal.join(', ')}`,
     );
 
     return {
@@ -210,7 +210,7 @@ export async function revealTraits(horseId, options = {}) {
     };
   } catch (error) {
     logger.error(
-      `[traitDiscovery.revealTraits] Error revealing traits for horse ${horseId}: ${error.message}`
+      `[traitDiscovery.revealTraits] Error revealing traits for horse ${horseId}: ${error.message}`,
     );
     throw error;
   }
@@ -244,7 +244,7 @@ async function checkDiscoveryConditions(horse) {
       }
     } catch (error) {
       logger.warn(
-        `[traitDiscovery.checkDiscoveryConditions] Error checking condition ${conditionName}: ${error.message}`
+        `[traitDiscovery.checkDiscoveryConditions] Error checking condition ${conditionName}: ${error.message}`,
       );
     }
   }
@@ -406,6 +406,62 @@ function getDiscoveryReason(trait, conditions) {
   });
 
   return relevantCondition ? relevantCondition.description : 'Special discovery condition met';
+}
+
+/**
+ * Batch reveal traits for multiple horses
+ * @param {Array} horseIds - Array of horse IDs
+ * @param {Object} options - Discovery options
+ * @returns {Object} Batch discovery results
+ */
+export async function batchRevealTraits(horseIds, options = {}) {
+  const results = {};
+
+  for (const horseId of horseIds) {
+    try {
+      results[horseId] = await revealTraits(horseId, options);
+    } catch (error) {
+      logger.error(`[traitDiscovery.batchRevealTraits] Error for horse ${horseId}:`, error);
+      results[horseId] = { error: error.message };
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Get discovery progress for a horse
+ * @param {number} horseId - Horse ID
+ * @returns {Object} Discovery progress information
+ */
+export async function getDiscoveryProgress(horseId) {
+  try {
+    const horse = await prisma.horse.findUnique({
+      where: { id: horseId },
+      include: {
+        traits: true,
+      },
+    });
+
+    if (!horse) {
+      throw new Error(`Horse with ID ${horseId} not found`);
+    }
+
+    const totalPossibleTraits = Object.keys(DISCOVERY_CONDITIONS).length;
+    const discoveredTraits = horse.traits.length;
+    const progressPercentage = Math.round((discoveredTraits / totalPossibleTraits) * 100);
+
+    return {
+      horseId,
+      discoveredTraits,
+      totalPossibleTraits,
+      progressPercentage,
+      traits: horse.traits.map(trait => trait.name),
+    };
+  } catch (error) {
+    logger.error(`[traitDiscovery.getDiscoveryProgress] Error for horse ${horseId}:`, error);
+    throw error;
+  }
 }
 
 export {

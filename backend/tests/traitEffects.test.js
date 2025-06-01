@@ -1,3 +1,41 @@
+/**
+ * 🧪 UNIT TEST: Trait Effects System - Trait Impact Calculation & Combination
+ *
+ * This test validates the trait effects system's functionality for calculating
+ * and combining trait impacts on horse performance, training, and competition.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Individual trait effect retrieval with complete modifier sets
+ * - Trait combination logic: additive numeric modifiers, boolean OR operations
+ * - Positive trait benefits: training bonuses, competition advantages, stat boosts
+ * - Negative trait penalties: training penalties, competition disadvantages, stress increases
+ * - Rare trait effects: legendary bloodline bonuses, burnout severe penalties
+ * - Discipline-specific modifiers: trait advantages/disadvantages per competition type
+ * - Input validation: null/undefined/invalid trait handling with graceful fallbacks
+ * - Effect type handling: numeric addition, boolean combination, object merging
+ * - Complete trait catalog validation: all positive, negative, and rare traits
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. getTraitEffects() - Individual trait effect retrieval with validation
+ * 2. hasTraitEffect() - Trait-specific effect existence checking
+ * 3. getCombinedTraitEffects() - Multi-trait effect combination with proper merging
+ * 4. getAllTraitEffects() - Complete trait catalog retrieval and validation
+ * 5. Positive trait effects: resilient, intelligent, athletic, bold, calm bonuses
+ * 6. Negative trait effects: nervous, lazy, fragile, aggressive, stubborn penalties
+ * 7. Rare trait effects: legendary bloodline, burnout, trainability boost impacts
+ * 8. Discipline modifiers: Racing, Dressage, Show Jumping, Cross Country, Endurance
+ * 9. Effect combination algorithms: numeric addition, boolean OR, object merging
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete trait effect calculations, combination algorithms, validation logic
+ * ✅ REAL: Modifier calculations, discipline bonuses, stat boosts, penalty applications
+ * 🔧 MOCK: None - pure algorithmic testing with no external dependencies
+ *
+ * 💡 TEST STRATEGY: Pure logic testing to validate trait effect calculations and
+ *    combination algorithms without external dependencies or database complexity
+ */
+
+import { jest, describe, it, expect, test } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -8,7 +46,7 @@ const __dirname = dirname(__filename);
 const { getTraitEffects, getAllTraitEffects, hasTraitEffect, getCombinedTraitEffects } =
   await import(join(__dirname, '../utils/traitEffects.js'));
 
-describe('Trait Effects System', () => {
+describe('🎭 UNIT: Trait Effects System - Trait Impact Calculation & Combination', () => {
   describe('getTraitEffects', () => {
     test('should return effects for valid trait', () => {
       const effects = getTraitEffects('resilient');

@@ -97,7 +97,7 @@ describe('🏋️ UNIT: Training Model - Training Session Logging & Horse Data',
 
     it('should throw error if horseId is missing', async () => {
       await expect(logTrainingSession({ discipline: 'Racing' })).rejects.toThrow(
-        'Horse ID is required'
+        'Horse ID is required',
       );
     });
 
@@ -107,15 +107,15 @@ describe('🏋️ UNIT: Training Model - Training Session Logging & Horse Data',
 
     it('should throw error if horseId is not a positive integer', async () => {
       await expect(logTrainingSession({ horseId: -1, discipline: 'Racing' })).rejects.toThrow(
-        'Horse ID must be a positive integer'
+        'Horse ID must be a positive integer',
       );
 
       await expect(logTrainingSession({ horseId: 0, discipline: 'Racing' })).rejects.toThrow(
-        'Horse ID must be a positive integer'
+        'Horse ID must be a positive integer',
       );
 
       await expect(
-        logTrainingSession({ horseId: 'invalid', discipline: 'Racing' })
+        logTrainingSession({ horseId: 'invalid', discipline: 'Racing' }),
       ).rejects.toThrow('Horse ID must be a positive integer');
     });
 
@@ -123,7 +123,7 @@ describe('🏋️ UNIT: Training Model - Training Session Logging & Horse Data',
       mockTrainingLogCreate.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(logTrainingSession({ horseId: 5, discipline: 'Racing' })).rejects.toThrow(
-        'Database error: Database connection failed'
+        'Database error: Database connection failed',
       );
     });
   });
@@ -159,15 +159,15 @@ describe('🏋️ UNIT: Training Model - Training Session Logging & Horse Data',
 
     it('should throw error if horseId is not a positive integer', async () => {
       await expect(getLastTrainingDate(-1, 'Racing')).rejects.toThrow(
-        'Horse ID must be a positive integer'
+        'Horse ID must be a positive integer',
       );
 
       await expect(getLastTrainingDate(0, 'Racing')).rejects.toThrow(
-        'Horse ID must be a positive integer'
+        'Horse ID must be a positive integer',
       );
 
       await expect(getLastTrainingDate('invalid', 'Racing')).rejects.toThrow(
-        'Horse ID must be a positive integer'
+        'Horse ID must be a positive integer',
       );
     });
 
@@ -181,7 +181,7 @@ describe('🏋️ UNIT: Training Model - Training Session Logging & Horse Data',
       mockTrainingLogFindFirst.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(getLastTrainingDate(5, 'Racing')).rejects.toThrow(
-        'Database error: Database connection failed'
+        'Database error: Database connection failed',
       );
     });
   });

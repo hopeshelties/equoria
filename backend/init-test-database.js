@@ -41,7 +41,7 @@ async function initTestDatabase() {
     console.log('Applying migrations to test database...');
     try {
       await prismaCommand(
-        `npx prisma migrate dev --name init_test_db --create-only --schema="${schemaPath}"`
+        `npx prisma migrate dev --name init_test_db --create-only --schema="${schemaPath}"`,
       );
       console.log('Migration creation step completed.');
     } catch (err) {

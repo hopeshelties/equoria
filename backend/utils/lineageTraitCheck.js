@@ -17,7 +17,7 @@ import logger from './logger.js';
 function checkLineageForDisciplineAffinity(ancestors) {
   try {
     logger.info(
-      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Analyzing ${ancestors?.length || 0} ancestors for discipline affinity`
+      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Analyzing ${ancestors?.length || 0} ancestors for discipline affinity`,
     );
 
     // Handle edge cases
@@ -36,13 +36,13 @@ function checkLineageForDisciplineAffinity(ancestors) {
       if (preferredDiscipline) {
         disciplineCount[preferredDiscipline] = (disciplineCount[preferredDiscipline] || 0) + 1;
         logger.info(
-          `[lineageTraitCheck.checkLineageForDisciplineAffinity] Ancestor ${ancestor.name || ancestor.id} prefers ${preferredDiscipline}`
+          `[lineageTraitCheck.checkLineageForDisciplineAffinity] Ancestor ${ancestor.name || ancestor.id} prefers ${preferredDiscipline}`,
         );
       }
     }
 
     logger.info(
-      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Discipline counts: ${JSON.stringify(disciplineCount)}`
+      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Discipline counts: ${JSON.stringify(disciplineCount)}`,
     );
 
     // Find the most common discipline
@@ -65,7 +65,7 @@ function checkLineageForDisciplineAffinity(ancestors) {
     };
 
     logger.info(
-      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Result: ${JSON.stringify(result)}`
+      `[lineageTraitCheck.checkLineageForDisciplineAffinity] Result: ${JSON.stringify(result)}`,
     );
 
     return result;
@@ -207,7 +207,7 @@ function checkLineageForDisciplineAffinityDetailed(ancestors) {
     };
   } catch (error) {
     logger.error(
-      `[lineageTraitCheck.checkLineageForDisciplineAffinityDetailed] Error: ${error.message}`
+      `[lineageTraitCheck.checkLineageForDisciplineAffinityDetailed] Error: ${error.message}`,
     );
     return {
       affinity: false,
@@ -252,7 +252,7 @@ function checkSpecificDisciplineAffinity(ancestors, targetDiscipline, minimumCou
     const hasAffinity = count >= minimumCount;
 
     logger.info(
-      `[lineageTraitCheck.checkSpecificDisciplineAffinity] ${targetDiscipline} affinity: ${hasAffinity} (${count}/${minimumCount})`
+      `[lineageTraitCheck.checkSpecificDisciplineAffinity] ${targetDiscipline} affinity: ${hasAffinity} (${count}/${minimumCount})`,
     );
 
     return {

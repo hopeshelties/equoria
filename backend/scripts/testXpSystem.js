@@ -76,7 +76,7 @@ async function testXpSystem() {
 
     console.log('8. Verifying state after adding 200 XP...');
     console.log(
-      `✅ Result: Level ${result.currentLevel || result.level}, XP: ${result.currentXP || result.xp}`
+      `✅ Result: Level ${result.currentLevel || result.level}, XP: ${result.currentXP || result.xp}`,
     );
     console.log(`   Leveled up: ${result.leveledUp}, Levels gained: ${result.levelsGained}\n`);
 

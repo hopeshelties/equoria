@@ -52,7 +52,7 @@ router.post('/enter-show', validateEnterShow, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       logger.warn(
-        `[competitionRoutes.POST /enter-show] Validation errors: ${JSON.stringify(errors.array())}`
+        `[competitionRoutes.POST /enter-show] Validation errors: ${JSON.stringify(errors.array())}`,
       );
       return res.status(400).json({
         success: false,
@@ -64,7 +64,7 @@ router.post('/enter-show', validateEnterShow, async (req, res) => {
     const { showId, horseIds } = req.body;
 
     logger.info(
-      `[competitionRoutes.POST /enter-show] Entering ${horseIds.length} horses into show ${showId}`
+      `[competitionRoutes.POST /enter-show] Entering ${horseIds.length} horses into show ${showId}`,
     );
 
     // Get show details from database
@@ -85,7 +85,7 @@ router.post('/enter-show', validateEnterShow, async (req, res) => {
     // Log the result
     if (result.success) {
       logger.info(
-        `[competitionRoutes.POST /enter-show] Competition completed successfully: ${result.summary.validEntries} entries, ${result.summary.skippedEntries} skipped`
+        `[competitionRoutes.POST /enter-show] Competition completed successfully: ${result.summary.validEntries} entries, ${result.summary.skippedEntries} skipped`,
       );
     } else {
       logger.warn(`[competitionRoutes.POST /enter-show] Competition failed: ${result.message}`);
@@ -122,7 +122,7 @@ router.get('/show/:showId/results', async (req, res) => {
     const results = await getResultsByShow(showId);
 
     logger.info(
-      `[competitionRoutes.GET /show/${showId}/results] Retrieved ${results.length} results`
+      `[competitionRoutes.GET /show/${showId}/results] Retrieved ${results.length} results`,
     );
 
     res.json({
@@ -159,7 +159,7 @@ router.get('/horse/:horseId/results', async (req, res) => {
     const results = await getResultsByHorse(horseId);
 
     logger.info(
-      `[competitionRoutes.GET /horse/${horseId}/results] Retrieved ${results.length} results`
+      `[competitionRoutes.GET /horse/${horseId}/results] Retrieved ${results.length} results`,
     );
 
     res.json({
@@ -201,7 +201,7 @@ router.post(
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         logger.warn(
-          `[competitionRoutes.POST /enter] Validation errors: ${JSON.stringify(errors.array())}`
+          `[competitionRoutes.POST /enter] Validation errors: ${JSON.stringify(errors.array())}`,
         );
         return res.status(400).json({
           success: false,
@@ -214,7 +214,7 @@ router.post(
       const userId = req.user.id;
 
       logger.info(
-        `[competitionRoutes.POST /enter] User ${userId} entering horse ${horseId} in show ${showId}`
+        `[competitionRoutes.POST /enter] User ${userId} entering horse ${horseId} in show ${showId}`,
       );
 
       // Get horse and validate ownership
@@ -307,7 +307,7 @@ router.post(
       });
 
       logger.info(
-        `[competitionRoutes.POST /enter] Successfully entered horse ${horseId} in show ${showId}`
+        `[competitionRoutes.POST /enter] Successfully entered horse ${horseId} in show ${showId}`,
       );
 
       res.status(201).json({
@@ -332,7 +332,7 @@ router.post(
         error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
       });
     }
-  }
+  },
 );
 
 /**
@@ -354,7 +354,7 @@ router.post(
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         logger.warn(
-          `[competitionRoutes.POST /execute] Validation errors: ${JSON.stringify(errors.array())}`
+          `[competitionRoutes.POST /execute] Validation errors: ${JSON.stringify(errors.array())}`,
         );
         return res.status(400).json({
           success: false,
@@ -367,7 +367,7 @@ router.post(
       const userId = req.user.id;
 
       logger.info(
-        `[competitionRoutes.POST /execute] User ${userId} executing competition for show ${showId}`
+        `[competitionRoutes.POST /execute] User ${userId} executing competition for show ${showId}`,
       );
 
       // Get show details
@@ -419,7 +419,7 @@ router.post(
       }));
 
       logger.info(
-        `[competitionRoutes.POST /execute] Executing competition with ${competitionEntries.length} entries`
+        `[competitionRoutes.POST /execute] Executing competition with ${competitionEntries.length} entries`,
       );
 
       // Execute enhanced competition
@@ -434,7 +434,7 @@ router.post(
       }
 
       logger.info(
-        `[competitionRoutes.POST /execute] Competition executed successfully for show ${showId}`
+        `[competitionRoutes.POST /execute] Competition executed successfully for show ${showId}`,
       );
 
       // Return results without scores (hidden from users)
@@ -460,7 +460,7 @@ router.post(
         error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
       });
     }
-  }
+  },
 );
 
 /**
@@ -483,7 +483,7 @@ router.get(
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         logger.warn(
-          `[competitionRoutes.GET /eligibility] Validation errors: ${JSON.stringify(errors.array())}`
+          `[competitionRoutes.GET /eligibility] Validation errors: ${JSON.stringify(errors.array())}`,
         );
         return res.status(400).json({
           success: false,
@@ -496,7 +496,7 @@ router.get(
       const userId = req.user.id;
 
       logger.info(
-        `[competitionRoutes.GET /eligibility] Checking eligibility for horse ${horseId} in ${discipline}`
+        `[competitionRoutes.GET /eligibility] Checking eligibility for horse ${horseId} in ${discipline}`,
       );
 
       // Get horse and validate ownership
@@ -529,7 +529,7 @@ router.get(
       const eligibility = getCompetitionEligibilitySummary(horse, discipline);
 
       logger.info(
-        `[competitionRoutes.GET /eligibility] Horse ${horseId} eligibility checked for ${discipline}`
+        `[competitionRoutes.GET /eligibility] Horse ${horseId} eligibility checked for ${discipline}`,
       );
 
       res.status(200).json({
@@ -549,7 +549,7 @@ router.get(
         error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
       });
     }
-  }
+  },
 );
 
 /**

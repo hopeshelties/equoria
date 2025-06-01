@@ -29,12 +29,12 @@ export const validateStatChanges = (allowedFields = []) => {
 
     // Check for unauthorized stat modifications
     const unauthorizedChanges = Object.keys(body).filter(
-      field => protectedStats.includes(field) && !allowedFields.includes(field)
+      field => protectedStats.includes(field) && !allowedFields.includes(field),
     );
 
     if (unauthorizedChanges.length > 0) {
       logger.warn(
-        `[integrity] Unauthorized stat modification attempt by user ${req.user?.id}: ${unauthorizedChanges.join(', ')}`
+        `[integrity] Unauthorized stat modification attempt by user ${req.user?.id}: ${unauthorizedChanges.join(', ')}`,
       );
       return res.status(403).json(ApiResponse.forbidden('Direct stat modification not allowed'));
     }
@@ -68,7 +68,7 @@ export const preventDuplication = resourceType => {
     const lastOperation = recentOperations.get(operationKey);
     if (lastOperation && now - lastOperation < 5000) {
       logger.warn(
-        `[integrity] Potential duplication exploit detected for user ${userId} on ${resourceType}`
+        `[integrity] Potential duplication exploit detected for user ${userId} on ${resourceType}`,
       );
       return res
         .status(429)
@@ -139,14 +139,14 @@ export const validateBreeding = async (req, res, next) => {
 
     if (!userOwnsOrHasAccess(sire) && sire.stud_status !== 'Public Stud') {
       logger.warn(
-        `[integrity] Unauthorized breeding attempt: User ${userId} tried to use sire ${sireId}`
+        `[integrity] Unauthorized breeding attempt: User ${userId} tried to use sire ${sireId}`,
       );
       return res.status(403).json(ApiResponse.forbidden('You do not have access to this sire'));
     }
 
     if (!userOwnsOrHasAccess(dam)) {
       logger.warn(
-        `[integrity] Unauthorized breeding attempt: User ${userId} tried to use dam ${damId}`
+        `[integrity] Unauthorized breeding attempt: User ${userId} tried to use dam ${damId}`,
       );
       return res.status(403).json(ApiResponse.forbidden('You do not own this mare'));
     }
@@ -231,7 +231,7 @@ export const validateTraining = async (req, res, next) => {
     // Ownership validation
     if (horse.playerId !== userId && horse.ownerId !== userId) {
       logger.warn(
-        `[integrity] Unauthorized training attempt: User ${userId} tried to train horse ${horseId}`
+        `[integrity] Unauthorized training attempt: User ${userId} tried to train horse ${horseId}`,
       );
       return res.status(403).json(ApiResponse.forbidden('You do not own this horse'));
     }
@@ -257,7 +257,7 @@ export const validateTraining = async (req, res, next) => {
         return res
           .status(400)
           .json(
-            ApiResponse.badRequest(`Horse is in training cooldown for ${remainingTime} more hours`)
+            ApiResponse.badRequest(`Horse is in training cooldown for ${remainingTime} more hours`),
           );
       }
     }
@@ -307,7 +307,7 @@ export const validateTransaction = transactionType => {
         // Additional validation for large transactions
         if (amount > 100000) {
           logger.warn(
-            `[integrity] Large transaction attempt: User ${userId} trying to ${transactionType} ${amount}`
+            `[integrity] Large transaction attempt: User ${userId} trying to ${transactionType} ${amount}`,
           );
           return res.status(400).json(ApiResponse.badRequest('Transaction amount exceeds limit'));
         }
@@ -351,7 +351,7 @@ export const validateTimestamp = (req, res, next) => {
     // Allow 5 minutes of clock drift
     if (timeDiff > 5 * 60 * 1000) {
       logger.warn(
-        `[integrity] Timestamp manipulation detected: User ${req.user?.id}, diff: ${timeDiff}ms`
+        `[integrity] Timestamp manipulation detected: User ${req.user?.id}, diff: ${timeDiff}ms`,
       );
       return res.status(400).json(ApiResponse.badRequest('Invalid timestamp'));
     }

@@ -42,13 +42,13 @@ export async function getTopUsersByXp(options = {}) {
     }));
 
     logger.info(
-      `[leaderboardService.getTopUsersByXp] Retrieved ${users.length} users for leaderboard`
+      `[leaderboardService.getTopUsersByXp] Retrieved ${users.length} users for leaderboard`,
     );
 
     return rankedUsers;
   } catch (error) {
     logger.error(
-      `[leaderboardService.getTopUsersByXp] Error retrieving XP leaderboard: ${error.message}`
+      `[leaderboardService.getTopUsersByXp] Error retrieving XP leaderboard: ${error.message}`,
     );
     throw error;
   }
@@ -85,13 +85,13 @@ export async function getTopUsersByLevel(options = {}) {
     }));
 
     logger.info(
-      `[leaderboardService.getTopUsersByLevel] Retrieved ${users.length} users for level leaderboard`
+      `[leaderboardService.getTopUsersByLevel] Retrieved ${users.length} users for level leaderboard`,
     );
 
     return rankedUsers;
   } catch (error) {
     logger.error(
-      `[leaderboardService.getTopUsersByLevel] Error retrieving level leaderboard: ${error.message}`
+      `[leaderboardService.getTopUsersByLevel] Error retrieving level leaderboard: ${error.message}`,
     );
     throw error;
   }
@@ -128,13 +128,13 @@ export async function getTopUsersByMoney(options = {}) {
     }));
 
     logger.info(
-      `[leaderboardService.getTopUsersByMoney] Retrieved ${users.length} users for money leaderboard`
+      `[leaderboardService.getTopUsersByMoney] Retrieved ${users.length} users for money leaderboard`,
     );
 
     return rankedUsers;
   } catch (error) {
     logger.error(
-      `[leaderboardService.getTopUsersByMoney] Error retrieving money leaderboard: ${error.message}`
+      `[leaderboardService.getTopUsersByMoney] Error retrieving money leaderboard: ${error.message}`,
     );
     throw error;
   }
@@ -192,7 +192,7 @@ export async function getUserXpRank(userId) {
     };
   } catch (error) {
     logger.error(
-      `[leaderboardService.getUserXpRank] Error getting user rank for ${userId}: ${error.message}`
+      `[leaderboardService.getUserXpRank] Error getting user rank for ${userId}: ${error.message}`,
     );
     throw error;
   }
@@ -241,7 +241,7 @@ export async function getLeaderboardStats() {
     };
   } catch (error) {
     logger.error(
-      `[leaderboardService.getLeaderboardStats] Error getting leaderboard stats: ${error.message}`
+      `[leaderboardService.getLeaderboardStats] Error getting leaderboard stats: ${error.message}`,
     );
     throw error;
   }

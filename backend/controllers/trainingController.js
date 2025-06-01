@@ -36,7 +36,7 @@ async function canTrain(horseId, discipline) {
     }
 
     logger.info(
-      `[trainingController.canTrain] Checking training eligibility for horse ${parsedHorseId} in ${discipline}`
+      `[trainingController.canTrain] Checking training eligibility for horse ${parsedHorseId} in ${discipline}`,
     );
 
     // Check horse age requirement (must be 3+ years old)
@@ -52,7 +52,7 @@ async function canTrain(horseId, discipline) {
 
     if (age < 3) {
       logger.info(
-        `[trainingController.canTrain] Horse ${parsedHorseId} is too young (${age} years old)`
+        `[trainingController.canTrain] Horse ${parsedHorseId} is too young (${age} years old)`,
       );
       return {
         eligible: false,
@@ -65,7 +65,7 @@ async function canTrain(horseId, discipline) {
       const horse = await getHorseById(parsedHorseId);
       if (!horse) {
         logger.warn(
-          `[trainingController.canTrain] Horse ${parsedHorseId} not found for trait check`
+          `[trainingController.canTrain] Horse ${parsedHorseId} not found for trait check`,
         );
         return {
           eligible: false,
@@ -75,7 +75,7 @@ async function canTrain(horseId, discipline) {
 
       if (!checkTraitRequirements(horse, discipline)) {
         logger.info(
-          `[trainingController.canTrain] Horse ${parsedHorseId} lacks required trait for ${discipline} training`
+          `[trainingController.canTrain] Horse ${parsedHorseId} lacks required trait for ${discipline} training`,
         );
         return {
           eligible: false,
@@ -97,7 +97,7 @@ async function canTrain(horseId, discipline) {
         const remainingDays = Math.ceil(remainingTime / (1000 * 60 * 60 * 24));
 
         logger.info(
-          `[trainingController.canTrain] Horse ${parsedHorseId} still in cooldown for any training (${remainingDays} days remaining)`
+          `[trainingController.canTrain] Horse ${parsedHorseId} still in cooldown for any training (${remainingDays} days remaining)`,
         );
         return {
           eligible: false,
@@ -108,7 +108,7 @@ async function canTrain(horseId, discipline) {
 
     // Horse is eligible to train
     logger.info(
-      `[trainingController.canTrain] Horse ${parsedHorseId} is eligible to train in ${discipline}`
+      `[trainingController.canTrain] Horse ${parsedHorseId} is eligible to train in ${discipline}`,
     );
     return {
       eligible: true,
@@ -116,7 +116,7 @@ async function canTrain(horseId, discipline) {
     };
   } catch (error) {
     logger.error(
-      `[trainingController.canTrain] Error checking training eligibility: ${error.message}`
+      `[trainingController.canTrain] Error checking training eligibility: ${error.message}`,
     );
     throw new Error(`Training eligibility check failed: ${error.message}`);
   }
@@ -132,7 +132,7 @@ async function canTrain(horseId, discipline) {
 async function trainHorse(horseId, discipline) {
   try {
     logger.info(
-      `[trainingController.trainHorse] Attempting to train horse ${horseId} in ${discipline}`
+      `[trainingController.trainHorse] Attempting to train horse ${horseId} in ${discipline}`,
     );
 
     // Check if horse is eligible to train
@@ -161,7 +161,7 @@ async function trainHorse(horseId, discipline) {
     const traitEffects = getCombinedTraitEffects(allTraits);
 
     logger.info(
-      `[trainingController.trainHorse] Horse ${horseId} has traits: ${allTraits.join(', ')}`
+      `[trainingController.trainHorse] Horse ${horseId} has traits: ${allTraits.join(', ')}`,
     );
 
     // Check for training-blocking traits
@@ -185,10 +185,10 @@ async function trainHorse(horseId, discipline) {
     // Apply trait effects to training
     if (traitEffects.trainingXpModifier) {
       disciplineScoreIncrease = Math.round(
-        disciplineScoreIncrease * (1 + traitEffects.trainingXpModifier)
+        disciplineScoreIncrease * (1 + traitEffects.trainingXpModifier),
       );
       logger.info(
-        `[trainingController.trainHorse] Trait XP modifier applied: ${(traitEffects.trainingXpModifier * 100).toFixed(1)}%`
+        `[trainingController.trainHorse] Trait XP modifier applied: ${(traitEffects.trainingXpModifier * 100).toFixed(1)}%`,
       );
     }
 
@@ -206,10 +206,10 @@ async function trainHorse(horseId, discipline) {
     if (traitEffects.statGainChanceModifier) {
       statGainChance = Math.max(
         0,
-        Math.min(1, statGainChance + traitEffects.statGainChanceModifier)
+        Math.min(1, statGainChance + traitEffects.statGainChanceModifier),
       );
       logger.info(
-        `[trainingController.trainHorse] Stat gain chance modified by traits: ${(statGainChance * 100).toFixed(1)}%`
+        `[trainingController.trainHorse] Stat gain chance modified by traits: ${(statGainChance * 100).toFixed(1)}%`,
       );
     }
 
@@ -240,7 +240,7 @@ async function trainHorse(horseId, discipline) {
       if (traitEffects.baseStatBoost) {
         statGainAmount += traitEffects.baseStatBoost;
         logger.info(
-          `[trainingController.trainHorse] Stat gain boosted by traits: +${traitEffects.baseStatBoost}`
+          `[trainingController.trainHorse] Stat gain boosted by traits: +${traitEffects.baseStatBoost}`,
         );
       }
 
@@ -254,7 +254,7 @@ async function trainHorse(horseId, discipline) {
       try {
         await updateHorseStat(horseId, statToImprove, statGainAmount);
         logger.info(
-          `[trainingController.trainHorse] Stat gain: ${statToImprove} +${statGainAmount}`
+          `[trainingController.trainHorse] Stat gain: ${statToImprove} +${statGainAmount}`,
         );
       } catch (error) {
         logger.error(`[trainingController.trainHorse] Failed to update stat: ${error.message}`);
@@ -267,7 +267,7 @@ async function trainHorse(horseId, discipline) {
     const updatedHorse = await incrementDisciplineScore(
       horseId,
       discipline,
-      disciplineScoreIncrease
+      disciplineScoreIncrease,
     );
 
     // Calculate XP award with trait effects
@@ -290,11 +290,11 @@ async function trainHorse(horseId, discipline) {
         });
 
         logger.info(
-          `[trainingController.trainHorse] Awarded ${baseXp} XP to user ${updatedHorse.userId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.newLevel}!` : ''}`
+          `[trainingController.trainHorse] Awarded ${baseXp} XP to user ${updatedHorse.userId} for training${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.newLevel}!` : ''}`,
         );
       } else if (updatedHorse && !updatedHorse.userId) {
         logger.warn(
-          `[trainingController.trainHorse] Horse ${updatedHorse.id} (${updatedHorse.name}) has no userId - XP cannot be awarded`
+          `[trainingController.trainHorse] Horse ${updatedHorse.id} (${updatedHorse.name}) has no userId - XP cannot be awarded`,
         );
       }
     } catch (error) {
@@ -310,17 +310,17 @@ async function trainHorse(horseId, discipline) {
     if (traitEffects.trainingTimeReduction) {
       cooldownDays = Math.max(
         5,
-        Math.round(cooldownDays * (1 - traitEffects.trainingTimeReduction))
+        Math.round(cooldownDays * (1 - traitEffects.trainingTimeReduction)),
       );
       logger.info(
-        `[trainingController.trainHorse] Training cooldown reduced by trait effects to ${cooldownDays} days`
+        `[trainingController.trainHorse] Training cooldown reduced by trait effects to ${cooldownDays} days`,
       );
     }
 
     nextEligible.setDate(nextEligible.getDate() + cooldownDays);
 
     logger.info(
-      `[trainingController.trainHorse] Successfully trained horse ${horseId} in ${discipline} (Log ID: ${trainingLog.id}, Score +${disciplineScoreIncrease})`
+      `[trainingController.trainHorse] Successfully trained horse ${horseId} in ${discipline} (Log ID: ${trainingLog.id}, Score +${disciplineScoreIncrease})`,
     );
 
     return {
@@ -353,7 +353,7 @@ async function trainHorse(horseId, discipline) {
 async function getTrainingStatus(horseId, discipline) {
   try {
     logger.info(
-      `[trainingController.getTrainingStatus] Getting training status for horse ${horseId} in ${discipline}`
+      `[trainingController.getTrainingStatus] Getting training status for horse ${horseId} in ${discipline}`,
     );
 
     // Get eligibility check (now uses global cooldown)
@@ -400,13 +400,13 @@ async function getTrainingStatus(horseId, discipline) {
     };
 
     logger.info(
-      `[trainingController.getTrainingStatus] Training status retrieved for horse ${horseId}: eligible=${status.eligible}`
+      `[trainingController.getTrainingStatus] Training status retrieved for horse ${horseId}: eligible=${status.eligible}`,
     );
 
     return status;
   } catch (error) {
     logger.error(
-      `[trainingController.getTrainingStatus] Error getting training status: ${error.message}`
+      `[trainingController.getTrainingStatus] Error getting training status: ${error.message}`,
     );
     throw new Error(`Training status check failed: ${error.message}`);
   }
@@ -426,7 +426,7 @@ async function getTrainableHorses(playerId) {
     }
 
     logger.info(
-      `[trainingController.getTrainableHorses] Getting trainable horses for player ${playerId}`
+      `[trainingController.getTrainableHorses] Getting trainable horses for player ${playerId}`,
     );
 
     // Get player with their horses
@@ -452,7 +452,7 @@ async function getTrainableHorses(playerId) {
       // Skip horses under 3 years old
       if (horse.age < 3) {
         logger.debug(
-          `[trainingController.getTrainableHorses] Horse ${horse.id} (${horse.name}) is too young (${horse.age} years)`
+          `[trainingController.getTrainableHorses] Horse ${horse.id} (${horse.name}) is too young (${horse.age} years)`,
         );
         continue;
       }
@@ -495,19 +495,19 @@ async function getTrainableHorses(playerId) {
         }
       } catch (error) {
         logger.warn(
-          `[trainingController.getTrainableHorses] Error checking training eligibility for horse ${horse.id}: ${error.message}`
+          `[trainingController.getTrainableHorses] Error checking training eligibility for horse ${horse.id}: ${error.message}`,
         );
         // Continue checking other horses even if one fails
       }
     }
 
     logger.info(
-      `[trainingController.getTrainableHorses] Found ${trainableHorses.length} trainable horses for player ${playerId}`
+      `[trainingController.getTrainableHorses] Found ${trainableHorses.length} trainable horses for player ${playerId}`,
     );
     return trainableHorses;
   } catch (error) {
     logger.error(
-      `[trainingController.getTrainableHorses] Error getting trainable horses: ${error.message}`
+      `[trainingController.getTrainableHorses] Error getting trainable horses: ${error.message}`,
     );
     throw new Error(`Failed to get trainable horses: ${error.message}`);
   }
@@ -523,7 +523,7 @@ async function trainRouteHandler(req, res) {
     const { horseId, discipline } = req.body;
 
     logger.info(
-      `[trainingController.trainRouteHandler] Training request for horse ${horseId} in ${discipline}`
+      `[trainingController.trainRouteHandler] Training request for horse ${horseId} in ${discipline}`,
     );
 
     // Call the existing trainHorse function

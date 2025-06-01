@@ -31,7 +31,7 @@ async function testConnections() {
           await prisma.$queryRaw`SELECT datname FROM pg_database WHERE datistemplate = false;`;
         console.log(
           '📋 Available databases:',
-          result.map(r => r.datname)
+          result.map(r => r.datname),
         );
 
         // Check if equoria database exists

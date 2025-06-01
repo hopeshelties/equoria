@@ -82,7 +82,7 @@ router.post('/cron/stop', async (req, res) => {
 router.post('/traits/evaluate', async (req, res) => {
   try {
     logger.info(
-      '[adminRoutes] POST /api/admin/traits/evaluate - Manual trait evaluation triggered'
+      '[adminRoutes] POST /api/admin/traits/evaluate - Manual trait evaluation triggered',
     );
 
     const result = await cronJobService.manualTraitEvaluation();

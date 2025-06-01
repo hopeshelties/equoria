@@ -26,13 +26,13 @@ const eagerLearnerHorse = {
 const eagerLearnerEffects = getCombinedTraitEffects(['eager_learner']);
 console.log('Eager Learner Trait Effects:');
 console.log(
-  `- Training XP Modifier: +${(eagerLearnerEffects.trainingXpModifier * 100).toFixed(1)}%`
+  `- Training XP Modifier: +${(eagerLearnerEffects.trainingXpModifier * 100).toFixed(1)}%`,
 );
 console.log(
-  `- Stat Gain Chance Modifier: +${(eagerLearnerEffects.statGainChanceModifier * 100).toFixed(1)}%`
+  `- Stat Gain Chance Modifier: +${(eagerLearnerEffects.statGainChanceModifier * 100).toFixed(1)}%`,
 );
 console.log(
-  `- Base Stat Boost: +${eagerLearnerEffects.baseStatBoost} points when stat gain occurs`
+  `- Base Stat Boost: +${eagerLearnerEffects.baseStatBoost} points when stat gain occurs`,
 );
 
 // Simulate training session
@@ -44,10 +44,10 @@ const modifiedStatGainChance = baseStatGainChance + eagerLearnerEffects.statGain
 console.log('\nTraining Session Results:');
 console.log(`- Base XP: ${baseXp} → Modified XP: ${modifiedXp} (+${modifiedXp - baseXp})`);
 console.log(
-  `- Base Stat Gain Chance: ${(baseStatGainChance * 100).toFixed(1)}% → Modified: ${(modifiedStatGainChance * 100).toFixed(1)}%`
+  `- Base Stat Gain Chance: ${(baseStatGainChance * 100).toFixed(1)}% → Modified: ${(modifiedStatGainChance * 100).toFixed(1)}%`,
 );
 console.log(
-  `- If stat gain occurs: +${1 + eagerLearnerEffects.baseStatBoost} points instead of +1\n`
+  `- If stat gain occurs: +${1 + eagerLearnerEffects.baseStatBoost} points instead of +1\n`,
 );
 
 // Example 2: Bonding Modifiers
@@ -142,7 +142,7 @@ console.log(`- Final Score: ${(baseScore - stressImpact).toFixed(1)}`);
 
 console.log(`\nResilient Horse (${resilientHorse.name}):`);
 console.log(
-  `- Stress Resistance: ${resilientEffects.competitionStressResistance ? `${(resilientEffects.competitionStressResistance * 100).toFixed(1)}%` : 'None'}`
+  `- Stress Resistance: ${resilientEffects.competitionStressResistance ? `${(resilientEffects.competitionStressResistance * 100).toFixed(1)}%` : 'None'}`,
 );
 console.log(`- Reduced Stress Impact: -${resilientStressImpact.toFixed(1)} points`);
 console.log(`- Final Score: ${(baseScore - resilientStressImpact).toFixed(1)}\n`);

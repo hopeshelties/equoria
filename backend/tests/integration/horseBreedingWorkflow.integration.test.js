@@ -286,7 +286,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
         interactionData.interactionType,
         interactionData.duration,
         testUser.id,
-        interactionData.notes
+        interactionData.notes,
       );
 
       expect(interactionResult.success).toBe(true);

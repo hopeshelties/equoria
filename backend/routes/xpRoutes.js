@@ -19,7 +19,7 @@ router.get('/player/:playerId/events', async (req, res) => {
     const { limit = 50, offset = 0, startDate, endDate } = req.query;
 
     logger.info(
-      `[xpRoutes] GET /api/xp/player/${playerId}/events - limit: ${limit}, offset: ${offset}`
+      `[xpRoutes] GET /api/xp/player/${playerId}/events - limit: ${limit}, offset: ${offset}`,
     );
 
     // Validate playerId

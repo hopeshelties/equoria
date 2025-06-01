@@ -394,7 +394,7 @@ describe('Leaderboard Routes Integration Tests', () => {
             placement: '1st',
             discipline: 'Dressage',
           },
-        })
+        }),
       );
     });
   });

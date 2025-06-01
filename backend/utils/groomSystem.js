@@ -10,13 +10,6 @@ import logger from './logger.js';
  * Groom specialties and their bonding modifiers
  */
 export const GROOM_SPECIALTIES = {
-  foalCare: {
-    name: 'Foal Care Specialist',
-    description: 'Specialized in caring for young horses',
-    bondingModifier: 1.5,
-    stressReduction: 1.3,
-    preferredActivities: ['dailyCare', 'feeding', 'grooming'],
-  },
   foal_care: {
     name: 'Foal Care Specialist',
     description: 'Specialized in caring for young horses',
@@ -121,7 +114,7 @@ export const DEFAULT_GROOMS = [
     experience: 5,
     skillLevel: 'intermediate',
     personality: 'gentle',
-    hourlyRate: 18.0,
+    sessionRate: 18.0,
     bio: 'Experienced foal care specialist with a gentle touch.',
     availability: {
       monday: true,
@@ -139,7 +132,7 @@ export const DEFAULT_GROOMS = [
     experience: 8,
     skillLevel: 'expert',
     personality: 'patient',
-    hourlyRate: 25.0,
+    sessionRate: 25.0,
     bio: 'Veteran horse caretaker with extensive experience.',
     availability: {
       monday: true,
@@ -157,7 +150,7 @@ export const DEFAULT_GROOMS = [
     experience: 3,
     skillLevel: 'intermediate',
     personality: 'energetic',
-    hourlyRate: 20.0,
+    sessionRate: 20.0,
     bio: 'Young trainer focused on exercise and development.',
     availability: {
       monday: true,
@@ -175,11 +168,11 @@ export const DEFAULT_GROOMS = [
  * Assign a groom to a foal
  * @param {number} foalId - ID of the foal
  * @param {number} groomId - ID of the groom
- * @param {string} playerId - ID of the player
+ * @param {string} userId - ID of the user
  * @param {Object} options - Assignment options
  * @returns {Object} Assignment result
  */
-export async function assignGroomToFoal(foalId, groomId, playerId, options = {}) {
+export async function assignGroomToFoal(foalId, groomId, userId, options = {}) {
   try {
     const { priority = 1, notes = null, isDefault = false } = options;
 
@@ -249,7 +242,7 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
       data: {
         foalId,
         groomId,
-        userId: playerId,
+        userId,
         priority,
         notes,
         isDefault,
@@ -264,7 +257,7 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
     });
 
     logger.info(
-      `[groomSystem.assignGroomToFoal] Successfully assigned ${groom.name} to foal ${foal.name}`
+      `[groomSystem.assignGroomToFoal] Successfully assigned ${groom.name} to foal ${foal.name}`,
     );
 
     return {
@@ -281,13 +274,13 @@ export async function assignGroomToFoal(foalId, groomId, playerId, options = {})
 /**
  * Get or create default groom assignment for a foal
  * @param {number} foalId - ID of the foal
- * @param {string} playerId - ID of the player
+ * @param {string} userId - ID of the user
  * @returns {Object} Assignment result
  */
-export async function ensureDefaultGroomAssignment(foalId, playerId) {
+export async function ensureDefaultGroomAssignment(foalId, userId) {
   try {
     logger.info(
-      `[groomSystem.ensureDefaultGroomAssignment] Checking default assignment for foal ${foalId}`
+      `[groomSystem.ensureDefaultGroomAssignment] Checking default assignment for foal ${foalId}`,
     );
 
     // Check if foal already has an active assignment
@@ -303,7 +296,7 @@ export async function ensureDefaultGroomAssignment(foalId, playerId) {
 
     if (existingAssignment) {
       logger.info(
-        `[groomSystem.ensureDefaultGroomAssignment] Foal ${foalId} already has active assignment`
+        `[groomSystem.ensureDefaultGroomAssignment] Foal ${foalId} already has active assignment`,
       );
       return {
         success: true,
@@ -313,11 +306,11 @@ export async function ensureDefaultGroomAssignment(foalId, playerId) {
       };
     }
 
-    // Find or create default grooms for the player
-    const defaultGroom = await getOrCreateDefaultGroom(playerId);
+    // Find or create default grooms for the user
+    const defaultGroom = await getOrCreateDefaultGroom(userId);
 
     // Assign the default groom
-    const assignment = await assignGroomToFoal(foalId, defaultGroom.id, playerId, {
+    const assignment = await assignGroomToFoal(foalId, defaultGroom.id, userId, {
       priority: 1,
       notes: 'Auto-assigned default groom',
       isDefault: true,
@@ -334,16 +327,16 @@ export async function ensureDefaultGroomAssignment(foalId, playerId) {
 }
 
 /**
- * Get or create a default groom for a player
- * @param {string} playerId - ID of the player
+ * Get or create a default groom for a user
+ * @param {string} userId - ID of the user
  * @returns {Object} Groom object
  */
-export async function getOrCreateDefaultGroom(playerId) {
+export async function getOrCreateDefaultGroom(userId) {
   try {
-    // Check if player already has grooms
+    // Check if user already has grooms
     const existingGroom = await prisma.groom.findFirst({
       where: {
-        userId: playerId,
+        userId,
         isActive: true,
         speciality: 'foal_care',
       },
@@ -359,12 +352,12 @@ export async function getOrCreateDefaultGroom(playerId) {
     const newGroom = await prisma.groom.create({
       data: {
         ...defaultGroomData,
-        userId: playerId,
+        userId,
       },
     });
 
     logger.info(
-      `[groomSystem.getOrCreateDefaultGroom] Created default groom ${newGroom.name} for player ${playerId}`
+      `[groomSystem.getOrCreateDefaultGroom] Created default groom ${newGroom.name} for user ${userId}`,
     );
 
     return newGroom;
@@ -390,11 +383,11 @@ export async function recordGroomInteraction(
   interactionType,
   duration,
   userId,
-  notes = null
+  notes = null,
 ) {
   try {
     logger.info(
-      `[groomSystem.recordGroomInteraction] Recording interaction: Groom ${groomId} with Foal ${foalId}`
+      `[groomSystem.recordGroomInteraction] Recording interaction: Groom ${groomId} with Foal ${foalId}`,
     );
 
     // Create the interaction record
@@ -410,7 +403,7 @@ export async function recordGroomInteraction(
     });
 
     logger.info(
-      `[groomSystem.recordGroomInteraction] Successfully recorded interaction ID ${interaction.id}`
+      `[groomSystem.recordGroomInteraction] Successfully recorded interaction ID ${interaction.id}`,
     );
 
     return {
@@ -471,8 +464,8 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
     bondingChange = Math.max(0, Math.min(10, bondingChange));
     stressChange = Math.max(-10, Math.min(5, stressChange));
 
-    // Calculate cost
-    const cost = (duration / 60) * groom.hourlyRate * skillLevel.costModifier;
+    // Calculate cost per session (not hourly)
+    const cost = groom.sessionRate * skillLevel.costModifier;
 
     // Determine quality based on results
     let quality = 'good';

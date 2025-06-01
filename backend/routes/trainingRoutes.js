@@ -46,7 +46,7 @@ router.post(
       const { horseId, discipline } = req.body;
 
       logger.info(
-        `[trainingRoutes.checkEligibility] Checking eligibility for horse ${horseId} in ${discipline}`
+        `[trainingRoutes.checkEligibility] Checking eligibility for horse ${horseId} in ${discipline}`,
       );
 
       const result = await canTrain(horseId, discipline);
@@ -63,7 +63,7 @@ router.post(
         error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
       });
     }
-  }
+  },
 );
 
 /**
@@ -81,7 +81,7 @@ router.post(
       .withMessage('Discipline must be between 1 and 50 characters'),
     handleValidationErrors,
   ],
-  trainRouteHandler
+  trainRouteHandler,
 );
 
 /**
@@ -104,7 +104,7 @@ router.get(
       const { horseId, discipline } = req.params;
 
       logger.info(
-        `[trainingRoutes.getStatus] Getting training status for horse ${horseId} in ${discipline}`
+        `[trainingRoutes.getStatus] Getting training status for horse ${horseId} in ${discipline}`,
       );
 
       const status = await getTrainingStatus(parseInt(horseId), discipline);
@@ -121,7 +121,7 @@ router.get(
         error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
       });
     }
-  }
+  },
 );
 
 /**
@@ -138,7 +138,7 @@ router.get(
     try {
       const { horseId } = req.params;
       logger.info(
-        `[trainingRoutes.getStatusAll] Getting all training statuses for horse ${horseId}`
+        `[trainingRoutes.getStatusAll] Getting all training statuses for horse ${horseId}`,
       );
 
       const disciplines = ['Racing', 'Show Jumping', 'Dressage', 'Cross Country', 'Western'];
@@ -162,7 +162,7 @@ router.get(
         error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
       });
     }
-  }
+  },
 );
 
 /**
@@ -177,7 +177,7 @@ router.get(
       const { userId } = req.params;
 
       logger.info(
-        `[trainingRoutes.getTrainableHorses] Getting trainable horses for user ${userId}`
+        `[trainingRoutes.getTrainableHorses] Getting trainable horses for user ${userId}`,
       );
 
       const horses = await getTrainableHorses(userId);
@@ -194,7 +194,7 @@ router.get(
         error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
       });
     }
-  }
+  },
 );
 
 export default router;

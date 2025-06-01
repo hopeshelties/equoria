@@ -260,7 +260,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       };
 
       mockAtBirthTraits.applyEpigeneticTraitsAtBirth.mockRejectedValue(
-        new Error('Trait application failed')
+        new Error('Trait application failed'),
       );
       mockPrisma.horse.create.mockResolvedValue(mockCreatedHorse);
 
@@ -270,7 +270,7 @@ describe('Horse Model At-Birth Traits Integration', () => {
       expect(result).toEqual(mockCreatedHorse);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error applying at-birth traits: Trait application failed')
+        expect.stringContaining('Error applying at-birth traits: Trait application failed'),
       );
     });
 
@@ -339,8 +339,8 @@ describe('Horse Model At-Birth Traits Integration', () => {
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         expect.stringContaining(
-          'Breeding analysis - Lineage specialization: true, Inbreeding: true'
-        )
+          'Breeding analysis - Lineage specialization: true, Inbreeding: true',
+        ),
       );
     });
   });

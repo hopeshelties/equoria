@@ -107,7 +107,7 @@ async function verifyUserSchema() {
       logger.error('- Missing one or more columns in the users table as defined in schema.prisma');
       logger.error('- Incorrect column types (e.g., INTEGER vs. TEXT, JSON vs. JSONB)');
       logger.error(
-        '- Database migration (`npx prisma migrate dev`) may not have run successfully or is pending.'
+        '- Database migration (`npx prisma migrate dev`) may not have run successfully or is pending.',
       );
     }
 

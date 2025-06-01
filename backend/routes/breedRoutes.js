@@ -73,7 +73,7 @@ router.post(
       .withMessage('Breed name must be between 2 and 255 characters.'),
   ],
   handleValidationErrors,
-  breedController.createBreed
+  breedController.createBreed,
 );
 
 /**
@@ -151,7 +151,7 @@ router.get(
   '/:id',
   [param('id').isInt({ min: 1 }).withMessage('Breed ID must be a positive integer.')],
   handleValidationErrors,
-  breedController.getBreedById
+  breedController.getBreedById,
 );
 
 export default router;

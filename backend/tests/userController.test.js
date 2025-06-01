@@ -149,7 +149,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
         },
       });
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[userController.getUserProgress] Getting progress for user 123'
+        '[userController.getUserProgress] Getting progress for user 123',
       ); // Changed log message
     });
 
@@ -216,7 +216,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
         message: 'User not found', // Changed message
       });
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[userController.getUserProgress] User 999 not found'
+        '[userController.getUserProgress] User 999 not found',
       ); // Changed log
     });
 
@@ -242,7 +242,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
         error: 'Database connection failed',
       });
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[userController.getUserProgress] Error getting user progress: Database connection failed'
+        '[userController.getUserProgress] Error getting user progress: Database connection failed',
       ); // Changed
 
       process.env.NODE_ENV = originalEnv;
@@ -408,7 +408,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
         },
       });
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[userController.getDashboardData] Dashboard data for user 123'
+        '[userController.getDashboardData] Dashboard data for user 123',
       ); // Changed
     });
 
@@ -432,7 +432,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
       expect(errorPassedToNext.statusCode).toBe(404);
       expect(errorPassedToNext.message).toBe('User not found'); // Changed
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[userController.getDashboardData] User not found for ID: 999'
+        '[userController.getDashboardData] User not found for ID: 999',
       ); // Changed
     });
 
@@ -450,8 +450,8 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
       expect(mockNext.mock.calls[0][0].message).toBe('Trainable horses error');
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining(
-          '[userController.getDashboardData] Error fetching dashboard data for user 123: Trainable horses error'
-        )
+          '[userController.getDashboardData] Error fetching dashboard data for user 123: Trainable horses error',
+        ),
       );
     });
 
@@ -469,7 +469,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Horse count error');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error fetching dashboard data for user 123: Horse count error')
+        expect.stringContaining('Error fetching dashboard data for user 123: Horse count error'),
       );
     });
 
@@ -488,7 +488,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Show fetch error');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error fetching dashboard data for user 123: Show fetch error')
+        expect.stringContaining('Error fetching dashboard data for user 123: Show fetch error'),
       );
     });
 
@@ -508,7 +508,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Comp count error');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error fetching dashboard data for user 123: Comp count error')
+        expect.stringContaining('Error fetching dashboard data for user 123: Comp count error'),
       );
     });
 
@@ -529,7 +529,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Last comp error');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error fetching dashboard data for user 123: Last comp error')
+        expect.stringContaining('Error fetching dashboard data for user 123: Last comp error'),
       );
     });
 
@@ -551,7 +551,7 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
       expect(mockNext).toHaveBeenCalledWith(expect.any(Error));
       expect(mockNext.mock.calls[0][0].message).toBe('Last training error');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error fetching dashboard data for user 123: Last training error')
+        expect.stringContaining('Error fetching dashboard data for user 123: Last training error'),
       );
     });
 
@@ -579,10 +579,10 @@ describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {
               lastShowPlaced: null,
             },
           }),
-        })
+        }),
       );
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[userController.getDashboardData] Dashboard data for user 123'
+        '[userController.getDashboardData] Dashboard data for user 123',
       );
     });
   });

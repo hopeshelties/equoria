@@ -15,7 +15,7 @@ const logger = winston.createLogger({
     enumerateErrorFormat(),
     config.env === 'development' ? winston.format.colorize() : winston.format.uncolorize(),
     winston.format.splat(),
-    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level}: ${message}`) // Updated printf
+    winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level}: ${message}`), // Updated printf
   ),
   transports: [
     new winston.transports.Console({
@@ -25,3 +25,4 @@ const logger = winston.createLogger({
 });
 
 export default logger; // Changed to ES module export
+export { logger }; // Named export for compatibility

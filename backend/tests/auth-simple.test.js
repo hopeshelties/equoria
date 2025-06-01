@@ -1,3 +1,42 @@
+/**
+ * 🧪 INTEGRATION TEST: Authentication Controller Simple - Core Auth Workflow Testing
+ *
+ * This test validates the core authentication functionality using a simplified
+ * Express app setup to isolate authentication logic from complex middleware.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - User registration: Username, email, password, firstName, lastName validation
+ * - User login: Email and password credential verification
+ * - Database integration: User creation, duplicate prevention, cleanup operations
+ * - Response structure: Success flags, user data, token generation
+ * - Input validation: Email format, password strength, required fields
+ * - Security measures: Password hashing, token generation, data sanitization
+ * - Database cleanup: Proper foreign key constraint handling during cleanup
+ * - Error handling: Validation errors, duplicate emails, invalid credentials
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. POST /register - User registration with complete field validation
+ * 2. POST /login - User authentication with credential verification
+ * 3. Database operations: User CRUD, foreign key constraint handling
+ * 4. Response validation: Success flags, user data structure, token presence
+ * 5. Input validation: Express-validator integration and error handling
+ * 6. Security validation: Password hashing, token security
+ * 7. Cleanup operations: Proper deletion order for foreign key constraints
+ * 8. Integration workflow: Registration followed by login validation
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete HTTP request/response cycle, database operations, authentication logic
+ * ✅ REAL: Express app setup, validation middleware, controller execution
+ * ✅ REAL: Database transactions, user creation, token generation
+ * 🔧 MOCK: None - full integration testing with real database and HTTP stack
+ *
+ * 💡 TEST STRATEGY: Simplified integration testing to validate core authentication
+ *    workflows without complex middleware interference
+ *
+ * ⚠️  NOTE: This represents EXCELLENT simplified integration testing - tests real
+ *    authentication flows with minimal setup complexity and maximum clarity.
+ */
+
 import request from 'supertest';
 import express from 'express';
 import { register, login } from '../controllers/authController.js';
@@ -17,7 +56,7 @@ const createTestApp = () => {
     body('password').isLength({ min: 8 }),
     body('firstName').notEmpty(), // Added
     body('lastName').notEmpty(), // Added
-    register
+    register,
   );
 
   // Simple login route
@@ -26,7 +65,7 @@ const createTestApp = () => {
   return app;
 };
 
-describe('Authentication Controller (Simple)', () => {
+describe('🔐 INTEGRATION: Authentication Controller Simple - Core Auth Workflow Testing', () => {
   let app;
 
   beforeAll(() => {

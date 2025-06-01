@@ -165,11 +165,11 @@ describe('🐎 UNIT: Horse Model - Discipline Score Management', () => {
 
     it('should throw error for invalid horse ID', async () => {
       await expect(updateDisciplineScore(-1, 'Dressage', 5)).rejects.toThrow(
-        'Invalid horse ID provided'
+        'Invalid horse ID provided',
       );
 
       await expect(updateDisciplineScore('invalid', 'Dressage', 5)).rejects.toThrow(
-        'Invalid horse ID provided'
+        'Invalid horse ID provided',
       );
     });
 
@@ -177,7 +177,7 @@ describe('🐎 UNIT: Horse Model - Discipline Score Management', () => {
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       await expect(updateDisciplineScore(99999, 'Dressage', 5)).rejects.toThrow(
-        'Horse with ID 99999 not found'
+        'Horse with ID 99999 not found',
       );
     });
 
@@ -202,11 +202,11 @@ describe('🐎 UNIT: Horse Model - Discipline Score Management', () => {
       });
 
       await expect(updateDisciplineScore(horse.id, '', 5)).rejects.toThrow(
-        'Discipline must be a non-empty string'
+        'Discipline must be a non-empty string',
       );
 
       await expect(updateDisciplineScore(horse.id, null, 5)).rejects.toThrow(
-        'Discipline must be a non-empty string'
+        'Discipline must be a non-empty string',
       );
     });
 
@@ -231,15 +231,15 @@ describe('🐎 UNIT: Horse Model - Discipline Score Management', () => {
       });
 
       await expect(updateDisciplineScore(horse.id, 'Dressage', 0)).rejects.toThrow(
-        'Points to add must be a positive number'
+        'Points to add must be a positive number',
       );
 
       await expect(updateDisciplineScore(horse.id, 'Dressage', -5)).rejects.toThrow(
-        'Points to add must be a positive number'
+        'Points to add must be a positive number',
       );
 
       await expect(updateDisciplineScore(horse.id, 'Dressage', 'invalid')).rejects.toThrow(
-        'Points to add must be a positive number'
+        'Points to add must be a positive number',
       );
     });
   });

@@ -126,7 +126,7 @@ async function exampleCompetitionWithTraits(horseId, competitionType) {
 
     console.log('\nCompetition results:');
     console.log(
-      `- Performance modifier: ${performanceModifier > 0 ? '+' : ''}${performanceModifier}%`
+      `- Performance modifier: ${performanceModifier > 0 ? '+' : ''}${performanceModifier}%`,
     );
     console.log(`- Confidence boost: +${confidenceBoost} points`);
 
@@ -255,7 +255,7 @@ async function exampleCompleteWorkflow(horseId) {
     console.log('\n5. Event-based trait modification:');
     const eventResults = await exampleAddTraitBasedOnEvent(
       horseId,
-      'successful_difficult_training'
+      'successful_difficult_training',
     );
 
     return {

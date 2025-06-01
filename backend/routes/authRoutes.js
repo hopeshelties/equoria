@@ -159,7 +159,7 @@ router.post(
       .withMessage('Password must be at least 8 characters long')
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
       .withMessage(
-        'Password must contain at least one lowercase letter, one uppercase letter, and one number'
+        'Password must contain at least one lowercase letter, one uppercase letter, and one number',
       ),
     body('firstName')
       .trim()
@@ -171,7 +171,7 @@ router.post(
       .withMessage('Last name must be between 1 and 50 characters'),
     handleValidationErrors,
   ],
-  authController.register
+  authController.register,
 );
 
 /**
@@ -223,7 +223,7 @@ router.post(
     body('password').notEmpty().withMessage('Password is required'),
     handleValidationErrors,
   ],
-  authController.login
+  authController.login,
 );
 
 /**
@@ -285,7 +285,7 @@ router.post(
     body('refreshToken').notEmpty().withMessage('Refresh token is required'),
     handleValidationErrors,
   ],
-  authController.refreshToken
+  authController.refreshToken,
 );
 
 /**
@@ -412,7 +412,7 @@ router.put(
       .withMessage('Username can only contain letters, numbers, and underscores'),
     handleValidationErrors,
   ],
-  authController.updateProfile
+  authController.updateProfile,
 );
 
 /**

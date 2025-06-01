@@ -1,3 +1,42 @@
+/**
+ * 🧪 INTEGRATION TEST: Authentication System - Complete Auth Workflow Validation
+ *
+ * This test validates the complete authentication system using real HTTP requests
+ * and database operations to ensure end-to-end authentication functionality.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - User registration: Email uniqueness, password hashing, token generation
+ * - User login: Credential validation, JWT token creation, refresh token issuance
+ * - Token management: JWT refresh, token expiration, invalid token handling
+ * - Protected routes: Authorization middleware, token validation, profile access
+ * - Security measures: Password exclusion from responses, proper error handling
+ * - Database integration: User creation, duplicate prevention, cleanup operations
+ * - Session management: Logout functionality, token invalidation
+ * - Input validation: Email format, password strength, required fields
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. POST /api/auth/register - User registration with validation and token generation
+ * 2. POST /api/auth/login - User authentication with credential verification
+ * 3. POST /api/auth/refresh - JWT token refresh with refresh token validation
+ * 4. POST /api/auth/logout - Session termination with token invalidation
+ * 5. GET /api/auth/me - Protected profile access with token authentication
+ * 6. Error handling: Duplicate emails, invalid credentials, missing tokens
+ * 7. Security validation: Password hashing, token security, data sanitization
+ * 8. Database operations: User CRUD, cleanup, transaction handling
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete HTTP request/response cycle, database operations, authentication logic
+ * ✅ REAL: JWT token generation/validation, password hashing, middleware execution
+ * ✅ REAL: Express app routing, validation middleware, error handling
+ * 🔧 MOCK: None - full integration testing with real database and HTTP stack
+ *
+ * 💡 TEST STRATEGY: Full integration testing to validate complete authentication
+ *    workflows with real HTTP requests, database operations, and security measures
+ *
+ * ⚠️  NOTE: This represents EXCELLENT integration testing - tests real authentication
+ *    flows with actual HTTP requests, database operations, and security validation.
+ */
+
 import request from 'supertest';
 import express from 'express';
 import { body } from 'express-validator';
@@ -25,14 +64,14 @@ const createTestApp = () => {
     body('name').trim().isLength({ min: 2, max: 50 }),
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 8, max: 128 }),
-    register
+    register,
   );
 
   app.post(
     '/api/auth/login',
     body('email').isEmail().normalizeEmail(),
     body('password').notEmpty(),
-    login
+    login,
   );
 
   app.post('/api/auth/refresh', body('refreshToken').notEmpty(), refreshToken);
@@ -61,7 +100,7 @@ const createTestApp = () => {
   return app;
 };
 
-describe('Authentication System (Working)', () => {
+describe('🔐 INTEGRATION: Authentication System - Complete Auth Workflow Validation', () => {
   let app;
 
   beforeAll(() => {

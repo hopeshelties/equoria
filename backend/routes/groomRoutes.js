@@ -10,7 +10,7 @@ import {
   ensureDefaultAssignment,
   getFoalAssignments,
   recordInteraction,
-  getPlayerGrooms,
+  getUserGrooms,
   hireGroom,
   getGroomDefinitions,
 } from '../controllers/groomController.js';
@@ -98,7 +98,7 @@ router.post(
       .withMessage('notes must be 500 characters or less'),
     handleValidationErrors,
   ],
-  assignGroom
+  assignGroom,
 );
 
 /**
@@ -129,7 +129,7 @@ router.post(
     param('foalId').isInt({ min: 1 }).withMessage('foalId must be a positive integer'),
     handleValidationErrors,
   ],
-  ensureDefaultAssignment
+  ensureDefaultAssignment,
 );
 
 /**
@@ -160,7 +160,7 @@ router.get(
     param('foalId').isInt({ min: 1 }).withMessage('foalId must be a positive integer'),
     handleValidationErrors,
   ],
-  getFoalAssignments
+  getFoalAssignments,
 );
 
 /**
@@ -224,7 +224,7 @@ router.post(
     body('interactionType')
       .isIn(['daily_care', 'feeding', 'grooming', 'exercise', 'medical_check'])
       .withMessage(
-        'interactionType must be one of: daily_care, feeding, grooming, exercise, medical_check'
+        'interactionType must be one of: daily_care, feeding, grooming, exercise, medical_check',
       ),
     body('duration')
       .isInt({ min: 5, max: 480 })
@@ -239,22 +239,22 @@ router.post(
       .withMessage('notes must be 500 characters or less'),
     handleValidationErrors,
   ],
-  recordInteraction
+  recordInteraction,
 );
 
 /**
  * @swagger
- * /api/grooms/player/{playerId}:
+ * /api/grooms/user/{userId}:
  *   get:
- *     summary: Get all grooms for a player
+ *     summary: Get all grooms for a user
  *     tags: [Grooms]
  *     parameters:
  *       - in: path
- *         name: playerId
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the player
+ *         description: ID of the user
  *     responses:
  *       200:
  *         description: Grooms retrieved successfully
@@ -262,16 +262,16 @@ router.post(
  *         description: Internal server error
  */
 router.get(
-  '/player/:playerId',
-  [param('playerId').notEmpty().withMessage('playerId is required'), handleValidationErrors],
-  getPlayerGrooms
+  '/user/:userId',
+  [param('userId').notEmpty().withMessage('userId is required'), handleValidationErrors],
+  getUserGrooms,
 );
 
 /**
  * @swagger
  * /api/grooms/hire:
  *   post:
- *     summary: Hire a new groom for a player
+ *     summary: Hire a new groom for a user
  *     tags: [Grooms]
  *     requestBody:
  *       required: true
@@ -354,7 +354,7 @@ router.post(
     body('availability').optional().isObject().withMessage('availability must be an object'),
     handleValidationErrors,
   ],
-  hireGroom
+  hireGroom,
 );
 
 /**

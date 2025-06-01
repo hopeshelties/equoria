@@ -58,7 +58,7 @@ const TEMPERAMENT_TYPES = {
 export function calculateTemperamentDrift(horse, factors = {}) {
   try {
     logger.debug(
-      `[temperamentDrift] Calculating drift for horse ${horse.id} with temperament ${horse.temperament}`
+      `[temperamentDrift] Calculating drift for horse ${horse.id} with temperament ${horse.temperament}`,
     );
 
     // Get trait effects
@@ -69,7 +69,7 @@ export function calculateTemperamentDrift(horse, factors = {}) {
     // Check if temperament drift is suppressed by traits
     if (traitEffects.suppressTemperamentDrift) {
       logger.info(
-        `[temperamentDrift] Temperament drift suppressed by traits for horse ${horse.id}`
+        `[temperamentDrift] Temperament drift suppressed by traits for horse ${horse.id}`,
       );
       return {
         driftOccurred: false,
@@ -134,7 +134,7 @@ export function calculateTemperamentDrift(horse, factors = {}) {
     driftProbability = Math.min(0.25, driftProbability);
 
     logger.debug(
-      `[temperamentDrift] Final drift probability: ${(driftProbability * 100).toFixed(2)}%`
+      `[temperamentDrift] Final drift probability: ${(driftProbability * 100).toFixed(2)}%`,
     );
 
     // Roll for drift
@@ -151,7 +151,7 @@ export function calculateTemperamentDrift(horse, factors = {}) {
     const newTemperament = selectNewTemperament(horse.temperament, factors);
 
     logger.info(
-      `[temperamentDrift] Temperament drift occurred for horse ${horse.id}: ${horse.temperament} -> ${newTemperament}`
+      `[temperamentDrift] Temperament drift occurred for horse ${horse.id}: ${horse.temperament} -> ${newTemperament}`,
     );
 
     return {

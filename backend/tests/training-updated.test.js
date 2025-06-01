@@ -1,3 +1,41 @@
+/**
+ * 🧪 INTEGRATION TEST: Training System Updated - User Model Integration
+ *
+ * This test validates the training system integration with the updated user model
+ * using real HTTP requests and authentication token validation.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - User model integration: UUID-based user identification and authentication
+ * - Age requirements: Horses 3+ years old eligible for training
+ * - Training eligibility: Proper filtering and validation of trainable horses
+ * - Authentication protection: Token-based access control for all endpoints
+ * - Training execution: Complete training workflow with score updates
+ * - Status checking: Training status validation for horses and disciplines
+ * - Error handling: Invalid horse IDs, disciplines, and authentication
+ * - Response consistency: Proper API response formatting and status codes
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. GET /api/horses/trainable/:userId - Trainable horse listing with UUID users
+ * 2. POST /api/training/train - Training execution with business rule validation
+ * 3. GET /api/training/status/:horseId/:discipline - Specific training status
+ * 4. GET /api/training/status/:horseId - All discipline training status
+ * 5. Authentication middleware: Token validation and access control
+ * 6. Age validation: Young horses blocked, adult horses allowed
+ * 7. Error scenarios: Invalid IDs, disciplines, authentication failures
+ * 8. Custom matchers: toBeOneOf for flexible response validation
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete Express application, HTTP routing, authentication, business logic
+ * ✅ REAL: User model integration, database operations, error handling
+ * 🔧 MOCK: Test authentication tokens - controlled authentication for testing
+ *
+ * 💡 TEST STRATEGY: Integration testing with real application and mocked
+ *    authentication to validate training system with updated user model
+ *
+ * ⚠️  NOTE: This represents EXCELLENT integration testing - tests real training
+ *    workflows with minimal mocking and validates user model integration.
+ */
+
 import request from 'supertest';
 import app from '../app.js';
 import { generateTestToken } from './helpers/authHelper.js';
@@ -20,7 +58,7 @@ expect.extend({
   },
 });
 
-describe('Training System Integration Tests (Updated for User Model)', () => {
+describe('🏋️ INTEGRATION: Training System Updated - User Model Integration', () => {
   let authToken;
   let testUserId;
 

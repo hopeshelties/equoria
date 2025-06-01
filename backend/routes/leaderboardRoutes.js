@@ -370,7 +370,7 @@ router.get(
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         logger.warn(
-          `[leaderboardRoutes.GET /competition] Validation errors: ${JSON.stringify(errors.array())}`
+          `[leaderboardRoutes.GET /competition] Validation errors: ${JSON.stringify(errors.array())}`,
         );
         return res.status(400).json({
           success: false,
@@ -382,7 +382,7 @@ router.get(
       const { discipline, period = 'all', metric = 'wins', limit = 20, offset = 0 } = req.query;
 
       logger.info(
-        `[leaderboardRoutes.GET /competition] Getting competition leaderboard: discipline=${discipline}, period=${period}, metric=${metric}`
+        `[leaderboardRoutes.GET /competition] Getting competition leaderboard: discipline=${discipline}, period=${period}, metric=${metric}`,
       );
 
       // Calculate date filter based on period
@@ -602,7 +602,7 @@ router.get(
       });
 
       logger.info(
-        `[leaderboardRoutes.GET /competition] Retrieved ${results.length} leaderboard entries`
+        `[leaderboardRoutes.GET /competition] Retrieved ${results.length} leaderboard entries`,
       );
 
       res.status(200).json({
@@ -630,7 +630,7 @@ router.get(
         error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
       });
     }
-  }
+  },
 );
 
 export default router;

@@ -90,7 +90,7 @@ describe('🔐 INTEGRATION: Authentication System - User Registration & Session 
       // Using console.error for errors
       console.error(
         'Database cleanup error (can be ignored if tables do not exist yet):',
-        error.message
+        error.message,
       );
     }
   };

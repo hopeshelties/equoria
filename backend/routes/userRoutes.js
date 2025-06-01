@@ -46,7 +46,7 @@ const validateDashboardUserId = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       logger.warn(
-        `[userRoutes] Validation errors for /dashboard/:userId: ${JSON.stringify(errors.array())}`
+        `[userRoutes] Validation errors for /dashboard/:userId: ${JSON.stringify(errors.array())}`,
       );
       return res.status(400).json({
         success: false,

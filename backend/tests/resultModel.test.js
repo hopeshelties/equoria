@@ -351,11 +351,11 @@ describe('🏆 UNIT: Result Model - Competition Result Management', () => {
       };
 
       mockPrisma.competitionResult.create.mockRejectedValue(
-        new Error('Database connection failed')
+        new Error('Database connection failed'),
       );
 
       await expect(saveResult(resultData)).rejects.toThrow(
-        'Database error in saveResult: Database connection failed'
+        'Database error in saveResult: Database connection failed',
       );
     });
   });
@@ -420,18 +420,18 @@ describe('🏆 UNIT: Result Model - Competition Result Management', () => {
     it('should validate horseId is a positive integer', async () => {
       await expect(getResultsByHorse(-1)).rejects.toThrow('Horse ID must be a positive integer');
       await expect(getResultsByHorse('invalid')).rejects.toThrow(
-        'Horse ID must be a positive integer'
+        'Horse ID must be a positive integer',
       );
       expect(mockPrisma.competitionResult.findMany).not.toHaveBeenCalled();
     });
 
     it('should handle database errors gracefully', async () => {
       mockPrisma.competitionResult.findMany.mockRejectedValue(
-        new Error('Database connection failed')
+        new Error('Database connection failed'),
       );
 
       await expect(getResultsByHorse(1)).rejects.toThrow(
-        'Database error in getResultsByHorse: Database connection failed'
+        'Database error in getResultsByHorse: Database connection failed',
       );
     });
   });
@@ -496,18 +496,18 @@ describe('🏆 UNIT: Result Model - Competition Result Management', () => {
     it('should validate showId is a positive integer', async () => {
       await expect(getResultsByShow(-1)).rejects.toThrow('Show ID must be a positive integer');
       await expect(getResultsByShow('invalid')).rejects.toThrow(
-        'Show ID must be a positive integer'
+        'Show ID must be a positive integer',
       );
       expect(mockPrisma.competitionResult.findMany).not.toHaveBeenCalled();
     });
 
     it('should handle database errors gracefully', async () => {
       mockPrisma.competitionResult.findMany.mockRejectedValue(
-        new Error('Database connection failed')
+        new Error('Database connection failed'),
       );
 
       await expect(getResultsByShow(1)).rejects.toThrow(
-        'Database error in getResultsByShow: Database connection failed'
+        'Database error in getResultsByShow: Database connection failed',
       );
     });
   });
@@ -558,18 +558,18 @@ describe('🏆 UNIT: Result Model - Competition Result Management', () => {
     it('should validate resultId is a positive integer', async () => {
       await expect(getResultById(-1)).rejects.toThrow('Result ID must be a positive integer');
       await expect(getResultById('invalid')).rejects.toThrow(
-        'Result ID must be a positive integer'
+        'Result ID must be a positive integer',
       );
       expect(mockPrisma.competitionResult.findUnique).not.toHaveBeenCalled();
     });
 
     it('should handle database errors gracefully', async () => {
       mockPrisma.competitionResult.findUnique.mockRejectedValue(
-        new Error('Database connection failed')
+        new Error('Database connection failed'),
       );
 
       await expect(getResultById(1)).rejects.toThrow(
-        'Database error in getResultById: Database connection failed'
+        'Database error in getResultById: Database connection failed',
       );
     });
   });
@@ -682,7 +682,7 @@ describe('🏆 UNIT: Result Model - Competition Result Management', () => {
         expect.objectContaining({
           take: 100, // Capped at 100
           skip: 0, // Non-negative
-        })
+        }),
       );
     });
 
@@ -702,7 +702,7 @@ describe('🏆 UNIT: Result Model - Competition Result Management', () => {
       expect(mockPrisma.competitionResult.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { horseId: 123 }, // Should be converted to number
-        })
+        }),
       );
     });
 
@@ -714,7 +714,7 @@ describe('🏆 UNIT: Result Model - Competition Result Management', () => {
       expect(mockPrisma.competitionResult.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { showId: 456 }, // Should be converted to number
-        })
+        }),
       );
     });
 
@@ -726,7 +726,7 @@ describe('🏆 UNIT: Result Model - Competition Result Management', () => {
       expect(mockPrisma.competitionResult.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 789 }, // Should be converted to number
-        })
+        }),
       );
     });
   });

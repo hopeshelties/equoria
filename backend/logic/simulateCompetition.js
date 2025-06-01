@@ -54,7 +54,7 @@ function simulateCompetition(horses, show) {
       if (horse.epigenetic_modifiers?.positive?.includes(affinityTrait)) {
         disciplineAffinityBonus = 5;
         logger.info(
-          `[simulateCompetition] Horse ${horse.name}: Discipline affinity bonus applied for ${affinityTrait} (+5 points)`
+          `[simulateCompetition] Horse ${horse.name}: Discipline affinity bonus applied for ${affinityTrait} (+5 points)`,
         );
       }
 
@@ -96,7 +96,7 @@ function simulateCompetition(horses, show) {
         if (traitEffects.competitionStressResistance) {
           stressImpactPercent *= 1 - traitEffects.competitionStressResistance;
           logger.info(
-            `[simulateCompetition] Horse ${horse.name}: Stress resistance applied, ${(traitEffects.competitionStressResistance * 100).toFixed(1)}% reduction`
+            `[simulateCompetition] Horse ${horse.name}: Stress resistance applied, ${(traitEffects.competitionStressResistance * 100).toFixed(1)}% reduction`,
           );
         }
 
@@ -109,7 +109,7 @@ function simulateCompetition(horses, show) {
 
         if (competitionStressImpact > 0) {
           logger.info(
-            `[simulateCompetition] Horse ${horse.name}: Stress impact -${competitionStressImpact.toFixed(1)} points (${baseStressLevel} stress level)`
+            `[simulateCompetition] Horse ${horse.name}: Stress impact -${competitionStressImpact.toFixed(1)} points (${baseStressLevel} stress level)`,
           );
         }
       }
@@ -123,7 +123,7 @@ function simulateCompetition(horses, show) {
       // Log trait impact for analysis
       if (traitImpact.appliedTraits.length > 0) {
         logger.info(
-          `[simulateCompetition] Horse ${horse.name}: ${traitImpact.appliedTraits.length} traits applied, ${(traitImpact.totalScoreModifier * 100).toFixed(1)}% modifier, ${traitImpact.finalScoreAdjustment.toFixed(1)} point adjustment`
+          `[simulateCompetition] Horse ${horse.name}: ${traitImpact.appliedTraits.length} traits applied, ${(traitImpact.totalScoreModifier * 100).toFixed(1)}% modifier, ${traitImpact.finalScoreAdjustment.toFixed(1)} point adjustment`,
         );
       }
 
@@ -156,7 +156,7 @@ function simulateCompetition(horses, show) {
           baseStressLevel,
           stressImpact: Math.round(competitionStressImpact * 10) / 10,
           stressResistanceApplied: !!traitImpact.appliedTraits.some(t =>
-            ['resilient', 'calm'].includes(t.traitName)
+            ['resilient', 'calm'].includes(t.traitName),
           ),
         },
       };
