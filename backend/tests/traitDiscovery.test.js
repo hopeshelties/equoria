@@ -32,7 +32,7 @@
  *    environmental condition evaluation without database complexity
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 
 describe('🔍 UNIT: Trait Discovery System - Environmental Trait Detection', () => {
   it('should pass basic test', () => {

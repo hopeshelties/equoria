@@ -34,7 +34,7 @@
  *    competition simulation algorithms and ensure realistic scoring outcomes
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { simulateCompetition } from '../logic/simulateCompetition.js';
 import { getStatScore } from '../utils/getStatScore.js';
 import { getHealthModifier } from '../utils/healthBonus.js';

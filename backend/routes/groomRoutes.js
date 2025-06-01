@@ -16,9 +16,31 @@ import {
   hireGroom,
   getGroomDefinitions,
 } from '../controllers/groomController.js';
+import { GROOM_CONFIG } from '../config/groomConfig.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
+
+/**
+ * Get all valid interaction types from configuration
+ * @returns {Array} Array of all valid interaction type strings
+ */
+function getAllValidInteractionTypes() {
+  return [
+    // Legacy interaction types (for backward compatibility)
+    'daily_care',
+    'feeding',
+    'grooming',
+    'exercise',
+    'medical_check',
+    // New foal enrichment tasks (0-2 years)
+    ...GROOM_CONFIG.ELIGIBLE_FOAL_ENRICHMENT_TASKS,
+    // New foal grooming tasks (1-3 years)
+    ...GROOM_CONFIG.ELIGIBLE_FOAL_GROOMING_TASKS,
+    // New general grooming tasks (3+ years)
+    ...GROOM_CONFIG.ELIGIBLE_GENERAL_GROOMING_TASKS,
+  ];
+}
 
 /**
  * Validation middleware for handling validation errors
@@ -193,8 +215,7 @@ router.get(
  *                 description: ID of the groom
  *               interactionType:
  *                 type: string
- *                 enum: [daily_care, feeding, grooming, exercise, medical_check]
- *                 description: Type of interaction
+ *                 description: Type of interaction (includes legacy types, foal enrichment tasks, foal grooming tasks, and general grooming tasks)
  *               duration:
  *                 type: integer
  *                 minimum: 5
@@ -224,10 +245,8 @@ router.post(
     body('foalId').isInt({ min: 1 }).withMessage('foalId must be a positive integer'),
     body('groomId').isInt({ min: 1 }).withMessage('groomId must be a positive integer'),
     body('interactionType')
-      .isIn(['daily_care', 'feeding', 'grooming', 'exercise', 'medical_check'])
-      .withMessage(
-        'interactionType must be one of: daily_care, feeding, grooming, exercise, medical_check',
-      ),
+      .isIn(getAllValidInteractionTypes())
+      .withMessage(`interactionType must be one of: ${getAllValidInteractionTypes().join(', ')}`),
     body('duration')
       .isInt({ min: 5, max: 480 })
       .withMessage('duration must be between 5 and 480 minutes'),

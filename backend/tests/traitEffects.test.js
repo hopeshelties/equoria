@@ -35,7 +35,7 @@
  *    combination algorithms without external dependencies or database complexity
  */
 
-import { jest, describe, it, expect, test } from '@jest/globals';
+import { describe, expect, test } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

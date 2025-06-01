@@ -31,7 +31,7 @@
  *    business logic while ensuring predictable test outcomes for XP calculations
  */
 
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, expect, beforeEach } from '@jest/globals';
 import { addXpToUser, getUserProgress } from '../controllers/progressionController.js';
 import * as db from '../models/userModel.js';
 

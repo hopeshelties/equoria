@@ -5,6 +5,7 @@
 
 import prisma from '../db/index.js';
 import logger from './logger.js';
+import { ELIGIBLE_FOAL_ENRICHMENT_TASKS, FOAL_GROOMING_TASKS } from '../config/groomConfig.js';
 
 /**
  * Groom specialties and their bonding modifiers
@@ -549,5 +550,42 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
   } catch (error) {
     logger.error(`[groomSystem.calculateGroomInteractionEffects] Error: ${error.message}`);
     throw error;
+  }
+}
+
+/**
+ * Check if a foal has already completed a foal-specific task today
+ * Enforces daily task exclusivity - foals can only complete one task per day from either category
+ * @param {Object} foal - Foal object with dailyTaskRecord
+ * @param {string} today - Today's date string (YYYY-MM-DD format)
+ * @returns {boolean} True if foal has completed any enrichment or grooming task today
+ */
+export function hasAlreadyCompletedFoalTaskToday(foal, today) {
+  try {
+    // Handle edge cases
+    if (!foal || !today || typeof today !== 'string' || today.trim() === '') {
+      return false;
+    }
+
+    // Check if foal has a daily task record
+    if (!foal.dailyTaskRecord || typeof foal.dailyTaskRecord !== 'object') {
+      return false;
+    }
+
+    // Get today's task log
+    const todayLog = foal.dailyTaskRecord[today];
+
+    // If no tasks recorded for today, return false
+    if (!todayLog || !Array.isArray(todayLog) || todayLog.length === 0) {
+      return false;
+    }
+
+    // Check if any task in today's log is a foal-specific task
+    return todayLog.some(
+      task => ELIGIBLE_FOAL_ENRICHMENT_TASKS.includes(task) || FOAL_GROOMING_TASKS.includes(task),
+    );
+  } catch (error) {
+    logger.error(`[groomSystem.hasAlreadyCompletedFoalTaskToday] Error: ${error.message}`);
+    return false; // Fail safe - allow interaction if there's an error
   }
 }

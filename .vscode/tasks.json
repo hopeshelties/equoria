@@ -75,6 +75,19 @@
         "focus": false,
         "panel": "shared"
       }
+    },
+    {
+      "label": "ESLint: Restart Server",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Restarting ESLint server... Please run 'ESLint: Restart ESLint Server' from Command Palette"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
     }
   ]
 }

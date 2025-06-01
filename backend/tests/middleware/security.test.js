@@ -8,7 +8,7 @@ import {
 } from '../../middleware/security.js';
 
 // Simple mock for logger
-const mockLogger = {
+const _mockLogger = {
   warn: () => {},
 };
 

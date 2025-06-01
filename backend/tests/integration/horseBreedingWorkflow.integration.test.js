@@ -101,7 +101,7 @@ describe('🐎 INTEGRATION: Complete Horse Breeding Workflow', () => {
 
       // Store for subsequent tests
       testUser = response.body.data.user;
-      authToken = response.body.data.token;
+      _authToken = response.body.data.token;
 
       // VERIFY: User exists in database
       const dbUser = await prisma.user.findUnique({

@@ -1,12 +1,7 @@
-echo node_modules > C:\Users\heirr\OneDrive\Desktop\Equoria\backend\.eslintignore
-echo dist >> C:\Users\heirr\OneDrive\Desktop\Equoria\backend\.eslintignore
-echo build >> C:\Users\heirr\OneDrive\Desktop\Equoria\backend\.eslintignore
-echo *.md >> C:\Users\heirr\OneDrive\Desktop\Equoria\backend\.eslintignore
-echo *.json >> C:\Users\heirr\OneDrive\Desktop\Equoria\backend\.eslintignore
-
 node_modules
 dist
 build
+coverage
 *.md
 *.json
 

@@ -34,7 +34,7 @@
  *    to validate eligibility rules and ensure comprehensive edge case coverage
  */
 
-import { jest, describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
 
 describe('🏆 UNIT: Horse Eligibility - Competition Entry Validation', () => {

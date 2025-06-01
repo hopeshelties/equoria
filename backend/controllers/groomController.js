@@ -13,6 +13,12 @@ import {
   PERSONALITY_TRAITS,
   DEFAULT_GROOMS,
 } from '../utils/groomSystem.js';
+import {
+  validateGroomingEligibility,
+  updateTaskLog,
+  updateStreakTracking,
+  checkTaskMutualExclusivity,
+} from '../utils/groomBondingSystem.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
 
@@ -195,8 +201,11 @@ export async function recordInteraction(req, res) {
         select: {
           id: true,
           name: true,
-          bond_score: true,
-          stress_level: true,
+          age: true,
+          bondScore: true,
+          stressLevel: true,
+          taskLog: true,
+          lastGroomed: true,
         },
       }),
     ]);
@@ -217,8 +226,44 @@ export async function recordInteraction(req, res) {
       });
     }
 
+    // Validate task eligibility based on age and task type
+    const eligibilityResult = await validateGroomingEligibility(foal, interactionType);
+    if (!eligibilityResult.eligible) {
+      return res.status(400).json({
+        success: false,
+        message: eligibilityResult.reason,
+        data: {
+          eligibleTasks: eligibilityResult.eligibleTasks,
+          ageGroup: eligibilityResult.ageGroup,
+          horseAge: foal.age,
+        },
+      });
+    }
+
+    // Check for task mutual exclusivity (enrichment vs grooming same day)
+    // TODO: Implement daily task checking - for now, allow all tasks
+    // const mutualExclusivityResult = checkTaskMutualExclusivity(existingTaskToday, interactionType);
+    // if (!mutualExclusivityResult.allowed) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: mutualExclusivityResult.reason,
+    //     data: { conflict: true },
+    //   });
+    // }
+
     // Calculate interaction effects
     const effects = calculateGroomInteractionEffects(groom, foal, interactionType, duration);
+
+    // Update task log
+    const taskLogUpdate = updateTaskLog(foal.taskLog, interactionType);
+
+    // Update streak tracking
+    const currentDate = new Date();
+    const streakUpdate = updateStreakTracking(
+      foal.lastGroomed ? new Date(foal.lastGroomed) : null,
+      currentDate,
+      0, // TODO: Get actual consecutive days from database
+    );
 
     // Record the interaction
     const interaction = await prisma.groomInteraction.create({
@@ -236,26 +281,25 @@ export async function recordInteraction(req, res) {
       },
     });
 
-    // Update foal's bond score and stress level
-    const newBondScore = Math.max(
-      0,
-      Math.min(100, (foal.bond_score || 50) + effects.bondingChange),
-    );
+    // Update foal's bond score, stress level, task log, and streak tracking
+    const newBondScore = Math.max(0, Math.min(100, (foal.bondScore || 50) + effects.bondingChange));
     const newStressLevel = Math.max(
       0,
-      Math.min(100, (foal.stress_level || 0) + effects.stressChange),
+      Math.min(100, (foal.stressLevel || 0) + effects.stressChange),
     );
 
     await prisma.horse.update({
       where: { id: foalId },
       data: {
-        bond_score: newBondScore,
-        stress_level: newStressLevel,
+        bondScore: newBondScore,
+        stressLevel: newStressLevel,
+        taskLog: taskLogUpdate.taskLog,
+        lastGroomed: streakUpdate.lastGroomed,
       },
     });
 
     logger.info(
-      `[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress`,
+      `[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress, task: ${interactionType} (count: ${taskLogUpdate.taskCount})`,
     );
 
     res.status(200).json({
@@ -265,12 +309,24 @@ export async function recordInteraction(req, res) {
         interaction,
         effects,
         foalUpdates: {
-          previousBondScore: foal.bond_score,
+          previousBondScore: foal.bondScore,
           newBondScore,
-          previousStressLevel: foal.stress_level,
+          previousStressLevel: foal.stressLevel,
           newStressLevel,
           bondingChange: effects.bondingChange,
           stressChange: effects.stressChange,
+        },
+        taskLogging: {
+          taskType: eligibilityResult.taskType,
+          taskCount: taskLogUpdate.taskCount,
+          totalTasks: taskLogUpdate.totalTasks,
+          updatedTaskLog: taskLogUpdate.taskLog,
+        },
+        streakTracking: {
+          consecutiveDays: streakUpdate.consecutiveDays,
+          bonusEligible: streakUpdate.bonusEligible,
+          streakBroken: streakUpdate.streakBroken,
+          lastGroomed: streakUpdate.lastGroomed,
         },
       },
     });

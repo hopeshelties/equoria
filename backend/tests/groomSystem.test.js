@@ -87,6 +87,7 @@ const {
   assignGroomToFoal,
   ensureDefaultGroomAssignment,
   calculateGroomInteractionEffects,
+  hasAlreadyCompletedFoalTaskToday,
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
   PERSONALITY_TRAITS,
@@ -428,6 +429,186 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         expect(trait).toHaveProperty('stressReduction');
         expect(trait).toHaveProperty('description');
       });
+    });
+  });
+
+  describe('hasAlreadyCompletedFoalTaskToday', () => {
+    const today = '2024-01-15';
+
+    it('should return false when foal has no daily task record', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: null,
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(false);
+    });
+
+    it('should return false when foal has empty daily task record', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: {},
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(false);
+    });
+
+    it('should return false when foal has no tasks for today', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: {
+          '2024-01-14': ['trust_building'],
+          '2024-01-16': ['hoof_handling'],
+        },
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(false);
+    });
+
+    it('should return false when foal has empty task array for today', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: {
+          [today]: [],
+        },
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(false);
+    });
+
+    it('should return true when foal has completed enrichment task today', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: {
+          [today]: ['trust_building'],
+        },
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(true);
+    });
+
+    it('should return true when foal has completed grooming task today', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: {
+          [today]: ['hoof_handling'],
+        },
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(true);
+    });
+
+    it('should return true when foal has completed multiple tasks today', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: {
+          [today]: ['trust_building', 'early_touch'],
+        },
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(true);
+    });
+
+    it('should return false when foal has completed non-foal tasks today', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: {
+          [today]: ['general_grooming', 'exercise', 'medical_check'],
+        },
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(false);
+    });
+
+    it('should return true when foal has mixed tasks including foal tasks today', () => {
+      const foal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: {
+          [today]: ['general_grooming', 'trust_building', 'exercise'],
+        },
+      };
+
+      const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+      expect(result).toBe(true);
+    });
+
+    it('should test all enrichment tasks are detected', () => {
+      const enrichmentTasks = ['desensitization', 'trust_building', 'showground_exposure'];
+
+      enrichmentTasks.forEach(task => {
+        const foal = {
+          id: 1,
+          name: 'Test Foal',
+          dailyTaskRecord: {
+            [today]: [task],
+          },
+        };
+
+        const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+        expect(result).toBe(true);
+      });
+    });
+
+    it('should test all grooming tasks are detected', () => {
+      const groomingTasks = [
+        'early_touch',
+        'hoof_handling',
+        'tying_practice',
+        'sponge_bath',
+        'coat_check',
+        'mane_tail_grooming',
+      ];
+
+      groomingTasks.forEach(task => {
+        const foal = {
+          id: 1,
+          name: 'Test Foal',
+          dailyTaskRecord: {
+            [today]: [task],
+          },
+        };
+
+        const result = hasAlreadyCompletedFoalTaskToday(foal, today);
+        expect(result).toBe(true);
+      });
+    });
+
+    it('should handle edge cases gracefully', () => {
+      // Test with undefined dailyTaskRecord
+      const foalUndefined = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: undefined,
+      };
+      expect(hasAlreadyCompletedFoalTaskToday(foalUndefined, today)).toBe(false);
+
+      // Test with null today parameter
+      const foalNormal = {
+        id: 1,
+        name: 'Test Foal',
+        dailyTaskRecord: { [today]: ['trust_building'] },
+      };
+      expect(hasAlreadyCompletedFoalTaskToday(foalNormal, null)).toBe(false);
+
+      // Test with empty string today parameter
+      expect(hasAlreadyCompletedFoalTaskToday(foalNormal, '')).toBe(false);
     });
   });
 

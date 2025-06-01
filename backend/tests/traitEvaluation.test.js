@@ -211,7 +211,7 @@ describe('🔬 UNIT: Trait Evaluation System - Trait Revelation & Validation', (
       const newbornFoal = { ...mockFoal, age: 0 };
       Math.random.mockReturnValue(0.1);
 
-      const result = evaluateTraitRevelation(newbornFoal, mockCurrentTraits, 5);
+      const _result = evaluateTraitRevelation(newbornFoal, mockCurrentTraits, 5);
 
       // Should use development day (5) instead of age (0) for trait evaluation
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -294,7 +294,7 @@ describe('🔬 UNIT: Trait Evaluation System - Trait Revelation & Validation', (
   describe('TRAIT_DEFINITIONS', () => {
     it('should have valid reveal conditions for all traits', () => {
       Object.values(TRAIT_DEFINITIONS).forEach(category => {
-        Object.entries(category).forEach(([key, trait]) => {
+        Object.entries(category).forEach(([_key, trait]) => {
           const conditions = trait.revealConditions;
 
           // Age should be valid
