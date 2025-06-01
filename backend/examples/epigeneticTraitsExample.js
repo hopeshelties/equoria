@@ -28,7 +28,7 @@ console.log('Input:', optimalBreeding);
 console.log('Result:', optimalResult);
 console.log(
   'Total traits:',
-  optimalResult.positive.length + optimalResult.negative.length + optimalResult.hidden.length
+  optimalResult.positive.length + optimalResult.negative.length + optimalResult.hidden.length,
 );
 console.log('');
 
@@ -48,7 +48,7 @@ console.log('Input:', poorBreeding);
 console.log('Result:', poorResult);
 console.log(
   'Total traits:',
-  poorResult.positive.length + poorResult.negative.length + poorResult.hidden.length
+  poorResult.positive.length + poorResult.negative.length + poorResult.hidden.length,
 );
 console.log('');
 
@@ -68,7 +68,7 @@ console.log('Input:', mixedBreeding);
 console.log('Result:', mixedResult);
 console.log(
   'Total traits:',
-  mixedResult.positive.length + mixedResult.negative.length + mixedResult.hidden.length
+  mixedResult.positive.length + mixedResult.negative.length + mixedResult.hidden.length,
 );
 console.log('');
 
@@ -88,7 +88,7 @@ console.log('Input:', newParents);
 console.log('Result:', newResult);
 console.log(
   'Total traits:',
-  newResult.positive.length + newResult.negative.length + newResult.hidden.length
+  newResult.positive.length + newResult.negative.length + newResult.hidden.length,
 );
 console.log('');
 
@@ -214,7 +214,7 @@ strategies.forEach(strategy => {
   console.log(`  Average negative traits: ${(totalNegative / 10).toFixed(1)}`);
   console.log(`  Average hidden traits: ${(totalHidden / 10).toFixed(1)}`);
   console.log(
-    `  Total average traits: ${((totalPositive + totalNegative + totalHidden) / 10).toFixed(1)}`
+    `  Total average traits: ${((totalPositive + totalNegative + totalHidden) / 10).toFixed(1)}`,
   );
 });
 
@@ -224,7 +224,7 @@ console.log('How to integrate with game breeding system');
 
 function simulateBreeding(dam, sire, foalDevelopmentData) {
   console.log(
-    `\nBreeding ${dam.name} (${dam.traits.join(', ')}) with ${sire.name} (${sire.traits.join(', ')})`
+    `\nBreeding ${dam.name} (${dam.traits.join(', ')}) with ${sire.name} (${sire.traits.join(', ')})`,
   );
 
   const breedingParams = {

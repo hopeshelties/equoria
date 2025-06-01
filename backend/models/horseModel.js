@@ -67,7 +67,7 @@ async function createHorse(horseData) {
       breedRelation = { breedId: breed };
     } else {
       throw new Error(
-        'Invalid breed format. Use breedId (number) or breed: { connect: { id: number } }'
+        'Invalid breed format. Use breedId (number) or breed: { connect: { id: number } }',
       );
     } // Prepare user relationship if provided
     let userRelation = {};
@@ -101,7 +101,7 @@ async function createHorse(horseData) {
     if (age === 0 && sireId && damId) {
       try {
         logger.info(
-          `[horseModel.createHorse] Applying at-birth traits for newborn with sire ${sireId} and dam ${damId}`
+          `[horseModel.createHorse] Applying at-birth traits for newborn with sire ${sireId} and dam ${damId}`,
         );
 
         const atBirthResult = await applyEpigeneticTraitsAtBirth({
@@ -125,14 +125,14 @@ async function createHorse(horseData) {
         };
 
         logger.info(
-          `[horseModel.createHorse] Applied at-birth traits: ${JSON.stringify(atBirthResult.traits)}`
+          `[horseModel.createHorse] Applied at-birth traits: ${JSON.stringify(atBirthResult.traits)}`,
         );
 
         // Log breeding analysis for debugging
         if (atBirthResult.breedingAnalysis) {
           const analysis = atBirthResult.breedingAnalysis;
           logger.info(
-            `[horseModel.createHorse] Breeding analysis - Lineage specialization: ${analysis.lineage.disciplineSpecialization}, Inbreeding: ${analysis.inbreeding.inbreedingDetected}`
+            `[horseModel.createHorse] Breeding analysis - Lineage specialization: ${analysis.lineage.disciplineSpecialization}, Inbreeding: ${analysis.inbreeding.inbreedingDetected}`,
           );
         }
       } catch (error) {
@@ -184,7 +184,7 @@ async function createHorse(horseData) {
     });
 
     logger.info(
-      `[horseModel.createHorse] Successfully created horse: ${horse.name} (ID: ${horse.id})`
+      `[horseModel.createHorse] Successfully created horse: ${horse.name} (ID: ${horse.id})`,
     );
     return horse;
   } catch (error) {
@@ -211,7 +211,7 @@ async function getHorseById(id) {
 
     if (horse) {
       logger.info(
-        `[horseModel.getHorseById] Successfully found horse: ${horse.name} (ID: ${horse.id})`
+        `[horseModel.getHorseById] Successfully found horse: ${horse.name} (ID: ${horse.id})`,
       );
     }
 
@@ -247,7 +247,7 @@ async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
     }
 
     logger.info(
-      `[horseModel.updateDisciplineScore] Updating ${discipline} score for horse ${numericId} by +${pointsToAdd}`
+      `[horseModel.updateDisciplineScore] Updating ${discipline} score for horse ${numericId} by +${pointsToAdd}`,
     );
 
     // First, get the current horse to check if it exists and get current scores
@@ -284,7 +284,7 @@ async function updateDisciplineScore(horseId, discipline, pointsToAdd) {
     });
 
     logger.info(
-      `[horseModel.updateDisciplineScore] Successfully updated ${discipline} score for horse ${numericId}: ${currentScore} -> ${newScore}`
+      `[horseModel.updateDisciplineScore] Successfully updated ${discipline} score for horse ${numericId}: ${currentScore} -> ${newScore}`,
     );
     return updatedHorse;
   } catch (error) {
@@ -333,14 +333,14 @@ async function getDisciplineScores(horseId) {
 async function incrementDisciplineScore(horseId, discipline, amount = 5) {
   try {
     logger.info(
-      `[horseModel.incrementDisciplineScore] Incrementing ${discipline} score for horse ${horseId} by +${amount}`
+      `[horseModel.incrementDisciplineScore] Incrementing ${discipline} score for horse ${horseId} by +${amount}`,
     );
 
     // Use the existing updateDisciplineScore function with specified amount
     const updatedHorse = await updateDisciplineScore(horseId, discipline, amount);
 
     logger.info(
-      `[horseModel.incrementDisciplineScore] Successfully incremented ${discipline} score for horse ${horseId}`
+      `[horseModel.incrementDisciplineScore] Successfully incremented ${discipline} score for horse ${horseId}`,
     );
     return updatedHorse;
   } catch (error) {
@@ -359,7 +359,7 @@ async function incrementDisciplineScore(horseId, discipline, amount = 5) {
 async function updateHorseStat(horseId, statName, amount) {
   try {
     logger.info(
-      `[horseModel.updateHorseStat] Updating ${statName} by ${amount} for horse ${horseId}`
+      `[horseModel.updateHorseStat] Updating ${statName} by ${amount} for horse ${horseId}`,
     );
 
     // Validate stat name
@@ -410,7 +410,7 @@ async function updateHorseStat(horseId, statName, amount) {
     });
 
     logger.info(
-      `[horseModel.updateHorseStat] Updated ${statName} for horse ${horseId}: ${currentValue} -> ${newValue} (+${amount})`
+      `[horseModel.updateHorseStat] Updated ${statName} for horse ${horseId}: ${currentValue} -> ${newValue} (+${amount})`,
     );
 
     return updatedHorse;
@@ -452,7 +452,7 @@ async function getPositiveTraits(horseId) {
     const positiveTraits = traits.positive || [];
 
     logger.info(
-      `[horseModel.getPositiveTraits] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`
+      `[horseModel.getPositiveTraits] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`,
     );
 
     return positiveTraits;
@@ -471,7 +471,7 @@ async function getPositiveTraits(horseId) {
 async function hasTraitPresent(horseId, traitName) {
   try {
     logger.info(
-      `[horseModel.hasTraitPresent] Checking for trait '${traitName}' on horse ${horseId}`
+      `[horseModel.hasTraitPresent] Checking for trait '${traitName}' on horse ${horseId}`,
     );
 
     // Validate inputs
@@ -510,7 +510,7 @@ async function hasTraitPresent(horseId, traitName) {
     };
 
     logger.info(
-      `[horseModel.hasTraitPresent] Trait '${traitName}' on horse ${horseId}: ${JSON.stringify(result)}`
+      `[horseModel.hasTraitPresent] Trait '${traitName}' on horse ${horseId}: ${JSON.stringify(result)}`,
     );
 
     return result;
@@ -530,7 +530,7 @@ async function hasTraitPresent(horseId, traitName) {
 async function addTraitSafely(horseId, traitName, category) {
   try {
     logger.info(
-      `[horseModel.addTraitSafely] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`
+      `[horseModel.addTraitSafely] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`,
     );
 
     // Validate inputs
@@ -546,7 +546,7 @@ async function addTraitSafely(horseId, traitName, category) {
     const validCategories = ['positive', 'negative', 'hidden'];
     if (!validCategories.includes(category)) {
       throw new Error(
-        `Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`
+        `Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`,
       );
     }
 
@@ -584,7 +584,7 @@ async function addTraitSafely(horseId, traitName, category) {
           ? 'negative'
           : 'hidden';
       logger.warn(
-        `[horseModel.addTraitSafely] Trait '${traitName}' already exists in '${existingCategory}' category for horse ${horseId}`
+        `[horseModel.addTraitSafely] Trait '${traitName}' already exists in '${existingCategory}' category for horse ${horseId}`,
       );
 
       // If it's in the same category, no change needed
@@ -594,7 +594,7 @@ async function addTraitSafely(horseId, traitName, category) {
 
       // Remove from existing category before adding to new one
       updatedTraits[existingCategory] = updatedTraits[existingCategory].filter(
-        t => t !== traitName
+        t => t !== traitName,
       );
     }
 
@@ -615,7 +615,7 @@ async function addTraitSafely(horseId, traitName, category) {
     });
 
     logger.info(
-      `[horseModel.addTraitSafely] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`
+      `[horseModel.addTraitSafely] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`,
     );
 
     return updatedHorse;
@@ -634,7 +634,7 @@ async function addTraitSafely(horseId, traitName, category) {
 async function removeTraitSafely(horseId, traitName) {
   try {
     logger.info(
-      `[horseModel.removeTraitSafely] Removing trait '${traitName}' from horse ${horseId}`
+      `[horseModel.removeTraitSafely] Removing trait '${traitName}' from horse ${horseId}`,
     );
 
     // Validate inputs
@@ -679,7 +679,7 @@ async function removeTraitSafely(horseId, traitName) {
 
     if (originalCount === newCount) {
       logger.warn(
-        `[horseModel.removeTraitSafely] Trait '${traitName}' was not found on horse ${horseId}`
+        `[horseModel.removeTraitSafely] Trait '${traitName}' was not found on horse ${horseId}`,
       );
       return horse; // No change needed
     }
@@ -698,7 +698,7 @@ async function removeTraitSafely(horseId, traitName) {
     });
 
     logger.info(
-      `[horseModel.removeTraitSafely] Successfully removed trait '${traitName}' from horse ${horseId}`
+      `[horseModel.removeTraitSafely] Successfully removed trait '${traitName}' from horse ${horseId}`,
     );
 
     return updatedHorse;
@@ -750,7 +750,7 @@ async function getAllTraits(horseId) {
     };
 
     logger.info(
-      `[horseModel.getAllTraits] Found ${result.total} total traits for horse ${horseId} (${result.positive.length} positive, ${result.negative.length} negative, ${result.hidden.length} hidden)`
+      `[horseModel.getAllTraits] Found ${result.total} total traits for horse ${horseId} (${result.positive.length} positive, ${result.negative.length} negative, ${result.hidden.length} hidden)`,
     );
 
     return result;
@@ -806,7 +806,7 @@ async function hasTrait(horseId, traitName) {
     const result = hasPositive || hasNegative || hasHidden;
 
     logger.info(
-      `[horseModel.hasTrait] Horse ${horseId} ${result ? 'has' : 'does not have'} trait '${traitName}'`
+      `[horseModel.hasTrait] Horse ${horseId} ${result ? 'has' : 'does not have'} trait '${traitName}'`,
     );
 
     return result;
@@ -848,13 +848,13 @@ async function getPositiveTraitsArray(horseId) {
     const positiveTraits = traits.positive || [];
 
     logger.info(
-      `[horseModel.getPositiveTraitsArray] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`
+      `[horseModel.getPositiveTraitsArray] Found ${positiveTraits.length} positive traits for horse ${horseId}: ${positiveTraits.join(', ')}`,
     );
 
     return positiveTraits;
   } catch (error) {
     logger.error(
-      `[horseModel.getPositiveTraitsArray] Error getting positive traits: ${error.message}`
+      `[horseModel.getPositiveTraitsArray] Error getting positive traits: ${error.message}`,
     );
     throw error;
   }
@@ -892,13 +892,13 @@ async function getNegativeTraitsArray(horseId) {
     const negativeTraits = traits.negative || [];
 
     logger.info(
-      `[horseModel.getNegativeTraitsArray] Found ${negativeTraits.length} negative traits for horse ${horseId}: ${negativeTraits.join(', ')}`
+      `[horseModel.getNegativeTraitsArray] Found ${negativeTraits.length} negative traits for horse ${horseId}: ${negativeTraits.join(', ')}`,
     );
 
     return negativeTraits;
   } catch (error) {
     logger.error(
-      `[horseModel.getNegativeTraitsArray] Error getting negative traits: ${error.message}`
+      `[horseModel.getNegativeTraitsArray] Error getting negative traits: ${error.message}`,
     );
     throw error;
   }
@@ -914,7 +914,7 @@ async function getNegativeTraitsArray(horseId) {
 async function addTrait(horseId, traitName, category) {
   try {
     logger.info(
-      `[horseModel.addTrait] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`
+      `[horseModel.addTrait] Adding trait '${traitName}' to category '${category}' for horse ${horseId}`,
     );
 
     // Validate inputs
@@ -931,7 +931,7 @@ async function addTrait(horseId, traitName, category) {
     const validCategories = ['positive', 'negative'];
     if (!validCategories.includes(category)) {
       throw new Error(
-        `Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`
+        `Invalid category '${category}'. Must be one of: ${validCategories.join(', ')}`,
       );
     }
 
@@ -939,7 +939,7 @@ async function addTrait(horseId, traitName, category) {
     const updatedHorse = await addTraitSafely(horseId, traitName, category);
 
     logger.info(
-      `[horseModel.addTrait] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`
+      `[horseModel.addTrait] Successfully added trait '${traitName}' to '${category}' category for horse ${horseId}`,
     );
 
     return updatedHorse;

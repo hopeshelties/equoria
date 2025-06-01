@@ -21,14 +21,14 @@ async function main() {
         try {
           if (typeof user.email !== 'string' || !user.email.includes('@')) {
             throw new Error(
-              `User email (${JSON.stringify(user.email)}) is not a string or does not contain '@'.`
+              `User email (${JSON.stringify(user.email)}) is not a string or does not contain '@'.`,
             );
           }
           const usernameBase = user.email.split('@')[0];
           if (!usernameBase) {
             // Handles cases like "@domain.com" or an empty email part
             throw new Error(
-              `Username base derived from email (${JSON.stringify(user.email)}) is empty.`
+              `Username base derived from email (${JSON.stringify(user.email)}) is empty.`,
             );
           }
 

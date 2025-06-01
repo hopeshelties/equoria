@@ -2,6 +2,8 @@ import express from 'express';
 import { param, body, validationResult } from 'express-validator';
 import { getTrainableHorses } from '../controllers/trainingController.js';
 import { getHorseOverview } from '../controllers/horseController.js';
+import { authenticateToken } from '../middleware/auth.js';
+import * as horseXpController from '../controllers/horseXpController.js';
 
 const router = express.Router();
 
@@ -149,6 +151,80 @@ router.post('/foals', validateFoalCreation, async (req, res) => {
 router.get('/:id/overview', validateHorseId, async (req, res) => {
   try {
     await getHorseOverview(req, res);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
+    });
+  }
+});
+
+// Horse XP System Routes (require authentication)
+
+/**
+ * GET /horses/:id/xp
+ * Get horse XP status and progression information
+ */
+router.get('/:id/xp', authenticateToken, validateHorseId, async (req, res) => {
+  try {
+    // Map :id to :horseId for the controller
+    req.params.horseId = req.params.id;
+    await horseXpController.getHorseXpStatus(req, res);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
+    });
+  }
+});
+
+/**
+ * POST /horses/:id/allocate-stat
+ * Allocate a stat point to a specific horse stat
+ */
+router.post('/:id/allocate-stat', authenticateToken, validateHorseId, async (req, res) => {
+  try {
+    // Map :id to :horseId for the controller
+    req.params.horseId = req.params.id;
+    await horseXpController.allocateStatPoint(req, res);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
+    });
+  }
+});
+
+/**
+ * GET /horses/:id/xp-history
+ * Get horse XP event history with pagination
+ */
+router.get('/:id/xp-history', authenticateToken, validateHorseId, async (req, res) => {
+  try {
+    // Map :id to :horseId for the controller
+    req.params.horseId = req.params.id;
+    await horseXpController.getHorseXpHistory(req, res);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
+    });
+  }
+});
+
+/**
+ * POST /horses/:id/award-xp
+ * Award XP to a horse (for system/admin use)
+ */
+router.post('/:id/award-xp', authenticateToken, validateHorseId, async (req, res) => {
+  try {
+    // Map :id to :horseId for the controller
+    req.params.horseId = req.params.id;
+    await horseXpController.awardXpToHorse(req, res);
   } catch (error) {
     res.status(500).json({
       success: false,

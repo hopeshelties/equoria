@@ -5,7 +5,7 @@ import { AppError } from '../errors/index.js';
  * Global Error Handler Middleware
  * Handles all errors in a consistent manner with proper logging
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   let error = { ...err };
   error.message = err.message;
 

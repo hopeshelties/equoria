@@ -41,7 +41,7 @@ export async function getHorseHistory(req, res) {
     }));
 
     logger.info(
-      `[horseController.getHorseHistory] Retrieved ${history.length} competition results for horse ${horseId}`
+      `[horseController.getHorseHistory] Retrieved ${history.length} competition results for horse ${horseId}`,
     );
 
     res.status(200).json({
@@ -80,7 +80,7 @@ export async function createFoal(req, res) {
     } = req.body;
 
     logger.info(
-      `[horseController.createFoal] Creating foal: ${name} with sire ${sire_id} and dam ${dam_id}`
+      `[horseController.createFoal] Creating foal: ${name} with sire ${sire_id} and dam ${dam_id}`,
     );
 
     // Validate required fields
@@ -130,7 +130,7 @@ export async function createFoal(req, res) {
     const stressLevel = mare.stress_level;
 
     logger.info(
-      `[horseController.createFoal] Mare stress: ${stressLevel}, Feed quality: ${feedQuality}, Lineage count: ${lineage.length}`
+      `[horseController.createFoal] Mare stress: ${stressLevel}, Feed quality: ${feedQuality}, Lineage count: ${lineage.length}`,
     );
 
     // Apply epigenetic traits at birth
@@ -142,7 +142,7 @@ export async function createFoal(req, res) {
     });
 
     logger.info(
-      `[horseController.createFoal] Applied epigenetic traits: ${JSON.stringify(epigeneticTraits)}`
+      `[horseController.createFoal] Applied epigenetic traits: ${JSON.stringify(epigeneticTraits)}`,
     );
 
     // Prepare horse data for creation
@@ -169,7 +169,7 @@ export async function createFoal(req, res) {
     const newFoal = await createHorse(horseData);
 
     logger.info(
-      `[horseController.createFoal] Successfully created foal: ${newFoal.name} (ID: ${newFoal.id})`
+      `[horseController.createFoal] Successfully created foal: ${newFoal.name} (ID: ${newFoal.id})`,
     );
 
     res.status(201).json({
@@ -208,7 +208,7 @@ export async function createFoal(req, res) {
 async function gatherLineage(sireId, damId, generations) {
   try {
     logger.info(
-      `[horseController.gatherLineage] Gathering lineage for sire ${sireId} and dam ${damId}, ${generations} generations`
+      `[horseController.gatherLineage] Gathering lineage for sire ${sireId} and dam ${damId}, ${generations} generations`,
     );
 
     const ancestors = [];
@@ -330,13 +330,13 @@ function assessFeedQualityFromMare(mare) {
     feedQuality = Math.max(feedQuality, 0);
 
     logger.info(
-      `[horseController.assessFeedQualityFromMare] Mare ${mare.name} feed quality: ${feedQuality} (health: ${mare.health_status}, bond: ${bondScore})`
+      `[horseController.assessFeedQualityFromMare] Mare ${mare.name} feed quality: ${feedQuality} (health: ${mare.health_status}, bond: ${bondScore})`,
     );
 
     return feedQuality;
   } catch (error) {
     logger.error(
-      `[horseController.assessFeedQualityFromMare] Error assessing feed quality: ${error.message}`
+      `[horseController.assessFeedQualityFromMare] Error assessing feed quality: ${error.message}`,
     );
     return 50; // Default on error
   }
@@ -405,7 +405,7 @@ export async function getHorseOverview(req, res) {
       }
     } catch (error) {
       logger.warn(
-        `[horseController.getHorseOverview] Error calculating next training date: ${error.message}`
+        `[horseController.getHorseOverview] Error calculating next training date: ${error.message}`,
       );
       // Continue with null next training date
     }
@@ -436,7 +436,7 @@ export async function getHorseOverview(req, res) {
       }
     } catch (error) {
       logger.warn(
-        `[horseController.getHorseOverview] Error getting last show result: ${error.message}`
+        `[horseController.getHorseOverview] Error getting last show result: ${error.message}`,
       );
       // Continue with null last show result
     }
@@ -456,7 +456,7 @@ export async function getHorseOverview(req, res) {
     };
 
     logger.info(
-      `[horseController.getHorseOverview] Successfully retrieved overview for horse ${horse.name} (ID: ${horseId})`
+      `[horseController.getHorseOverview] Successfully retrieved overview for horse ${horse.name} (ID: ${horseId})`,
     );
 
     res.status(200).json({
@@ -466,7 +466,7 @@ export async function getHorseOverview(req, res) {
     });
   } catch (error) {
     logger.error(
-      `[horseController.getHorseOverview] Error getting horse overview: ${error.message}`
+      `[horseController.getHorseOverview] Error getting horse overview: ${error.message}`,
     );
 
     res.status(500).json({

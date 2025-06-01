@@ -74,7 +74,7 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
 
     it('should throw error for invalid discipline', () => {
       expect(() => getStatScore(testHorse, 'InvalidDiscipline')).toThrow(
-        'Unknown discipline: InvalidDiscipline'
+        'Unknown discipline: InvalidDiscipline',
       );
     });
 
@@ -122,10 +122,10 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
 
     it('should validate input ranges', () => {
       expect(() => applyRiderModifiers(100, 0.15, 0)).toThrow(
-        'Bonus percent must be between 0 and 0.10'
+        'Bonus percent must be between 0 and 0.10',
       );
       expect(() => applyRiderModifiers(100, 0, 0.1)).toThrow(
-        'Penalty percent must be between 0 and 0.08'
+        'Penalty percent must be between 0 and 0.08',
       );
       expect(() => applyRiderModifiers(-10, 0, 0)).toThrow('Score must be a non-negative number');
     });
@@ -292,10 +292,10 @@ describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking
 
       expect(() => simulateCompetition('not-array', sampleShow)).toThrow('Horses must be an array');
       expect(() => simulateCompetition(horses, null)).toThrow(
-        'Show object with discipline is required'
+        'Show object with discipline is required',
       );
       expect(() => simulateCompetition(horses, {})).toThrow(
-        'Show object with discipline is required'
+        'Show object with discipline is required',
       );
     });
 

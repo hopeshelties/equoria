@@ -62,7 +62,7 @@ async function getFoalDevelopment(foalId) {
     });
 
     logger.info(
-      `[foalModel.getFoalDevelopment] Retrieved development data for foal ${parsedFoalId}`
+      `[foalModel.getFoalDevelopment] Retrieved development data for foal ${parsedFoalId}`,
     );
 
     return {
@@ -92,7 +92,7 @@ async function getFoalDevelopment(foalId) {
       })),
       availableActivities: getAvailableActivities(
         development.currentDay,
-        development.completedActivities || {}
+        development.completedActivities || {},
       ),
     };
   } catch (error) {
@@ -127,7 +127,7 @@ async function completeEnrichmentActivity(foalId, day, activity) {
     }
 
     logger.info(
-      `[foalModel.completeEnrichmentActivity] Processing enrichment activity "${activity}" for foal ${parsedFoalId} on day ${parsedDay}`
+      `[foalModel.completeEnrichmentActivity] Processing enrichment activity "${activity}" for foal ${parsedFoalId} on day ${parsedDay}`,
     );
 
     // Get foal and verify it exists
@@ -158,12 +158,12 @@ async function completeEnrichmentActivity(foalId, day, activity) {
         a.type === activity ||
         a.name === activity ||
         a.type.toLowerCase().replace('_', ' ') === activity.toLowerCase() ||
-        a.name.toLowerCase() === activity.toLowerCase()
+        a.name.toLowerCase() === activity.toLowerCase(),
     );
 
     if (!activityDefinition) {
       throw new Error(
-        `Activity "${activity}" is not appropriate for day ${parsedDay}. Available activities: ${availableActivities.map(a => a.name).join(', ')}`
+        `Activity "${activity}" is not appropriate for day ${parsedDay}. Available activities: ${availableActivities.map(a => a.name).join(', ')}`,
       );
     }
 
@@ -179,7 +179,7 @@ async function completeEnrichmentActivity(foalId, day, activity) {
     const newStressLevel = Math.max(0, Math.min(100, currentStressLevel + outcome.stressChange));
 
     // Update horse's bonding and stress levels
-    const updatedHorse = await prisma.horse.update({
+    await prisma.horse.update({
       where: { id: parsedFoalId },
       data: {
         bond_score: newBondScore,
@@ -200,7 +200,7 @@ async function completeEnrichmentActivity(foalId, day, activity) {
     });
 
     logger.info(
-      `[foalModel.completeEnrichmentActivity] Activity completed successfully. Bond: ${currentBondScore} -> ${newBondScore}, Stress: ${currentStressLevel} -> ${newStressLevel}`
+      `[foalModel.completeEnrichmentActivity] Activity completed successfully. Bond: ${currentBondScore} -> ${newBondScore}, Stress: ${currentStressLevel} -> ${newStressLevel}`,
     );
 
     return {
@@ -248,7 +248,7 @@ async function completeActivity(foalId, activityType) {
     }
 
     logger.info(
-      `[foalModel.completeActivity] Completing activity ${activityType} for foal ${parsedFoalId}`
+      `[foalModel.completeActivity] Completing activity ${activityType} for foal ${parsedFoalId}`,
     );
 
     // Get current development status
@@ -263,7 +263,7 @@ async function completeActivity(foalId, activityType) {
     // Check if activity is available for current day
     const availableActivities = getAvailableActivities(
       development.currentDay,
-      development.completedActivities || {}
+      development.completedActivities || {},
     );
     const activity = availableActivities.find(a => a.type === activityType);
 
@@ -283,14 +283,14 @@ async function completeActivity(foalId, activityType) {
 
     const newBondingLevel = Math.max(
       0,
-      Math.min(100, development.bondingLevel + outcome.bondingChange)
+      Math.min(100, development.bondingLevel + outcome.bondingChange),
     );
     const newStressLevel = Math.max(
       0,
-      Math.min(100, development.stressLevel + outcome.stressChange)
+      Math.min(100, development.stressLevel + outcome.stressChange),
     );
 
-    const updatedDevelopment = await prisma.foalDevelopment.update({
+    await prisma.foalDevelopment.update({
       where: { foalId: parsedFoalId },
       data: {
         bondingLevel: newBondingLevel,
@@ -357,7 +357,7 @@ async function advanceDay(foalId) {
     });
 
     logger.info(
-      `[foalModel.advanceDay] Foal ${parsedFoalId} advanced to day ${development.currentDay + 1}`
+      `[foalModel.advanceDay] Foal ${parsedFoalId} advanced to day ${development.currentDay + 1}`,
     );
 
     return await getFoalDevelopment(parsedFoalId);

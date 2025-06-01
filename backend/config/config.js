@@ -35,7 +35,7 @@ for (const key of requiredVars) {
 // Always check for missing/problematic vars, regardless of NODE_ENV
 if (problematicVars.length > 0) {
   throw new Error(
-    `[config] Problematic required environment variables for ${NODE_ENV} environment: ${problematicVars.join('; ')}. Please check your .env or env.test file.`
+    `[config] Problematic required environment variables for ${NODE_ENV} environment: ${problematicVars.join('; ')}. Please check your .env or env.test file.`,
   );
 }
 

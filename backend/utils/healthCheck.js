@@ -110,7 +110,7 @@ export class HealthCheck {
 
     // Determine overall health
     const hasUnhealthy = Object.values(results).some(
-      check => check.status === 'unhealthy' || check.status === 'error'
+      check => check.status === 'unhealthy' || check.status === 'error',
     );
     const hasWarnings = Object.values(results).some(check => check.status === 'warning');
 

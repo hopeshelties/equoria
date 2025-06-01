@@ -46,7 +46,7 @@ export function autoDiscoveryMiddleware(options = {}) {
               });
             } catch (error) {
               logger.error(
-                `[traitDiscoveryMiddleware] Auto-discovery failed for horse ${horseId}: ${error.message}`
+                `[traitDiscoveryMiddleware] Auto-discovery failed for horse ${horseId}: ${error.message}`,
               );
             }
           });
@@ -122,7 +122,7 @@ async function triggerAutoDiscovery(horseId, options = {}) {
 
   try {
     logger.debug(
-      `[traitDiscoveryMiddleware.triggerAutoDiscovery] Checking discovery for horse ${horseId} (trigger: ${trigger})`
+      `[traitDiscoveryMiddleware.triggerAutoDiscovery] Checking discovery for horse ${horseId} (trigger: ${trigger})`,
     );
 
     // Check if we should skip due to recent check
@@ -130,7 +130,7 @@ async function triggerAutoDiscovery(horseId, options = {}) {
       const lastCheck = await getLastDiscoveryCheck(horseId);
       if (lastCheck && Date.now() - lastCheck.getTime() < recentCheckThreshold) {
         logger.debug(
-          `[traitDiscoveryMiddleware.triggerAutoDiscovery] Skipping discovery for horse ${horseId} - recently checked`
+          `[traitDiscoveryMiddleware.triggerAutoDiscovery] Skipping discovery for horse ${horseId} - recently checked`,
         );
         return;
       }
@@ -148,7 +148,7 @@ async function triggerAutoDiscovery(horseId, options = {}) {
     // Log significant discoveries
     if (discoveryResult.revealed && discoveryResult.revealed.length > 0) {
       logger.info(
-        `[traitDiscoveryMiddleware.triggerAutoDiscovery] Auto-discovered ${discoveryResult.revealed.length} traits for horse ${horseId} (trigger: ${trigger})`
+        `[traitDiscoveryMiddleware.triggerAutoDiscovery] Auto-discovered ${discoveryResult.revealed.length} traits for horse ${horseId} (trigger: ${trigger})`,
       );
 
       // Emit discovery event for real-time updates (if WebSocket is available)
@@ -156,7 +156,7 @@ async function triggerAutoDiscovery(horseId, options = {}) {
     }
   } catch (error) {
     logger.error(
-      `[traitDiscoveryMiddleware.triggerAutoDiscovery] Error during auto-discovery for horse ${horseId}: ${error.message}`
+      `[traitDiscoveryMiddleware.triggerAutoDiscovery] Error during auto-discovery for horse ${horseId}: ${error.message}`,
     );
   }
 }
@@ -177,7 +177,7 @@ async function getLastDiscoveryCheck(horseId) {
     return global.discoveryCheckCache.get(horseId) || null;
   } catch (error) {
     logger.warn(
-      `[traitDiscoveryMiddleware.getLastDiscoveryCheck] Error getting last check time: ${error.message}`
+      `[traitDiscoveryMiddleware.getLastDiscoveryCheck] Error getting last check time: ${error.message}`,
     );
     return null;
   }
@@ -207,7 +207,7 @@ async function updateLastDiscoveryCheck(horseId) {
     }
   } catch (error) {
     logger.warn(
-      `[traitDiscoveryMiddleware.updateLastDiscoveryCheck] Error updating last check time: ${error.message}`
+      `[traitDiscoveryMiddleware.updateLastDiscoveryCheck] Error updating last check time: ${error.message}`,
     );
   }
 }
@@ -228,12 +228,12 @@ function emitDiscoveryEvent(horseId, discoveryResult) {
       });
 
       logger.debug(
-        `[traitDiscoveryMiddleware.emitDiscoveryEvent] Emitted discovery event for horse ${horseId}`
+        `[traitDiscoveryMiddleware.emitDiscoveryEvent] Emitted discovery event for horse ${horseId}`,
       );
     }
   } catch (error) {
     logger.warn(
-      `[traitDiscoveryMiddleware.emitDiscoveryEvent] Error emitting discovery event: ${error.message}`
+      `[traitDiscoveryMiddleware.emitDiscoveryEvent] Error emitting discovery event: ${error.message}`,
     );
   }
 }
@@ -281,7 +281,7 @@ export function bondingDiscoveryMiddleware() {
 export async function manualDiscoveryTrigger(horseId, options = {}) {
   try {
     logger.info(
-      `[traitDiscoveryMiddleware.manualDiscoveryTrigger] Manual discovery triggered for horse ${horseId}`
+      `[traitDiscoveryMiddleware.manualDiscoveryTrigger] Manual discovery triggered for horse ${horseId}`,
     );
 
     const discoveryResult = await revealTraits(horseId, {
@@ -298,7 +298,7 @@ export async function manualDiscoveryTrigger(horseId, options = {}) {
     return discoveryResult;
   } catch (error) {
     logger.error(
-      `[traitDiscoveryMiddleware.manualDiscoveryTrigger] Error during manual discovery: ${error.message}`
+      `[traitDiscoveryMiddleware.manualDiscoveryTrigger] Error during manual discovery: ${error.message}`,
     );
     throw error;
   }

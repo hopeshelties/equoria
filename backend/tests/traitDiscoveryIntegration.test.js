@@ -464,7 +464,7 @@ describe('Trait Discovery API Integration Tests', () => {
         // If traits were revealed, hidden count should decrease
         if (discoveryResponse.body.data.traitsRevealed.length > 0) {
           expect(discoveryResponse.body.data.summary.hiddenAfter).toBeLessThan(
-            discoveryResponse.body.data.summary.hiddenBefore
+            discoveryResponse.body.data.summary.hiddenBefore,
           );
         }
       }
@@ -476,7 +476,7 @@ describe('Trait Discovery API Integration Tests', () => {
 
       // Hidden count should be same or less than initial
       expect(finalProgressResponse.body.data.hiddenTraitsCount).toBeLessThanOrEqual(
-        initialHiddenCount
+        initialHiddenCount,
       );
     });
   });

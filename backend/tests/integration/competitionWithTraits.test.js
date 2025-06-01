@@ -213,12 +213,12 @@ describe('Competition Simulation with Trait Impact', () => {
 
       // Legendary bloodline should provide significant advantage
       expect(legendaryHorse.traitImpact.adjustment).toBeGreaterThan(
-        regularHorse.traitImpact.adjustment
+        regularHorse.traitImpact.adjustment,
       );
 
       // Check that legendary trait is properly identified
       const legendaryTrait = legendaryHorse.traitImpact.details.find(
-        t => t.name === 'legendary_bloodline'
+        t => t.name === 'legendary_bloodline',
       );
       expect(legendaryTrait).toBeDefined();
       expect(legendaryTrait.type).toBe('positive');

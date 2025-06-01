@@ -43,7 +43,7 @@ describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait C
       expect(() => calculateEpigeneticTraits()).toThrow('Missing required breeding parameters');
       expect(() => calculateEpigeneticTraits({})).toThrow('Missing required breeding parameters');
       expect(() => calculateEpigeneticTraits({ damTraits: [] })).toThrow(
-        'Missing required breeding parameters'
+        'Missing required breeding parameters',
       );
     });
 
@@ -65,7 +65,7 @@ describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait C
         damStressLevel: 20,
       };
       expect(() => calculateEpigeneticTraits(invalidInput)).toThrow(
-        'Bond scores and stress levels must be numbers'
+        'Bond scores and stress levels must be numbers',
       );
     });
 
@@ -77,7 +77,7 @@ describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait C
         damStressLevel: 20,
       };
       expect(() => calculateEpigeneticTraits(invalidInput)).toThrow(
-        'Bond scores must be between 0-100, stress levels between 0-100'
+        'Bond scores must be between 0-100, stress levels between 0-100',
       );
     });
 
@@ -127,7 +127,7 @@ describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait C
 
       // Should sometimes inherit resilient, sometimes bold, sometimes both
       const hasResilient = results.some(
-        r => r.positive.includes('resilient') || r.hidden.includes('resilient')
+        r => r.positive.includes('resilient') || r.hidden.includes('resilient'),
       );
       const hasBold = results.some(r => r.positive.includes('bold') || r.hidden.includes('bold'));
 
@@ -315,7 +315,7 @@ describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait C
 
       // Should sometimes generate rare traits like trainability_boost
       const hasRareTraits = allHiddenTraits.some(trait =>
-        ['trainability_boost', 'legendary_bloodline', 'weather_immunity'].includes(trait)
+        ['trainability_boost', 'legendary_bloodline', 'weather_immunity'].includes(trait),
       );
 
       expect(hasRareTraits).toBe(true);
@@ -342,7 +342,7 @@ describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait C
           const allTraits = [...result.positive, ...result.negative, ...result.hidden];
           expect(
             allTraits.filter(t => t === 'calm').length +
-              allTraits.filter(t => t === 'nervous').length
+              allTraits.filter(t => t === 'nervous').length,
           ).toBeLessThanOrEqual(1);
           break;
         }

@@ -1,4 +1,43 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+/**
+ * 🧪 UNIT TEST: Trait Evaluation System - Trait Revelation & Validation
+ *
+ * This test validates the trait evaluation system's functionality for revealing
+ * hidden traits based on foal development conditions and environmental factors.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Trait revelation conditions: age, bond score, stress level thresholds
+ * - Environmental factor evaluation: high bonding enables positive traits
+ * - Stress impact assessment: high stress prevents positive trait revelation
+ * - Age-based trait availability: traits unlock at specific development stages
+ * - Trait conflict prevention: contradictory traits cannot coexist (calm vs nervous)
+ * - Duplicate trait prevention: existing traits cannot be revealed again
+ * - Probability-based revelation: random chance affects trait discovery
+ * - Development day usage: young foals use development days instead of age
+ * - Trait definition validation: consistent structure and valid conditions
+ * - Conflict symmetry: bidirectional trait conflicts (A conflicts B = B conflicts A)
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. evaluateTraitRevelation() - Complete trait revelation with condition checking
+ * 2. getTraitDefinition() - Individual trait definition retrieval with validation
+ * 3. getAllTraitDefinitions() - Complete trait catalog with structure validation
+ * 4. TRAIT_DEFINITIONS validation - Reveal conditions, base chances, rarity levels
+ * 5. TRAIT_CONFLICTS validation - Symmetric conflicts and valid trait references
+ * 6. Environmental condition evaluation: bond scores, stress levels, age requirements
+ * 7. Probability system testing: random chance effects on trait revelation
+ * 8. Error handling: null foals, missing properties, invalid inputs
+ * 9. Edge cases: newborn foals, extreme bond/stress values, existing trait conflicts
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete trait evaluation logic, condition checking, probability calculations
+ * ✅ REAL: Trait definition validation, conflict resolution, revelation algorithms
+ * 🔧 MOCK: Logger calls - external dependency for audit trails
+ * 🔧 MOCK: Math.random - for deterministic testing of probability-based revelation
+ *
+ * 💡 TEST STRATEGY: Unit testing with minimal mocking to focus on trait evaluation
+ *    business logic while ensuring predictable test outcomes for probability systems
+ */
+
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -26,7 +65,7 @@ const {
   TRAIT_CONFLICTS,
 } = await import(join(__dirname, '../utils/traitEvaluation.js'));
 
-describe('Trait Evaluation System', () => {
+describe('🔬 UNIT: Trait Evaluation System - Trait Revelation & Validation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset random seed for consistent testing
@@ -176,7 +215,7 @@ describe('Trait Evaluation System', () => {
 
       // Should use development day (5) instead of age (0) for trait evaluation
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Evaluating traits for foal 1 on day 5')
+        expect.stringContaining('Evaluating traits for foal 1 on day 5'),
       );
     });
 

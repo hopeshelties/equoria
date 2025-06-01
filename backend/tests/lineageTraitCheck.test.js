@@ -342,7 +342,7 @@ describe('🧬 UNIT: Lineage Trait Check - Discipline Affinity Analysis', () => 
       expect(checkSpecificDisciplineAffinity([], 'Racing').hasAffinity).toBe(false);
       expect(checkSpecificDisciplineAffinity(null, 'Racing').hasAffinity).toBe(false);
       expect(checkSpecificDisciplineAffinity([{ discipline: 'Racing' }], null).hasAffinity).toBe(
-        false
+        false,
       );
     });
   });

@@ -1,5 +1,40 @@
 /**
- * Tests for applyEpigeneticTraitsAtBirth function
+ * 🧪 UNIT TEST: Apply Epigenetic Traits At Birth - Breeding Condition Analysis
+ *
+ * This test validates the epigenetic trait application system that determines
+ * foal traits based on breeding conditions, lineage, and environmental factors.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Environmental conditions: Low stress + premium feed → positive traits (resilient, people_trusting)
+ * - Inbreeding detection: Common ancestors → negative traits (fragile, reactive, low_immunity)
+ * - Discipline specialization: 3+ ancestors same discipline → discipline_affinity traits
+ * - Legacy talent: 4+ ancestors same discipline → legacy_talent trait
+ * - Stress effects: Very high mare stress (85+) → nervous trait
+ * - Nutrition effects: Poor feed quality (25-) → low_immunity trait
+ * - Trait deduplication: No duplicate traits from multiple conditions
+ * - Input validation: Required mare object, graceful handling of missing parameters
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. applyEpigeneticTraitsAtBirth() - Complete trait application with all conditions
+ * 2. Environmental trait assignment: Stress + feed quality combinations
+ * 3. Inbreeding analysis: Common ancestor detection and severity levels
+ * 4. Discipline specialization: Lineage analysis for discipline affinity
+ * 5. Legacy talent detection: Enhanced discipline specialization bonuses
+ * 6. Stress-based traits: Mare stress level impact on foal traits
+ * 7. Nutrition-based traits: Feed quality impact on immune system
+ * 8. Edge cases: Empty lineage, null values, missing parameters
+ * 9. Data structure validation: Return format and trait deduplication
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete trait calculation algorithms, breeding analysis, condition evaluation
+ * ✅ REAL: Inbreeding detection, discipline specialization, environmental factor processing
+ * 🔧 MOCK: Math.random() for deterministic testing, logger for output control
+ *
+ * 💡 TEST STRATEGY: Unit testing with controlled randomness to validate
+ *    breeding condition analysis and trait assignment accuracy
+ *
+ * ⚠️  NOTE: This represents GOOD balanced mocking - mocks only randomness and logging
+ *    while testing real breeding logic, trait calculations, and business rules.
  */
 
 import { jest, describe, beforeEach, afterEach, expect, it } from '@jest/globals';
@@ -26,7 +61,7 @@ const { applyEpigeneticTraitsAtBirth } = await import(
   join(__dirname, '../utils/applyEpigeneticTraitsAtBirth.js')
 );
 
-describe('applyEpigeneticTraitsAtBirth', () => {
+describe('🧬 UNIT: Apply Epigenetic Traits At Birth - Breeding Condition Analysis', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset random seed for consistent testing
@@ -281,7 +316,7 @@ describe('applyEpigeneticTraitsAtBirth', () => {
       });
 
       expect(
-        result.positive.filter(trait => trait.startsWith('discipline_affinity_'))
+        result.positive.filter(trait => trait.startsWith('discipline_affinity_')),
       ).toHaveLength(0);
       expect(result.positive).not.toContain('legacy_talent');
     });

@@ -74,7 +74,7 @@ async function testUserProgressAPI() {
         logger.info(`   ✅ xpToNextLevel calculation correct: ${xpToNextLevel}`);
       } else {
         logger.info(
-          `   ❌ xpToNextLevel calculation incorrect: expected ${scenario.expectedXpToNext}, got ${xpToNextLevel}`
+          `   ❌ xpToNextLevel calculation incorrect: expected ${scenario.expectedXpToNext}, got ${xpToNextLevel}`,
         );
       }
       logger.info('');
@@ -104,10 +104,10 @@ async function testUserProgressAPI() {
 
     logger.info('   Edge case - exactly at level boundary:');
     logger.info(
-      `   Level: ${edgeResponse.level}, XP: ${edgeResponse.xp}, XP to next: ${edgeResponse.xpToNextLevel}`
+      `   Level: ${edgeResponse.level}, XP: ${edgeResponse.xp}, XP to next: ${edgeResponse.xpToNextLevel}`,
     );
     logger.info(
-      `   ✅ Should be 100 XP to next level: ${edgeResponse.xpToNextLevel === 100 ? 'PASS' : 'FAIL'}\n`
+      `   ✅ Should be 100 XP to next level: ${edgeResponse.xpToNextLevel === 100 ? 'PASS' : 'FAIL'}\n`,
     );
 
     logger.info('🎉 User Progress API test completed successfully!');

@@ -1,6 +1,37 @@
 /**
- * Trait Competition Impact Tests
- * Tests for trait-based competition scoring system
+ * 🧪 UNIT TEST: Trait Competition Impact System - Scoring Modifier Calculations
+ *
+ * This test validates the trait competition impact system's functionality for
+ * calculating trait-based score modifiers and discipline-specific bonuses.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Trait score modifiers: Positive traits provide bonuses, negative traits penalties
+ * - Discipline specialization: Specific trait-discipline combinations provide enhanced effects
+ * - Diminishing returns: Multiple traits reduce per-trait effectiveness (5+ traits = 80%)
+ * - Balance constraints: Maximum 50% total bonus to prevent overpowered combinations
+ * - Legendary trait effects: Rare traits provide significant but balanced bonuses
+ * - Unknown trait handling: Graceful fallback for unrecognized traits
+ * - Mixed trait calculations: Proper combination of positive and negative effects
+ * - Score adjustment accuracy: Correct final score calculations from modifiers
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. calculateTraitCompetitionImpact() - Complete trait impact calculation with all modifiers
+ * 2. getTraitCompetitionEffect() - Individual trait effect retrieval and validation
+ * 3. hasSpecializedEffect() - Discipline-specific trait bonus detection
+ * 4. getAllTraitCompetitionEffects() - Complete trait catalog validation
+ * 5. Discipline specializations: Racing, Dressage, Show Jumping, Cross Country, Endurance
+ * 6. Trait categories: Positive (bold, intelligent, athletic), Negative (nervous, stubborn)
+ * 7. Legendary traits: legendary_bloodline with enhanced bonuses
+ * 8. Balance validation: Reasonable modifier limits and stacking prevention
+ * 9. Error handling: Missing traits, null modifiers, unknown disciplines
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete trait calculation algorithms, modifier math, specialization logic
+ * ✅ REAL: Balance validation, diminishing returns, score adjustment calculations
+ * 🔧 MOCK: None - pure algorithmic testing with no external dependencies
+ *
+ * 💡 TEST STRATEGY: Pure unit testing to validate trait impact calculations and
+ *    ensure balanced, fair competition scoring without external dependencies
  */
 
 // Import the module under test
@@ -11,7 +42,7 @@ import {
   hasSpecializedEffect,
 } from '../utils/traitCompetitionImpact.js';
 
-describe('Trait Competition Impact System', () => {
+describe('🏆 UNIT: Trait Competition Impact System - Scoring Modifier Calculations', () => {
   describe('calculateTraitCompetitionImpact', () => {
     const baseScore = 100;
 
@@ -139,7 +170,7 @@ describe('Trait Competition Impact System', () => {
       const resultMany = calculateTraitCompetitionImpact(
         horseManyTraits,
         'Show Jumping',
-        baseScore
+        baseScore,
       );
 
       // Many traits should have diminishing returns applied
@@ -149,7 +180,7 @@ describe('Trait Competition Impact System', () => {
       // The per-trait effect should be reduced for the horse with many traits
       const manyTraitsRawModifier = resultMany.appliedTraits.reduce(
         (sum, trait) => sum + trait.modifier,
-        0
+        0,
       );
       expect(resultMany.totalScoreModifier).toBeLessThan(manyTraitsRawModifier);
       expect(resultMany.totalScoreModifier).toBeCloseTo(manyTraitsRawModifier * 0.8, 2); // 5+ traits = 80% effectiveness

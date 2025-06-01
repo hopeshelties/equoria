@@ -62,7 +62,7 @@ jest.unstable_mockModule('../models/horseModel.js', () => ({
       coordination: 10,
       boldness: 10,
       balance: 10,
-    })
+    }),
   ),
 }));
 

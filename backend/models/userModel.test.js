@@ -1,3 +1,43 @@
+/**
+ * 🧪 UNIT TEST: User Model - Database Operations & Business Logic
+ *
+ * This test validates the user model's database operations and business logic
+ * using strategic mocking to focus on model functionality and error handling.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - User creation: Required fields validation, email normalization, unique constraints
+ * - User lookup: ID and email-based queries with proper error handling
+ * - User updates: Data modification with validation and error handling
+ * - User deletion: Safe deletion with proper error handling
+ * - XP system: XP addition with level calculation and progression tracking
+ * - Progress calculation: Level progression, XP to next level, XP requirements
+ * - User statistics: Horse count, average age, comprehensive user data
+ * - Error handling: Database errors, validation errors, missing data scenarios
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. createUser() - User creation with validation and unique constraint handling
+ * 2. getUserById() - User lookup by ID with null handling
+ * 3. getUserByEmail() - Case-insensitive email lookup with validation
+ * 4. getUserWithHorses() - User data with related horse information
+ * 5. updateUser() - User data modification with error handling
+ * 6. deleteUser() - User deletion with proper error handling
+ * 7. addXpToUser() - XP addition with level progression calculation
+ * 8. getUserProgress() - Progress tracking with XP calculations
+ * 9. getUserStats() - Comprehensive user statistics with horse data
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Model business logic, validation rules, XP calculations, error handling
+ * ✅ REAL: Data transformation, level progression, statistics calculation
+ * 🔧 MOCK: Database operations (Prisma calls) - external dependency
+ * 🔧 MOCK: Logger calls - external dependency
+ *
+ * 💡 TEST STRATEGY: Unit testing with mocked database to focus on model
+ *    logic and business rule validation while ensuring predictable outcomes
+ *
+ * ⚠️  NOTE: This represents EXCELLENT model testing - strategic mocking of
+ *    database while testing real business logic and validation rules.
+ */
+
 import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -43,7 +83,7 @@ const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
 const mockLogger = (await import(join(__dirname, '../utils/logger.js'))).default;
 const { DatabaseError } = await import(join(__dirname, '../errors/index.js'));
 
-describe('userModel', () => {
+describe('👤 UNIT: User Model - Database Operations & Business Logic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -95,28 +135,28 @@ describe('userModel', () => {
       });
       expect(result).toEqual(mockCreatedUser);
       expect(mockLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('User created: testuser')
+        expect.stringContaining('User created: testuser'),
       );
     });
 
     it('should throw error if username is missing', async () => {
       const { username: _username, ...incompleteData } = baseUserData;
       await expect(createUser(incompleteData)).rejects.toThrow(
-        'Username, email, and password are required.'
+        'Username, email, and password are required.',
       );
     });
 
     it('should throw error if email is missing', async () => {
       const { email: _email, ...incompleteData } = baseUserData;
       await expect(createUser(incompleteData)).rejects.toThrow(
-        'Username, email, and password are required.'
+        'Username, email, and password are required.',
       );
     });
 
     it('should throw error if password is missing', async () => {
       const { password: _password, ...incompleteData } = baseUserData;
       await expect(createUser(incompleteData)).rejects.toThrow(
-        'Username, email, and password are required.'
+        'Username, email, and password are required.',
       );
     });
 
@@ -136,7 +176,7 @@ describe('userModel', () => {
       const dbError = new Error('Some other DB error');
       mockPrisma.user.create.mockRejectedValue(dbError);
       await expect(createUser(baseUserData)).rejects.toThrow(
-        new DatabaseError('Create user failed: Some other DB error')
+        new DatabaseError('Create user failed: Some other DB error'),
       );
     });
   });
@@ -158,10 +198,10 @@ describe('userModel', () => {
 
     it('should throw DatabaseError if ID is not provided', async () => {
       await expect(getUserById(null)).rejects.toThrow(
-        new DatabaseError('Lookup failed: User ID is required.')
+        new DatabaseError('Lookup failed: User ID is required.'),
       );
       await expect(getUserById(undefined)).rejects.toThrow(
-        new DatabaseError('Lookup failed: User ID is required.')
+        new DatabaseError('Lookup failed: User ID is required.'),
       );
     });
   });
@@ -180,10 +220,10 @@ describe('userModel', () => {
 
     it('should throw DatabaseError if email is not provided', async () => {
       await expect(getUserByEmail('')).rejects.toThrow(
-        new DatabaseError('Lookup failed: Email required.')
+        new DatabaseError('Lookup failed: Email required.'),
       );
       await expect(getUserByEmail(null)).rejects.toThrow(
-        new DatabaseError('Lookup failed: Email required.')
+        new DatabaseError('Lookup failed: Email required.'),
       );
     });
   });
@@ -203,7 +243,7 @@ describe('userModel', () => {
 
     it('should throw DatabaseError if ID is not provided', async () => {
       await expect(getUserWithHorses(null)).rejects.toThrow(
-        new DatabaseError('Lookup failed: User ID is required.')
+        new DatabaseError('Lookup failed: User ID is required.'),
       );
     });
   });
@@ -225,7 +265,7 @@ describe('userModel', () => {
 
     it('should throw DatabaseError if ID is not provided', async () => {
       await expect(updateUser(null, updateData)).rejects.toThrow(
-        new DatabaseError('Update failed: User ID is required.')
+        new DatabaseError('Update failed: User ID is required.'),
       );
     });
 
@@ -234,7 +274,7 @@ describe('userModel', () => {
       mockPrisma.user.update.mockRejectedValue(prismaError);
 
       await expect(updateUser(1, updateData)).rejects.toThrow(
-        new DatabaseError('Update failed: Record to update not found.')
+        new DatabaseError('Update failed: Record to update not found.'),
       );
     });
 
@@ -243,7 +283,7 @@ describe('userModel', () => {
       mockPrisma.user.update.mockRejectedValue(prismaError);
 
       await expect(updateUser(1, updateData)).rejects.toThrow(
-        new DatabaseError('Update failed: Some other update error')
+        new DatabaseError('Update failed: Some other update error'),
       );
     });
   });
@@ -260,7 +300,7 @@ describe('userModel', () => {
 
     it('should throw DatabaseError if ID is not provided', async () => {
       await expect(deleteUser(null)).rejects.toThrow(
-        new DatabaseError('Delete failed: User ID is required.')
+        new DatabaseError('Delete failed: User ID is required.'),
       );
     });
 
@@ -269,7 +309,7 @@ describe('userModel', () => {
       mockPrisma.user.delete.mockRejectedValue(prismaError);
 
       await expect(deleteUser(99)).rejects.toThrow(
-        new DatabaseError('Delete failed: Record to delete not found.')
+        new DatabaseError('Delete failed: Record to delete not found.'),
       );
     });
   });
@@ -317,10 +357,10 @@ describe('userModel', () => {
         expect.objectContaining({
           success: false,
           error: 'XP amount must be a positive number.',
-        })
+        }),
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error: XP amount must be a positive number.')
+        expect.stringContaining('Error: XP amount must be a positive number.'),
       );
     });
 
@@ -330,10 +370,10 @@ describe('userModel', () => {
         expect.objectContaining({
           success: false,
           error: 'User ID is required.',
-        })
+        }),
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error: User ID is required.')
+        expect.stringContaining('Error: User ID is required.'),
       );
     });
 
@@ -344,10 +384,10 @@ describe('userModel', () => {
         expect.objectContaining({
           success: false,
           error: 'User not found.',
-        })
+        }),
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error: User not found.')
+        expect.stringContaining('Error: User not found.'),
       );
     });
   });
@@ -370,14 +410,14 @@ describe('userModel', () => {
 
     it('should throw DatabaseError if ID is not provided', async () => {
       await expect(getUserProgress(null)).rejects.toThrow(
-        new DatabaseError('Progress fetch failed: Lookup failed: User ID is required.')
+        new DatabaseError('Progress fetch failed: Lookup failed: User ID is required.'),
       );
     });
 
     it('should throw DatabaseError if user not found', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
       await expect(getUserProgress(99)).rejects.toThrow(
-        new DatabaseError('Progress fetch failed: User not found.')
+        new DatabaseError('Progress fetch failed: User not found.'),
       );
     });
   });
@@ -438,7 +478,7 @@ describe('userModel', () => {
         expect.objectContaining({
           horseCount: 0,
           averageHorseAge: 0,
-        })
+        }),
       );
     });
 
@@ -463,7 +503,7 @@ describe('userModel', () => {
         expect.objectContaining({
           horseCount: 0,
           averageHorseAge: 0,
-        })
+        }),
       );
     });
 
@@ -475,7 +515,7 @@ describe('userModel', () => {
     });
     it('should throw DatabaseError if ID is not provided', async () => {
       await expect(getUserStats(null)).rejects.toThrow(
-        new DatabaseError('Stats fetch failed: User ID is required.')
+        new DatabaseError('Stats fetch failed: User ID is required.'),
       );
     });
   });

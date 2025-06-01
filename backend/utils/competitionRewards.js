@@ -61,7 +61,7 @@ function calculateStatGains(placement, discipline) {
   const randomStat = relevantStats[Math.floor(Math.random() * relevantStats.length)];
 
   logger.info(
-    `[competitionRewards.calculateStatGains] ${placement} place winner gained +1 ${randomStat} (${Math.round(chance * 100)}% chance)`
+    `[competitionRewards.calculateStatGains] ${placement} place winner gained +1 ${randomStat} (${Math.round(chance * 100)}% chance)`,
   );
 
   return {

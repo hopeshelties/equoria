@@ -232,7 +232,7 @@ const TRAIT_COMPETITION_EFFECTS = {
 export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
   try {
     logger.debug(
-      `[traitCompetitionImpact] Calculating trait impact for horse ${horse.id} in ${discipline}`
+      `[traitCompetitionImpact] Calculating trait impact for horse ${horse.id} in ${discipline}`,
     );
 
     // Initialize results
@@ -324,7 +324,7 @@ export function calculateTraitCompetitionImpact(horse, discipline, baseScore) {
     result.finalScoreAdjustment = baseScore * result.totalScoreModifier;
 
     logger.info(
-      `[traitCompetitionImpact] Horse ${horse.id}: ${result.appliedTraits.length} traits applied, ${(result.totalScoreModifier * 100).toFixed(1)}% modifier, ${result.finalScoreAdjustment.toFixed(1)} point adjustment`
+      `[traitCompetitionImpact] Horse ${horse.id}: ${result.appliedTraits.length} traits applied, ${(result.totalScoreModifier * 100).toFixed(1)}% modifier, ${result.finalScoreAdjustment.toFixed(1)} point adjustment`,
     );
 
     return result;

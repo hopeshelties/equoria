@@ -28,7 +28,7 @@ export async function discoverTraits(req, res) {
     }
 
     logger.info(
-      `[traitController.discoverTraits] Triggering trait discovery for horse ${parsedHorseId}`
+      `[traitController.discoverTraits] Triggering trait discovery for horse ${parsedHorseId}`,
     );
 
     // Check if horse exists
@@ -54,7 +54,7 @@ export async function discoverTraits(req, res) {
     // Log discovery event
     if (discoveryResult.revealed.length > 0) {
       logger.info(
-        `[traitController.discoverTraits] Discovered ${discoveryResult.revealed.length} traits for horse ${parsedHorseId} (${horse.name})`
+        `[traitController.discoverTraits] Discovered ${discoveryResult.revealed.length} traits for horse ${parsedHorseId} (${horse.name})`,
       );
     }
 
@@ -178,7 +178,7 @@ export async function getTraitDefinitions(req, res) {
     const { type } = req.query;
 
     logger.info(
-      `[traitController.getTraitDefinitions] Getting trait definitions${type ? ` for type: ${type}` : ''}`
+      `[traitController.getTraitDefinitions] Getting trait definitions${type ? ` for type: ${type}` : ''}`,
     );
 
     let traits;
@@ -238,7 +238,7 @@ export async function getDiscoveryStatus(req, res) {
     }
 
     logger.info(
-      `[traitController.getDiscoveryStatus] Getting discovery status for horse ${parsedHorseId}`
+      `[traitController.getDiscoveryStatus] Getting discovery status for horse ${parsedHorseId}`,
     );
 
     // Get horse data
@@ -332,7 +332,7 @@ export async function batchDiscoverTraits(req, res) {
     }
 
     logger.info(
-      `[traitController.batchDiscoverTraits] Processing batch discovery for ${horseIds.length} horses`
+      `[traitController.batchDiscoverTraits] Processing batch discovery for ${horseIds.length} horses`,
     );
 
     const results = [];
@@ -354,7 +354,7 @@ export async function batchDiscoverTraits(req, res) {
         });
       } catch (error) {
         logger.error(
-          `[traitController.batchDiscoverTraits] Error processing horse ${horseId}: ${error.message}`
+          `[traitController.batchDiscoverTraits] Error processing horse ${horseId}: ${error.message}`,
         );
         errors.push({ horseId, error: error.message });
       }

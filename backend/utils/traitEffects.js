@@ -4,7 +4,7 @@
  * Used throughout training, competition, and display logic
  */
 
-import logger from './logger.js';
+import { logger } from './logger.js';
 
 /**
  * Comprehensive trait effects mapping

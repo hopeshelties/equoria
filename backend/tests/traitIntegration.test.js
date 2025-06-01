@@ -1,6 +1,38 @@
 /**
- * Trait Integration Tests
- * Tests for trait effects during training, competition, and gameplay
+ * 🧪 UNIT TEST: Trait Integration System - Gameplay Effect Application
+ *
+ * This test validates the trait integration system's functionality for applying
+ * trait effects during training, competition, bonding, and temperament management.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - Bonding modifier application: social traits enhance grooming/training bonding
+ * - Negative trait penalties: antisocial/nervous traits reduce bonding effectiveness
+ * - Competition bonding rewards: placement-based bonding with trait modifiers
+ * - Temperament drift suppression: resilient/calm traits prevent temperament changes
+ * - Stress resistance effects: traits reduce competition stress impact
+ * - Trait combination algorithms: multiple trait effects combine additively
+ * - Error handling: missing/malformed trait data handled gracefully
+ * - Activity type validation: invalid activities return appropriate errors
+ * - Trait effect persistence: effects apply consistently across gameplay systems
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. calculateBondingChange() - Trait-modified bonding for grooming/training/competition
+ * 2. calculateTemperamentDrift() - Trait-based temperament drift suppression
+ * 3. getCombinedTraitEffects() - Multi-trait effect combination and validation
+ * 4. Bonding modifiers: social/calm bonuses, antisocial/nervous penalties
+ * 5. Temperament suppression: resilient/calm traits prevent drift
+ * 6. Competition stress resistance: trait-based stress impact reduction
+ * 7. Error handling: missing traits, malformed data, invalid activities
+ * 8. Edge cases: empty trait arrays, unknown traits, invalid inputs
+ * 9. Integration workflows: complete trait effect application across systems
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Complete trait integration logic, bonding calculations, temperament management
+ * ✅ REAL: Effect combination algorithms, stress calculations, validation rules
+ * 🔧 MOCK: Math.random - for deterministic testing of probability-based effects
+ *
+ * 💡 TEST STRATEGY: Integration testing with minimal mocking to validate trait
+ *    effects across multiple gameplay systems while ensuring predictable outcomes
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
@@ -8,7 +40,7 @@ import { getCombinedTraitEffects } from '../utils/traitEffects.js';
 import { calculateBondingChange } from '../utils/bondingModifiers.js';
 import { calculateTemperamentDrift } from '../utils/temperamentDrift.js';
 
-describe('Trait Integration During Gameplay', () => {
+describe('🎮 UNIT: Trait Integration System - Gameplay Effect Application', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset Math.random for consistent testing

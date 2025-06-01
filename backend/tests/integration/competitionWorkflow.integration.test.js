@@ -199,7 +199,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
 
       // Discipline score requirement
       expect(horse.disciplineScores[show.discipline]).toBeGreaterThanOrEqual(
-        show.requirements.minDisciplineScore
+        show.requirements.minDisciplineScore,
       );
 
       // Health requirement
@@ -256,7 +256,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
         horse.disciplineScores[show.discipline],
         horse.epigeneticModifiers,
         horse.age,
-        show.discipline
+        show.discipline,
       );
 
       expect(competitionScore).toBeGreaterThan(0);
@@ -376,7 +376,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
 
       const totalPrizeWon = competitionHistory.reduce(
         (sum, result) => sum + Number(result.prizeWon),
-        0
+        0,
       );
       expect(totalPrizeWon).toBe(Number(competitionResult.prizeWon));
     });
@@ -478,7 +478,7 @@ describe('🏆 INTEGRATION: Complete Competition Workflow', () => {
       // Entry requirements enforced
       expect(competitionHorse.age).toBeGreaterThanOrEqual(testShow.requirements.minAge);
       expect(competitionHorse.disciplineScores[testShow.discipline]).toBeGreaterThanOrEqual(
-        testShow.requirements.minDisciplineScore
+        testShow.requirements.minDisciplineScore,
       );
 
       // Financial transactions accurate

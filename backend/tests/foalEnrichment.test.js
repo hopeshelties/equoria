@@ -173,43 +173,43 @@ describe('🐴 UNIT: Foal Enrichment API - Early Training System Validation', ()
 
     it('should validate foal ID is a positive integer', async () => {
       await expect(completeEnrichmentActivity('invalid', 3, 'Trailer Exposure')).rejects.toThrow(
-        'Foal ID must be a positive integer'
+        'Foal ID must be a positive integer',
       );
 
       await expect(completeEnrichmentActivity(-1, 3, 'Trailer Exposure')).rejects.toThrow(
-        'Foal ID must be a positive integer'
+        'Foal ID must be a positive integer',
       );
 
       await expect(completeEnrichmentActivity(0, 3, 'Trailer Exposure')).rejects.toThrow(
-        'Foal ID must be a positive integer'
+        'Foal ID must be a positive integer',
       );
     });
 
     it('should validate day is between 0 and 6', async () => {
       await expect(completeEnrichmentActivity(1, -1, 'Trailer Exposure')).rejects.toThrow(
-        'Day must be between 0 and 6'
+        'Day must be between 0 and 6',
       );
 
       await expect(completeEnrichmentActivity(1, 7, 'Trailer Exposure')).rejects.toThrow(
-        'Day must be between 0 and 6'
+        'Day must be between 0 and 6',
       );
 
       await expect(completeEnrichmentActivity(1, 'invalid', 'Trailer Exposure')).rejects.toThrow(
-        'Day must be between 0 and 6'
+        'Day must be between 0 and 6',
       );
     });
 
     it('should validate activity is required and is a string', async () => {
       await expect(completeEnrichmentActivity(1, 3, '')).rejects.toThrow(
-        'Activity is required and must be a string'
+        'Activity is required and must be a string',
       );
 
       await expect(completeEnrichmentActivity(1, 3, null)).rejects.toThrow(
-        'Activity is required and must be a string'
+        'Activity is required and must be a string',
       );
 
       await expect(completeEnrichmentActivity(1, 3, 123)).rejects.toThrow(
-        'Activity is required and must be a string'
+        'Activity is required and must be a string',
       );
     });
 
@@ -217,7 +217,7 @@ describe('🐴 UNIT: Foal Enrichment API - Early Training System Validation', ()
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       await expect(completeEnrichmentActivity(999, 3, 'Trailer Exposure')).rejects.toThrow(
-        'Foal not found'
+        'Foal not found',
       );
     });
 
@@ -230,7 +230,7 @@ describe('🐴 UNIT: Foal Enrichment API - Early Training System Validation', ()
       mockPrisma.horse.findUnique.mockResolvedValue(adultHorse);
 
       await expect(completeEnrichmentActivity(1, 3, 'Trailer Exposure')).rejects.toThrow(
-        'Horse is not a foal (must be 1 year old or younger)'
+        'Horse is not a foal (must be 1 year old or younger)',
       );
     });
 
@@ -239,12 +239,12 @@ describe('🐴 UNIT: Foal Enrichment API - Early Training System Validation', ()
 
       // Try to do a day 3 activity on day 0
       await expect(completeEnrichmentActivity(1, 0, 'Trailer Exposure')).rejects.toThrow(
-        'Activity "Trailer Exposure" is not appropriate for day 0'
+        'Activity "Trailer Exposure" is not appropriate for day 0',
       );
 
       // Try an invalid activity
       await expect(completeEnrichmentActivity(1, 3, 'Invalid Activity')).rejects.toThrow(
-        'Activity "Invalid Activity" is not appropriate for day 3'
+        'Activity "Invalid Activity" is not appropriate for day 3',
       );
     });
 
@@ -296,13 +296,13 @@ describe('🐴 UNIT: Foal Enrichment API - Early Training System Validation', ()
       mockPrisma.horse.findUnique.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(completeEnrichmentActivity(1, 3, 'Trailer Exposure')).rejects.toThrow(
-        'Database connection failed'
+        'Database connection failed',
       );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining(
-          '[foalModel.completeEnrichmentActivity] Error: Database connection failed'
-        )
+          '[foalModel.completeEnrichmentActivity] Error: Database connection failed',
+        ),
       );
     });
 

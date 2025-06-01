@@ -27,7 +27,7 @@ async function logTrainingSession({ horseId, discipline }) {
     }
 
     logger.info(
-      `[trainingModel.logTrainingSession] Logging training session for horse ${parsedHorseId} in ${discipline}`
+      `[trainingModel.logTrainingSession] Logging training session for horse ${parsedHorseId} in ${discipline}`,
     );
 
     // Insert training log record using Prisma
@@ -40,7 +40,7 @@ async function logTrainingSession({ horseId, discipline }) {
     });
 
     logger.info(
-      `[trainingModel.logTrainingSession] Successfully logged training session: ID ${trainingLog.id}`
+      `[trainingModel.logTrainingSession] Successfully logged training session: ID ${trainingLog.id}`,
     );
 
     return trainingLog;
@@ -71,7 +71,7 @@ async function getLastTrainingDate(horseId, discipline) {
     }
 
     logger.info(
-      `[trainingModel.getLastTrainingDate] Checking last training date for horse ${parsedHorseId} in ${discipline}`
+      `[trainingModel.getLastTrainingDate] Checking last training date for horse ${parsedHorseId} in ${discipline}`,
     );
 
     // Query for most recent training date using Prisma
@@ -87,14 +87,14 @@ async function getLastTrainingDate(horseId, discipline) {
 
     if (!trainingLog) {
       logger.info(
-        `[trainingModel.getLastTrainingDate] No training records found for horse ${parsedHorseId} in ${discipline}`
+        `[trainingModel.getLastTrainingDate] No training records found for horse ${parsedHorseId} in ${discipline}`,
       );
       return null;
     }
 
     const lastTrainingDate = trainingLog.trainedAt;
     logger.info(
-      `[trainingModel.getLastTrainingDate] Last training date for horse ${parsedHorseId} in ${discipline}: ${lastTrainingDate}`
+      `[trainingModel.getLastTrainingDate] Last training date for horse ${parsedHorseId} in ${discipline}: ${lastTrainingDate}`,
     );
 
     return lastTrainingDate;
@@ -156,7 +156,7 @@ async function getAnyRecentTraining(horseId) {
     }
 
     logger.info(
-      `[trainingModel.getAnyRecentTraining] Checking most recent training date for horse ${parsedHorseId} across all disciplines`
+      `[trainingModel.getAnyRecentTraining] Checking most recent training date for horse ${parsedHorseId} across all disciplines`,
     );
 
     // Query for most recent training date across all disciplines using Prisma
@@ -171,14 +171,14 @@ async function getAnyRecentTraining(horseId) {
 
     if (!trainingLog) {
       logger.info(
-        `[trainingModel.getAnyRecentTraining] No training records found for horse ${parsedHorseId}`
+        `[trainingModel.getAnyRecentTraining] No training records found for horse ${parsedHorseId}`,
       );
       return null;
     }
 
     const lastTrainingDate = trainingLog.trainedAt;
     logger.info(
-      `[trainingModel.getAnyRecentTraining] Most recent training date for horse ${parsedHorseId}: ${lastTrainingDate} (discipline: ${trainingLog.discipline})`
+      `[trainingModel.getAnyRecentTraining] Most recent training date for horse ${parsedHorseId}: ${lastTrainingDate} (discipline: ${trainingLog.discipline})`,
     );
 
     return lastTrainingDate;

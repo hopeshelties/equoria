@@ -54,7 +54,7 @@ app.use(
     explorer: true,
     customCss: '.swagger-ui .topbar { display: none }',
     customSiteTitle: 'Equoria API Documentation',
-  })
+  }),
 );
 
 // API Documentation JSON
@@ -90,11 +90,6 @@ if (config.env !== 'test') {
 app.use(errorRequestLogger); // Log errors before handling them
 app.use(errorHandler);
 
-const _input = {
-  damTraits: ['resilient', 'nervous'], // Mixed traits
-  sireTraits: ['bold', 'stubborn'], // Mixed traits
-  damBondScore: 70,
-  damStressLevel: 30,
-};
+// Test data removed - was unused
 
 export default app;

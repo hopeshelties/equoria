@@ -16,7 +16,7 @@ const validateCreateHorse = [
     .withMessage('Sex must be a string.')
     .isIn(['Stallion', 'Mare', 'Gelding', 'Colt', 'Filly', 'Rig', 'Spayed Mare'])
     .withMessage(
-      'Invalid sex. Must be one of: Stallion, Mare, Gelding, Colt, Filly, Rig, Spayed Mare.'
+      'Invalid sex. Must be one of: Stallion, Mare, Gelding, Colt, Filly, Rig, Spayed Mare.',
     ),
   body('date_of_birth')
     .isISO8601()
@@ -65,9 +65,9 @@ const validateCreateHorse = [
         .optional()
         .isInt({ min: 0, max: 100 })
         .withMessage(
-          `${stat.charAt(0).toUpperCase() + stat.slice(1)} must be an integer between 0 and 100 if provided.`
+          `${stat.charAt(0).toUpperCase() + stat.slice(1)} must be an integer between 0 and 100 if provided.`,
         );
-    }
+    },
   ),
 
   body('total_earnings')
@@ -86,7 +86,7 @@ const validateCreateHorse = [
     .optional()
     .isIn(['Public Stud', 'Private Stud', 'Not at Stud', 'Retired', 'Youngstock'])
     .withMessage(
-      'Invalid stud status if provided. Must be one of: Public Stud, Private Stud, Not at Stud, Retired, Youngstock.'
+      'Invalid stud status if provided. Must be one of: Public Stud, Private Stud, Not at Stud, Retired, Youngstock.',
     ),
   body('stud_fee')
     .optional()

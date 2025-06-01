@@ -209,7 +209,7 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
       const show = createTestShow('Racing');
       const results = simulateCompetition(
         [horseWithMultipleAffinities, horseWithSingleAffinity],
-        show
+        show,
       );
 
       const multiResult = results.find(r => r.horseId === 1);
@@ -284,7 +284,7 @@ describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhance
       const show = createTestShow('Racing');
       const results = simulateCompetition(
         [horseWithAffinityAndTraits, horseWithOnlyAffinity, horseWithoutAffinity],
-        show
+        show,
       );
 
       const superResult = results.find(r => r.horseId === 1);

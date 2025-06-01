@@ -28,7 +28,7 @@ async function optimalBreedingExample() {
     console.log(`- Feed Quality: ${result.breedingAnalysis.conditions.feedQuality}`);
     console.log(`- Inbreeding Detected: ${result.breedingAnalysis.inbreeding.inbreedingDetected}`);
     console.log(
-      `- Discipline Specialization: ${result.breedingAnalysis.lineage.disciplineSpecialization}`
+      `- Discipline Specialization: ${result.breedingAnalysis.lineage.disciplineSpecialization}`,
     );
 
     console.log('\nApplied Traits:');
@@ -228,7 +228,7 @@ async function runExamples() {
     console.log('\n✅ All examples completed successfully!');
     console.log('\n📝 Key Takeaways:');
     console.log(
-      '- At-birth traits are automatically applied to newborn horses (age 0) with parents'
+      '- At-birth traits are automatically applied to newborn horses (age 0) with parents',
     );
     console.log('- Mare stress and feed quality significantly impact trait probability');
     console.log('- Inbreeding detection prevents genetic complications');

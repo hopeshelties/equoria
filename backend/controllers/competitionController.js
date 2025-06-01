@@ -2,6 +2,7 @@ import { getHorseById } from '../models/horseModel.js';
 import { saveResult, getResultsByShow } from '../models/resultModel.js';
 import { addXpToUser } from '../models/userModel.js';
 import { logXpEvent } from '../models/xpLogModel.js';
+import { awardCompetitionXp } from '../models/horseXpModel.js';
 import { calculateCompetitionScore } from '../utils/competitionLogic.js';
 import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
 import {
@@ -52,7 +53,7 @@ function detectTraitBonuses(horse, discipline) {
  */
 function runEnhancedCompetition(horses, show) {
   logger.info(
-    `[runEnhancedCompetition] Starting enhanced competition for ${horses.length} horses in ${show.discipline}`
+    `[runEnhancedCompetition] Starting enhanced competition for ${horses.length} horses in ${show.discipline}`,
   );
 
   // Calculate scores for each horse using the new scoring system
@@ -103,13 +104,13 @@ function runEnhancedCompetition(horses, show) {
       };
 
       logger.info(
-        `[runEnhancedCompetition] Horse ${horse.name}: Score ${finalScore}${traitInfo.bonusDescription ? `, ${traitInfo.bonusDescription}` : ''}`
+        `[runEnhancedCompetition] Horse ${horse.name}: Score ${finalScore}${traitInfo.bonusDescription ? `, ${traitInfo.bonusDescription}` : ''}`,
       );
 
       return result;
     } catch (error) {
       logger.error(
-        `[runEnhancedCompetition] Error calculating score for horse ${horse.id}: ${error.message}`
+        `[runEnhancedCompetition] Error calculating score for horse ${horse.id}: ${error.message}`,
       );
       return {
         horseId: horse.id,
@@ -137,7 +138,7 @@ function runEnhancedCompetition(horses, show) {
   });
 
   logger.info(
-    `[runEnhancedCompetition] Competition completed. Winner: ${results[0]?.name} with score ${results[0]?.score}`
+    `[runEnhancedCompetition] Competition completed. Winner: ${results[0]?.name} with score ${results[0]?.score}`,
   );
 
   return results;
@@ -166,7 +167,7 @@ async function enterAndRunShow(horseIds, show) {
 
   try {
     logger.info(
-      `[competitionController.enterAndRunShow] Starting enhanced competition for show ${show.id} with ${horseIds.length} horses`
+      `[competitionController.enterAndRunShow] Starting enhanced competition for show ${show.id} with ${horseIds.length} horses`,
     );
 
     // Step 1: Fetch horse data and validate riders
@@ -202,7 +203,7 @@ async function enterAndRunShow(horseIds, show) {
       // Check if horse already entered this show
       if (previousEntries.includes(horse.id)) {
         logger.info(
-          `[competitionController.enterAndRunShow] Horse ${horse.id} (${horse.name}) already entered this show, skipping`
+          `[competitionController.enterAndRunShow] Horse ${horse.id} (${horse.name}) already entered this show, skipping`,
         );
         continue;
       }
@@ -210,7 +211,7 @@ async function enterAndRunShow(horseIds, show) {
       // Check eligibility
       if (!isHorseEligibleForShow(horse, show, previousEntries)) {
         logger.info(
-          `[competitionController.enterAndRunShow] Horse ${horse.id} (${horse.name}) is not eligible for this show, skipping`
+          `[competitionController.enterAndRunShow] Horse ${horse.id} (${horse.name}) is not eligible for this show, skipping`,
         );
         continue;
       }
@@ -224,7 +225,7 @@ async function enterAndRunShow(horseIds, show) {
     // Step 4: Check if we have any valid horses
     if (validHorses.length === 0) {
       logger.warn(
-        '[competitionController.enterAndRunShow] No valid horses available for competition'
+        '[competitionController.enterAndRunShow] No valid horses available for competition',
       );
       return {
         success: false,
@@ -251,11 +252,11 @@ async function enterAndRunShow(horseIds, show) {
         await transferEntryFees(show.hostUserId, show.entryFee, validHorses.length); // Renamed hostuser to hostUserId
         entryFeesTransferred = totalFees;
         logger.info(
-          `[competitionController.enterAndRunShow] Transferred $${totalFees} in entry fees to host user ${show.hostUserId}`
+          `[competitionController.enterAndRunShow] Transferred $${totalFees} in entry fees to host user ${show.hostUserId}`,
         ); // Renamed hostuser to hostUserId
       } catch (error) {
         logger.error(
-          `[competitionController.enterAndRunShow] Failed to transfer entry fees: ${error.message}`
+          `[competitionController.enterAndRunShow] Failed to transfer entry fees: ${error.message}`,
         );
         // Continue with competition even if fee transfer fails
       }
@@ -266,11 +267,11 @@ async function enterAndRunShow(horseIds, show) {
     try {
       simulationResults = runEnhancedCompetition(validHorses, show);
       logger.info(
-        `[competitionController.enterAndRunShow] Enhanced competition completed with ${simulationResults.length} results`
+        `[competitionController.enterAndRunShow] Enhanced competition completed with ${simulationResults.length} results`,
       );
     } catch (error) {
       logger.error(
-        `[competitionController.enterAndRunShow] Enhanced competition failed: ${error.message}`
+        `[competitionController.enterAndRunShow] Enhanced competition failed: ${error.message}`,
       );
       throw new Error(`Enhanced competition error: ${error.message}`);
     }
@@ -325,78 +326,102 @@ async function enterAndRunShow(horseIds, show) {
             await updateHorseRewards(simResult.horseId, prizeWon, statGains);
             totalPrizesAwarded += prizeWon;
             logger.info(
-              `[competitionController.enterAndRunShow] Updated horse ${simResult.horseId} with $${prizeWon} prize${statGains ? ` and +1 ${statGains.stat}` : ''}`
+              `[competitionController.enterAndRunShow] Updated horse ${simResult.horseId} with $${prizeWon} prize${statGains ? ` and +1 ${statGains.stat}` : ''}`,
             );
           } catch (error) {
             logger.error(
-              `[competitionController.enterAndRunShow] Failed to update horse rewards for ${simResult.horseId}: ${error.message}`
+              `[competitionController.enterAndRunShow] Failed to update horse rewards for ${simResult.horseId}: ${error.message}`,
             );
             // Continue with other horses even if one update fails
           }
         }
 
-        // NEW: Award XP to horse owner based on placement
+        // NEW: Award XP to horse owner and horse based on placement
         if (simResult.placement) {
           try {
             // Get horse to find owner
             const horse = await getHorseById(simResult.horseId);
             if (horse && horse.userId) {
-              let xpAmount = 0;
+              let userXpAmount = 0;
               switch (simResult.placement) {
                 case '1st':
-                  xpAmount = 20;
+                  userXpAmount = 20;
                   break;
                 case '2nd':
-                  xpAmount = 15;
+                  userXpAmount = 15;
                   break;
                 case '3rd':
-                  xpAmount = 10;
+                  userXpAmount = 10;
                   break;
               }
 
-              if (xpAmount > 0) {
-                // Award XP using userModel.addXpToUser
-                const xpResult = await addXpToUser(horse.userId, xpAmount);
+              if (userXpAmount > 0) {
+                // Award XP to user using userModel.addXpToUser
+                const userXpResult = await addXpToUser(horse.userId, userXpAmount);
 
-                // Log XP event for auditing
+                // Log user XP event for auditing
                 await logXpEvent({
                   userId: horse.userId,
-                  amount: xpAmount,
+                  amount: userXpAmount,
                   reason: `${simResult.placement} place with horse ${horse.name} in ${show.discipline}`,
                 });
 
-                // Track XP event for summary
+                // Track user XP event for summary
                 const xpEventData = {
                   userId: horse.userId,
                   horseId: horse.id,
                   horseName: horse.name,
                   placement: simResult.placement,
-                  xpAwarded: xpAmount,
-                  leveledUp: xpResult.leveledUp,
-                  newLevel: xpResult.currentLevel,
-                  levelsGained: xpResult.levelsGained || 0,
+                  xpAwarded: userXpAmount,
+                  leveledUp: userXpResult.leveledUp,
+                  newLevel: userXpResult.currentLevel,
+                  levelsGained: userXpResult.levelsGained || 0,
                 };
                 xpEvents.push(xpEventData);
 
                 logger.info(
-                  `[competitionController.enterAndRunShow] Awarded ${xpAmount} XP to user ${horse.userId} for ${simResult.placement} place${xpResult.leveledUp ? ` - LEVEL UP to ${xpResult.currentLevel}!` : ''}`
+                  `[competitionController.enterAndRunShow] Awarded ${userXpAmount} XP to user ${horse.userId} for ${simResult.placement} place${userXpResult.leveledUp ? ` - LEVEL UP to ${userXpResult.currentLevel}!` : ''}`,
                 );
+              }
+
+              // NEW: Award Horse XP for competition participation
+              try {
+                const horseXpResult = await awardCompetitionXp(
+                  simResult.horseId,
+                  simResult.placement,
+                  show.discipline,
+                );
+
+                if (horseXpResult.success) {
+                  logger.info(
+                    `[competitionController.enterAndRunShow] Awarded ${horseXpResult.xpAwarded} Horse XP to ${horse.name} for ${simResult.placement} place${horseXpResult.statPointsGained > 0 ? ` - Gained ${horseXpResult.statPointsGained} stat points!` : ''}`,
+                  );
+                } else {
+                  logger.warn(
+                    `[competitionController.enterAndRunShow] Failed to award Horse XP to ${horse.name}: ${horseXpResult.error}`,
+                  );
+                }
+              } catch (horseXpError) {
+                logger.error(
+                  `[competitionController.enterAndRunShow] Error awarding Horse XP to ${horse.name}: ${horseXpError.message}`,
+                );
+                // Continue with other horses even if horse XP award fails
               }
             }
           } catch (error) {
             logger.error(
-              `[competitionController.enterAndRunShow] Failed to award XP for horse ${simResult.horseId}: ${error.message}`
+              `[competitionController.enterAndRunShow] Failed to award XP for horse ${simResult.horseId}: ${error.message}`,
             );
             // Continue with other horses even if XP award fails
           }
         }
       }
       logger.info(
-        `[competitionController.enterAndRunShow] Successfully saved ${savedResults.length} competition results`
+        `[competitionController.enterAndRunShow] Successfully saved ${savedResults.length} competition results`,
       );
     } catch (error) {
       logger.error(
-        `[competitionController.enterAndRunShow] Failed to save results: ${error.message}`
+        `[competitionController.enterAndRunShow] Failed to save results: ${error.message}`,
       );
       throw new Error(`Failed to save competition results: ${error.message}`);
     }
@@ -425,7 +450,7 @@ async function enterAndRunShow(horseIds, show) {
         .length,
       totalTraitBonuses: simulationResults.reduce(
         (sum, r) => sum + (r.scoringDetails?.traitBonus || 0),
-        0
+        0,
       ),
       averageTraitBonus: 0,
       mostCommonTraits: {},
@@ -474,7 +499,7 @@ async function enterAndRunShow(horseIds, show) {
     };
 
     logger.info(
-      `[competitionController.enterAndRunShow] Enhanced competition completed: ${validHorses.length} valid entries, $${totalPrizesAwarded} in prizes, $${entryFeesTransferred} in fees`
+      `[competitionController.enterAndRunShow] Enhanced competition completed: ${validHorses.length} valid entries, $${totalPrizesAwarded} in prizes, $${entryFeesTransferred} in fees`,
     );
     return response;
   } catch (error) {

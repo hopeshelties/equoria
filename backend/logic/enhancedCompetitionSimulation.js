@@ -49,7 +49,7 @@ export async function validateCompetitionEntry(horse, show, user) {
       const disciplineConfig = getDisciplineConfig(show.discipline);
       if (disciplineConfig.requiresTrait) {
         errors.push(
-          `Horse must have the '${disciplineConfig.requiresTrait}' trait to compete in ${show.discipline}.`
+          `Horse must have the '${disciplineConfig.requiresTrait}' trait to compete in ${show.discipline}.`,
         );
       }
     }
@@ -58,14 +58,14 @@ export async function validateCompetitionEntry(horse, show, user) {
     const horseLevel = calculateHorseLevel(horse, show.discipline);
     if (horseLevel < show.levelMin || horseLevel > show.levelMax) {
       errors.push(
-        `Horse level ${horseLevel} is outside the required range (${show.levelMin}-${show.levelMax}) for this competition.`
+        `Horse level ${horseLevel} is outside the required range (${show.levelMin}-${show.levelMax}) for this competition.`,
       );
     }
 
     // Health requirements
     if (horse.healthStatus !== 'Good' && horse.healthStatus !== 'Excellent') {
       errors.push(
-        `Horse health status must be Good or Excellent. Current status: ${horse.healthStatus}`
+        `Horse health status must be Good or Excellent. Current status: ${horse.healthStatus}`,
       );
     }
 
@@ -79,7 +79,7 @@ export async function validateCompetitionEntry(horse, show, user) {
     const minDisciplineScore = 0; // Could be configurable per show
     if (disciplineScore < minDisciplineScore) {
       errors.push(
-        `Horse discipline score too low. Required: ${minDisciplineScore}, Current: ${disciplineScore}`
+        `Horse discipline score too low. Required: ${minDisciplineScore}, Current: ${disciplineScore}`,
       );
     }
 
@@ -109,7 +109,7 @@ export async function validateCompetitionEntry(horse, show, user) {
 export async function executeEnhancedCompetition(show, entries) {
   try {
     logger.info(
-      `[enhancedCompetitionSimulation] Executing competition: ${show.name} (${show.discipline})`
+      `[enhancedCompetitionSimulation] Executing competition: ${show.name} (${show.discipline})`,
     );
 
     // Calculate scores for all entries
@@ -225,7 +225,7 @@ export async function executeEnhancedCompetition(show, entries) {
     }
 
     logger.info(
-      `[enhancedCompetitionSimulation] Competition completed. ${results.length} entries processed.`
+      `[enhancedCompetitionSimulation] Competition completed. ${results.length} entries processed.`,
     );
 
     return {
@@ -252,7 +252,7 @@ export async function executeEnhancedCompetition(show, entries) {
   } catch (error) {
     logger.error(
       '[enhancedCompetitionSimulation.executeEnhancedCompetition] Error:',
-      error.message
+      error.message,
     );
     return {
       success: false,
@@ -289,7 +289,7 @@ export function getCompetitionEligibilitySummary(horse, discipline) {
   } catch (error) {
     logger.error(
       '[enhancedCompetitionSimulation.getCompetitionEligibilitySummary] Error:',
-      error.message
+      error.message,
     );
     return {
       horseLevel: 1,

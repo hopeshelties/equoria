@@ -1,5 +1,5 @@
 import prisma from '../db/index.js';
-import logger from './logger.js';
+import { logger } from './logger.js';
 
 /**
  * Update user money
@@ -27,7 +27,7 @@ async function updateUserMoney(userId, amount) {
     });
 
     logger.info(
-      `[userUpdates.updateUserMoney] Updated user ${userId} money by $${amount} (total: $${updatedUser.money})`
+      `[userUpdates.updateUserMoney] Updated user ${userId} money by $${amount} (total: $${updatedUser.money})`,
     );
     return updatedUser;
   } catch (error) {
@@ -52,7 +52,7 @@ async function transferEntryFees(hostUserId, entryFee, numEntries) {
   try {
     if (!hostUserId) {
       logger.info(
-        '[userUpdates.transferEntryFees] No host user specified, entry fees not transferred'
+        '[userUpdates.transferEntryFees] No host user specified, entry fees not transferred',
       );
       return null;
     }
@@ -61,7 +61,7 @@ async function transferEntryFees(hostUserId, entryFee, numEntries) {
     const updatedUser = await updateUserMoney(hostUserId, totalFees);
 
     logger.info(
-      `[userUpdates.transferEntryFees] Transferred $${totalFees} in entry fees to host user ${hostUserId}`
+      `[userUpdates.transferEntryFees] Transferred $${totalFees} in entry fees to host user ${hostUserId}`,
     );
     return updatedUser;
   } catch (error) {

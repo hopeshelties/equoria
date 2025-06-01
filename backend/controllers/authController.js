@@ -33,16 +33,7 @@ export const register = async (req, res, next) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Construct the name field. Use firstName and lastName if available, otherwise default to username.
-    let _constructedName = username;
-    if (firstName && lastName) {
-      _constructedName = `${firstName} ${lastName}`;
-    } else if (firstName) {
-      _constructedName = firstName;
-    } else if (lastName) {
-      // This case is less common, but handle it if only lastName is provided
-      _constructedName = lastName;
-    }
+    // Name construction logic removed - was unused
 
     // Create user
     const user = await prisma.user.create({

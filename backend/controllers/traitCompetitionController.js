@@ -113,7 +113,7 @@ export async function analyzeHorseTraitImpact(req, res) {
     };
 
     logger.info(
-      `[traitCompetitionController] Analyzed trait impact for horse ${horse.name} in ${discipline}: ${response.analysis.percentageChange}% effect`
+      `[traitCompetitionController] Analyzed trait impact for horse ${horse.name} in ${discipline}: ${response.analysis.percentageChange}% effect`,
     );
 
     res.json({
@@ -229,7 +229,7 @@ export async function compareTraitImpactAcrossDisciplines(req, res) {
     };
 
     logger.info(
-      `[traitCompetitionController] Compared trait impact for horse ${horse.name} across ${disciplines.length} disciplines`
+      `[traitCompetitionController] Compared trait impact for horse ${horse.name} across ${disciplines.length} disciplines`,
     );
 
     res.json({
@@ -239,7 +239,7 @@ export async function compareTraitImpactAcrossDisciplines(req, res) {
     });
   } catch (error) {
     logger.error(
-      `[traitCompetitionController.compareTraitImpactAcrossDisciplines] Error: ${error.message}`
+      `[traitCompetitionController.compareTraitImpactAcrossDisciplines] Error: ${error.message}`,
     );
     res.status(500).json({
       success: false,
@@ -263,7 +263,7 @@ export async function getTraitCompetitionEffects(req, res) {
     // Filter by trait type if specified
     if (type && ['positive', 'negative'].includes(type)) {
       filteredEffects = Object.fromEntries(
-        Object.entries(allEffects).filter(([_, effect]) => effect.type === type)
+        Object.entries(allEffects).filter(([_, effect]) => effect.type === type),
       );
     }
 

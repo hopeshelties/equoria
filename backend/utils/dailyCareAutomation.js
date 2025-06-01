@@ -67,7 +67,7 @@ export async function runDailyCareAutomation(options = {}) {
     } = options;
 
     logger.info(
-      `[dailyCareAutomation.runDailyCareAutomation] Starting daily care automation${dryRun ? ' (DRY RUN)' : ''}`
+      `[dailyCareAutomation.runDailyCareAutomation] Starting daily care automation${dryRun ? ' (DRY RUN)' : ''}`,
     );
 
     // Get all active groom assignments
@@ -116,11 +116,11 @@ export async function runDailyCareAutomation(options = {}) {
         // Check if daily care already completed today
         const existingCareToday = await checkExistingCareToday(
           assignment.foalId,
-          assignment.groomId
+          assignment.groomId,
         );
         if (existingCareToday.hasCompleteCare) {
           logger.debug(
-            `[dailyCareAutomation] Daily care already completed for foal ${assignment.foal.name}`
+            `[dailyCareAutomation] Daily care already completed for foal ${assignment.foal.name}`,
           );
           continue;
         }
@@ -128,7 +128,7 @@ export async function runDailyCareAutomation(options = {}) {
         // Determine which routines to perform
         const routinesToPerform = determineRoutinesToPerform(
           routineTypes,
-          existingCareToday.completedRoutines
+          existingCareToday.completedRoutines,
         );
 
         if (routinesToPerform.length === 0) {
@@ -149,7 +149,7 @@ export async function runDailyCareAutomation(options = {}) {
               assignment.groom,
               assignment.foal,
               routine.interactionType,
-              routine.duration
+              routine.duration,
             );
 
             results.push({
@@ -165,7 +165,7 @@ export async function runDailyCareAutomation(options = {}) {
         }
       } catch (error) {
         logger.error(
-          `[dailyCareAutomation] Error processing assignment ${assignment.id}: ${error.message}`
+          `[dailyCareAutomation] Error processing assignment ${assignment.id}: ${error.message}`,
         );
         errors.push({
           assignmentId: assignment.id,
@@ -181,7 +181,7 @@ export async function runDailyCareAutomation(options = {}) {
     const totalCost = results.reduce((sum, r) => sum + (r.effects?.cost || 0), 0);
 
     logger.info(
-      `[dailyCareAutomation.runDailyCareAutomation] Completed: ${totalInteractions} interactions, ${totalBondingGain} total bonding gain, $${totalCost.toFixed(2)} total cost`
+      `[dailyCareAutomation.runDailyCareAutomation] Completed: ${totalInteractions} interactions, ${totalBondingGain} total bonding gain, $${totalCost.toFixed(2)} total cost`,
     );
 
     return {
@@ -216,7 +216,7 @@ async function performAutomaticCare(assignment, routine) {
       assignment.groom,
       assignment.foal,
       routine.interactionType,
-      routine.duration
+      routine.duration,
     );
 
     // Record the interaction
@@ -238,11 +238,11 @@ async function performAutomaticCare(assignment, routine) {
     // Update foal's bond score and stress level
     const newBondScore = Math.max(
       0,
-      Math.min(100, (assignment.foal.bond_score || 50) + effects.bondingChange)
+      Math.min(100, (assignment.foal.bond_score || 50) + effects.bondingChange),
     );
     const newStressLevel = Math.max(
       0,
-      Math.min(100, (assignment.foal.stress_level || 0) + effects.stressChange)
+      Math.min(100, (assignment.foal.stress_level || 0) + effects.stressChange),
     );
 
     await prisma.horse.update({
@@ -254,7 +254,7 @@ async function performAutomaticCare(assignment, routine) {
     });
 
     logger.debug(
-      `[dailyCareAutomation.performAutomaticCare] ${routine.name} completed for ${assignment.foal.name}: +${effects.bondingChange} bonding, ${effects.stressChange} stress`
+      `[dailyCareAutomation.performAutomaticCare] ${routine.name} completed for ${assignment.foal.name}: +${effects.bondingChange} bonding, ${effects.stressChange} stress`,
     );
 
     return {
@@ -298,7 +298,7 @@ function isGroomAvailableToday(groom) {
     return availability[todayName] !== false;
   } catch (error) {
     logger.warn(
-      `[dailyCareAutomation.isGroomAvailableToday] Error checking availability: ${error.message}`
+      `[dailyCareAutomation.isGroomAvailableToday] Error checking availability: ${error.message}`,
     );
     return true; // Default to available if error
   }

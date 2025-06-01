@@ -25,7 +25,7 @@ export const authenticateToken = (req, res, next) => {
     jwt.verify(token, secret, (err, user) => {
       if (err) {
         logger.warn(
-          `[auth] Invalid token for ${req.method} ${req.path} from ${req.ip}: ${err.message}`
+          `[auth] Invalid token for ${req.method} ${req.path} from ${req.ip}: ${err.message}`,
         );
 
         if (err.name === 'TokenExpiredError') {
@@ -104,13 +104,13 @@ export const requireRole = (...roles) => {
 
       if (!req.user.role || !roles.includes(req.user.role)) {
         logger.warn(
-          `[auth] User ${req.user.id} with role '${req.user.role}' attempted to access ${req.method} ${req.path} (requires: ${roles.join(', ')})`
+          `[auth] User ${req.user.id} with role '${req.user.role}' attempted to access ${req.method} ${req.path} (requires: ${roles.join(', ')})`,
         );
         throw new AppError('Insufficient permissions', 403);
       }
 
       logger.info(
-        `[auth] Authorized user ${req.user.id} with role '${req.user.role}' for ${req.method} ${req.path}`
+        `[auth] Authorized user ${req.user.id} with role '${req.user.role}' for ${req.method} ${req.path}`,
       );
       next();
     } catch (error) {

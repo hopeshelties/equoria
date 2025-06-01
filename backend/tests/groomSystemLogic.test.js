@@ -95,20 +95,20 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
         foalCareGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       const generalEffects = calculateGroomInteractionEffects(
         generalGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
 
       // Foal care specialist should have better bonding modifier
       expect(foalCareEffects.modifiers.specialty).toBe(1.5);
       expect(generalEffects.modifiers.specialty).toBe(1.0);
       expect(foalCareEffects.modifiers.specialty).toBeGreaterThan(
-        generalEffects.modifiers.specialty
+        generalEffects.modifiers.specialty,
       );
     });
 
@@ -120,20 +120,20 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
         expertGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       const noviceEffects = calculateGroomInteractionEffects(
         noviceGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
 
       // Expert should have better bonding modifier
       expect(expertEffects.modifiers.skillLevel).toBe(1.3);
       expect(noviceEffects.modifiers.skillLevel).toBe(0.8);
       expect(expertEffects.modifiers.skillLevel).toBeGreaterThan(
-        noviceEffects.modifiers.skillLevel
+        noviceEffects.modifiers.skillLevel,
       );
 
       // Expert should cost more
@@ -148,20 +148,20 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
         gentleGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       const strictEffects = calculateGroomInteractionEffects(
         strictGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
 
       // Gentle should have better bonding modifier
       expect(gentleEffects.modifiers.personality).toBe(1.2);
       expect(strictEffects.modifiers.personality).toBe(0.9);
       expect(gentleEffects.modifiers.personality).toBeGreaterThan(
-        strictEffects.modifiers.personality
+        strictEffects.modifiers.personality,
       );
     });
 
@@ -173,7 +173,7 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
         experiencedGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       const newGroomEffects = calculateGroomInteractionEffects(newGroom, mockFoal, 'dailyCare', 60);
 
@@ -181,7 +181,7 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
       expect(experiencedEffects.modifiers.experience).toBe(3); // 15/5 = 3
       expect(newGroomEffects.modifiers.experience).toBe(0); // 1/5 = 0
       expect(experiencedEffects.modifiers.experience).toBeGreaterThan(
-        newGroomEffects.modifiers.experience
+        newGroomEffects.modifiers.experience,
       );
     });
 
@@ -205,7 +205,7 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
         mockGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       const feedingEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'feeding', 60);
       const groomingEffects = calculateGroomInteractionEffects(mockGroom, mockFoal, 'grooming', 60);
@@ -237,7 +237,7 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
         masterGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       expect(masterEffects.modifiers.experience).toBe(4); // 20/5 = 4
       expect(masterEffects.modifiers.skillLevel).toBe(1.6);
@@ -381,7 +381,7 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
         testGroom,
         { bondScore: 50 },
         'dailyCare',
-        60
+        60,
       );
 
       // Check individual modifiers
@@ -409,7 +409,7 @@ describe('🧮 UNIT: Groom System Logic - Pure Business Logic Validation', () =>
         invalidGroom,
         { bondScore: 50 },
         'dailyCare',
-        60
+        60,
       );
 
       expect(effects).toHaveProperty('bondingChange');

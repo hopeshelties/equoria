@@ -55,7 +55,7 @@ export async function createTestUser(userData = {}) {
   const token = jwt.sign(
     { id: user.id, username: user.username },
     process.env.JWT_SECRET || 'test-secret',
-    { expiresIn: '24h' }
+    { expiresIn: '24h' },
   );
 
   return { user, token };

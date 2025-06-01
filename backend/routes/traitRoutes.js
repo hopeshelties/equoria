@@ -121,7 +121,7 @@ router.post(
     body('forceCheck').optional().isBoolean().withMessage('forceCheck must be a boolean'),
     handleValidationErrors,
   ],
-  discoverTraits
+  discoverTraits,
 );
 
 /**
@@ -187,7 +187,7 @@ router.get(
     param('horseId').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
     handleValidationErrors,
   ],
-  getHorseTraits
+  getHorseTraits,
 );
 
 /**
@@ -236,7 +236,7 @@ router.get(
       .withMessage('Type must be positive, negative, or all'),
     handleValidationErrors,
   ],
-  getTraitDefinitions
+  getTraitDefinitions,
 );
 
 /**
@@ -293,7 +293,7 @@ router.get(
     param('horseId').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
     handleValidationErrors,
   ],
-  getDiscoveryStatus
+  getDiscoveryStatus,
 );
 
 /**
@@ -364,7 +364,7 @@ router.post(
     body('checkEnrichment').optional().isBoolean().withMessage('checkEnrichment must be a boolean'),
     handleValidationErrors,
   ],
-  batchDiscoverTraits
+  batchDiscoverTraits,
 );
 
 /**
@@ -443,7 +443,7 @@ router.get(
       .withMessage('Invalid discipline'),
     handleValidationErrors,
   ],
-  analyzeHorseTraitImpact
+  analyzeHorseTraitImpact,
 );
 
 /**
@@ -496,7 +496,7 @@ router.get(
     param('horseId').isInt({ min: 1 }).withMessage('Horse ID must be a positive integer'),
     handleValidationErrors,
   ],
-  compareTraitImpactAcrossDisciplines
+  compareTraitImpactAcrossDisciplines,
 );
 
 /**
@@ -571,7 +571,7 @@ router.get(
       .withMessage('Invalid discipline'),
     handleValidationErrors,
   ],
-  getTraitCompetitionEffects
+  getTraitCompetitionEffects,
 );
 
 export default router;

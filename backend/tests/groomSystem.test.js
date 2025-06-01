@@ -156,7 +156,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       mockPrisma.horse.findUnique.mockResolvedValue(null);
 
       await expect(assignGroomToFoal(999, 1, 'player-1')).rejects.toThrow(
-        'Foal with ID 999 not found'
+        'Foal with ID 999 not found',
       );
     });
 
@@ -165,7 +165,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       mockPrisma.groom.findUnique.mockResolvedValue(null);
 
       await expect(assignGroomToFoal(1, 999, 'player-1')).rejects.toThrow(
-        'Groom with ID 999 not found'
+        'Groom with ID 999 not found',
       );
     });
 
@@ -177,7 +177,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       });
 
       await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow(
-        'Groom Sarah Johnson is not currently active'
+        'Groom Sarah Johnson is not currently active',
       );
     });
 
@@ -192,7 +192,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       });
 
       await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow(
-        'Groom Sarah Johnson is already assigned to this foal'
+        'Groom Sarah Johnson is already assigned to this foal',
       );
     });
 
@@ -323,17 +323,17 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         foalCareGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       const generalEffects = calculateGroomInteractionEffects(
         generalGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
 
       expect(foalCareEffects.modifiers.specialty).toBeGreaterThan(
-        generalEffects.modifiers.specialty
+        generalEffects.modifiers.specialty,
       );
     });
 
@@ -345,17 +345,17 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         expertGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       const noviceEffects = calculateGroomInteractionEffects(
         noviceGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
 
       expect(expertEffects.modifiers.skillLevel).toBeGreaterThan(
-        noviceEffects.modifiers.skillLevel
+        noviceEffects.modifiers.skillLevel,
       );
       expect(expertEffects.cost).toBeGreaterThan(noviceEffects.cost);
     });
@@ -368,12 +368,12 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         experiencedGroom,
         mockFoal,
         'dailyCare',
-        60
+        60,
       );
       const newGroomEffects = calculateGroomInteractionEffects(newGroom, mockFoal, 'dailyCare', 60);
 
       expect(experiencedEffects.modifiers.experience).toBeGreaterThan(
-        newGroomEffects.modifiers.experience
+        newGroomEffects.modifiers.experience,
       );
     });
 
@@ -436,7 +436,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
       mockPrisma.horse.findUnique.mockRejectedValue(new Error('Database connection failed'));
 
       await expect(assignGroomToFoal(1, 1, 'player-1')).rejects.toThrow(
-        'Database connection failed'
+        'Database connection failed',
       );
       expect(mockLogger.error).toHaveBeenCalled();
     });
@@ -456,7 +456,7 @@ describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', (
         invalidGroom,
         { id: 1, bondScore: 50 },
         'dailyCare',
-        60
+        60,
       );
 
       expect(effects).toHaveProperty('bondingChange');

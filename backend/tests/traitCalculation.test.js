@@ -85,7 +85,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
 
       // Minimum stress should generally produce more positive traits
       expect(minStressResult.positive.length).toBeGreaterThanOrEqual(
-        maxStressResult.positive.length
+        maxStressResult.positive.length,
       );
     });
 
@@ -118,7 +118,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
       // Should have a good chance of inheriting complementary traits
       const allTraits = [...result.positive, ...result.hidden];
       const hasIntelligenceRelatedTrait = allTraits.some(trait =>
-        ['intelligent', 'trainability_boost'].includes(trait)
+        ['intelligent', 'trainability_boost'].includes(trait),
       );
 
       expect(hasIntelligenceRelatedTrait).toBe(true);
@@ -184,10 +184,10 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
 
       // Count trait occurrences
       const resilientCount = results.filter(
-        r => r.positive.includes('resilient') || r.hidden.includes('resilient')
+        r => r.positive.includes('resilient') || r.hidden.includes('resilient'),
       ).length;
       const boldCount = results.filter(
-        r => r.positive.includes('bold') || r.hidden.includes('bold')
+        r => r.positive.includes('bold') || r.hidden.includes('bold'),
       ).length;
 
       // Should have reasonable inheritance rates (at least 20%)
@@ -483,7 +483,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
           ...baseParams,
           damBondScore: -1,
           damStressLevel: 50,
-        })
+        }),
       ).toThrow('Bond scores must be between 0-100');
 
       expect(() =>
@@ -491,7 +491,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
           ...baseParams,
           damBondScore: 101,
           damStressLevel: 50,
-        })
+        }),
       ).toThrow('Bond scores must be between 0-100');
 
       // Test out-of-bounds stress levels
@@ -500,7 +500,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
           ...baseParams,
           damBondScore: 50,
           damStressLevel: -1,
-        })
+        }),
       ).toThrow('stress levels between 0-100');
 
       expect(() =>
@@ -508,7 +508,7 @@ describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
           ...baseParams,
           damBondScore: 50,
           damStressLevel: 101,
-        })
+        }),
       ).toThrow('stress levels between 0-100');
     });
   });

@@ -1,5 +1,5 @@
 import logger from '../utils/logger.js';
-import prisma from '../db/index.js';
+// import prisma from '../db/index.js'; // TODO: Implement audit logging
 
 /**
  * Audit Logging Middleware
@@ -174,7 +174,7 @@ async function checkSuspiciousActivity(logEntry) {
 /**
  * Detect suspicious patterns in user activity
  */
-function detectSuspiciousPatterns(userActivity, currentEntry) {
+function detectSuspiciousPatterns(userActivity) {
   const patterns = [];
   const now = Date.now();
 
@@ -190,7 +190,7 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
 
   // Pattern 2: Rapid-fire requests (potential automation)
   const rapidRequests = userActivity.filter(
-    entry => now - entry.timestamp < 30000 // Last 30 seconds
+    entry => now - entry.timestamp < 30000, // Last 30 seconds
   );
   if (rapidRequests.length >= 20) {
     patterns.push({
@@ -213,7 +213,7 @@ function detectSuspiciousPatterns(userActivity, currentEntry) {
 
   // Pattern 4: Unusual operation patterns
   const sensitiveOps = userActivity.filter(entry =>
-    ['breeding', 'training', 'transaction', 'stat_modification'].includes(entry.operationType)
+    ['breeding', 'training', 'transaction', 'stat_modification'].includes(entry.operationType),
   );
   if (sensitiveOps.length >= 15) {
     patterns.push({
@@ -310,7 +310,7 @@ setInterval(
       }
     }
   },
-  5 * 60 * 1000
+  5 * 60 * 1000,
 ); // Clean every 5 minutes
 
 export default {

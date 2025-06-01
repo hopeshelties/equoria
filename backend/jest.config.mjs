@@ -1,5 +1,8 @@
 export default {
   testEnvironment: 'node',
+  preset: null,
+
+  // Transform configuration for ES modules
   transform: {},
 
   // Enable Jest globals (describe, it, expect, jest, etc.)

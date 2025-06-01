@@ -118,7 +118,7 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[xpLogModel.logXpEvent] Logging XP event: User user-123, Amount: 5, Reason: Trained horse in Dressage'
+        '[xpLogModel.logXpEvent] Logging XP event: User user-123, Amount: 5, Reason: Trained horse in Dressage',
       );
     });
 
@@ -128,7 +128,7 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
         logXpEvent({
           amount: 5,
           reason: 'Test reason',
-        })
+        }),
       ).rejects.toThrow('User ID is required');
 
       // Test invalid amount
@@ -137,7 +137,7 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
           userId: 'user-123',
           amount: 'invalid',
           reason: 'Test reason',
-        })
+        }),
       ).rejects.toThrow('Amount must be a number');
 
       // Test missing reason
@@ -145,7 +145,7 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
         logXpEvent({
           userId: 'user-123',
           amount: 5,
-        })
+        }),
       ).rejects.toThrow('Reason is required and must be a string');
 
       expect(mockPrismaXpEvent.create).not.toHaveBeenCalled();
@@ -159,11 +159,11 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
           userId: 'user-123',
           amount: 5,
           reason: 'Test reason',
-        })
+        }),
       ).rejects.toThrow('Database connection failed');
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '[xpLogModel.logXpEvent] Error logging XP event: Database connection failed'
+        '[xpLogModel.logXpEvent] Error logging XP event: Database connection failed',
       );
     });
 
@@ -227,7 +227,7 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
 
       expect(result).toEqual(mockEvents);
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[xpLogModel.getUserXpEvents] Getting XP events for user user-123, limit: 50, offset: 0'
+        '[xpLogModel.getUserXpEvents] Getting XP events for user user-123, limit: 50, offset: 0',
       );
     });
 
@@ -359,7 +359,7 @@ describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {
 
       expect(result).toEqual(mockEvents);
       expect(mockLogger.info).toHaveBeenCalledWith(
-        '[xpLogModel.getRecentXpEvents] Getting recent XP events, limit: 10, offset: 0'
+        '[xpLogModel.getRecentXpEvents] Getting recent XP events, limit: 10, offset: 0',
       );
     });
 

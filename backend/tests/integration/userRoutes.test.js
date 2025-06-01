@@ -1,3 +1,43 @@
+/**
+ * 🧪 INTEGRATION TEST: User Routes - HTTP API Endpoints
+ *
+ * This test validates the user routes' HTTP API endpoints using real Express
+ * application testing with strategic mocking of model dependencies.
+ *
+ * 📋 BUSINESS RULES TESTED:
+ * - User progress API: XP calculations, level progression, response formatting
+ * - User CRUD operations: Create, read, update, delete with proper HTTP status codes
+ * - XP system integration: XP addition with level-up handling
+ * - Input validation: ID format validation, required fields, data constraints
+ * - Error handling: 404 for missing users, 400 for invalid data, 500 for server errors
+ * - Response security: Sensitive fields excluded from public responses
+ * - Edge cases: Special characters, long IDs, boundary values
+ * - HTTP compliance: Proper status codes, response formats, error messages
+ *
+ * 🎯 FUNCTIONALITY TESTED:
+ * 1. GET /api/user/:id/progress - User progress with XP calculations
+ * 2. GET /api/user/:id - User lookup by ID
+ * 3. POST /api/user - User creation with validation
+ * 4. PUT /api/user/:id - User updates with existence checks
+ * 5. DELETE /api/user/:id - User deletion with proper responses
+ * 6. POST /api/user/:id/add-xp - XP addition with level progression
+ * 7. Input validation: ID constraints, data validation, error responses
+ * 8. Error scenarios: Missing users, invalid data, server errors
+ * 9. Response formatting: Data transformation, field filtering, security
+ *
+ * 🔄 BALANCED MOCKING APPROACH:
+ * ✅ REAL: Express application, HTTP routing, middleware, response formatting
+ * ✅ REAL: Input validation, error handling, status codes, API contracts
+ * 🔧 MOCK: User model operations - external dependency
+ * 🔧 MOCK: Logger calls - external dependency
+ *
+ * 💡 TEST STRATEGY: Integration testing with real HTTP stack and mocked
+ *    model layer to validate API behavior and response formatting
+ *
+ * ⚠️  NOTE: This represents EXCELLENT API testing - tests real HTTP behavior
+ *    with strategic mocking of data layer while validating API contracts.
+ */
+
 import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import request from 'supertest';
 import { fileURLToPath } from 'url';
@@ -43,7 +83,7 @@ jest.unstable_mockModule(join(__dirname, '../../utils/logger.js'), () => ({
 // Import app after mocking
 const app = (await import('../../app.js')).default;
 
-describe('User Routes Integration Tests', () => {
+describe('🌐 INTEGRATION: User Routes - HTTP API Endpoints', () => {
   // Changed from User Routes'
   beforeEach(() => {
     jest.clearAllMocks();

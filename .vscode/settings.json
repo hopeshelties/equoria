@@ -1,9 +1,7 @@
 {
   "eslint.enable": true,
   "eslint.validate": ["javascript", "javascriptreact"],
-  "eslint.options": {
-    "configFile": "C:/Users/heirr/OneDrive/Desktop/Equoria/.eslintrc.json"
-  },
+  "eslint.workingDirectories": ["backend"],
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },

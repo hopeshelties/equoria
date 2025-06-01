@@ -48,7 +48,7 @@ const BASE_BONDING_RATES = {
 export function calculateBondingChange(horse, activity, activityData = {}) {
   try {
     logger.debug(
-      `[bondingModifiers] Calculating bonding change for horse ${horse.id}, activity: ${activity}`
+      `[bondingModifiers] Calculating bonding change for horse ${horse.id}, activity: ${activity}`,
     );
 
     // Get trait effects
@@ -72,7 +72,7 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
     if (traitEffects.bondingBonus) {
       bondingChange *= 1 + traitEffects.bondingBonus;
       logger.debug(
-        `[bondingModifiers] Bonding bonus applied: +${(traitEffects.bondingBonus * 100).toFixed(1)}%`
+        `[bondingModifiers] Bonding bonus applied: +${(traitEffects.bondingBonus * 100).toFixed(1)}%`,
       );
     }
 
@@ -80,14 +80,14 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
     if (traitEffects.groomingBondingBonus && activity === 'grooming') {
       bondingChange *= 1 + traitEffects.groomingBondingBonus;
       logger.debug(
-        `[bondingModifiers] Grooming bonding bonus applied: +${(traitEffects.groomingBondingBonus * 100).toFixed(1)}%`
+        `[bondingModifiers] Grooming bonding bonus applied: +${(traitEffects.groomingBondingBonus * 100).toFixed(1)}%`,
       );
     }
 
     if (traitEffects.trainingBondingBonus && activity === 'training') {
       bondingChange *= 1 + traitEffects.trainingBondingBonus;
       logger.debug(
-        `[bondingModifiers] Training bonding bonus applied: +${(traitEffects.trainingBondingBonus * 100).toFixed(1)}%`
+        `[bondingModifiers] Training bonding bonus applied: +${(traitEffects.trainingBondingBonus * 100).toFixed(1)}%`,
       );
     }
 
@@ -95,7 +95,7 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
     if (traitEffects.bondingPenalty) {
       bondingChange *= 1 - traitEffects.bondingPenalty;
       logger.debug(
-        `[bondingModifiers] Bonding penalty applied: -${(traitEffects.bondingPenalty * 100).toFixed(1)}%`
+        `[bondingModifiers] Bonding penalty applied: -${(traitEffects.bondingPenalty * 100).toFixed(1)}%`,
       );
     }
 
@@ -112,7 +112,7 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
     // Handle NaN values
     if (isNaN(bondingChange)) {
       logger.error(
-        `[bondingModifiers] Bonding change became NaN for horse ${horse.id}, activity: ${activity}`
+        `[bondingModifiers] Bonding change became NaN for horse ${horse.id}, activity: ${activity}`,
       );
       bondingChange = originalChange; // Fallback to original change
     }
@@ -138,7 +138,7 @@ export function calculateBondingChange(horse, activity, activityData = {}) {
     };
 
     logger.info(
-      `[bondingModifiers] Bonding change for horse ${horse.id}: ${originalChange} -> ${bondingChange} (${((result.traitModifier - 1) * 100).toFixed(1)}% trait modifier)`
+      `[bondingModifiers] Bonding change for horse ${horse.id}: ${originalChange} -> ${bondingChange} (${((result.traitModifier - 1) * 100).toFixed(1)}% trait modifier)`,
     );
 
     return result;
@@ -227,11 +227,11 @@ export function applyBondingChange(horse, activity, activityData = {}) {
 
     const newBondScore = Math.min(
       100,
-      Math.max(0, currentBondScore + bondingResult.modifiedChange)
+      Math.max(0, currentBondScore + bondingResult.modifiedChange),
     );
 
     logger.info(
-      `[bondingModifiers] Applied bonding change to horse ${horse.id}: ${currentBondScore} -> ${newBondScore} (+${bondingResult.modifiedChange})`
+      `[bondingModifiers] Applied bonding change to horse ${horse.id}: ${currentBondScore} -> ${newBondScore} (+${bondingResult.modifiedChange})`,
     );
 
     return {
@@ -306,7 +306,7 @@ export function getBondingEfficiency(horse) {
     percentageChange: Math.round((efficiency - 1) * 100),
     modifiers,
     appliedTraits: allTraits.filter(trait =>
-      ['social', 'antisocial', 'calm', 'nervous'].includes(trait)
+      ['social', 'antisocial', 'calm', 'nervous'].includes(trait),
     ),
   };
 }

@@ -22,7 +22,7 @@ import logger from '../utils/logger.js';
 export async function assignGroom(req, res) {
   try {
     const { foalId, groomId, priority = 1, notes } = req.body;
-    const playerId = req.user?.id || 'default-player'; // TODO: Get from auth
+    const userId = req.user?.id || 'default-user'; // TODO: Get from auth
 
     logger.info(`[groomController.assignGroom] Assigning groom ${groomId} to foal ${foalId}`);
 
@@ -35,7 +35,7 @@ export async function assignGroom(req, res) {
       });
     }
 
-    const result = await assignGroomToFoal(foalId, groomId, playerId, {
+    const result = await assignGroomToFoal(foalId, groomId, userId, {
       priority,
       notes,
       isDefault: false,
@@ -63,7 +63,7 @@ export async function assignGroom(req, res) {
 export async function ensureDefaultAssignment(req, res) {
   try {
     const { foalId } = req.params;
-    const playerId = req.user?.id || 'default-player'; // TODO: Get from auth
+    const userId = req.user?.id || 'default-user'; // TODO: Get from auth
 
     const parsedFoalId = parseInt(foalId, 10);
     if (isNaN(parsedFoalId) || parsedFoalId <= 0) {
@@ -75,10 +75,10 @@ export async function ensureDefaultAssignment(req, res) {
     }
 
     logger.info(
-      `[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`
+      `[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`,
     );
 
-    const result = await ensureDefaultGroomAssignment(parsedFoalId, playerId);
+    const result = await ensureDefaultGroomAssignment(parsedFoalId, userId);
 
     res.status(200).json({
       success: true,
@@ -117,7 +117,7 @@ export async function getFoalAssignments(req, res) {
     }
 
     logger.info(
-      `[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`
+      `[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`,
     );
 
     const assignments = await prisma.groomAssignment.findMany({
@@ -160,7 +160,7 @@ export async function recordInteraction(req, res) {
     const { foalId, groomId, interactionType, duration, notes, assignmentId } = req.body;
 
     logger.info(
-      `[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`
+      `[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`,
     );
 
     // Validate required fields
@@ -224,11 +224,11 @@ export async function recordInteraction(req, res) {
     // Update foal's bond score and stress level
     const newBondScore = Math.max(
       0,
-      Math.min(100, (foal.bond_score || 50) + effects.bondingChange)
+      Math.min(100, (foal.bond_score || 50) + effects.bondingChange),
     );
     const newStressLevel = Math.max(
       0,
-      Math.min(100, (foal.stress_level || 0) + effects.stressChange)
+      Math.min(100, (foal.stress_level || 0) + effects.stressChange),
     );
 
     await prisma.horse.update({
@@ -240,7 +240,7 @@ export async function recordInteraction(req, res) {
     });
 
     logger.info(
-      `[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress`
+      `[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress`,
     );
 
     res.status(200).json({
@@ -270,17 +270,17 @@ export async function recordInteraction(req, res) {
 }
 
 /**
- * GET /api/grooms/player/:playerId
- * Get all grooms for a player
+ * GET /api/grooms/user/:userId
+ * Get all grooms for a user
  */
-export async function getPlayerGrooms(req, res) {
+export async function getUserGrooms(req, res) {
   try {
-    const { playerId } = req.params;
+    const { userId } = req.params;
 
-    logger.info(`[groomController.getPlayerGrooms] Getting grooms for player ${playerId}`);
+    logger.info(`[groomController.getUserGrooms] Getting grooms for user ${userId}`);
 
     const grooms = await prisma.groom.findMany({
-      where: { playerId },
+      where: { userId },
       include: {
         assignments: {
           where: { isActive: true },
@@ -302,19 +302,19 @@ export async function getPlayerGrooms(req, res) {
 
     res.status(200).json({
       success: true,
-      message: `Retrieved ${grooms.length} grooms for player`,
+      message: `Retrieved ${grooms.length} grooms for user`,
       data: {
-        playerId,
+        userId,
         grooms,
         activeGrooms: grooms.filter(g => g.is_active),
         totalGrooms: grooms.length,
       },
     });
   } catch (error) {
-    logger.error(`[groomController.getPlayerGrooms] Error: ${error.message}`);
+    logger.error(`[groomController.getUserGrooms] Error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve player grooms',
+      message: 'Failed to retrieve user grooms',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
@@ -322,7 +322,7 @@ export async function getPlayerGrooms(req, res) {
 
 /**
  * POST /api/grooms/hire
- * Hire a new groom for a player
+ * Hire a new groom for a user
  */
 export async function hireGroom(req, res) {
   try {
@@ -332,13 +332,13 @@ export async function hireGroom(req, res) {
       experience,
       skill_level,
       personality,
-      hourly_rate,
+      session_rate,
       bio,
       availability,
     } = req.body;
-    const playerId = req.user?.id || 'default-player'; // TODO: Get from auth
+    const userId = req.user?.id || 'default-user'; // TODO: Get from auth
 
-    logger.info(`[groomController.hireGroom] Hiring new groom ${name} for player ${playerId}`);
+    logger.info(`[groomController.hireGroom] Hiring new groom ${name} for user ${userId}`);
 
     // Validate required fields
     if (!name || !speciality || !skill_level || !personality) {
@@ -381,17 +381,17 @@ export async function hireGroom(req, res) {
         name,
         speciality,
         experience: experience || 1,
-        skill_level,
+        skillLevel: skill_level,
         personality,
-        hourly_rate: hourly_rate || SKILL_LEVELS[skill_level].costModifier * 15.0,
+        sessionRate: session_rate || SKILL_LEVELS[skill_level].costModifier * 15.0,
         bio,
         availability: availability || {},
-        playerId,
+        userId,
       },
     });
 
     logger.info(
-      `[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`
+      `[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`,
     );
 
     res.status(201).json({

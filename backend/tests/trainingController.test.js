@@ -167,7 +167,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
 
     it('should throw error for invalid horse ID', async () => {
       await expect(canTrain('invalid', 'Dressage')).rejects.toThrow(
-        'Horse ID must be a positive integer'
+        'Horse ID must be a positive integer',
       );
     });
 
@@ -315,7 +315,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
       mockLogTrainingSession.mockRejectedValue(new Error('Failed to log training'));
 
       await expect(trainHorse(1, 'Racing')).rejects.toThrow(
-        'Training failed: Failed to log training'
+        'Training failed: Failed to log training',
       );
     });
 
@@ -733,7 +733,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
       mockGetUserWithHorses.mockRejectedValue(new Error('Player database error'));
 
       await expect(getTrainableHorses(playerId)).rejects.toThrow(
-        'Failed to get trainable horses: Player database error'
+        'Failed to get trainable horses: Player database error',
       );
     });
   });

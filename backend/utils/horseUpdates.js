@@ -33,12 +33,12 @@ async function updateHorseEarnings(horseId, prizeAmount) {
     });
 
     logger.info(
-      `[horseUpdates.updateHorseEarnings] Updated horse ${horseId} earnings by $${prizeAmount} (total: $${updatedHorse.earnings})`
+      `[horseUpdates.updateHorseEarnings] Updated horse ${horseId} earnings by $${prizeAmount} (total: $${updatedHorse.earnings})`,
     );
     return updatedHorse;
   } catch (error) {
     logger.error(
-      `[horseUpdates.updateHorseEarnings] Error updating horse earnings: ${error.message}`
+      `[horseUpdates.updateHorseEarnings] Error updating horse earnings: ${error.message}`,
     );
     throw error;
   }
@@ -102,7 +102,7 @@ async function updateHorseStat(horseId, statName, increase = 1) {
     });
 
     logger.info(
-      `[horseUpdates.updateHorseStat] Updated horse ${horseId} ${statName} by +${increase} (new value: ${updatedHorse[statName]})`
+      `[horseUpdates.updateHorseStat] Updated horse ${horseId} ${statName} by +${increase} (new value: ${updatedHorse[statName]})`,
     );
     return updatedHorse;
   } catch (error) {
@@ -131,7 +131,7 @@ async function updateHorseRewards(horseId, prizeAmount, statGain = null) {
     return updatedHorse;
   } catch (error) {
     logger.error(
-      `[horseUpdates.updateHorseRewards] Error updating horse rewards: ${error.message}`
+      `[horseUpdates.updateHorseRewards] Error updating horse rewards: ${error.message}`,
     );
     throw error;
   }

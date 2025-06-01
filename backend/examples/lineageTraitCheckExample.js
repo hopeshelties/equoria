@@ -28,7 +28,7 @@ function basicAffinityExample() {
   console.log('Ancestors:', racingLineage.map(a => `${a.name} (${a.discipline})`).join(', '));
   console.log(`Result: ${JSON.stringify(result)}`);
   console.log(
-    `Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage detected!` : 'No strong discipline affinity'}\n`
+    `Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage detected!` : 'No strong discipline affinity'}\n`,
   );
 }
 
@@ -49,7 +49,7 @@ function noAffinityExample() {
   console.log('Ancestors:', diverseLineage.map(a => `${a.name} (${a.discipline})`).join(', '));
   console.log(`Result: ${JSON.stringify(result)}`);
   console.log(
-    `Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage detected!` : 'Diverse lineage - no single discipline dominance'}\n`
+    `Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage detected!` : 'Diverse lineage - no single discipline dominance'}\n`,
   );
 }
 
@@ -98,13 +98,13 @@ function competitionHistoryExample() {
     const disciplines = ancestor.competitionHistory.map(c => c.discipline);
     const uniqueDisciplines = [...new Set(disciplines)];
     console.log(
-      `- ${ancestor.name}: ${uniqueDisciplines.join(', ')} (${disciplines.length} competitions)`
+      `- ${ancestor.name}: ${uniqueDisciplines.join(', ')} (${disciplines.length} competitions)`,
     );
   });
 
   console.log(`Result: ${JSON.stringify(result)}`);
   console.log(
-    `Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage from competition analysis!` : 'No clear discipline preference from competitions'}\n`
+    `Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage from competition analysis!` : 'No clear discipline preference from competitions'}\n`,
   );
 }
 
@@ -147,7 +147,7 @@ function disciplineScoresExample() {
 
   console.log(`Result: ${JSON.stringify(result)}`);
   console.log(
-    `Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage from score analysis!` : 'No clear discipline preference from scores'}\n`
+    `Interpretation: ${result.affinity ? `Strong ${result.discipline} lineage from score analysis!` : 'No clear discipline preference from scores'}\n`,
   );
 }
 
@@ -174,7 +174,7 @@ function detailedAnalysisExample() {
   console.log(`- Affinity strength: ${result.affinityStrength}%`);
   console.log(`- Dominant discipline count: ${result.dominantCount}`);
   console.log(
-    `- Has affinity: ${result.affinity} ${result.affinity ? `(${result.discipline})` : ''}\n`
+    `- Has affinity: ${result.affinity} ${result.affinity ? `(${result.discipline})` : ''}\n`,
   );
 }
 
@@ -193,17 +193,17 @@ function specificDisciplineExample() {
 
   const racingCheck = checkSpecificDisciplineAffinity(lineage, 'Racing', 2);
   console.log(
-    `Racing (need 2): ${racingCheck.hasAffinity} - ${racingCheck.count}/${racingCheck.required} (${racingCheck.percentage}%)`
+    `Racing (need 2): ${racingCheck.hasAffinity} - ${racingCheck.count}/${racingCheck.required} (${racingCheck.percentage}%)`,
   );
 
   const jumpingCheck = checkSpecificDisciplineAffinity(lineage, 'Show Jumping', 2);
   console.log(
-    `Show Jumping (need 2): ${jumpingCheck.hasAffinity} - ${jumpingCheck.count}/${jumpingCheck.required} (${jumpingCheck.percentage}%)`
+    `Show Jumping (need 2): ${jumpingCheck.hasAffinity} - ${jumpingCheck.count}/${jumpingCheck.required} (${jumpingCheck.percentage}%)`,
   );
 
   const dressageCheck = checkSpecificDisciplineAffinity(lineage, 'Dressage', 2);
   console.log(
-    `Dressage (need 2): ${dressageCheck.hasAffinity} - ${dressageCheck.count}/${dressageCheck.required} (${dressageCheck.percentage}%)\n`
+    `Dressage (need 2): ${dressageCheck.hasAffinity} - ${dressageCheck.count}/${dressageCheck.required} (${dressageCheck.percentage}%)\n`,
   );
 }
 
@@ -274,7 +274,7 @@ function breedingScenarioExample() {
   console.log('\nCombined lineage analysis:');
   console.log(`- Discipline breakdown: ${JSON.stringify(result.disciplineBreakdown)}`);
   console.log(
-    `- Strongest affinity: ${result.affinity ? result.discipline : 'None'} (${result.affinityStrength}%)`
+    `- Strongest affinity: ${result.affinity ? result.discipline : 'None'} (${result.affinityStrength}%)`,
   );
 
   // Check for specific discipline affinities
@@ -315,7 +315,7 @@ async function runAllExamples() {
     console.log('- Use checkLineageForDisciplineAffinityDetailed() for comprehensive analysis');
     console.log('- Use checkSpecificDisciplineAffinity() to check for particular disciplines');
     console.log(
-      '- Function handles multiple data sources: direct discipline, competition history, scores'
+      '- Function handles multiple data sources: direct discipline, competition history, scores',
     );
     console.log('- Requires 3+ ancestors with same discipline for affinity = true');
   } catch (error) {

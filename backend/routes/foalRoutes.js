@@ -42,7 +42,7 @@ router.get(
         await ensureDefaultGroomAssignment(parseInt(foalId, 10), playerId);
       } catch (groomError) {
         logger.warn(
-          `[foalRoutes] Failed to ensure groom assignment for foal ${foalId}: ${groomError.message}`
+          `[foalRoutes] Failed to ensure groom assignment for foal ${foalId}: ${groomError.message}`,
         );
       }
 
@@ -65,7 +65,7 @@ router.get(
         message: 'Internal server error',
       });
     }
-  }
+  },
 );
 
 /**
@@ -128,7 +128,7 @@ router.post(
         message: 'Internal server error',
       });
     }
-  }
+  },
 );
 
 /**
@@ -182,7 +182,7 @@ router.post(
         message: 'Internal server error',
       });
     }
-  }
+  },
 );
 
 /**
@@ -219,7 +219,7 @@ router.post(
       const { day, activity } = req.body;
 
       logger.info(
-        `[foalRoutes] POST /api/foals/${foalId}/enrichment - Day ${day}, Activity: ${activity}`
+        `[foalRoutes] POST /api/foals/${foalId}/enrichment - Day ${day}, Activity: ${activity}`,
       );
 
       const result = await completeEnrichmentActivity(foalId, day, activity);
@@ -263,7 +263,7 @@ router.post(
         message: 'Internal server error',
       });
     }
-  }
+  },
 );
 
 export default router;

@@ -34,7 +34,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
     const currentFeedQuality = feedQuality !== undefined ? feedQuality : 50;
 
     logger.info(
-      `[applyEpigeneticTraitsAtBirth] Mare stress: ${currentStressLevel}, Feed quality: ${currentFeedQuality}`
+      `[applyEpigeneticTraitsAtBirth] Mare stress: ${currentStressLevel}, Feed quality: ${currentFeedQuality}`,
     );
 
     // Check for positive conditions: Low stress and premium feed
@@ -43,7 +43,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
       if (Math.random() < 0.75) {
         positive.push('resilient');
         logger.info(
-          '[applyEpigeneticTraitsAtBirth] Applied resilient trait (low stress + premium feed)'
+          '[applyEpigeneticTraitsAtBirth] Applied resilient trait (low stress + premium feed)',
         );
       }
 
@@ -51,7 +51,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
       if (Math.random() < 0.6) {
         positive.push('people_trusting');
         logger.info(
-          '[applyEpigeneticTraitsAtBirth] Applied people_trusting trait (low stress + premium feed)'
+          '[applyEpigeneticTraitsAtBirth] Applied people_trusting trait (low stress + premium feed)',
         );
       }
     }
@@ -60,7 +60,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
     const inbreedingAnalysis = analyzeInbreeding(lineage);
     if (inbreedingAnalysis.inbreedingDetected) {
       logger.info(
-        `[applyEpigeneticTraitsAtBirth] Inbreeding detected: ${inbreedingAnalysis.severity}`
+        `[applyEpigeneticTraitsAtBirth] Inbreeding detected: ${inbreedingAnalysis.severity}`,
       );
 
       // Risk of fragile trait
@@ -104,7 +104,7 @@ export function applyEpigeneticTraitsAtBirth({ mare, lineage, feedQuality, stres
     const disciplineAnalysis = analyzeDisciplineSpecialization(lineage);
     if (disciplineAnalysis.hasSpecialization) {
       logger.info(
-        `[applyEpigeneticTraitsAtBirth] Discipline specialization detected: ${disciplineAnalysis.discipline} (${disciplineAnalysis.count} ancestors)`
+        `[applyEpigeneticTraitsAtBirth] Discipline specialization detected: ${disciplineAnalysis.discipline} (${disciplineAnalysis.count} ancestors)`,
       );
 
       // Assign discipline affinity trait

@@ -57,7 +57,7 @@ export const getUserProgressAPI = async (req, res, next) => {
     }
 
     logger.info(
-      `[userController.getUserProgressAPI] Getting comprehensive progress for user ${userId}`
+      `[userController.getUserProgressAPI] Getting comprehensive progress for user ${userId}`,
     );
 
     // Use userModel.getUserProgress for consistent XP calculations
@@ -96,7 +96,7 @@ export const getUserProgressAPI = async (req, res, next) => {
     };
 
     logger.info(
-      `[userController.getUserProgressAPI] Successfully retrieved progress for user ${user.username} (Level ${progressData.level}, XP: ${progressData.xp}/${progressData.xpForNextLevel}, ${progressPercentage}% progress)`
+      `[userController.getUserProgressAPI] Successfully retrieved progress for user ${user.username} (Level ${progressData.level}, XP: ${progressData.xp}/${progressData.xpForNextLevel}, ${progressPercentage}% progress)`,
     );
 
     res.json({
@@ -106,7 +106,7 @@ export const getUserProgressAPI = async (req, res, next) => {
     });
   } catch (error) {
     logger.error(
-      `[userController.getUserProgressAPI] Error getting user progress: ${error.message}`
+      `[userController.getUserProgressAPI] Error getting user progress: ${error.message}`,
     );
     next(error); // Pass to global error handler
   }
@@ -155,7 +155,7 @@ export const getDashboardData = async (req, res, next) => {
     } catch (error) {
       logger.error(
         `[userController.getDashboardData] Error getting trainable horses for user ${userId}: ${error.message}`,
-        { error }
+        { error },
       );
       // Not critical, proceed with 0, but log error.
     }
@@ -202,7 +202,7 @@ export const getDashboardData = async (req, res, next) => {
       lastTrained = recentTraining?.trainedAt || null;
     } catch (error) {
       logger.warn(
-        `[userController.getDashboardData] Error getting recent training for user ${userId}: ${error.message}`
+        `[userController.getDashboardData] Error getting recent training for user ${userId}: ${error.message}`,
       );
     }
 
@@ -238,7 +238,7 @@ export const getDashboardData = async (req, res, next) => {
       }
     } catch (error) {
       logger.warn(
-        `[userController.getDashboardData] Error getting recent placement for user ${userId}: ${error.message}`
+        `[userController.getDashboardData] Error getting recent placement for user ${userId}: ${error.message}`,
       );
     }
 
@@ -265,7 +265,7 @@ export const getDashboardData = async (req, res, next) => {
     };
 
     logger.info(
-      `[userController.getDashboardData] Successfully retrieved dashboard data for user ${user.name} (${totalHorses} horses, ${trainableHorsesCount} trainable)`
+      `[userController.getDashboardData] Successfully retrieved dashboard data for user ${user.name} (${totalHorses} horses, ${trainableHorsesCount} trainable)`,
     );
 
     res.status(200).json({
@@ -276,7 +276,7 @@ export const getDashboardData = async (req, res, next) => {
   } catch (error) {
     logger.error(
       `[userController.getDashboardData] Error getting dashboard data for user ${userId}: ${error.message}`,
-      { stack: error.stack }
+      { stack: error.stack },
     );
     next(error);
   }

@@ -119,7 +119,7 @@ describe('🏆 UNIT: Competition Score Calculation - Scoring Algorithm Validatio
     it('should NOT apply trait bonus for non-matching discipline', () => {
       const horse = createTestHorse(
         { speed: 70, stamina: 60, focus: 50 },
-        ['discipline_affinity_dressage'] // Wrong trait for Racing
+        ['discipline_affinity_dressage'], // Wrong trait for Racing
       );
 
       // Mock Math.random to eliminate luck variance
@@ -189,23 +189,23 @@ describe('🏆 UNIT: Competition Score Calculation - Scoring Algorithm Validatio
     it('should throw error for invalid horse input', () => {
       expect(() => calculateCompetitionScore(null, 'Racing')).toThrow('Horse object is required');
       expect(() => calculateCompetitionScore(undefined, 'Racing')).toThrow(
-        'Horse object is required'
+        'Horse object is required',
       );
       expect(() => calculateCompetitionScore('invalid', 'Racing')).toThrow(
-        'Horse object is required'
+        'Horse object is required',
       );
     });
 
     it('should throw error for invalid event type', () => {
       const horse = createTestHorse();
       expect(() => calculateCompetitionScore(horse, null)).toThrow(
-        'Event type is required and must be a string'
+        'Event type is required and must be a string',
       );
       expect(() => calculateCompetitionScore(horse, undefined)).toThrow(
-        'Event type is required and must be a string'
+        'Event type is required and must be a string',
       );
       expect(() => calculateCompetitionScore(horse, 123)).toThrow(
-        'Event type is required and must be a string'
+        'Event type is required and must be a string',
       );
     });
 
@@ -377,7 +377,7 @@ describe('🏆 UNIT: Competition Score Calculation - Scoring Algorithm Validatio
 
       const jumpTraitHorse = createTestHorse(
         { speed: 70, stamina: 60, focus: 50 },
-        ['discipline_affinity_show_jumping'] // Jump trait for Racing discipline
+        ['discipline_affinity_show_jumping'], // Jump trait for Racing discipline
       );
 
       const regularHorse = createTestHorse({ speed: 70, stamina: 60, focus: 50 });
@@ -598,7 +598,7 @@ describe('🏆 UNIT: Competition Score Calculation - Scoring Algorithm Validatio
 
       const jumpTraitHorse = createTestHorse(
         { speed: 70, stamina: 60, focus: 50 },
-        ['discipline_affinity_show_jumping'] // Jump trait
+        ['discipline_affinity_show_jumping'], // Jump trait
       );
 
       const regularHorse = createTestHorse({ speed: 70, stamina: 60, focus: 50 });
