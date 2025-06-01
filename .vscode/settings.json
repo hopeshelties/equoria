@@ -1,6 +1,10 @@
-﻿{
+{
   "eslint.enable": true,
   "eslint.validate": ["javascript"],
+  "eslint.workingDirectories": [
+    "./backend",
+    "."
+  ],
   "eslint.run": "onType",
   "eslint.debug": true,
   "eslint.alwaysShowStatus": true,
