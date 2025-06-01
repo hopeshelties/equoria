@@ -2,9 +2,9 @@
   "eslint.enable": true,
   "eslint.validate": ["javascript"],
   "eslint.workingDirectories": [
-    "./backend",
-    "."
+    "./backend"
   ],
+  "eslint.nodePath": "./backend/node_modules",
   "eslint.run": "onType",
   "eslint.debug": true,
   "eslint.alwaysShowStatus": true,

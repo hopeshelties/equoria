@@ -83,11 +83,22 @@ grep -r "module.exports\|require(" --include="*.js" --exclude-dir=node_modules .
 ```json
 {
   "root": true,
-  "env": { "node": true, "es2021": true }
+  "env": { "node": true, "es2021": true },
+  "overrides": [
+    {
+      "files": ["**/*.test.js", "**/*.spec.js", "**/tests/**/*.js"],
+      "env": { "jest": true }
+    }
+  ]
 }
 ```
 
-### **6. Restart ESLint Server:**
+### **6. Import Plugins Cause Issues:**
+- ❌ `plugin:import/recommended` breaks with ES modules
+- ❌ `plugin:prettier/recommended` causes hanging
+- ✅ Use core ESLint rules only for ES modules projects
+
+### **7. Restart ESLint Server:**
 - Ctrl+Shift+P → "ESLint: Restart ESLint Server"
 - Restart VSCode completely if needed
 
