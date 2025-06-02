@@ -32,7 +32,6 @@ import prisma from '../db/index.js';
 import {
   updateFoalCareData,
   getFoalCareSummary,
-  hasBurnoutImmunity,
   calculateStreakFromLastCareDate,
 } from '../utils/foalTaskLogManager.js';
 import { calculateTraitPoints } from '../config/taskInfluenceConfig.js';

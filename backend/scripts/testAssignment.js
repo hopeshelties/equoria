@@ -19,14 +19,13 @@ async function testAssignment() {
         foalId: 1,
         groomId: 1,
         priority: 1,
-        notes: 'Test assignment'
+        notes: 'Test assignment',
       }),
     });
 
     console.log(`Status: ${response.status}`);
     const data = await response.json();
     console.log('Response:', JSON.stringify(data, null, 2));
-
   } catch (error) {
     console.error('Error:', error.message);
   }

@@ -187,9 +187,9 @@ describe('Trait Milestone Evaluation', () => {
       };
 
       // Mock random to return different values for each call
-      let callCount = 0;
+      let _callCount = 0;
       jest.spyOn(Math, 'random').mockImplementation(() => {
-        callCount++;
+        _callCount++;
         return 0.1; // Always trigger traits
       });
 

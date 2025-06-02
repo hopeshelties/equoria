@@ -38,6 +38,11 @@ npx eslint backend/tests/ --fix Fix ESLint errors in test files specifically.
 **Over-mocking (16 files)**: ~1% success rate - Artificial test environments missing real issues
 **Pure Algorithmic Testing**: 100% success rates for utility functions with no mocking
 **Strategic Mocking**: Database/logger only mocking maintaining high success while enabling unit testing
+**API Testing (22 Groom endpoints)**: 100% success rate - Complete business logic validation
+
+### API Testing Commands
+Postman Collection: GROOM_API_TESTS.postman_collection.json (22 tests, 100% passing)
+Run comprehensive groom system API validation with business logic testing
 
 ### Testing Best Practices
 - Mock external dependencies only (databases, APIs, services)
@@ -45,6 +50,7 @@ npx eslint backend/tests/ --fix Fix ESLint errors in test files specifically.
 - Use integration tests with real database operations
 - Focus on actual functionality validation over mock expectations
 - Maintain comprehensive test documentation headers
+- Use Postman collections for comprehensive API validation
 
 ## Formatting
 npx prettier --write . Formats all code in the repo using Prettier settings.

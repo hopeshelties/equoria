@@ -1,5 +1,37 @@
+/**
+ * @fileoverview Trait Evaluation System for Horse Development
+ *
+ * @description
+ * Comprehensive trait evaluation system handling both discovery-based traits and
+ * groom interaction-based trait development. Manages trait revelation, conflict
+ * resolution, epigenetic trait assignment, and permanent trait application.
+ *
+ * @features
+ * - Discovery-based trait revelation system with bond/stress conditions
+ * - Groom interaction trait influence system (+3/-3 permanence rules)
+ * - Epigenetic trait marking for early development (before age 3)
+ * - Trait conflict resolution and duplication prevention
+ * - Task-based trait evaluation from foal care history
+ * - Milestone-based trait assignment at age thresholds
+ *
+ * @dependencies
+ * - logger: Winston logger for system logging
+ * - taskInfluenceConfig: Legacy task influence mapping (foal enrichment)
+ * - taskTraitInfluenceMap: New groom interaction trait influence system
+ *
+ * @usage
+ * Used by groom system for trait development during interactions.
+ * Used by foal system for epigenetic trait assignment at milestones.
+ * Used by trait discovery system for revelation-based trait assignment.
+ *
+ * @author Equoria Development Team
+ * @since 1.0.0
+ * @lastModified 2025-01-02 - Enhanced with groom interaction trait influence system
+ */
+
 import logger from './logger.js';
 import { TASK_TRAIT_INFLUENCE_MAP } from '../config/taskInfluenceConfig.js';
+import { TRAIT_INFLUENCE_CONFIG, getTaskTraitInfluence } from './taskTraitInfluenceMap.js';
 
 /**
  * Trait definitions with their revelation conditions
@@ -498,11 +530,101 @@ function evaluateEpigeneticTagsFromFoalTasks(taskLog, streak = 0) {
   }
 }
 
+/**
+ * Apply trait influence from groom interaction
+ *
+ * @param {Object} horse - Horse data with current traits and age
+ * @param {string} taskType - Type of grooming task performed
+ * @param {Object} currentTraitInfluences - Current trait influence scores
+ * @returns {Object} Updated trait influences and any new permanent traits
+ */
+function applyGroomTraitInfluence(horse, taskType, currentTraitInfluences = {}) {
+  try {
+    logger.info(
+      `[traitEvaluation.applyGroomTraitInfluence] Applying trait influence for task: ${taskType}`,
+    );
+
+    const influence = getTaskTraitInfluence(taskType);
+    if (!influence) {
+      logger.warn(
+        `[traitEvaluation.applyGroomTraitInfluence] No influence found for task: ${taskType}`,
+      );
+      return {
+        updatedInfluences: currentTraitInfluences,
+        newPermanentTraits: [],
+        isEpigenetic: false,
+      };
+    }
+
+    const updatedInfluences = { ...currentTraitInfluences };
+    const newPermanentTraits = [];
+    const isEpigenetic = horse.age < TRAIT_INFLUENCE_CONFIG.EPIGENETIC_AGE_THRESHOLD;
+
+    // Apply encouraging influences (+1)
+    influence.encourages.forEach(trait => {
+      updatedInfluences[trait] =
+        (updatedInfluences[trait] || 0) + TRAIT_INFLUENCE_CONFIG.ENCOURAGE_VALUE;
+
+      logger.info(
+        `[traitEvaluation.applyGroomTraitInfluence] Encouraged trait: ${trait}, new score: ${updatedInfluences[trait]}`,
+      );
+
+      // Check for permanence threshold
+      if (updatedInfluences[trait] >= TRAIT_INFLUENCE_CONFIG.PERMANENCE_THRESHOLD) {
+        newPermanentTraits.push({
+          name: trait,
+          type: 'positive',
+          epigenetic: isEpigenetic,
+          source: 'groom_interaction',
+          taskType,
+        });
+        logger.info(
+          `[traitEvaluation.applyGroomTraitInfluence] Trait ${trait} became permanent (positive, epigenetic: ${isEpigenetic})`,
+        );
+      }
+    });
+
+    // Apply discouraging influences (-1)
+    influence.discourages.forEach(trait => {
+      updatedInfluences[trait] =
+        (updatedInfluences[trait] || 0) + TRAIT_INFLUENCE_CONFIG.DISCOURAGE_VALUE;
+
+      logger.info(
+        `[traitEvaluation.applyGroomTraitInfluence] Discouraged trait: ${trait}, new score: ${updatedInfluences[trait]}`,
+      );
+
+      // Check for negative permanence threshold
+      if (updatedInfluences[trait] <= TRAIT_INFLUENCE_CONFIG.NEGATIVE_PERMANENCE_THRESHOLD) {
+        newPermanentTraits.push({
+          name: trait,
+          type: 'negative_resistance',
+          epigenetic: isEpigenetic,
+          source: 'groom_interaction',
+          taskType,
+        });
+        logger.info(
+          `[traitEvaluation.applyGroomTraitInfluence] Trait ${trait} became permanently discouraged (epigenetic: ${isEpigenetic})`,
+        );
+      }
+    });
+
+    return {
+      updatedInfluences,
+      newPermanentTraits,
+      isEpigenetic,
+    };
+  } catch (error) {
+    logger.error(`[traitEvaluation.applyGroomTraitInfluence] Error: ${error.message}`);
+    throw error;
+  }
+}
+
 export {
   evaluateTraitRevelation,
   evaluateEpigeneticTagsFromFoalTasks,
   getTraitDefinition,
   getAllTraitDefinitions,
+  applyGroomTraitInfluence,
   TRAIT_DEFINITIONS,
   TRAIT_CONFLICTS,
 };

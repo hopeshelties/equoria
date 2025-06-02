@@ -51,10 +51,12 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 const {
   updateConsecutiveDays,
   checkBurnoutImmunity,
-  updateStreakTracking,
+  updateStreakTracking: _updateStreakTracking,
 } = await import(join(__dirname, '../utils/groomBondingSystem.js'));
 
-const { evaluateEpigeneticTagsFromFoalTasks } = await import(join(__dirname, '../utils/traitEvaluation.js'));
+const { evaluateEpigeneticTagsFromFoalTasks } = await import(
+  join(__dirname, '../utils/traitEvaluation.js')
+);
 
 const { getTraitMetadata } = await import(join(__dirname, '../utils/epigeneticTraits.js'));
 
@@ -107,10 +109,10 @@ describe('Burnout Immunity & Trait Integration', () => {
 
       // Simulate task log from consistent care
       const taskLog = {
-        trust_building: 8,      // 8 days of trust building
-        desensitization: 6,     // 6 days of desensitization
-        early_touch: 5,         // 5 days of early touch
-        showground_exposure: 3,  // 3 days of showground exposure
+        trust_building: 8, // 8 days of trust building
+        desensitization: 6, // 6 days of desensitization
+        early_touch: 5, // 5 days of early touch
+        showground_exposure: 3, // 3 days of showground exposure
       };
 
       // Mock random to ensure trait assignment
@@ -121,9 +123,9 @@ describe('Burnout Immunity & Trait Integration', () => {
 
       // Should get multiple traits due to consistent care + streak bonus
       expect(assignedTraits.length).toBeGreaterThan(2);
-      expect(assignedTraits).toContain('bonded');     // From trust_building
-      expect(assignedTraits).toContain('resilient');  // From trust_building
-      expect(assignedTraits).toContain('confident');  // From desensitization + showground_exposure
+      expect(assignedTraits).toContain('bonded'); // From trust_building
+      expect(assignedTraits).toContain('resilient'); // From trust_building
+      expect(assignedTraits).toContain('confident'); // From desensitization + showground_exposure
 
       // Verify all assigned traits have proper metadata
       assignedTraits.forEach(trait => {
@@ -171,9 +173,9 @@ describe('Burnout Immunity & Trait Integration', () => {
 
       // Task log reflects the rebuild period
       const taskLog = {
-        trust_building: 8,      // Rebuilt over 8 days
-        desensitization: 4,     // Some variety
-        early_touch: 6,          // Consistent handling
+        trust_building: 8, // Rebuilt over 8 days
+        desensitization: 4, // Some variety
+        early_touch: 6, // Consistent handling
       };
 
       jest.spyOn(Math, 'random').mockReturnValue(0.2); // Medium roll
@@ -210,8 +212,8 @@ describe('Burnout Immunity & Trait Integration', () => {
 
       // Verify independent tracking
       expect(horseA_streak).toBe(10); // Full streak
-      expect(horseB_streak).toBe(5);  // Preserved in grace period
-      expect(horseC_streak).toBe(3);  // New streak
+      expect(horseB_streak).toBe(5); // Preserved in grace period
+      expect(horseC_streak).toBe(3); // New streak
 
       // Check immunity status for each
       const immunityA = checkBurnoutImmunity(horseA_streak);

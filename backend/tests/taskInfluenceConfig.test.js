@@ -65,7 +65,7 @@ describe('Task Influence Configuration', () => {
     });
 
     it('should have correct structure for each task entry', () => {
-      Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([taskName, influence]) => {
+      Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([_taskName, influence]) => {
         // Check required properties
         expect(influence).toHaveProperty('traits');
         expect(influence).toHaveProperty('dailyValue');
@@ -163,7 +163,7 @@ describe('Task Influence Configuration', () => {
     });
 
     it('should have unique trait combinations per task', () => {
-      Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([taskName, influence]) => {
+      Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([_taskName, influence]) => {
         // Check for duplicate traits within the same task
         const uniqueTraits = [...new Set(influence.traits)];
         expect(uniqueTraits.length).toBe(influence.traits.length);

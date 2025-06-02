@@ -32,6 +32,7 @@
 import prisma from '../db/index.js';
 import logger from './logger.js';
 import { evaluateEpigeneticTagsFromFoalTasks } from './traitEvaluation.js';
+import { evaluateTraitMilestones, checkMilestoneEligibility } from './milestoneTraitEvaluator.js';
 
 /**
  * Calculate age in days from date of birth
@@ -217,6 +218,99 @@ export async function checkForMilestones(horseId, previousAge, newAge) {
         logger.error(
           `[horseAgingSystem.checkForMilestones] Error in age 1 trait evaluation for horse ${horseId}: ${error.message}`,
         );
+      }
+    }
+
+    // Enhanced milestone trait evaluation (ages 2 and 3) - New comprehensive system
+    const additionalMilestoneAges = [730, 1095]; // 2, 3 years in days
+
+    for (const milestoneAge of additionalMilestoneAges) {
+      if (previousAge < milestoneAge && newAge >= milestoneAge) {
+        const milestoneYear = Math.floor(milestoneAge / 365);
+        logger.info(
+          `[horseAgingSystem.checkForMilestones] Horse ${horseId} reached age ${milestoneYear} milestone - evaluating traits`,
+        );
+
+        try {
+          // Get complete horse data for milestone evaluation
+          const horse = await prisma.horse.findUnique({
+            where: { id: horseId },
+            select: {
+              id: true,
+              name: true,
+              age: true,
+              task_log: true,
+              taskLog: true, // Legacy field
+              daysGroomedInARow: true,
+              epigeneticModifiers: true,
+              trait_milestones: true,
+            },
+          });
+
+          if (horse) {
+            // Check eligibility for milestone evaluation
+            const eligibility = checkMilestoneEligibility(horse);
+
+            if (eligibility.eligible) {
+              // Evaluate traits using new milestone system
+              const milestoneResult = evaluateTraitMilestones(horse);
+
+              if (milestoneResult.success) {
+                // Update horse with new traits and milestone completion
+                const updatedModifiers = { ...horse.epigeneticModifiers };
+
+                // Apply new traits from milestone evaluation
+                milestoneResult.traitsApplied.forEach(trait => {
+                  if (trait.epigenetic) {
+                    updatedModifiers.epigenetic = updatedModifiers.epigenetic || [];
+                    updatedModifiers.epigenetic.push({
+                      name: trait.name,
+                      type: trait.type,
+                      source: 'milestone_evaluation',
+                      milestoneAge: milestoneYear,
+                      appliedAt: new Date().toISOString(),
+                    });
+                  } else if (trait.type === 'resistance') {
+                    updatedModifiers.negative = updatedModifiers.negative || [];
+                    updatedModifiers.negative.push(trait.name);
+                  } else {
+                    updatedModifiers.positive = updatedModifiers.positive || [];
+                    updatedModifiers.positive.push(trait.name);
+                  }
+                });
+
+                // Update database with new traits and milestone completion
+                await prisma.horse.update({
+                  where: { id: horseId },
+                  data: {
+                    epigeneticModifiers: updatedModifiers,
+                    trait_milestones: milestoneResult.updatedMilestones,
+                  },
+                });
+
+                traitsAssigned = [...traitsAssigned, ...milestoneResult.traitsApplied];
+                milestonesTriggered.push(`age_${milestoneYear}_trait_evaluation`);
+
+                logger.info(
+                  `[horseAgingSystem.checkForMilestones] Milestone age ${milestoneYear}: Applied ${milestoneResult.traitsApplied.length} traits to horse ${horseId}: ${milestoneResult.traitsApplied.map(t => t.name).join(', ')}`,
+                );
+              } else {
+                logger.info(
+                  `[horseAgingSystem.checkForMilestones] Milestone age ${milestoneYear}: No traits applied to horse ${horseId} (${milestoneResult.reason})`,
+                );
+                milestonesTriggered.push(`age_${milestoneYear}_milestone_checked`);
+              }
+            } else {
+              logger.info(
+                `[horseAgingSystem.checkForMilestones] Horse ${horseId} not eligible for age ${milestoneYear} milestone evaluation`,
+              );
+            }
+          }
+        } catch (error) {
+          logger.error(
+            `[horseAgingSystem.checkForMilestones] Error in age ${milestoneYear} trait evaluation for horse ${horseId}: ${error.message}`,
+          );
+        }
       }
     }
 

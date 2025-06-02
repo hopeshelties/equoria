@@ -170,6 +170,17 @@ This file tracks current tasks and issues that need to be addressed in the Equor
 
 ## 🟡 MEDIUM PRIORITY
 
+### Groom System Enhancement (Phase 2)
+
+- [ ] **Advanced Groom Features** - Enhance groom system with advanced functionality
+  - [ ] **Groom Availability Scheduling**: Time-based availability system for realistic scheduling
+  - [ ] **Groom Performance Metrics**: Track success rates, effectiveness, and player satisfaction
+  - [ ] **Cost Optimization**: Dynamic pricing based on demand/supply and market conditions
+  - [ ] **Groom Specialization Bonuses**: Enhanced effects for specialized tasks and experience
+  - [ ] **Enhanced Trait Integration**: Trait milestone evaluation and personality-based bonuses
+  - [ ] **Advanced Streak Bonuses**: Escalating bonuses for longer consecutive care streaks
+  - [ ] **Groom Reputation System**: Track groom effectiveness and build reputation scores
+
 ### Code Quality & Consistency
 
 - [ ] **Schema Field Type Consistency** - Fix type mismatches found in integration tests

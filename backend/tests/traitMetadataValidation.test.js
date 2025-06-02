@@ -26,7 +26,7 @@
  * - Real: All trait definitions, metadata, and relationships
  */
 
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -220,7 +220,7 @@ describe('Trait Metadata Validation', () => {
     });
 
     it('should have valid daily values for all tasks', () => {
-      Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([task, influence]) => {
+      Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([_task, influence]) => {
         expect(influence.dailyValue).toBeGreaterThan(0);
         expect(influence.dailyValue).toBeLessThanOrEqual(10);
         expect(Array.isArray(influence.traits)).toBe(true);

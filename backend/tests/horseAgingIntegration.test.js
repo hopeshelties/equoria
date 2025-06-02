@@ -332,7 +332,7 @@ describe('Horse Aging Integration', () => {
   describe('Error Handling', () => {
     it('should handle database errors gracefully', async () => {
       // Create horse with valid data
-      const horse = await prisma.horse.create({
+      const _horse = await prisma.horse.create({
         data: {
           name: 'Error Test Horse',
           sex: 'Colt',
