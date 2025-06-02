@@ -77,8 +77,6 @@ describe('Groom Workflow Integration Tests', () => {
       data: {
         name: 'Test Breed',
         description: 'Test breed for integration testing',
-        origin: 'Test Origin',
-        characteristics: {},
       },
     });
 
@@ -109,8 +107,8 @@ describe('Groom Workflow Integration Tests', () => {
         taskLog: null,
         lastGroomed: null,
         daysGroomedInARow: 0,
+        consecutiveDaysFoalCare: 0,
         epigeneticModifiers: {},
-        traitInfluences: {},
       },
     });
 
@@ -127,8 +125,8 @@ describe('Groom Workflow Integration Tests', () => {
         taskLog: null,
         lastGroomed: null,
         daysGroomedInARow: 0,
+        consecutiveDaysFoalCare: 0,
         epigeneticModifiers: {},
-        traitInfluences: {},
       },
     });
 
@@ -145,8 +143,8 @@ describe('Groom Workflow Integration Tests', () => {
         taskLog: null,
         lastGroomed: null,
         daysGroomedInARow: 0,
+        consecutiveDaysFoalCare: 0,
         epigeneticModifiers: {},
-        traitInfluences: {},
       },
     });
   });
@@ -487,7 +485,7 @@ describe('Groom Workflow Integration Tests', () => {
         body: {
           foalId: testFoal.id,
           groomId: testGroom.id,
-          taskType: 'trust_building',
+          interactionType: 'trust_building',
           duration: 30,
           notes: 'Building trust with young foal',
         },
@@ -501,14 +499,15 @@ describe('Groom Workflow Integration Tests', () => {
 
       await recordInteraction(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
           data: expect.objectContaining({
-            taskType: 'trust_building',
-            bondingEffects: expect.any(Object),
-            traitInfluence: expect.any(Object),
+            interaction: expect.objectContaining({
+              interactionType: 'trust_building',
+            }),
+            effects: expect.any(Object),
           }),
         }),
       );
@@ -517,7 +516,7 @@ describe('Groom Workflow Integration Tests', () => {
       const interaction = await prisma.groomInteraction.findFirst({
         where: {
           foalId: testFoal.id,
-          taskType: 'trust_building',
+          interactionType: 'trust_building',
         },
       });
       expect(interaction).toBeTruthy();
@@ -528,7 +527,7 @@ describe('Groom Workflow Integration Tests', () => {
         body: {
           foalId: testFoal.id,
           groomId: testGroom.id,
-          taskType: 'hand_walking', // Adult task
+          interactionType: 'hand_walking', // Adult task
           duration: 30,
         },
         user: { id: testUser.id },
@@ -545,7 +544,7 @@ describe('Groom Workflow Integration Tests', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
-          message: expect.stringContaining('age restriction'),
+          message: expect.stringContaining('not an eligible task'),
         }),
       );
     });
@@ -1103,7 +1102,179 @@ describe('Groom Workflow Integration Tests', () => {
     });
   });
 
-  describe('7. Integration Validation', () => {
+  describe('7. Groom Personality Impact Testing', () => {
+    let gentleGroom;
+    let aloofGroom;
+    let highEnergyGroom;
+
+    beforeEach(async () => {
+      // Create grooms with different personalities
+      gentleGroom = await prisma.groom.create({
+        data: {
+          name: 'Gentle Test Groom',
+          speciality: 'foal_care',
+          skillLevel: 'expert',
+          personality: 'gentle',
+          sessionRate: 25.0,
+          userId: testUser.id,
+        },
+      });
+
+      aloofGroom = await prisma.groom.create({
+        data: {
+          name: 'Aloof Test Groom',
+          speciality: 'general',
+          skillLevel: 'intermediate',
+          personality: 'aloof',
+          sessionRate: 20.0,
+          userId: testUser.id,
+        },
+      });
+
+      highEnergyGroom = await prisma.groom.create({
+        data: {
+          name: 'High Energy Test Groom',
+          speciality: 'general',
+          skillLevel: 'expert',
+          personality: 'high_energy',
+          sessionRate: 30.0,
+          userId: testUser.id,
+        },
+      });
+
+      // Create nervous horse for gentle groom testing
+      await prisma.horse.update({
+        where: { id: testFoal.id },
+        data: {
+          epigeneticModifiers: {
+            positive: ['nervous'],
+            negative: [],
+            hidden: [],
+            epigenetic: [],
+          },
+        },
+      });
+
+      // Assign grooms to horses
+      await Promise.all([
+        prisma.groomAssignment.create({
+          data: {
+            foalId: testFoal.id,
+            groomId: gentleGroom.id,
+            priority: 1,
+            isActive: true,
+          },
+        }),
+        prisma.groomAssignment.create({
+          data: {
+            foalId: testYoungHorse.id,
+            groomId: aloofGroom.id,
+            priority: 1,
+            isActive: true,
+          },
+        }),
+        prisma.groomAssignment.create({
+          data: {
+            foalId: testAdultHorse.id,
+            groomId: highEnergyGroom.id,
+            priority: 1,
+            isActive: true,
+          },
+        }),
+      ]);
+    });
+
+    it('should apply gentle personality bonuses for nervous horses', async () => {
+      const req = {
+        body: {
+          foalId: testFoal.id,
+          groomId: gentleGroom.id,
+          taskType: 'brushing', // Gentle groom's bonus task
+          duration: 30,
+        },
+        user: { id: testUser.id },
+      };
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+
+      await recordInteraction(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      const responseData = res.json.mock.calls[0][0];
+      expect(responseData.data.effects.personalityEffects).toBeDefined();
+      expect(responseData.data.effects.personalityEffects.personality).toBe('gentle');
+      expect(responseData.data.effects.personalityEffects.taskBonus).toBe(true);
+      expect(responseData.data.effects.personalityEffects.specialConditionMet).toBe(true);
+      expect(responseData.data.effects.personalityEffects.bonusesApplied).toContain(
+        'task_specialty',
+      );
+      expect(responseData.data.effects.personalityEffects.bonusesApplied).toContain('trait_match');
+    });
+
+    it('should apply aloof personality penalties', async () => {
+      const req = {
+        body: {
+          foalId: testYoungHorse.id,
+          groomId: aloofGroom.id,
+          taskType: 'brushing',
+          duration: 30,
+        },
+        user: { id: testUser.id },
+      };
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+
+      await recordInteraction(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      const responseData = res.json.mock.calls[0][0];
+      expect(responseData.data.effects.personalityEffects).toBeDefined();
+      expect(responseData.data.effects.personalityEffects.personality).toBe('aloof');
+      expect(responseData.data.effects.personalityEffects.taskBonus).toBe(false);
+
+      // Aloof should have reduced bonding compared to other personalities
+      expect(responseData.data.effects.bondingChange).toBeLessThan(5); // Base bonding would be higher
+    });
+
+    it('should apply high energy personality extra trait points', async () => {
+      const req = {
+        body: {
+          foalId: testAdultHorse.id,
+          groomId: highEnergyGroom.id,
+          taskType: 'obstacle_course', // High energy groom's bonus task
+          duration: 30,
+        },
+        user: { id: testUser.id },
+      };
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+
+      await recordInteraction(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      const responseData = res.json.mock.calls[0][0];
+      expect(responseData.data.effects.personalityEffects).toBeDefined();
+      expect(responseData.data.effects.personalityEffects.personality).toBe('high_energy');
+      expect(responseData.data.effects.personalityEffects.bonusesApplied).toContain(
+        'extra_trait_points',
+      );
+      expect(responseData.data.effects.traitInfluence).toBeGreaterThan(1); // Should have extra trait points
+    });
+  });
+
+  describe('8. Integration Validation', () => {
     it('should validate trait influence map configuration', () => {
       // Test that all tasks in the influence map have valid structure
       Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([_taskType, influence]) => {

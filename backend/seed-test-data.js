@@ -26,7 +26,6 @@ async function seedTestData() {
     // eslint-disable-next-line no-console
     console.log(`✅ Breed: ${thoroughbredBreed.name} (ID: ${thoroughbredBreed.id})`);
 
-    // Create test player
     const existingPlayer = await prisma.user.findUnique({
       where: { email: 'test-player@example.com' },
     });

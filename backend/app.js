@@ -7,7 +7,7 @@ import breedRoutes from './routes/breedRoutes.js';
 import competitionRoutes from './routes/competitionRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import horseRoutes from './routes/horseRoutes.js';
-import userRoutes from './routes/userRoutes.js'; // Changed from playerRoutes
+import userRoutes from './routes/userRoutes.js';
 import trainingRoutes from './routes/trainingRoutes.js';
 import foalRoutes from './routes/foalRoutes.js';
 import traitRoutes from './routes/traitRoutes.js';
@@ -69,7 +69,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/breeds', breedRoutes);
 app.use('/api/competition', competitionRoutes);
 app.use('/api/horses', horseRoutes);
-app.use('/api/user', userRoutes); // Changed from /api/player and playerRoutes
+app.use('/api/user', userRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/foals', foalRoutes);
 app.use('/api/traits', traitRoutes);

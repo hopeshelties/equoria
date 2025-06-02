@@ -107,6 +107,16 @@ This file tracks current tasks and issues that need to be addressed in the Equor
   - [x] **QUALITY STANDARD**: ✅ COMPLETED - ESLint working perfectly in file explorer and problems section (VSCode integration active!)
   - [x] **COMPLETION CRITERIA**: Achieved comprehensive test documentation and quality assessment
     - [x] **QUALITY STANDARD**: ✅ COMPLETED - npm run lint returns 0 errors (100% success!)
+    - [] **FIX seed-test-data.js**: Change all reference to player to user.Ensure all files connected to them are correct and still working.
+     - [] **FIX horseController.js**: Change all reference to player and owner to user. Ensure all files connected to them are correct and still working.
+     - [] **FIX leaderboardController.js**: Change all reference to player and owner to user. Ensure all files connected to them are correct and still working.
+     - [] **FIX trainingController.js**: Change all reference to player and owner to user. Ensure all files connected to them are correct and still working.
+     - [] **FIX coverage-final.json**: Change all reference to player and owner to user. Ensure all files connected to them are correct and still working.
+     - [] **FIX lcov.info**: Change all reference to player and owner to user. Ensure all files connected to them are correct and still working.
+
+
+
+
 
 ### Horse XP System Development (COMPLETED ✅)
 

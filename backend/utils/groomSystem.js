@@ -5,6 +5,7 @@
 
 import prisma from '../db/index.js';
 import logger from './logger.js';
+import { calculatePersonalityEffects } from './groomPersonalityEffects.js';
 import { ELIGIBLE_FOAL_ENRICHMENT_TASKS, FOAL_GROOMING_TASKS } from '../config/groomConfig.js';
 
 /**
@@ -534,12 +535,17 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
       quality = 'fair';
     }
 
-    return {
+    // Create base effects object for personality modification
+    const baseEffects = {
       bondingChange,
       stressChange,
       cost: Math.round(cost * 100) / 100, // Round to 2 decimal places
       quality,
       errorOccurred,
+      successRate: 1.0 - skillLevel.errorChance, // Base success rate
+      traitInfluence: 1, // Base trait influence points
+      streakGrowth: 1, // Base streak growth
+      burnoutRisk: 0.1, // Base burnout risk
       modifiers: {
         specialty: specialty.bondingModifier,
         skillLevel: skillLevel.bondingModifier,
@@ -547,6 +553,15 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
         experience: experienceBonus,
       },
     };
+
+    // Apply personality effects to modify base calculations
+    const finalEffects = calculatePersonalityEffects(groom, foal, interactionType, baseEffects);
+
+    logger.info(
+      `[groomSystem.calculateGroomInteractionEffects] Applied personality effects for ${groom.personality}: ${finalEffects.personalityEffects?.bonusesApplied?.join(', ') || 'none'}`,
+    );
+
+    return finalEffects;
   } catch (error) {
     logger.error(`[groomSystem.calculateGroomInteractionEffects] Error: ${error.message}`);
     throw error;

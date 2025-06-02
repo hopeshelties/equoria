@@ -302,6 +302,13 @@ export async function recordInteraction(req, res) {
       `[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress, task: ${interactionType} (count: ${taskLogUpdate.taskCount})`,
     );
 
+    // Log personality effects if applied
+    if (effects.personalityEffects && effects.personalityEffects.bonusesApplied.length > 0) {
+      logger.info(
+        `[groomController.recordInteraction] Personality effects applied (${groom.personality}): ${effects.personalityEffects.bonusesApplied.join(', ')} - ${effects.personalityEffects.description}`,
+      );
+    }
+
     res.status(200).json({
       success: true,
       message: `${interactionType} interaction completed successfully`,

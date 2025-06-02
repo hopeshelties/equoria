@@ -5,7 +5,28 @@ import { AppError } from '../errors/index.js';
  * Global Error Handler Middleware
  * Handles all errors in a consistent manner with proper logging
  */
-const errorHandler = (err, req, res) => {
+const errorHandler = (err, req, res, next) => {
+  // Defensive checks for response object
+  if (!res || typeof res.status !== 'function') {
+    logger.error('Error Handler: Invalid response object', {
+      error: err.message,
+      stack: err.stack,
+      url: req?.originalUrl,
+      method: req?.method,
+    });
+    return next(err); // Pass to Express default handler
+  }
+
+  // Check if response already sent
+  if (res.headersSent) {
+    logger.error('Error Handler: Headers already sent', {
+      error: err.message,
+      url: req?.originalUrl,
+      method: req?.method,
+    });
+    return next(err); // Pass to Express default handler
+  }
+
   let error = { ...err };
   error.message = err.message;
 
@@ -13,10 +34,10 @@ const errorHandler = (err, req, res) => {
   logger.error(`Error ${err.message}`, {
     error: err.message,
     stack: err.stack,
-    url: req.originalUrl,
-    method: req.method,
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
+    url: req?.originalUrl,
+    method: req?.method,
+    ip: req?.ip,
+    userAgent: req?.get('User-Agent'),
   });
 
   // Mongoose bad ObjectId
@@ -49,11 +70,19 @@ const errorHandler = (err, req, res) => {
   }
 
   // Send error response
-  res.status(error.statusCode || 500).json({
-    success: false,
-    message: error.message || 'Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
+  try {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || 'Server Error',
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    });
+  } catch (responseError) {
+    logger.error('Error Handler: Failed to send response', {
+      originalError: err.message,
+      responseError: responseError.message,
+    });
+    next(err);
+  }
 };
 
 export default errorHandler;

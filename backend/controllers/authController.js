@@ -6,7 +6,7 @@ import logger from '../utils/logger.js';
 import prisma from '../db/index.js';
 
 /**
- * Register a new user and create a corresponding player record.
+ * Register a new user and create a corresponding user record.
  */
 export const register = async (req, res, next) => {
   // eslint-disable-next-line no-console
@@ -100,7 +100,7 @@ export const login = async (req, res, next) => {
 
     const user = await prisma.user.findUnique({
       where: { email },
-      // include: { player: true } // Player data not typically returned on login by default
+      // include: { user: true } // User data not typically returned on login by default
     });
 
     if (!user) {
