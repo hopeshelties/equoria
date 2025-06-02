@@ -14,10 +14,7 @@
   "eslint.debug": true,
   "eslint.trace.server": "verbose",
   "eslint.alwaysShowStatus": true,
-  "eslint.useFlatConfig": true,
-  "eslint.options": {
-    "overrideConfigFile": "./backend/eslint.config.js"
-  },
+
   "eslint.runtime": "node",
   "eslint.nodePath": "./backend/node_modules",
   "problems.decorations.enabled": true,

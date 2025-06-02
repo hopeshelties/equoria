@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
 import { evaluateTraitRevelation } from '../utils/traitEvaluation.js';
+import { processHorseBirthdays } from '../utils/horseAgingSystem.js';
 
 /**
  * Daily trait evaluation cron job that runs at midnight
@@ -36,7 +37,20 @@ class CronJobService {
       },
     );
 
+    // Daily aging job - runs at 12:05 AM (after trait evaluation)
+    const dailyAgingJob = cron.schedule(
+      '5 0 * * *',
+      async () => {
+        await this.processHorseAging();
+      },
+      {
+        scheduled: false,
+        timezone: 'UTC',
+      },
+    );
+
     this.jobs.set('dailyTraitEvaluation', dailyTraitJob);
+    this.jobs.set('dailyHorseAging', dailyAgingJob);
 
     // Start all jobs
     this.jobs.forEach((job, name) => {
@@ -275,12 +289,78 @@ class CronJobService {
   }
 
   /**
+   * Daily horse aging process
+   * Processes all horses for birthday updates and milestone evaluation
+   */
+  async processHorseAging() {
+    const startTime = Date.now();
+    logger.info('[CronJobService.processHorseAging] Starting daily horse aging process');
+
+    try {
+      const result = await processHorseBirthdays();
+
+      const duration = Date.now() - startTime;
+      logger.info(`[CronJobService.processHorseAging] Completed aging process in ${duration}ms`);
+      logger.info(
+        `[CronJobService.processHorseAging] Summary: ${result.totalProcessed} horses processed, ${result.birthdaysFound} birthdays, ${result.milestonesTriggered} milestones, ${result.errors} errors`,
+      );
+
+      // Log audit summary
+      await this.logAgingSummary({
+        timestamp: new Date(),
+        ...result,
+        duration,
+      });
+
+      return result;
+    } catch (error) {
+      logger.error(`[CronJobService.processHorseAging] Error: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Log aging audit summary
+   * @param {Object} summary - Summary data
+   */
+  async logAgingSummary(summary) {
+    try {
+      const auditSummary = {
+        type: 'DAILY_HORSE_AGING_SUMMARY',
+        timestamp: summary.timestamp.toISOString(),
+        statistics: {
+          horsesProcessed: summary.totalProcessed,
+          birthdaysFound: summary.birthdaysFound,
+          milestonesTriggered: summary.milestonesTriggered,
+          errors: summary.errors,
+          duration: summary.duration,
+        },
+      };
+
+      logger.info(`[CronJobService.AUDIT] Aging summary: ${JSON.stringify(auditSummary)}`);
+    } catch (error) {
+      logger.error(
+        `[CronJobService.logAgingSummary] Error logging aging summary: ${error.message}`,
+      );
+    }
+  }
+
+  /**
    * Manually trigger trait evaluation (for testing/admin purposes)
    * @returns {Object} - Evaluation results
    */
   async manualTraitEvaluation() {
     logger.info('[CronJobService.manualTraitEvaluation] Manual trait evaluation triggered');
     return await this.evaluateDailyFoalTraits();
+  }
+
+  /**
+   * Manually trigger horse aging (for testing/admin purposes)
+   * @returns {Object} - Aging results
+   */
+  async manualHorseAging() {
+    logger.info('[CronJobService.manualHorseAging] Manual horse aging triggered');
+    return await this.processHorseAging();
   }
 
   /**

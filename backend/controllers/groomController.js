@@ -17,7 +17,7 @@ import {
   validateGroomingEligibility,
   updateTaskLog,
   updateStreakTracking,
-  checkTaskMutualExclusivity,
+  checkTaskMutualExclusivity as _checkTaskMutualExclusivity,
 } from '../utils/groomBondingSystem.js';
 import prisma from '../db/index.js';
 import logger from '../utils/logger.js';
@@ -29,7 +29,7 @@ import logger from '../utils/logger.js';
 export async function assignGroom(req, res) {
   try {
     const { foalId, groomId, priority = 1, notes } = req.body;
-    const userId = req.user?.id || 'default-user'; // TODO: Get from auth
+    const userId = req.user?.id || '83970fb4-f086-46b3-9e76-ae71720d2918'; // TODO: Get from auth
 
     logger.info(`[groomController.assignGroom] Assigning groom ${groomId} to foal ${foalId}`);
 
@@ -48,7 +48,7 @@ export async function assignGroom(req, res) {
       isDefault: false,
     });
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       message: result.message,
       data: result.assignment,
@@ -132,7 +132,7 @@ export async function getFoalAssignments(req, res) {
       include: {
         groom: true,
         foal: {
-          select: { id: true, name: true, bond_score: true, stress_level: true },
+          select: { id: true, name: true, bondScore: true, stressLevel: true },
         },
       },
       orderBy: [{ isActive: 'desc' }, { priority: 'asc' }, { createdAt: 'desc' }],
@@ -353,7 +353,7 @@ export async function getUserGrooms(req, res) {
     const grooms = await prisma.groom.findMany({
       where: { userId },
       include: {
-        assignments: {
+        groomAssignments: {
           where: { isActive: true },
           include: {
             foal: {
@@ -363,12 +363,12 @@ export async function getUserGrooms(req, res) {
         },
         _count: {
           select: {
-            assignments: true,
-            interactions: true,
+            groomAssignments: true,
+            groomInteractions: true,
           },
         },
       },
-      orderBy: [{ is_active: 'desc' }, { skill_level: 'desc' }, { experience: 'desc' }],
+      orderBy: [{ isActive: 'desc' }, { skillLevel: 'desc' }, { experience: 'desc' }],
     });
 
     res.status(200).json({
@@ -377,7 +377,7 @@ export async function getUserGrooms(req, res) {
       data: {
         userId,
         grooms,
-        activeGrooms: grooms.filter(g => g.is_active),
+        activeGrooms: grooms.filter(g => g.isActive),
         totalGrooms: grooms.length,
       },
     });
@@ -407,7 +407,7 @@ export async function hireGroom(req, res) {
       bio,
       availability,
     } = req.body;
-    const userId = req.user?.id || 'default-user'; // TODO: Get from auth
+    const userId = req.user?.id || '83970fb4-f086-46b3-9e76-ae71720d2918'; // TODO: Get from auth
 
     logger.info(`[groomController.hireGroom] Hiring new groom ${name} for user ${userId}`);
 
@@ -504,6 +504,44 @@ export async function getGroomDefinitions(_req, res) {
       success: false,
       message: 'Failed to retrieve definitions',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
+    });
+  }
+}
+
+/**
+ * DELETE /api/grooms/test/cleanup
+ * Clean up test data (for testing only)
+ */
+export async function cleanupTestData(_req, res) {
+  try {
+    logger.info('[groomController.cleanupTestData] Cleaning up test data');
+
+    // Delete all groom interactions
+    const deletedInteractions = await prisma.groomInteraction.deleteMany({});
+    logger.info(
+      `[groomController.cleanupTestData] Deleted ${deletedInteractions.count} interactions`,
+    );
+
+    // Delete all groom assignments
+    const deletedAssignments = await prisma.groomAssignment.deleteMany({});
+    logger.info(
+      `[groomController.cleanupTestData] Deleted ${deletedAssignments.count} assignments`,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Test data cleaned up successfully',
+      data: {
+        deletedInteractions: deletedInteractions.count,
+        deletedAssignments: deletedAssignments.count,
+      },
+    });
+  } catch (error) {
+    logger.error(`[groomController.cleanupTestData] Error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to cleanup test data',
+      error: error.message,
     });
   }
 }

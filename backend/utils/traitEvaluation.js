@@ -1,4 +1,5 @@
-import { logger } from './logger.js';
+import logger from './logger.js';
+import { TASK_TRAIT_INFLUENCE_MAP } from '../config/taskInfluenceConfig.js';
 
 /**
  * Trait definitions with their revelation conditions
@@ -408,8 +409,98 @@ function getAllTraitDefinitions() {
   return TRAIT_DEFINITIONS;
 }
 
+/**
+ * Evaluate epigenetic traits from foal task history at age 1 milestone
+ * @param {Object} taskLog - Task completion history: {taskName: count}
+ * @param {number} streak - Consecutive days of foal care (default: 0)
+ * @returns {string[]} - Array of assigned epigenetic trait names
+ */
+function evaluateEpigeneticTagsFromFoalTasks(taskLog, streak = 0) {
+  try {
+    logger.info(
+      `[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Evaluating traits from task log with streak: ${streak}`,
+    );
+
+    const tags = new Set();
+
+    // Handle null or undefined task log
+    if (!taskLog || typeof taskLog !== 'object') {
+      logger.info(
+        '[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] No valid task log provided',
+      );
+      return [];
+    }
+
+    // Calculate streak bonus (burnout immunity bonus)
+    const streakBonus = streak >= 7 ? 10 : 0;
+    logger.info(
+      `[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Streak bonus: ${streakBonus} (streak: ${streak})`,
+    );
+
+    // First, accumulate trait points from all tasks
+    const traitPoints = {};
+
+    for (const [task, count] of Object.entries(taskLog)) {
+      const map = TASK_TRAIT_INFLUENCE_MAP[task];
+
+      // Skip tasks not in influence map or with zero/negative counts
+      if (!map || typeof count !== 'number' || count <= 0) {
+        continue;
+      }
+
+      logger.info(
+        `[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Processing task: ${task}, count: ${count}`,
+      );
+
+      // Accumulate points for each influenced trait
+      for (const tag of map.traits) {
+        const basePoints = count * map.dailyValue;
+        traitPoints[tag] = (traitPoints[tag] || 0) + basePoints;
+
+        logger.info(
+          `[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Accumulated ${basePoints} points for trait: ${tag} (total: ${traitPoints[tag]})`,
+        );
+      }
+    }
+
+    // Then, evaluate each trait for assignment
+    for (const [tag, basePoints] of Object.entries(traitPoints)) {
+      const totalPoints = basePoints + streakBonus;
+      const chance = Math.min(totalPoints, 60); // Cap at 60%
+
+      logger.info(
+        `[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Trait: ${tag}, base: ${basePoints}, total: ${totalPoints}, chance: ${chance}%`,
+      );
+
+      // Roll for trait assignment
+      const roll = Math.random() * 100;
+      if (roll < chance) {
+        tags.add(tag);
+        logger.info(
+          `[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Trait assigned: ${tag} (rolled: ${roll.toFixed(2)})`,
+        );
+      } else {
+        logger.info(
+          `[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Trait not assigned: ${tag} (rolled: ${roll.toFixed(2)})`,
+        );
+      }
+    }
+
+    const result = Array.from(tags);
+    logger.info(
+      `[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Final assigned traits: ${JSON.stringify(result)}`,
+    );
+
+    return result;
+  } catch (error) {
+    logger.error(`[traitEvaluation.evaluateEpigeneticTagsFromFoalTasks] Error: ${error.message}`);
+    throw error;
+  }
+}
+
 export {
   evaluateTraitRevelation,
+  evaluateEpigeneticTagsFromFoalTasks,
   getTraitDefinition,
   getAllTraitDefinitions,
   TRAIT_DEFINITIONS,

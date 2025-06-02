@@ -17,34 +17,172 @@ class SeededRandom {
 
 // Trait definitions and their properties
 const TRAIT_DEFINITIONS = {
-  // Positive traits
-  resilient: { type: 'positive', rarity: 'common', conflicts: ['fragile'] },
-  bold: { type: 'positive', rarity: 'common', conflicts: ['nervous'] },
-  intelligent: { type: 'positive', rarity: 'common', conflicts: ['lazy'] },
-  athletic: { type: 'positive', rarity: 'common', conflicts: ['fragile'] },
-  calm: { type: 'positive', rarity: 'common', conflicts: ['nervous', 'aggressive'] },
-  trainability_boost: { type: 'positive', rarity: 'rare', conflicts: ['stubborn'] },
+  // Positive traits - Common
+  resilient: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['fragile'],
+    description: 'Less likely to be affected by stress.',
+    category: 'epigenetic',
+  },
+  bold: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['nervous'],
+    description: 'Shows courage in challenging situations.',
+    category: 'epigenetic',
+  },
+  intelligent: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['lazy'],
+    description: 'Learns faster and retains training better.',
+    category: 'epigenetic',
+  },
+  athletic: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['fragile', 'lazy'],
+    description: 'Enhanced physical performance and stamina.',
+    category: 'epigenetic',
+  },
+  calm: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['nervous', 'aggressive'],
+    description: 'Maintains composure in stressful situations.',
+    category: 'epigenetic',
+  },
+
+  // Positive traits - Epigenetic (from foal development)
+  confident: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['nervous'],
+    description: 'This horse is brave in new situations.',
+    category: 'epigenetic',
+  },
+  bonded: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['aggressive'],
+    description: 'Forms deeper trust with specific handlers.',
+    category: 'bond',
+  },
+
+  // Positive traits - Situational (from specific training)
+  presentation_boosted: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: [],
+    description: 'Scores higher in appearance-based events.',
+    category: 'situational',
+  },
+  show_calm: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['nervous'],
+    description: 'Remains composed during competitions and shows.',
+    category: 'situational',
+  },
+  crowd_ready: {
+    type: 'positive',
+    rarity: 'common',
+    conflicts: ['nervous'],
+    description: 'Comfortable performing in front of large audiences.',
+    category: 'situational',
+  },
+
+  // Positive traits - Rare
+  trainability_boost: {
+    type: 'positive',
+    rarity: 'rare',
+    conflicts: ['stubborn'],
+    description: 'Exceptional learning ability and training response.',
+    category: 'epigenetic',
+  },
 
   // Negative traits
-  nervous: { type: 'negative', rarity: 'common', conflicts: ['bold', 'calm'] },
-  stubborn: { type: 'negative', rarity: 'common', conflicts: ['trainability_boost'] },
-  fragile: { type: 'negative', rarity: 'common', conflicts: ['resilient', 'athletic'] },
-  aggressive: { type: 'negative', rarity: 'common', conflicts: ['calm'] },
-  lazy: { type: 'negative', rarity: 'common', conflicts: ['intelligent', 'athletic'] },
+  nervous: {
+    type: 'negative',
+    rarity: 'common',
+    conflicts: ['bold', 'calm', 'confident', 'show_calm', 'crowd_ready'],
+    description: 'Easily startled and stressed by new situations.',
+    category: 'epigenetic',
+  },
+  stubborn: {
+    type: 'negative',
+    rarity: 'common',
+    conflicts: ['trainability_boost'],
+    description: 'Resistant to training and new commands.',
+    category: 'epigenetic',
+  },
+  fragile: {
+    type: 'negative',
+    rarity: 'common',
+    conflicts: ['resilient', 'athletic'],
+    description: 'More susceptible to injury and stress.',
+    category: 'epigenetic',
+  },
+  aggressive: {
+    type: 'negative',
+    rarity: 'common',
+    conflicts: ['calm', 'bonded'],
+    description: 'Difficult to handle and may show hostility.',
+    category: 'epigenetic',
+  },
+  lazy: {
+    type: 'negative',
+    rarity: 'common',
+    conflicts: ['intelligent', 'athletic'],
+    description: 'Low motivation and energy for training.',
+    category: 'epigenetic',
+  },
 
   // Rare traits (usually hidden)
-  legendary_bloodline: { type: 'positive', rarity: 'legendary', conflicts: [] },
-  weather_immunity: { type: 'positive', rarity: 'rare', conflicts: [] },
-  fire_resistance: { type: 'positive', rarity: 'rare', conflicts: [] },
-  water_phobia: { type: 'negative', rarity: 'rare', conflicts: [] },
-  night_vision: { type: 'positive', rarity: 'rare', conflicts: [] },
+  legendary_bloodline: {
+    type: 'positive',
+    rarity: 'legendary',
+    conflicts: [],
+    description: 'Exceptional heritage with legendary performance potential.',
+    category: 'epigenetic',
+  },
+  weather_immunity: {
+    type: 'positive',
+    rarity: 'rare',
+    conflicts: [],
+    description: 'Unaffected by weather conditions during events.',
+    category: 'epigenetic',
+  },
+  fire_resistance: {
+    type: 'positive',
+    rarity: 'rare',
+    conflicts: [],
+    description: 'Enhanced tolerance to heat and fire-related stress.',
+    category: 'epigenetic',
+  },
+  water_phobia: {
+    type: 'negative',
+    rarity: 'rare',
+    conflicts: [],
+    description: 'Extreme fear of water and water-related activities.',
+    category: 'epigenetic',
+  },
+  night_vision: {
+    type: 'positive',
+    rarity: 'rare',
+    conflicts: [],
+    description: 'Enhanced performance during night events.',
+    category: 'epigenetic',
+  },
 };
 
 // Environmental trait pools that can emerge based on conditions
 const ENVIRONMENTAL_TRAITS = {
-  positive: ['resilient', 'calm', 'intelligent'],
+  positive: ['resilient', 'calm', 'intelligent', 'confident', 'bonded'],
   negative: ['nervous', 'fragile', 'lazy'],
   rare: ['weather_immunity', 'night_vision', 'legendary_bloodline'],
+  situational: ['presentation_boosted', 'show_calm', 'crowd_ready'],
 };
 
 /**
@@ -337,6 +475,42 @@ export function getTraitsByType(type = 'all') {
   }
 
   return traits.filter(trait => TRAIT_DEFINITIONS[trait].type === type);
+}
+
+/**
+ * Get all available traits by category
+ * @param {string} category - 'epigenetic', 'bond', 'situational', or 'all'
+ * @returns {string[]} Array of trait names
+ */
+export function getTraitsByCategory(category = 'all') {
+  const traits = Object.keys(TRAIT_DEFINITIONS);
+
+  if (category === 'all') {
+    return traits;
+  }
+
+  return traits.filter(trait => TRAIT_DEFINITIONS[trait].category === category);
+}
+
+/**
+ * Get trait metadata including description and category
+ * @param {string} trait - Trait name
+ * @returns {Object|null} Trait metadata or null if not found
+ */
+export function getTraitMetadata(trait) {
+  const definition = TRAIT_DEFINITIONS[trait];
+  if (!definition) {
+    return null;
+  }
+
+  return {
+    name: trait,
+    type: definition.type,
+    category: definition.category,
+    description: definition.description,
+    rarity: definition.rarity,
+    conflicts: [...definition.conflicts],
+  };
 }
 
 /**

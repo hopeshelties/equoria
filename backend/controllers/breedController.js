@@ -12,10 +12,9 @@ export async function createBreed(req, res, next) {
   const { name, description } = req.body; // Added description
 
   try {
-    // Prisma's `create` will fail if `name` is not unique due to `@unique` in schema
-    // However, to provide a friendly error message, we can check first.
-    const existingBreed = await prisma.breed.findUnique({
-      where: { name }, // Prisma is case-sensitive by default for unique checks on PostgreSQL
+    // Check if breed name already exists (case-sensitive)
+    const existingBreed = await prisma.breed.findFirst({
+      where: { name }, // Prisma is case-sensitive by default for checks on PostgreSQL
     });
 
     if (existingBreed) {

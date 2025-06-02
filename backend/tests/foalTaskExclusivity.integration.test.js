@@ -37,7 +37,7 @@ describe('Foal Task Exclusivity Integration', () => {
       expect(ELIGIBLE_FOAL_ENRICHMENT_TASKS).toEqual([
         'desensitization',
         'trust_building',
-        'showground_exposure'
+        'showground_exposure',
       ]);
 
       // Verify grooming tasks
@@ -47,14 +47,14 @@ describe('Foal Task Exclusivity Integration', () => {
         'tying_practice',
         'sponge_bath',
         'coat_check',
-        'mane_tail_grooming'
+        'mane_tail_grooming',
       ]);
     });
 
     it('should have no overlap between task categories', () => {
       const enrichmentSet = new Set(ELIGIBLE_FOAL_ENRICHMENT_TASKS);
       const groomingSet = new Set(FOAL_GROOMING_TASKS);
-      
+
       const intersection = [...enrichmentSet].filter(task => groomingSet.has(task));
       expect(intersection).toHaveLength(0);
     });
@@ -67,8 +67,8 @@ describe('Foal Task Exclusivity Integration', () => {
           id: 1,
           name: 'Test Foal',
           dailyTaskRecord: {
-            [today]: [task]
-          }
+            [today]: [task],
+          },
         };
 
         const result = hasAlreadyCompletedFoalTaskToday(foal, today);
@@ -82,8 +82,8 @@ describe('Foal Task Exclusivity Integration', () => {
           id: 1,
           name: 'Test Foal',
           dailyTaskRecord: {
-            [today]: [task]
-          }
+            [today]: [task],
+          },
         };
 
         const result = hasAlreadyCompletedFoalTaskToday(foal, today);
@@ -97,8 +97,8 @@ describe('Foal Task Exclusivity Integration', () => {
         id: 1,
         name: 'Test Foal',
         dailyTaskRecord: {
-          [today]: ['trust_building']
-        }
+          [today]: ['trust_building'],
+        },
       };
 
       expect(hasAlreadyCompletedFoalTaskToday(foalWithEnrichment, today)).toBe(true);
@@ -108,8 +108,8 @@ describe('Foal Task Exclusivity Integration', () => {
         id: 2,
         name: 'Test Foal 2',
         dailyTaskRecord: {
-          [today]: ['hoof_handling']
-        }
+          [today]: ['hoof_handling'],
+        },
       };
 
       expect(hasAlreadyCompletedFoalTaskToday(foalWithGrooming, today)).toBe(true);
@@ -120,8 +120,8 @@ describe('Foal Task Exclusivity Integration', () => {
         id: 1,
         name: 'Test Foal',
         dailyTaskRecord: {
-          [today]: ['general_grooming', 'exercise', 'medical_check', 'feeding']
-        }
+          [today]: ['general_grooming', 'exercise', 'medical_check', 'feeding'],
+        },
       };
 
       const result = hasAlreadyCompletedFoalTaskToday(foalWithGeneralTasks, today);
@@ -133,8 +133,8 @@ describe('Foal Task Exclusivity Integration', () => {
         id: 1,
         name: 'Test Foal',
         dailyTaskRecord: {
-          [today]: ['general_grooming', 'trust_building', 'exercise']
-        }
+          [today]: ['general_grooming', 'trust_building', 'exercise'],
+        },
       };
 
       const result = hasAlreadyCompletedFoalTaskToday(foalWithMixedTasks, today);
@@ -148,8 +148,8 @@ describe('Foal Task Exclusivity Integration', () => {
         id: 1,
         name: 'Test Foal',
         dailyTaskRecord: {
-          [today]: ['trust_building', 'hoof_handling', 'desensitization']
-        }
+          [today]: ['trust_building', 'hoof_handling', 'desensitization'],
+        },
       };
 
       // Should return true (blocked) because foal already has foal tasks today
@@ -164,8 +164,8 @@ describe('Foal Task Exclusivity Integration', () => {
         dailyTaskRecord: {
           '2024-01-14': ['trust_building'],
           '2024-01-15': [], // Today - empty
-          '2024-01-16': ['hoof_handling']
-        }
+          '2024-01-16': ['hoof_handling'],
+        },
       };
 
       // Should allow interaction today since no foal tasks completed today
@@ -187,8 +187,8 @@ describe('Foal Task Exclusivity Integration', () => {
           '2024-01-12': ['hoof_handling'],
           '2024-01-13': ['early_touch'],
           '2024-01-14': ['general_grooming'], // Non-foal task
-          [today]: [] // Today - ready for new task
-        }
+          [today]: [], // Today - ready for new task
+        },
       };
 
       // Should allow new foal task today

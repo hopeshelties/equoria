@@ -150,8 +150,9 @@ model Horse {
   burnoutStatus         String?   @default("none") // 'none' | 'atRisk' | 'immune'
 
   /// Foal task logging and streak tracking
-  taskLog               Json?     // Stores enrichment/grooming task counters
-  lastGroomed           DateTime? // For streak tracking and grace period logic
+  taskLog                    Json?     // Stores enrichment/grooming task counters
+  consecutiveDaysFoalCare    Int?      @default(0) // Tracks consecutive days of foal care for streak bonuses
+  lastGroomed                DateTime? // For streak tracking and grace period logic (lastCareDate)
 
   /// Game mechanics
   tack                  Json?     @default("{}")

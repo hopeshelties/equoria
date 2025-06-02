@@ -32,8 +32,8 @@ describe('Groom Configuration', () => {
       it('should define correct enrichment tasks for early development', () => {
         expect(ELIGIBLE_FOAL_ENRICHMENT_TASKS).toEqual([
           'desensitization',
-          'trust_building', 
-          'showground_exposure'
+          'trust_building',
+          'showground_exposure',
         ]);
       });
 
@@ -64,7 +64,7 @@ describe('Groom Configuration', () => {
           'tying_practice',
           'sponge_bath',
           'coat_check',
-          'mane_tail_grooming'
+          'mane_tail_grooming',
         ]);
       });
 
@@ -91,7 +91,7 @@ describe('Groom Configuration', () => {
       it('should have no overlap between enrichment and grooming tasks', () => {
         const enrichmentSet = new Set(ELIGIBLE_FOAL_ENRICHMENT_TASKS);
         const groomingSet = new Set(FOAL_GROOMING_TASKS);
-        
+
         // Check for intersection
         const intersection = [...enrichmentSet].filter(task => groomingSet.has(task));
         expect(intersection).toHaveLength(0);
@@ -137,7 +137,7 @@ describe('Groom Configuration', () => {
       for (let age = 0; age <= 2; age++) {
         expect(age <= GROOM_CONFIG.FOAL_ENRICHMENT_MAX_AGE).toBe(true);
       }
-      
+
       // Age 3+ should not be eligible for enrichment only
       expect(3 <= GROOM_CONFIG.FOAL_ENRICHMENT_MAX_AGE).toBe(false);
     });
@@ -145,13 +145,13 @@ describe('Groom Configuration', () => {
     it('should allow grooming tasks for ages 1-3', () => {
       // Age 0 should not be eligible for grooming
       expect(0 >= GROOM_CONFIG.FOAL_GROOMING_MIN_AGE).toBe(false);
-      
+
       // Ages 1, 2, 3 should be eligible for grooming
       for (let age = 1; age <= 3; age++) {
-        expect(age >= GROOM_CONFIG.FOAL_GROOMING_MIN_AGE && 
+        expect(age >= GROOM_CONFIG.FOAL_GROOMING_MIN_AGE &&
                age <= GROOM_CONFIG.FOAL_GROOMING_MAX_AGE).toBe(true);
       }
-      
+
       // Age 4+ should not be eligible for foal grooming
       expect(4 <= GROOM_CONFIG.FOAL_GROOMING_MAX_AGE).toBe(false);
     });
@@ -161,7 +161,7 @@ describe('Groom Configuration', () => {
       for (let age = 0; age < 3; age++) {
         expect(age >= GROOM_CONFIG.GENERAL_GROOMING_MIN_AGE).toBe(false);
       }
-      
+
       // Ages 3+ should be eligible for general grooming
       for (let age = 3; age <= 10; age++) {
         expect(age >= GROOM_CONFIG.GENERAL_GROOMING_MIN_AGE).toBe(true);
@@ -172,9 +172,9 @@ describe('Groom Configuration', () => {
       // Ages 1 and 2 should be eligible for BOTH enrichment and grooming
       for (let age = 1; age <= 2; age++) {
         const canEnrichment = age <= GROOM_CONFIG.FOAL_ENRICHMENT_MAX_AGE;
-        const canGrooming = age >= GROOM_CONFIG.FOAL_GROOMING_MIN_AGE && 
+        const canGrooming = age >= GROOM_CONFIG.FOAL_GROOMING_MIN_AGE &&
                            age <= GROOM_CONFIG.FOAL_GROOMING_MAX_AGE;
-        
+
         expect(canEnrichment && canGrooming).toBe(true);
       }
     });

@@ -28,11 +28,11 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { 
+import {
   TASK_TRAIT_INFLUENCE_MAP,
   calculateTraitPoints,
   getTasksInfluencingTrait,
-  getAllInfluencedTraits
+  getAllInfluencedTraits,
 } from '../config/taskInfluenceConfig.js';
 import { ELIGIBLE_FOAL_ENRICHMENT_TASKS, FOAL_GROOMING_TASKS } from '../config/groomConfig.js';
 
@@ -80,7 +80,7 @@ describe('Task-Trait Influence Integration', () => {
       const taskCompletions = {
         trust_building: 5,    // 5 days of trust building
         desensitization: 3,   // 3 days of desensitization
-        early_touch: 2        // 2 days of early touch (overlap period)
+        early_touch: 2,        // 2 days of early touch (overlap period)
       };
 
       const traitPoints = calculateTraitPoints(taskCompletions);
@@ -98,7 +98,7 @@ describe('Task-Trait Influence Integration', () => {
         trust_building: 3,
         showground_exposure: 2,
         early_touch: 4,
-        hoof_handling: 2
+        hoof_handling: 2,
       };
 
       const traitPoints = calculateTraitPoints(taskCompletions);
@@ -119,7 +119,7 @@ describe('Task-Trait Influence Integration', () => {
         tying_practice: 3,
         sponge_bath: 2,
         coat_check: 3,
-        mane_tail_grooming: 2
+        mane_tail_grooming: 2,
       };
 
       const traitPoints = calculateTraitPoints(taskCompletions);
@@ -137,17 +137,17 @@ describe('Task-Trait Influence Integration', () => {
         // Year 1: Enrichment focus
         trust_building: 8,
         desensitization: 6,
-        
+
         // Year 2: Mixed development
         showground_exposure: 4,
         early_touch: 6,
         hoof_handling: 3,
-        
+
         // Year 3: Presentation focus
         tying_practice: 5,
         sponge_bath: 4,
         coat_check: 6,
-        mane_tail_grooming: 3
+        mane_tail_grooming: 3,
       };
 
       const traitPoints = calculateTraitPoints(fullDevelopmentTasks);
@@ -169,7 +169,7 @@ describe('Task-Trait Influence Integration', () => {
       // Simulate confidence-focused development
       const confidenceFocusedTasks = {
         desensitization: 10,
-        showground_exposure: 8
+        showground_exposure: 8,
       };
 
       const confidencePoints = calculateTraitPoints(confidenceFocusedTasks);
@@ -179,7 +179,7 @@ describe('Task-Trait Influence Integration', () => {
       const presentationFocusedTasks = {
         sponge_bath: 6,
         coat_check: 8,
-        mane_tail_grooming: 5
+        mane_tail_grooming: 5,
       };
 
       const presentationPoints = calculateTraitPoints(presentationFocusedTasks);
@@ -212,7 +212,7 @@ describe('Task-Trait Influence Integration', () => {
 
     it('should provide complete trait coverage', () => {
       const allTraits = getAllInfluencedTraits();
-      
+
       // Should include all expected trait categories
       expect(allTraits).toContain('bonded');
       expect(allTraits).toContain('calm');
@@ -232,7 +232,7 @@ describe('Task-Trait Influence Integration', () => {
     it('should enforce consistent daily values across all tasks', () => {
       const dailyValues = Object.values(TASK_TRAIT_INFLUENCE_MAP).map(influence => influence.dailyValue);
       const uniqueValues = [...new Set(dailyValues)];
-      
+
       expect(uniqueValues).toHaveLength(1);
       expect(uniqueValues[0]).toBe(5);
     });
@@ -252,7 +252,7 @@ describe('Task-Trait Influence Integration', () => {
     it('should provide balanced trait development opportunities', () => {
       // Count how many tasks influence each trait
       const traitTaskCounts = {};
-      
+
       Object.values(TASK_TRAIT_INFLUENCE_MAP).forEach(influence => {
         influence.traits.forEach(trait => {
           traitTaskCounts[trait] = (traitTaskCounts[trait] || 0) + 1;
@@ -270,8 +270,8 @@ describe('Task-Trait Influence Integration', () => {
   describe('Development Stage Integration', () => {
     it('should align with foal development stages', () => {
       // Enrichment tasks (0-2 years) should focus on foundational traits
-      const enrichmentInfluences = ELIGIBLE_FOAL_ENRICHMENT_TASKS.map(task => 
-        TASK_TRAIT_INFLUENCE_MAP[task].traits
+      const enrichmentInfluences = ELIGIBLE_FOAL_ENRICHMENT_TASKS.map(task =>
+        TASK_TRAIT_INFLUENCE_MAP[task].traits,
       ).flat();
 
       expect(enrichmentInfluences).toContain('confident');
@@ -280,8 +280,8 @@ describe('Task-Trait Influence Integration', () => {
       expect(enrichmentInfluences).toContain('crowd_ready');
 
       // Grooming tasks (1-3 years) should focus on handling and presentation
-      const groomingInfluences = FOAL_GROOMING_TASKS.map(task => 
-        TASK_TRAIT_INFLUENCE_MAP[task].traits
+      const groomingInfluences = FOAL_GROOMING_TASKS.map(task =>
+        TASK_TRAIT_INFLUENCE_MAP[task].traits,
       ).flat();
 
       expect(groomingInfluences).toContain('calm');

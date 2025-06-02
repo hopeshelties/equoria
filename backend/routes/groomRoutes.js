@@ -9,6 +9,7 @@ import { body, param, validationResult } from 'express-validator';
 // import { query } from 'express-validator';
 import {
   assignGroom,
+  cleanupTestData,
   ensureDefaultAssignment,
   getFoalAssignments,
   recordInteraction,
@@ -391,5 +392,8 @@ router.post(
  *         description: Internal server error
  */
 router.get('/definitions', getGroomDefinitions);
+
+// Test cleanup endpoint (for testing only)
+router.delete('/test/cleanup', cleanupTestData);
 
 export default router;

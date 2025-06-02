@@ -3,7 +3,7 @@
  * Maps foal tasks to epigenetic traits and defines trait point accumulation
  *
  * 🎯 PURPOSE:
- * Links task names to epigenetic traits and defines how many "trait points" 
+ * Links task names to epigenetic traits and defines how many "trait points"
  * each successful repetition contributes to trait probability during foal development.
  *
  * 📋 BUSINESS RULES:
@@ -28,7 +28,7 @@
 
 /**
  * Task to Trait Influence Mapping
- * 
+ *
  * Structure:
  * {
  *   taskName: {
@@ -39,14 +39,14 @@
  */
 export const TASK_TRAIT_INFLUENCE_MAP = {
   // ENRICHMENT TASKS (0-2 years) - Foundational trait development
-  
+
   /**
    * Desensitization - Early exposure and confidence building
    * Helps foals become comfortable with new stimuli and environments
    */
   desensitization: {
     traits: ['confident'],
-    dailyValue: 5
+    dailyValue: 5,
   },
 
   /**
@@ -55,7 +55,7 @@ export const TASK_TRAIT_INFLUENCE_MAP = {
    */
   trust_building: {
     traits: ['bonded', 'resilient'],
-    dailyValue: 5
+    dailyValue: 5,
   },
 
   /**
@@ -64,7 +64,7 @@ export const TASK_TRAIT_INFLUENCE_MAP = {
    */
   showground_exposure: {
     traits: ['crowd_ready', 'confident'],
-    dailyValue: 5
+    dailyValue: 5,
   },
 
   // GROOMING TASKS (1-3 years) - Handling and presentation development
@@ -75,7 +75,7 @@ export const TASK_TRAIT_INFLUENCE_MAP = {
    */
   early_touch: {
     traits: ['calm'],
-    dailyValue: 5
+    dailyValue: 5,
   },
 
   /**
@@ -84,7 +84,7 @@ export const TASK_TRAIT_INFLUENCE_MAP = {
    */
   hoof_handling: {
     traits: ['show_calm'],
-    dailyValue: 5
+    dailyValue: 5,
   },
 
   /**
@@ -93,7 +93,7 @@ export const TASK_TRAIT_INFLUENCE_MAP = {
    */
   tying_practice: {
     traits: ['show_calm'],
-    dailyValue: 5
+    dailyValue: 5,
   },
 
   /**
@@ -102,7 +102,7 @@ export const TASK_TRAIT_INFLUENCE_MAP = {
    */
   sponge_bath: {
     traits: ['show_calm', 'presentation_boosted'],
-    dailyValue: 5
+    dailyValue: 5,
   },
 
   /**
@@ -111,7 +111,7 @@ export const TASK_TRAIT_INFLUENCE_MAP = {
    */
   coat_check: {
     traits: ['presentation_boosted'],
-    dailyValue: 5
+    dailyValue: 5,
   },
 
   /**
@@ -120,8 +120,8 @@ export const TASK_TRAIT_INFLUENCE_MAP = {
    */
   mane_tail_grooming: {
     traits: ['presentation_boosted'],
-    dailyValue: 5
-  }
+    dailyValue: 5,
+  },
 };
 
 /**
@@ -160,13 +160,13 @@ export function getDailyTraitValue(taskName) {
  */
 export function getTasksInfluencingTrait(traitName) {
   const tasks = [];
-  
+
   Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([taskName, influence]) => {
     if (influence.traits.includes(traitName)) {
       tasks.push(taskName);
     }
   });
-  
+
   return tasks;
 }
 
@@ -176,11 +176,11 @@ export function getTasksInfluencingTrait(traitName) {
  */
 export function getAllInfluencedTraits() {
   const traits = new Set();
-  
+
   Object.values(TASK_TRAIT_INFLUENCE_MAP).forEach(influence => {
     influence.traits.forEach(trait => traits.add(trait));
   });
-  
+
   return Array.from(traits).sort();
 }
 
@@ -191,19 +191,19 @@ export function getAllInfluencedTraits() {
  */
 export function calculateTraitPoints(taskCompletions) {
   const traitPoints = {};
-  
+
   Object.entries(taskCompletions).forEach(([taskName, completionCount]) => {
     const influence = TASK_TRAIT_INFLUENCE_MAP[taskName];
     if (influence && completionCount > 0) {
       const pointsPerCompletion = influence.dailyValue;
       const totalPoints = pointsPerCompletion * completionCount;
-      
+
       influence.traits.forEach(trait => {
         traitPoints[trait] = (traitPoints[trait] || 0) + totalPoints;
       });
     }
   });
-  
+
   return traitPoints;
 }
 
@@ -213,23 +213,23 @@ export function calculateTraitPoints(taskCompletions) {
  */
 export function validateTaskInfluenceMap() {
   const errors = [];
-  
+
   Object.entries(TASK_TRAIT_INFLUENCE_MAP).forEach(([taskName, influence]) => {
     // Check required properties
     if (!influence.traits || !Array.isArray(influence.traits)) {
       errors.push(`Task ${taskName}: traits must be an array`);
     }
-    
+
     if (typeof influence.dailyValue !== 'number' || influence.dailyValue <= 0) {
       errors.push(`Task ${taskName}: dailyValue must be a positive number`);
     }
-    
+
     // Check trait array
     if (influence.traits) {
       if (influence.traits.length === 0) {
         errors.push(`Task ${taskName}: must influence at least one trait`);
       }
-      
+
       influence.traits.forEach((trait, index) => {
         if (typeof trait !== 'string' || trait.length === 0) {
           errors.push(`Task ${taskName}: trait at index ${index} must be a non-empty string`);
@@ -237,10 +237,10 @@ export function validateTaskInfluenceMap() {
       });
     }
   });
-  
+
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
