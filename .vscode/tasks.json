@@ -88,6 +88,38 @@
         "focus": false,
         "panel": "shared"
       }
+    },
+    {
+  "label": "🔁 Convert .js to .mjs (backend only)",
+  "type": "shell",
+  "command": "powershell",
+  "args": [
+    "-NoProfile",
+    "-ExecutionPolicy", "Bypass",
+    "-Command",
+    "Get-ChildItem -Path '${workspaceFolder}/backend' -Recurse -Filter *.js | Rename-Item -NewName { $_.Name -replace '\\.js$', '.mjs' }"
+  ],
+  "presentation": {
+    "reveal": "always",
+    "panel": "shared"
+  },
+  "problemMatcher": []
+},
+    {
+      "label": "🔎 Scan .js Files (flag ESM errors)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-Command",
+        "Get-ChildItem -Path '${workspaceFolder}/backend' -Recurse -Filter *.js | ForEach-Object { Write-Host 'Found JS file: ' $_.FullName }"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
     }
   ]
 }

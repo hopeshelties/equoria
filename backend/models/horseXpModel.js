@@ -40,16 +40,9 @@ const VALID_HORSE_STATS = [
 /**
  * Calculate available stat points based on horse XP
  * @param {number} horseXp - Current horse XP
-<<<<<<< HEAD
  * @returns {number} Total available stat points
  */
 function calculateAvailableStatPoints(horseXp) {
-=======
- * @param {number} currentStatPoints - Currently available unspent stat points
- * @returns {number} Total available stat points
- */
-function calculateAvailableStatPoints(horseXp, currentStatPoints = 0) {
->>>>>>> 2b90c9a95e25c8a96fbf72c96ae67accf803c409
   const earnedStatPoints = Math.floor(horseXp / XP_PER_STAT_POINT);
   return earnedStatPoints;
 }
@@ -103,11 +96,7 @@ export async function addXpToHorse(horseId, amount, reason) {
     const newAvailableStatPoints = currentStatPoints + statPointsGained;
 
     // Update horse in database
-<<<<<<< HEAD
     await prisma.horse.update({
-=======
-    const updatedHorse = await prisma.horse.update({
->>>>>>> 2b90c9a95e25c8a96fbf72c96ae67accf803c409
       where: { id: horseId },
       data: {
         horseXp: newXp,
@@ -292,19 +281,6 @@ export async function awardCompetitionXp(horseId, placement, discipline) {
     let placementBonus = 0;
 
     switch (placement) {
-<<<<<<< HEAD
-    case '1st':
-      placementBonus = 10;
-      break;
-    case '2nd':
-      placementBonus = 7;
-      break;
-    case '3rd':
-      placementBonus = 5;
-      break;
-    default:
-      placementBonus = 0;
-=======
       case '1st':
         placementBonus = 10;
         break;
@@ -316,7 +292,6 @@ export async function awardCompetitionXp(horseId, placement, discipline) {
         break;
       default:
         placementBonus = 0;
->>>>>>> 2b90c9a95e25c8a96fbf72c96ae67accf803c409
     }
 
     const totalXp = baseXp + placementBonus;
