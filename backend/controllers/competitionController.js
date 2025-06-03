@@ -344,15 +344,15 @@ async function enterAndRunShow(horseIds, show) {
             if (horse && horse.userId) {
               let userXpAmount = 0;
               switch (simResult.placement) {
-              case '1st':
-                userXpAmount = 20;
-                break;
-              case '2nd':
-                userXpAmount = 15;
-                break;
-              case '3rd':
-                userXpAmount = 10;
-                break;
+                case '1st':
+                  userXpAmount = 20;
+                  break;
+                case '2nd':
+                  userXpAmount = 15;
+                  break;
+                case '3rd':
+                  userXpAmount = 10;
+                  break;
               }
 
               if (userXpAmount > 0) {

@@ -3,10 +3,11 @@
 /copilot
 /.cursor
 /Project Cheatsheets
-
+/codehelpers
 # next.js
 /.next/
 /out/
+/UI
 
 # production
 /build

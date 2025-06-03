@@ -42,6 +42,26 @@ export async function assignGroom(req, res) {
       });
     }
 
+    // Ownership check: Only the owner can assign a groom
+    const foal = await prisma.horse.findUnique({
+      where: { id: foalId },
+      select: { id: true, userId: true },
+    });
+    if (!foal) {
+      return res.status(404).json({
+        success: false,
+        message: 'Foal not found',
+        data: null,
+      });
+    }
+    if (foal.userId !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Forbidden: You do not own this horse',
+        data: null,
+      });
+    }
+
     const result = await assignGroomToFoal(foalId, groomId, userId, {
       priority,
       notes,
