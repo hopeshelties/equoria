@@ -15,9 +15,7 @@ export default {
   },
 
   // Don't transform node_modules except for specific packages that need it
-  transformIgnorePatterns: [
-    'node_modules/(?!(dotenv|other-es-module-packages)/)',
-  ],
+  transformIgnorePatterns: ['node_modules/(?!(dotenv|other-es-module-packages)/)'],
 
   // Setup file path must match your actual filename
   setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'],
@@ -35,8 +33,7 @@ export default {
     experimentalVmModules: true,
   },
 
-  // Additional ES module options
-  extensionsToTreatAsEsm: ['.mjs'],
+  // Module name mapping for imports
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
