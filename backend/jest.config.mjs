@@ -14,6 +14,11 @@ export default {
     '^.+\\.m?js$': ['babel-jest', { configFile: './babel.config.json' }],
   },
 
+  // Don't transform node_modules except for specific packages that need it
+  transformIgnorePatterns: [
+    'node_modules/(?!(dotenv|other-es-module-packages)/)',
+  ],
+
   // Setup file path must match your actual filename
   setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'],
 
@@ -28,5 +33,11 @@ export default {
   // Enable experimental features
   testEnvironmentOptions: {
     experimentalVmModules: true,
+  },
+
+  // Additional ES module options
+  extensionsToTreatAsEsm: ['.mjs'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
 };
