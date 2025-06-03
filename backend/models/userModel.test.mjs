@@ -200,7 +200,7 @@ describe('👤 UNIT: User Model - Database Operations & Business Logic', () => {
       await expect(getUserById(null)).rejects.toThrow(
         new DatabaseError('Lookup failed: User ID is required.'),
       );
-      await expect(getUserById(undefined)).rejects.toThrow(
+      await expect(getUserById()).rejects.toThrow(
         new DatabaseError('Lookup failed: User ID is required.'),
       );
     });

@@ -138,7 +138,7 @@ describe('⏰ UNIT: Training Cooldown System - Horse Training Restrictions', () 
     });
 
     it('should throw error for undefined horse', () => {
-      expect(() => canTrain(undefined)).toThrow('Horse object is required');
+      expect(() => canTrain()).toThrow('Horse object is required');
     });
   });
 
@@ -195,7 +195,7 @@ describe('⏰ UNIT: Training Cooldown System - Horse Training Restrictions', () 
     });
 
     it('should throw error for undefined horse', () => {
-      expect(() => getCooldownTimeRemaining(undefined)).toThrow('Horse object is required');
+      expect(() => getCooldownTimeRemaining()).toThrow('Horse object is required');
     });
   });
 
@@ -264,7 +264,7 @@ describe('⏰ UNIT: Training Cooldown System - Horse Training Restrictions', () 
     });
 
     it('should throw error for undefined horse ID', async () => {
-      await expect(setCooldown(undefined)).rejects.toThrow('Horse ID is required');
+      await expect(setCooldown()).rejects.toThrow('Horse ID is required');
     });
 
     it('should throw error for invalid horse ID (string)', async () => {
