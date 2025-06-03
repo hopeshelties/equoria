@@ -1,6 +1,6 @@
 // TODO: Re-enable when stat scoring is needed for reward calculations
-// import { getStatScore } from './getStatScore.js';
-import logger from './logger.js';
+// import { getStatScore } from './getStatScore.mjs';
+import logger from './logger.mjs';
 
 /**
  * Calculate prize distribution for competition winners

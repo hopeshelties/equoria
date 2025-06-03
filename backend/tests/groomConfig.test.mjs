@@ -28,7 +28,7 @@ import {
   GROOM_CONFIG,
   ELIGIBLE_FOAL_ENRICHMENT_TASKS,
   FOAL_GROOMING_TASKS,
-} from '../config/groomConfig.js';
+} from '../config/groomConfig.mjs';
 
 describe('Groom Configuration', () => {
   describe('Foal Task Categories', () => {

@@ -35,7 +35,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { calculateEpigeneticTraits } from '../utils/epigeneticTraits.js';
+import { calculateEpigeneticTraits } from '../utils/epigeneticTraits.mjs';
 
 describe('🧬 UNIT: Epigenetic Traits System - Breeding & Environmental Trait Calculation', () => {
   describe('Input Validation', () => {

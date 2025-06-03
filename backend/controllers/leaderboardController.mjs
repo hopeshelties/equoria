@@ -3,8 +3,8 @@
  * Provides ranked lists of top-performing horses and users based on various metrics
  */
 
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
 
 // Utility Functions
 const calculateXpToNextLevel = currentLevelXp => {

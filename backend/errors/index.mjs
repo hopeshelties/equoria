@@ -3,10 +3,10 @@
  * Centralized export for all custom error classes
  */
 
-import AppError from './AppError.js';
-import ValidationError from './ValidationError.js';
-import DatabaseError from './DatabaseError.js';
-import NotFoundError from './NotFoundError.js';
-import AuthorizationError from './AuthorizationError.js';
+import AppError from './AppError.mjs';
+import ValidationError from './ValidationError.mjs';
+import DatabaseError from './DatabaseError.mjs';
+import NotFoundError from './NotFoundError.mjs';
+import AuthorizationError from './AuthorizationError.mjs';
 
 export { AppError, ValidationError, DatabaseError, NotFoundError, AuthorizationError };

@@ -4,6 +4,8 @@
 /.cursor
 /Project Cheatsheets
 /codehelpers
+/.vscode
+/UI
 
 # next.js
 /.next/

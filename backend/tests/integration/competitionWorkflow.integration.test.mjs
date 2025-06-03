@@ -22,8 +22,8 @@ import request from 'supertest';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import dotenv from 'dotenv';
-import app from '../../app.js';
-import prisma from '../../db/index.js';
+import app from '../../app.mjs';
+import prisma from '../../db/index.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

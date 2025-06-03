@@ -1,5 +1,5 @@
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Save a competition result to the database

@@ -38,9 +38,9 @@
 import { describe, it, expect, beforeEach, afterAll } from '@jest/globals';
 // Jest globals are available in test environment
 import request from 'supertest';
-import app from '../app.js';
-import { createTestUser, createLoginData } from './helpers/authHelper.js';
-import prisma from '../db/index.js';
+import app from '../app.mjs';
+import { createTestUser, createLoginData } from './helpers/authHelper.mjs';
+import prisma from '../db/index.mjs';
 
 describe('🔐 INTEGRATION: Authentication System - User Registration & Session Management', () => {
   // Clean up test data before and after tests

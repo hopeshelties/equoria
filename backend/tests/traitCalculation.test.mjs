@@ -37,7 +37,7 @@ import {
   getTraitDefinition,
   getTraitsByType,
   checkTraitConflict,
-} from '../utils/epigeneticTraits.js';
+} from '../utils/epigeneticTraits.mjs';
 
 describe('🧬 UNIT: Epigenetic Traits Calculation System', () => {
   describe('Edge Cases', () => {

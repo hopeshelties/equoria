@@ -3,8 +3,8 @@
  * Applies epigenetic traits to newborn horses based on breeding conditions
  */
 
-import logger from './logger.js';
-import prisma from '../db/index.js';
+import logger from './logger.mjs';
+import prisma from '../db/index.mjs';
 
 /**
  * At-birth trait definitions based on breeding conditions

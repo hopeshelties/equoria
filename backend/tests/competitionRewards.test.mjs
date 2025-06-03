@@ -39,7 +39,7 @@ import {
   calculateStatGains,
   calculateEntryFees,
   hasValidRider,
-} from '../utils/competitionRewards.js';
+} from '../utils/competitionRewards.mjs';
 
 describe('🏆 UNIT: Competition Rewards System - Prize & Stat Gain Calculations', () => {
   describe('calculatePrizeDistribution', () => {

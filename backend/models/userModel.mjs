@@ -1,13 +1,28 @@
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
-import { DatabaseError } from '../errors/index.js';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import { DatabaseError } from '../errors/index.mjs';
 
 const DEFAULT_XP_PER_LEVEL = 100;
 
+/**
+ * Calculates the experience points threshold for a specific level.
+ * @param {number} level - The level to calculate the threshold for.
+ * @returns {number} The experience points threshold for the given level.
+ */
 function xpThreshold(level) {
   return DEFAULT_XP_PER_LEVEL * level;
 }
 
+/**
+ * Creates a new user in the database.
+ *
+ * @param {Object} userData - The user data.
+ * @param {string} userData.username - The username of the user.
+ * @param {string} userData.email - The user's email address.
+ * @param {string} userData.password - The user's password.
+ * @param {Object} [userData.rest] - Additional user fields.
+ * @returns {Promise<Object>} The created user object containing selected fields.
+ */
 async function createUser(userData) {
   try {
     const { username, email, password, ...rest } = userData;
@@ -230,7 +245,7 @@ async function getUserStats(userId) {
 }
 
 // Deprecated
-async function addUserXp(userId, amount) {
+function addUserXp(userId, amount) {
   logger.warn('[addUserXp] DEPRECATED: Use addXpToUser instead.');
   return addXpToUser(userId, amount);
 }

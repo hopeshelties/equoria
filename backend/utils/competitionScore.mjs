@@ -1,4 +1,4 @@
-import logger from './logger.js';
+import logger from './logger.mjs';
 
 /**
  * Calculate competition score for a horse in a specific event type

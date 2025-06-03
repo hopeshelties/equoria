@@ -3,10 +3,10 @@
  * Handles trait discovery, revelation, and management operations
  */
 
-import { revealTraits } from '../utils/traitDiscovery.js';
-import { getTraitDefinition, getTraitsByType } from '../utils/epigeneticTraits.js';
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
+import { revealTraits } from '../utils/traitDiscovery.mjs';
+import { getTraitDefinition, getTraitsByType } from '../utils/epigeneticTraits.mjs';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * POST /api/traits/discover/:horseId

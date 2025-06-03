@@ -5,7 +5,7 @@
  * based on mare conditions, lineage analysis, and breeding circumstances.
  */
 
-import logger from './logger.js';
+import logger from './logger.mjs';
 
 /**
  * Apply epigenetic traits at birth based on breeding conditions

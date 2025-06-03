@@ -5,7 +5,7 @@
  * Uses minimal mocking approach - real business logic with deterministic results.
  */
 
-import logger from './logger.js';
+import logger from './logger.mjs';
 
 /**
  * Calculate competition score based on horse attributes and discipline

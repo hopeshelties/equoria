@@ -35,7 +35,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
+import { isHorseEligibleForShow } from '../utils/isHorseEligible.mjs';
 
 describe('🏆 UNIT: Horse Eligibility - Competition Entry Validation', () => {
   // Sample test data

@@ -26,7 +26,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 
 describe('Foal Task Log Storage', () => {
   let testUser, testFoal;

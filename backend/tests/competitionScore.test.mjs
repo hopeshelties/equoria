@@ -38,7 +38,7 @@ import {
   calculateCompetitionScore,
   getDisciplineStatWeights,
   validateHorseForCompetition,
-} from '../utils/competitionScore.js';
+} from '../utils/competitionScore.mjs';
 
 describe('🏆 UNIT: Competition Score Calculation - Scoring Algorithm Validation', () => {
   const createTestHorse = (stats = {}, traits = []) => ({

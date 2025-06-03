@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import logger from './logger.js';
+import logger from './logger.mjs';
 
 /**
  * Security Validation Utilities

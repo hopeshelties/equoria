@@ -36,9 +36,9 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { getCombinedTraitEffects } from '../utils/traitEffects.js';
-import { calculateBondingChange } from '../utils/bondingModifiers.js';
-import { calculateTemperamentDrift } from '../utils/temperamentDrift.js';
+import { getCombinedTraitEffects } from '../utils/traitEffects.mjs';
+import { calculateBondingChange } from '../utils/bondingModifiers.mjs';
+import { calculateTemperamentDrift } from '../utils/temperamentDrift.mjs';
 
 describe('🎮 UNIT: Trait Integration System - Gameplay Effect Application', () => {
   beforeEach(() => {

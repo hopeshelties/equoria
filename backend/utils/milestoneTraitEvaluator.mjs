@@ -33,8 +33,8 @@
  * @lastModified 2025-01-02 - Initial milestone trait evaluation implementation
  */
 
-import { TASK_TRAIT_INFLUENCE_MAP } from './taskTraitInfluenceMap.js';
-import logger from './logger.js';
+import { TASK_TRAIT_INFLUENCE_MAP } from './taskTraitInfluenceMap.mjs';
+import logger from './logger.mjs';
 
 /**
  * Milestone ages for trait evaluation

@@ -16,9 +16,9 @@ import {
   getUserGrooms,
   hireGroom,
   getGroomDefinitions,
-} from '../controllers/groomController.js';
-import { GROOM_CONFIG } from '../config/groomConfig.js';
-import logger from '../utils/logger.js';
+} from '../controllers/groomController.mjs';
+import { GROOM_CONFIG } from '../config/groomConfig.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

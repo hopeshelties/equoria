@@ -2,7 +2,7 @@
  * Create test data for API testing
  */
 
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 
 async function createTestData() {
   try {

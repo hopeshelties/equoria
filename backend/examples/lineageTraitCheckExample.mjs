@@ -7,7 +7,7 @@ import {
   checkLineageForDisciplineAffinity,
   checkLineageForDisciplineAffinityDetailed,
   checkSpecificDisciplineAffinity,
-} from '../utils/lineageTraitCheck.js';
+} from '../utils/lineageTraitCheck.mjs';
 
 console.log('🐎 Lineage Trait Check Utility Examples\n');
 

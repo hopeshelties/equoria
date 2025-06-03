@@ -2,7 +2,7 @@
  * Clean up test assignments for fresh testing
  */
 
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 
 async function cleanupAssignments() {
   try {

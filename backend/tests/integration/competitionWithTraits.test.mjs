@@ -3,7 +3,7 @@
  * Tests the complete competition simulation with trait impact
  */
 
-import { simulateCompetition } from '../../logic/simulateCompetition.js';
+import { simulateCompetition } from '../../logic/simulateCompetition.mjs';
 
 describe('Competition Simulation with Trait Impact', () => {
   const baseHorse = {

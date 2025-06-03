@@ -29,8 +29,8 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import request from 'supertest';
-import app from '../app.js';
-import prisma from '../db/index.js';
+import app from '../app.mjs';
+import prisma from '../db/index.mjs';
 
 describe('Foal Task Logging Integration', () => {
   let testUser, testGroom, testFoal, testAssignment;

@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import request from 'supertest';
-import app from '../app.js';
-import prisma from '../db/index.js';
+import app from '../app.mjs';
+import prisma from '../db/index.mjs';
 
 describe('Trait Discovery API Integration Tests', () => {
   let testBreed;

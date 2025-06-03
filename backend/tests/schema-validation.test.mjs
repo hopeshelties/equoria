@@ -3,7 +3,7 @@
  * Quick test to verify database schema compatibility
  */
 
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 
 describe('Schema Validation', () => {
   let testUser;

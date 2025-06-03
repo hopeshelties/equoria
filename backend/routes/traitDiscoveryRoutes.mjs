@@ -5,8 +5,8 @@ import {
   batchRevealTraits,
   getDiscoveryProgress,
   DISCOVERY_CONDITIONS,
-} from '../utils/traitDiscovery.js';
-import logger from '../utils/logger.js';
+} from '../utils/traitDiscovery.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

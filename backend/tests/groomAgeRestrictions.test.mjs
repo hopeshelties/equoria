@@ -25,8 +25,8 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { validateGroomingEligibility } from '../utils/groomBondingSystem.js';
-import { GROOM_CONFIG } from '../config/groomConfig.js';
+import { validateGroomingEligibility } from '../utils/groomBondingSystem.mjs';
+import { GROOM_CONFIG } from '../config/groomConfig.mjs';
 
 describe('Groom Age Restrictions & Task Eligibility', () => {
   beforeEach(() => {

@@ -36,8 +36,8 @@ import {
   updateTaskLog,
   updateStreakTracking,
   checkTaskMutualExclusivity,
-} from '../utils/groomBondingSystem.js';
-import { GROOM_CONFIG } from '../config/groomConfig.js';
+} from '../utils/groomBondingSystem.mjs';
+import { GROOM_CONFIG } from '../config/groomConfig.mjs';
 
 describe('Foal Task Logging & Streak Tracking System', () => {
   beforeEach(() => {

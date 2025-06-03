@@ -1,9 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { generateToken, generateRefreshToken } from '../middleware/auth.js';
-import { AppError, ValidationError } from '../errors/index.js';
-import logger from '../utils/logger.js';
-import prisma from '../db/index.js';
+import { generateToken, generateRefreshToken } from '../middleware/auth.mjs';
+import { AppError, ValidationError } from '../errors/index.mjs';
+import logger from '../utils/logger.mjs';
+import prisma from '../db/index.mjs';
 
 /**
  * Register a new user and create a corresponding user record.

@@ -1,5 +1,5 @@
-import { generateMockShows } from '../utils/generateMockShows.js';
-import { PrismaClient } from '../../packages/database/node_modules/@prisma/client/index.js';
+import { generateMockShows } from '../utils/generateMockShows.mjs';
+import { PrismaClient } from '../../packages/database/node_modules/@prisma/client/index.mjs';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';

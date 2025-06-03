@@ -1,5 +1,5 @@
-import logger from '../utils/logger.js';
-// import prisma from '../db/index.js'; // TODO: Implement audit logging
+import logger from '../utils/logger.mjs';
+// import prisma from '../db/index.mjs'; // TODO: Implement audit logging
 
 /**
  * Audit Logging Middleware

@@ -1,5 +1,5 @@
-import prisma from '../db/index.js';
-import { logger } from './logger.js';
+import prisma from '../db/index.mjs';
+import { logger } from './logger.mjs';
 
 /**
  * Update user money

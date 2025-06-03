@@ -1,4 +1,4 @@
-import { getAllDisciplines } from './statMap.js';
+import { getAllDisciplines } from './statMap.mjs';
 
 /**
  * Generate mock shows for testing and seeding purposes

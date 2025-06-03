@@ -3,8 +3,8 @@
  * Demonstrates how traits are applied during horse creation based on breeding conditions
  */
 
-import { applyEpigeneticTraitsAtBirth, AT_BIRTH_TRAITS } from '../utils/atBirthTraits.js';
-import { createHorse } from '../models/horseModel.js';
+import { applyEpigeneticTraitsAtBirth, AT_BIRTH_TRAITS } from '../utils/atBirthTraits.mjs';
+import { createHorse } from '../models/horseModel.mjs';
 
 console.log('🐎 At-Birth Traits System Examples\n');
 

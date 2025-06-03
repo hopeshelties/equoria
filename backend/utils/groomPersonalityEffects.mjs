@@ -30,7 +30,7 @@
  * @lastModified 2025-01-02 - Initial groom personality effects implementation
  */
 
-import logger from './logger.js';
+import logger from './logger.mjs';
 
 /**
  * Comprehensive groom personality effects configuration

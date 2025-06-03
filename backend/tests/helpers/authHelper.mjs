@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import config from '../../config/config.js';
+import config from '../../config/config.mjs';
 
 /**
  * Generate a test JWT token for authenticated requests

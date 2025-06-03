@@ -3,9 +3,9 @@
  * Handles automatic daily care routines for foals with assigned grooms
  */
 
-import prisma from '../db/index.js';
-import logger from './logger.js';
-import { calculateGroomInteractionEffects } from './groomSystem.js';
+import prisma from '../db/index.mjs';
+import logger from './logger.mjs';
+import { calculateGroomInteractionEffects } from './groomSystem.mjs';
 
 /**
  * Daily care routine types and their characteristics

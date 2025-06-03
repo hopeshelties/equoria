@@ -1,5 +1,5 @@
 import express from 'express';
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 import { query, validationResult } from 'express-validator';
 import {
   getTopPlayersByLevel,
@@ -9,10 +9,10 @@ import {
   getTopPlayersByHorseEarnings,
   getRecentWinners,
   getLeaderboardStats,
-} from '../controllers/leaderboardController.js';
-import { getAllDisciplines } from '../utils/competitionLogic.js';
-import auth from '../middleware/auth.js';
-import logger from '../utils/logger.js';
+} from '../controllers/leaderboardController.mjs';
+import { getAllDisciplines } from '../utils/competitionLogic.mjs';
+import auth from '../middleware/auth.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

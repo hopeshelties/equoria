@@ -1,3 +1,4 @@
+// skipcq: JS-0128
 import React, { useState } from 'react';
 import {
   View,
@@ -9,8 +10,6 @@ import {
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-
-const { width } = Dimensions.get('window');
 
 /**
  * TraitDisplay Component
@@ -112,12 +111,9 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
   const getTraitInfo = (traitKey) => {
     return (
       traitDefinitions[traitKey] || {
-        name: traitKey
-          .replace(/_/g, ' ')
-          .replace(/\b\w/g, (l) => l.toUpperCase()),
+        name: traitKey.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
         type: 'unknown',
-        description:
-          "This trait affects the horse's behavior and abilities in unique ways.",
+        description: "This trait affects the horse's behavior and abilities in unique ways.",
         effects: 'Various effects on horse development and performance',
       }
     );
@@ -169,9 +165,7 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
         accessibilityLabel={`${traitInfo.name} trait - ${type}`}
         accessibilityHint="Tap to view detailed description"
       >
-        <Text className={`${textColor} text-sm font-medium`}>
-          {traitInfo.name}
-        </Text>
+        <Text className={`${textColor} text-sm font-medium`}>{traitInfo.name}</Text>
       </TouchableOpacity>
     );
   };
@@ -188,11 +182,7 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
         </View>
         <View className="flex-row flex-wrap">
           {traits.map((trait, index) => (
-            <TraitBadge
-              key={`${type}-${trait}-${index}`}
-              traitKey={trait}
-              type={type}
-            />
+            <TraitBadge key={`${type}-${trait}-${index}`} traitKey={trait} type={type} />
           ))}
         </View>
       </View>
@@ -206,9 +196,7 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
     return (
       <View className="mb-6">
         <View className="flex-row items-center mb-3">
-          <Text className="text-lg font-bold text-gray-800 mr-2">
-            Undiscovered
-          </Text>
+          <Text className="text-lg font-bold text-gray-800 mr-2">Undiscovered</Text>
           <Text className="text-lg">🔍</Text>
         </View>
         <View className="flex-row flex-wrap">
@@ -226,6 +214,52 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
   };
 
   // Modal component
+const TraitModalHeader = ({ selectedTrait, closeModal }) => (
+    <View className="flex-row items-center justify-between mb-4">
+      <View className="flex-row items-center">
+        <View
+          className={`px-3 py-1 rounded-full mr-3 ${
+            selectedTrait.type === 'positive' ? 'bg-green-500' : 'bg-red-500'
+          }`}
+        >
+          <Text className="text-white text-sm font-medium">{selectedTrait.name}</Text>
+        </View>
+        <Text className="text-lg">{selectedTrait.type === 'positive' ? '✨' : '⚠️'}</Text>
+      </View>
+      <TouchableOpacity
+        onPress={closeModal}
+        className="p-2"
+        accessibilityRole="button"
+        accessibilityLabel="Close"
+      >
+        <Text className="text-gray-500 text-xl font-bold">×</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const TraitModalContent = ({ selectedTrait }) => (
+    <ScrollView className="max-h-64">
+      <Text className="text-gray-800 text-base leading-6 mb-4">
+        {selectedTrait.description}
+      </Text>
+      <View className="bg-gray-50 rounded-lg p-3">
+        <Text className="text-sm font-semibold text-gray-700 mb-1">Effects:</Text>
+        <Text className="text-sm text-gray-600">{selectedTrait.effects}</Text>
+      </View>
+    </ScrollView>
+  );
+
+  const TraitModalFooter = ({ closeModal }) => (
+    <TouchableOpacity
+      className="bg-blue-500 rounded-lg py-3 mt-4"
+      onPress={closeModal}
+      accessibilityRole="button"
+      accessibilityLabel="Close trait details"
+    >
+      <Text className="text-white text-center font-medium">Got it!</Text>
+    </TouchableOpacity>
+  );
+
   const TraitModal = () => {
     if (!selectedTrait) return null;
 
@@ -252,18 +286,12 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
               <View className="flex-row items-center">
                 <View
                   className={`px-3 py-1 rounded-full mr-3 ${
-                    selectedTrait.type === 'positive'
-                      ? 'bg-green-500'
-                      : 'bg-red-500'
+                    selectedTrait.type === 'positive' ? 'bg-green-500' : 'bg-red-500'
                   }`}
                 >
-                  <Text className="text-white text-sm font-medium">
-                    {selectedTrait.name}
-                  </Text>
+                  <Text className="text-white text-sm font-medium">{selectedTrait.name}</Text>
                 </View>
-                <Text className="text-lg">
-                  {selectedTrait.type === 'positive' ? '✨' : '⚠️'}
-                </Text>
+                <Text className="text-lg">{selectedTrait.type === 'positive' ? '✨' : '⚠️'}</Text>
               </View>
               <TouchableOpacity
                 onPress={closeModal}
@@ -282,12 +310,8 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
               </Text>
 
               <View className="bg-gray-50 rounded-lg p-3">
-                <Text className="text-sm font-semibold text-gray-700 mb-1">
-                  Effects:
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  {selectedTrait.effects}
-                </Text>
+                <Text className="text-sm font-semibold text-gray-700 mb-1">Effects:</Text>
+                <Text className="text-sm text-gray-600">{selectedTrait.effects}</Text>
               </View>
             </ScrollView>
 
@@ -298,30 +322,26 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
               accessibilityRole="button"
               accessibilityLabel="Close trait details"
             >
-              <Text className="text-white text-center font-medium">
-                Got it!
-              </Text>
+              <Text className="text-white text-center font-medium">Got it!</Text>
             </TouchableOpacity>
+            <TraitModalHeader selectedTrait={selectedTrait} closeModal={closeModal} />
+            <TraitModalContent selectedTrait={selectedTrait} />
+            <TraitModalFooter closeModal={closeModal} />
           </Pressable>
         </Pressable>
       </Modal>
     );
+  };);
   };
 
   const { positive = [], negative = [], hidden = [] } = traits;
-  const hasAnyTraits =
-    positive.length > 0 || negative.length > 0 || hidden.length > 0;
+  const hasAnyTraits = positive.length > 0 || negative.length > 0 || hidden.length > 0;
 
   return (
     <View className="bg-white rounded-xl p-6 shadow-sm">
       {/* Header */}
-      <LinearGradient
-        colors={['#8B5CF6', '#7C3AED']}
-        className="p-4 rounded-lg mb-6"
-      >
-        <Text className="text-xl font-bold text-white text-center">
-          {horseName}'s Traits
-        </Text>
+      <LinearGradient colors={['#8B5CF6', '#7C3AED']} className="p-4 rounded-lg mb-6">
+        <Text className="text-xl font-bold text-white text-center">{horseName}'s Traits</Text>
         <Text className="text-purple-100 text-center text-sm mt-1">
           Epigenetic characteristics that shape behavior
         </Text>
@@ -330,28 +350,16 @@ const TraitDisplay = ({ traits = {}, horseName = 'Horse', onTraitPress }) => {
       {/* Traits sections */}
       {hasAnyTraits ? (
         <View>
-          <TraitSection
-            title="Positive Traits"
-            traits={positive}
-            type="positive"
-            icon="✨"
-          />
+          <TraitSection title="Positive Traits" traits={positive} type="positive" icon="✨" />
 
-          <TraitSection
-            title="Negative Traits"
-            traits={negative}
-            type="negative"
-            icon="⚠️"
-          />
+          <TraitSection title="Negative Traits" traits={negative} type="negative" icon="⚠️" />
 
           <HiddenTraitsSection hiddenTraits={hidden} />
         </View>
       ) : (
         <View className="py-8">
           <Text className="text-center text-gray-500 text-lg">🧬</Text>
-          <Text className="text-center text-gray-600 mt-2">
-            No traits discovered yet
-          </Text>
+          <Text className="text-center text-gray-600 mt-2">No traits discovered yet</Text>
           <Text className="text-center text-gray-500 text-sm mt-1">
             Traits will be revealed as you interact with your horse
           </Text>

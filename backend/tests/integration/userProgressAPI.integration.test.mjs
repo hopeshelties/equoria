@@ -34,8 +34,8 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
-import app from '../../app.js';
-import prisma from '../../db/index.js';
+import app from '../../app.mjs';
+import prisma from '../../db/index.mjs';
 
 describe('🎯 INTEGRATION: User Progress API - Complete Progress Tracking', () => {
   let testUser;

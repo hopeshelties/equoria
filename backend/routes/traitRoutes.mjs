@@ -11,13 +11,13 @@ import {
   getTraitDefinitions,
   getDiscoveryStatus,
   batchDiscoverTraits,
-} from '../controllers/traitController.js';
+} from '../controllers/traitController.mjs';
 import {
   analyzeHorseTraitImpact,
   compareTraitImpactAcrossDisciplines,
   getTraitCompetitionEffects,
-} from '../controllers/traitCompetitionController.js';
-import logger from '../utils/logger.js';
+} from '../controllers/traitCompetitionController.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

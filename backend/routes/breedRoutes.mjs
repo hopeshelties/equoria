@@ -1,7 +1,7 @@
 import express from 'express';
 import { body, param } from 'express-validator';
-import * as breedController from '../controllers/breedController.js';
-import { handleValidationErrors } from '../middleware/validationErrorHandler.js';
+import * as breedController from '../controllers/breedController.mjs';
+import { handleValidationErrors } from '../middleware/validationErrorHandler.mjs';
 
 const router = express.Router();
 

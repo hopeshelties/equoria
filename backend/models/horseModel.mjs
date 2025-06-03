@@ -1,6 +1,6 @@
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
-import { applyEpigeneticTraitsAtBirth } from '../utils/atBirthTraits.js';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import { applyEpigeneticTraitsAtBirth } from '../utils/atBirthTraits.mjs';
 
 async function createHorse(horseData) {
   try {

@@ -1,9 +1,9 @@
 // Initialize database connection
 import './db/index.js';
 
-import app from './app.js';
-import config from './config/config.js';
-import logger from './utils/logger.js';
+import app from './app.mjs';
+import config from './config/config.mjs';
+import logger from './utils/logger.mjs';
 
 const { port } = config;
 

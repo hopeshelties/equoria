@@ -1,8 +1,8 @@
 import cron from 'node-cron';
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
-import { evaluateTraitRevelation } from '../utils/traitEvaluation.js';
-import { processHorseBirthdays } from '../utils/horseAgingSystem.js';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import { evaluateTraitRevelation } from '../utils/traitEvaluation.mjs';
+import { processHorseBirthdays } from '../utils/horseAgingSystem.mjs';
 
 /**
  * Daily trait evaluation cron job that runs at midnight

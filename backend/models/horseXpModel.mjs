@@ -16,9 +16,9 @@
  * - API endpoints for viewing and managing horse XP
  */
 
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
-import { DatabaseError } from '../errors/index.js';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import { DatabaseError } from '../errors/index.mjs';
 
 // Horse XP System Constants
 const XP_PER_STAT_POINT = 100;

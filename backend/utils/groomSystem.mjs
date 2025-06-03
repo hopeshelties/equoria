@@ -3,10 +3,10 @@
  * Handles groom assignments, daily care, and bonding calculations
  */
 
-import prisma from '../db/index.js';
-import logger from './logger.js';
-import { calculatePersonalityEffects } from './groomPersonalityEffects.js';
-import { ELIGIBLE_FOAL_ENRICHMENT_TASKS, FOAL_GROOMING_TASKS } from '../config/groomConfig.js';
+import prisma from '../db/index.mjs';
+import logger from './logger.mjs';
+import { calculatePersonalityEffects } from './groomPersonalityEffects.mjs';
+import { ELIGIBLE_FOAL_ENRICHMENT_TASKS, FOAL_GROOMING_TASKS } from '../config/groomConfig.mjs';
 
 /**
  * Groom specialties and their bonding modifiers

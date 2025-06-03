@@ -3,8 +3,8 @@
  * Automatically triggers trait discovery when certain conditions are met
  */
 
-import { revealTraits } from '../utils/traitDiscovery.js';
-import logger from '../utils/logger.js';
+import { revealTraits } from '../utils/traitDiscovery.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Middleware to automatically check for trait discoveries after horse updates

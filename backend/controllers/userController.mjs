@@ -31,11 +31,11 @@
  * - Consistent response format across all endpoints
  */
 
-import { getTrainableHorses } from '../controllers/trainingController.js';
-import { getUserProgress } from '../models/userModel.js';
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
-import AppError from '../errors/AppError.js';
+import { getTrainableHorses } from '../controllers/trainingController.mjs';
+import { getUserProgress } from '../models/userModel.mjs';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import AppError from '../errors/AppError.mjs';
 
 /**
  * Get comprehensive user progress information

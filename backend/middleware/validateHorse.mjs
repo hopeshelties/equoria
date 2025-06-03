@@ -1,5 +1,5 @@
 import { body, param } from 'express-validator';
-import { handleValidationErrors } from './validationErrorHandler.js'; // Assuming a generic error handler, ensure .js extension
+import { handleValidationErrors } from './validationErrorHandler.mjs'; // Assuming a generic error handler, ensure .js extension
 
 // Validation rules for creating a new horse
 const validateCreateHorse = [

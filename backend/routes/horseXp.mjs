@@ -12,8 +12,8 @@
  */
 
 import express from 'express';
-import { authenticateToken } from '../middleware/auth.js';
-import * as horseXpController from '../controllers/horseXpController.js';
+import { authenticateToken } from '../middleware/auth.mjs';
+import * as horseXpController from '../controllers/horseXpController.mjs';
 
 const router = express.Router();
 

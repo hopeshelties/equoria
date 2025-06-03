@@ -1,5 +1,5 @@
 import winston from 'winston';
-import config from '../config/config.js'; // Changed to ES module import
+import config from '../config/config.mjs'; // Changed to ES module import
 
 const enumerateErrorFormat = winston.format(info => {
   if (info instanceof Error) {

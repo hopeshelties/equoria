@@ -77,7 +77,7 @@ import {
   getTopPlayersByHorseEarnings,
   getRecentWinners,
   getLeaderboardStats,
-} from '../../controllers/leaderboardController.js';
+} from '../../controllers/leaderboardController.mjs';
 
 // Create a test express app
 const app = express();

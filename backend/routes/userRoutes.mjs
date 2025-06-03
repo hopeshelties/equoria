@@ -5,9 +5,9 @@
 
 import express from 'express';
 import { param, validationResult } from 'express-validator';
-import { getUserProgressAPI, getDashboardData } from '../controllers/userController.js'; // Updated import
-import { authenticateToken } from '../middleware/auth.js';
-import logger from '../utils/logger.js';
+import { getUserProgressAPI, getDashboardData } from '../controllers/userController.mjs'; // Updated import
+import { authenticateToken } from '../middleware/auth.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

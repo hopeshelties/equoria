@@ -1,3 +1,3 @@
-import prisma from '../../packages/database/prismaClient.js';
+import prisma from '../../packages/database/prismaClient.mjs';
 
 export default prisma;

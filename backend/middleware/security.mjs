@@ -1,7 +1,7 @@
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger.mjs';
 
 /**
  * Security Middleware Configuration

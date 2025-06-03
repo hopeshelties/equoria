@@ -1,18 +1,18 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
-import prisma from '../db/index.js';
-import { getHorseById } from '../models/horseModel.js';
-import { getUserById } from '../models/userModel.js';
-import { enterAndRunShow } from '../controllers/competitionController.js';
-import { getResultsByShow, getResultsByHorse } from '../models/resultModel.js';
+import prisma from '../db/index.mjs';
+import { getHorseById } from '../models/horseModel.mjs';
+import { getUserById } from '../models/userModel.mjs';
+import { enterAndRunShow } from '../controllers/competitionController.mjs';
+import { getResultsByShow, getResultsByHorse } from '../models/resultModel.mjs';
 import {
   validateCompetitionEntry,
   executeEnhancedCompetition,
   getCompetitionEligibilitySummary,
-} from '../logic/enhancedCompetitionSimulation.js';
-import { getAllDisciplines, getDisciplineConfig } from '../utils/competitionLogic.js';
-import auth from '../middleware/auth.js';
-import logger from '../utils/logger.js';
+} from '../logic/enhancedCompetitionSimulation.mjs';
+import { getAllDisciplines, getDisciplineConfig } from '../utils/competitionLogic.mjs';
+import auth from '../middleware/auth.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

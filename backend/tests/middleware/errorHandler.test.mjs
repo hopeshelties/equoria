@@ -1,5 +1,5 @@
-import errorHandler from '../../middleware/errorHandler.js';
-import { AppError } from '../../errors/index.js';
+import errorHandler from '../../middleware/errorHandler.mjs';
+import { AppError } from '../../errors/index.mjs';
 
 describe('Error Handler Middleware', () => {
   let req, res, next, statusCode, responseData;

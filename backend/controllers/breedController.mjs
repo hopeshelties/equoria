@@ -1,6 +1,6 @@
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
-import { ValidationError, NotFoundError, DatabaseError } from '../errors/index.js';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import { ValidationError, NotFoundError, DatabaseError } from '../errors/index.mjs';
 
 /**
  * Breed Controller

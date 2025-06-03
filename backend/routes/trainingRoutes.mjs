@@ -5,8 +5,8 @@ import {
   getTrainingStatus,
   trainRouteHandler,
   getTrainableHorses,
-} from '../controllers/trainingController.js';
-import logger from '../utils/logger.js';
+} from '../controllers/trainingController.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

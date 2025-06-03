@@ -1,9 +1,9 @@
-import { getResultsByHorse } from '../models/resultModel.js';
-import { createHorse, getHorseById } from '../models/horseModel.js';
-import { getAnyRecentTraining } from '../models/trainingModel.js';
-import { applyEpigeneticTraitsAtBirth } from '../utils/applyEpigeneticTraitsAtBirth.js';
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
+import { getResultsByHorse } from '../models/resultModel.mjs';
+import { createHorse, getHorseById } from '../models/horseModel.mjs';
+import { getAnyRecentTraining } from '../models/trainingModel.mjs';
+import { applyEpigeneticTraitsAtBirth } from '../utils/applyEpigeneticTraitsAtBirth.mjs';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Get competition history for a specific horse

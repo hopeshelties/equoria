@@ -5,7 +5,7 @@
  * Used when a user attempts to access resources they don't have permission for.
  */
 
-import AppError from './AppError.js';
+import AppError from './AppError.mjs';
 
 class AuthorizationError extends AppError {
   constructor(message = 'Authorization failed') {

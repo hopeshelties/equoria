@@ -1,11 +1,7 @@
 // DO NOT MODIFY: Configuration locked for consistency
 // Jest configuration for a Node.js project using ES modules
-// This configuration is tailored for a Node.js environment with ES module support,
-// ensuring compatibility with both .js and .mjs files, and includes necessary setup for Jest globals.
-// It also includes custom module name mappings for utility files and error handling.
 export default {
   testEnvironment: 'node',
-  preset: null,
 
   // Enable Jest globals (describe, it, expect, jest, etc.)
   injectGlobals: true,
@@ -13,62 +9,24 @@ export default {
   // Ensures Jest treats both JS and MJS files correctly
   moduleFileExtensions: ['js', 'mjs'],
 
+  // Configure transform for ES modules
+  transform: {
+    '^.+\\.m?js$': ['babel-jest', { configFile: './babel.config.json' }],
+  },
+
   // Setup file path must match your actual filename
   setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'],
 
-  // Recommended test file globs
+  // Updated test file globs to include .mjs files
   testMatch: [
-    '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).js',
-    '**/tests/**/*.test.js',
-    '**/models/**/*.test.js',
+    '**/__tests__/**/*.mjs',
+    '**/?(*.)+(spec|test).mjs',
+    '**/tests/**/*.test.mjs',
+    '**/models/**/*.test.mjs',
   ],
 
-  verbose: true,
-  clearMocks: true,
-  resetMocks: true,
-  restoreMocks: true,
-  testTimeout: 30000,
-
-  // Force Jest to exit and detect open handles
-  forceExit: true,
-  detectOpenHandles: true,
-
-  // Limit concurrent tests to reduce database connection issues
-  maxWorkers: 1,
-
-  // Makes sure Prisma-generated clients don't break things
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|@prisma/client))'],
-  moduleNameMapper: {
-    // Ensure logger.js is resolved correctly from jest.setup.js and other locations
-    '^../../utils/logger.js$': '<rootDir>/utils/logger.js',
-    '^../utils/logger.js$': '<rootDir>/utils/logger.js',
-    '^utils/logger.js$': '<rootDir>/utils/logger.js',
-
-    '^../utils/appError.js$': '<rootDir>/errors/AppError.js', // Specific map for AppError
-    '^../../utils/appError.js$': '<rootDir>/errors/AppError.js', // Specific map for AppError from deeper paths
-    '^../errors/AppError.js$': '<rootDir>/errors/AppError.js', // If referenced from one level up
-    '^../../errors/AppError.js$': '<rootDir>/errors/AppError.js', // If referenced from two levels up
-
-    '^../utils/(.*)$': '<rootDir>/utils/$1',
-    '^db/(.*)$': '<rootDir>/db/$1',
-    '^../../db/(.*)$': '<rootDir>/db/$1',
-    // Add a more general alias for controllers, models, utils, errors, etc.
-    '^#controllers/(.*)$': '<rootDir>/controllers/$1',
-    '^#models/(.*)$': '<rootDir>/models/$1',
-    '^#utils/(.*)$': '<rootDir>/utils/$1',
-    '^#errors/(.*)$': '<rootDir>/errors/$1',
-    '^#config/(.*)$': '<rootDir>/config/$1',
-    '^#db/(.*)$': '<rootDir>/db/$1',
+  // Enable experimental features
+  testEnvironmentOptions: {
+    experimentalVmModules: true,
   },
-  testPathIgnorePatterns: ['/node_modules/', '/build/', '/dist/'],
-  collectCoverageFrom: [
-    '**/*.js',
-    '!**/node_modules/**',
-    '!**/coverage/**',
-    '!jest.config.mjs',
-    '!**/*.test.js',
-    '!**/*.spec.js',
-    '!jest.setup.mjs',
-  ],
 };

@@ -5,7 +5,7 @@ import {
   createRateLimiter,
   helmetConfig,
   createSecurityMiddleware,
-} from '../../middleware/security.js';
+} from '../../middleware/security.mjs';
 
 // Simple mock for logger
 const _mockLogger = {

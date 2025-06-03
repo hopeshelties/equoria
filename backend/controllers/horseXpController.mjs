@@ -17,10 +17,10 @@
  * - Rate limiting and error handling
  */
 
-import * as horseXpModel from '../models/horseXpModel.js';
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
-import { ValidationError, AuthorizationError, NotFoundError } from '../errors/index.js';
+import * as horseXpModel from '../models/horseXpModel.mjs';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import { ValidationError, AuthorizationError, NotFoundError } from '../errors/index.mjs';
 
 /**
  * Get horse XP status

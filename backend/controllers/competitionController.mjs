@@ -1,19 +1,19 @@
-import { getHorseById } from '../models/horseModel.js';
-import { saveResult, getResultsByShow } from '../models/resultModel.js';
-import { addXpToUser } from '../models/userModel.js';
-import { logXpEvent } from '../models/xpLogModel.js';
-import { awardCompetitionXp } from '../models/horseXpModel.js';
-import { calculateCompetitionScore } from '../utils/competitionLogic.js';
-import { isHorseEligibleForShow } from '../utils/isHorseEligible.js';
+import { getHorseById } from '../models/horseModel.mjs';
+import { saveResult, getResultsByShow } from '../models/resultModel.mjs';
+import { addXpToUser } from '../models/userModel.mjs';
+import { logXpEvent } from '../models/xpLogModel.mjs';
+import { awardCompetitionXp } from '../models/horseXpModel.mjs';
+import { calculateCompetitionScore } from '../utils/competitionLogic.mjs';
+import { isHorseEligibleForShow } from '../utils/isHorseEligible.mjs';
 import {
   calculatePrizeDistribution,
   calculateStatGains,
   calculateEntryFees,
   hasValidRider,
-} from '../utils/competitionRewards.js';
-import { updateHorseRewards } from '../utils/horseUpdates.js';
-import { transferEntryFees } from '../utils/userUpdates.js';
-import logger from '../utils/logger.js';
+} from '../utils/competitionRewards.mjs';
+import { updateHorseRewards } from '../utils/horseUpdates.mjs';
+import { transferEntryFees } from '../utils/userUpdates.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Helper function to detect trait bonuses for a horse in a specific discipline

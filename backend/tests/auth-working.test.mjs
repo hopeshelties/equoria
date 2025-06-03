@@ -46,9 +46,9 @@ import {
   refreshToken,
   logout,
   getProfile,
-} from '../controllers/authController.js';
-import { authenticateToken } from '../middleware/auth.js';
-import prisma from '../db/index.js';
+} from '../controllers/authController.mjs';
+import { authenticateToken } from '../middleware/auth.mjs';
+import prisma from '../db/index.mjs';
 
 // Create a minimal test app without problematic middleware
 const createTestApp = () => {

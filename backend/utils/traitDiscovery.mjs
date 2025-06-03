@@ -3,9 +3,9 @@
  * Handles the revelation of hidden traits based on specific conditions
  */
 
-import prisma from '../db/index.js';
-import logger from './logger.js';
-import { getTraitDefinition } from './epigeneticTraits.js';
+import prisma from '../db/index.mjs';
+import logger from './logger.mjs';
+import { getTraitDefinition } from './epigeneticTraits.mjs';
 
 /**
  * Discovery conditions that trigger trait revelation

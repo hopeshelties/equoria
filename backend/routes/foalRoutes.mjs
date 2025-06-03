@@ -5,10 +5,10 @@ import {
   completeActivity,
   advanceDay,
   completeEnrichmentActivity,
-} from '../models/foalModel.js';
-import { enrichmentDiscoveryMiddleware } from '../middleware/traitDiscoveryMiddleware.js';
-import { ensureDefaultGroomAssignment } from '../utils/groomSystem.js';
-import logger from '../utils/logger.js';
+} from '../models/foalModel.mjs';
+import { enrichmentDiscoveryMiddleware } from '../middleware/traitDiscoveryMiddleware.mjs';
+import { ensureDefaultGroomAssignment } from '../utils/groomSystem.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

@@ -35,10 +35,10 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { simulateCompetition } from '../logic/simulateCompetition.js';
-import { getStatScore } from '../utils/getStatScore.js';
-import { getHealthModifier } from '../utils/healthBonus.js';
-import { applyRiderModifiers } from '../utils/riderBonus.js';
+import { simulateCompetition } from '../logic/simulateCompetition.mjs';
+import { getStatScore } from '../utils/getStatScore.mjs';
+import { getHealthModifier } from '../utils/healthBonus.mjs';
+import { applyRiderModifiers } from '../utils/riderBonus.mjs';
 
 describe('🏇 UNIT: Competition Simulation System - Horse Performance & Ranking', () => {
   describe('getStatScore', () => {

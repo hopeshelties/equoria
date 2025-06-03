@@ -38,7 +38,7 @@ import {
   calculatePersonalityEffects,
   getPersonalityEffectSummary,
   getAllPersonalityTypes,
-} from '../utils/groomPersonalityEffects.js';
+} from '../utils/groomPersonalityEffects.mjs';
 
 // Strategic mocking: Only mock external dependencies, not business logic
 jest.mock('../utils/logger.js', () => ({

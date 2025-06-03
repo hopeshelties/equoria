@@ -3,7 +3,7 @@ import {
   getTraitDefinition,
   getTraitsByType,
   checkTraitConflict,
-} from '../utils/epigeneticTraits.js';
+} from '../utils/epigeneticTraits.mjs';
 
 /**
  * Epigenetic Traits Calculation Examples

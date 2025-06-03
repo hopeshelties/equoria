@@ -4,8 +4,8 @@
  * Can be suppressed by certain traits like 'resilient' and 'calm'
  */
 
-import { getCombinedTraitEffects } from './traitEffects.js';
-import logger from './logger.js';
+import { getCombinedTraitEffects } from './traitEffects.mjs';
+import logger from './logger.mjs';
 
 /**
  * Available temperament types and their characteristics

@@ -1,7 +1,7 @@
-import { generateTestToken } from './authHelper.js';
+import { generateTestToken } from './authHelper.mjs';
 import supertest from 'supertest';
-import app from '../../app.js';
-import prisma from '../../../packages/database/prismaClient.js';
+import app from '../../app.mjs';
+import prisma from '../../../packages/database/prismaClient.mjs';
 import jwt from 'jsonwebtoken';
 
 /**

@@ -9,14 +9,14 @@
  */
 
 import request from 'supertest';
-import app from '../../app.js';
-import prisma from '../../../packages/database/prismaClient.js';
+import app from '../../app.mjs';
+import prisma from '../../../packages/database/prismaClient.mjs';
 import {
   createTestUser,
   createTestHorse,
   createTestShow,
   cleanupTestData,
-} from '../helpers/testAuth.js';
+} from '../helpers/testAuth.mjs';
 
 describe('🚀 INTEGRATION: Competition API Endpoints', () => {
   let testUser;

@@ -1,4 +1,4 @@
-import { PrismaClient } from '../packages/database/node_modules/@prisma/client/index.js';
+import { PrismaClient } from '../packages/database/node_modules/@prisma/client/index.mjs';
 
 async function testConnections() {
   const connectionStrings = [

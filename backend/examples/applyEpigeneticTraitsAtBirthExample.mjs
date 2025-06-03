@@ -4,7 +4,7 @@
  * Demonstrates various breeding scenarios and trait assignments
  */
 
-import { applyEpigeneticTraitsAtBirth } from '../utils/applyEpigeneticTraitsAtBirth.js';
+import { applyEpigeneticTraitsAtBirth } from '../utils/applyEpigeneticTraitsAtBirth.mjs';
 
 console.log('🧬 Epigenetic Traits at Birth Examples\n');
 

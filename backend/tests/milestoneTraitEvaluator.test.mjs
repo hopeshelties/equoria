@@ -42,8 +42,8 @@ import {
   calculateTraitScores,
   MILESTONE_AGES,
   TRAIT_THRESHOLDS,
-} from '../utils/milestoneTraitEvaluator.js';
-import { TASK_TRAIT_INFLUENCE_MAP } from '../utils/taskTraitInfluenceMap.js';
+} from '../utils/milestoneTraitEvaluator.mjs';
+import { TASK_TRAIT_INFLUENCE_MAP } from '../utils/taskTraitInfluenceMap.mjs';
 
 // Strategic mocking: Only mock external dependencies, not business logic
 jest.mock('../utils/logger.js', () => ({

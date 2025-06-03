@@ -1,6 +1,6 @@
-import logger from '../utils/logger.js';
-import { ApiResponse } from '../utils/apiResponse.js';
-import prisma from '../db/index.js';
+import logger from '../utils/logger.mjs';
+import { ApiResponse } from '../utils/apiResponse.mjs';
+import prisma from '../db/index.mjs';
 
 /**
  * Game Integrity Middleware

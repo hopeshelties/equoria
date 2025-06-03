@@ -1,8 +1,8 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { handleValidationErrors } from '../middleware/validationErrorHandler.js';
-import { authenticateToken } from '../middleware/auth.js';
-import * as authController from '../controllers/authController.js';
+import { handleValidationErrors } from '../middleware/validationErrorHandler.mjs';
+import { authenticateToken } from '../middleware/auth.mjs';
+import * as authController from '../controllers/authController.mjs';
 
 const router = express.Router();
 

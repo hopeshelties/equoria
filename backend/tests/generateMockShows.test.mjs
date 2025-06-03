@@ -35,8 +35,8 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { generateMockShows, generateSingleMockShow } from '../utils/generateMockShows.js';
-import { getAllDisciplines } from '../utils/statMap.js';
+import { generateMockShows, generateSingleMockShow } from '../utils/generateMockShows.mjs';
+import { getAllDisciplines } from '../utils/statMap.mjs';
 
 describe('🎪 UNIT: Generate Mock Shows - Competition Data Generation Utilities', () => {
   const validDisciplines = getAllDisciplines();

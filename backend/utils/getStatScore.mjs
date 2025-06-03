@@ -1,4 +1,4 @@
-import { getStatsForDiscipline } from './statMap.js';
+import { getStatsForDiscipline } from './statMap.mjs';
 
 /**
  * Calculate weighted base stat score for a horse in a specific discipline

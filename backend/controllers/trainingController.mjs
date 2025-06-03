@@ -3,13 +3,13 @@ import {
   getHorseAge,
   logTrainingSession,
   getAnyRecentTraining,
-} from '../models/trainingModel.js';
-import { incrementDisciplineScore, getHorseById, updateHorseStat } from '../models/horseModel.js';
-import { getUserWithHorses, addXpToUser } from '../models/userModel.js';
-import { logXpEvent } from '../models/xpLogModel.js';
-import { getCombinedTraitEffects } from '../utils/traitEffects.js';
-import { checkTraitRequirements } from '../utils/competitionLogic.js';
-import logger from '../utils/logger.js';
+} from '../models/trainingModel.mjs';
+import { incrementDisciplineScore, getHorseById, updateHorseStat } from '../models/horseModel.mjs';
+import { getUserWithHorses, addXpToUser } from '../models/userModel.mjs';
+import { logXpEvent } from '../models/xpLogModel.mjs';
+import { getCombinedTraitEffects } from '../utils/traitEffects.mjs';
+import { checkTraitRequirements } from '../utils/competitionLogic.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Check if a horse is eligible to train in a specific discipline

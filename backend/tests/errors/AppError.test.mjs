@@ -1,4 +1,4 @@
-import { AppError, ValidationError, DatabaseError, NotFoundError } from '../../errors/index.js';
+import { AppError, ValidationError, DatabaseError, NotFoundError } from '../../errors/index.mjs';
 
 describe('Error Classes', () => {
   describe('AppError', () => {

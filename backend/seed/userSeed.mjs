@@ -1,6 +1,6 @@
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
-import { hashPassword } from '../utils/authUtils.js'; // Assuming you have a utility for hashing passwords
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import { hashPassword } from '../utils/authUtils.mjs'; // Assuming you have a utility for hashing passwords
 
 /**
  * Creates a test user with horses for development and testing

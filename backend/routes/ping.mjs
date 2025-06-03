@@ -1,6 +1,6 @@
 import express from 'express';
-import { handlePing, handleHealthCheck } from '../controllers/pingController.js';
-import { validatePing } from '../middleware/validatePing.js';
+import { handlePing, handleHealthCheck } from '../controllers/pingController.mjs';
+import { validatePing } from '../middleware/validatePing.mjs';
 
 const router = express.Router();
 

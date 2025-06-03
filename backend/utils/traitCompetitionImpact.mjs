@@ -3,7 +3,7 @@
  * Calculates trait-based bonuses and penalties for competition scoring
  */
 
-import logger from './logger.js';
+import logger from './logger.mjs';
 
 /**
  * Trait impact definitions for different competition disciplines

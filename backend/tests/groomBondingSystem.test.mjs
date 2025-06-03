@@ -27,8 +27,8 @@ import {
   updateConsecutiveDays,
   checkBurnoutImmunity,
   validateGroomingEligibility,
-} from '../utils/groomBondingSystem.js';
-import { GROOM_CONFIG } from '../config/groomConfig.js';
+} from '../utils/groomBondingSystem.mjs';
+import { GROOM_CONFIG } from '../config/groomConfig.mjs';
 
 describe('Groom Bonding & Burnout Prevention System', () => {
   beforeEach(() => {

@@ -9,15 +9,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { beforeAll, afterAll, jest } from '@jest/globals';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// ES Module compatibility
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 
 // Set Jest timeout
-if (typeof jest !== 'undefined') {
-  jest.setTimeout(30000);
-}
+jest.setTimeout(30000);
 
+// Logging setup info
 console.log('JEST_SETUP: NODE_ENV:', process.env.NODE_ENV);
 console.log('JEST_SETUP: DATABASE_URL used for tests:', process.env.DATABASE_URL);
 

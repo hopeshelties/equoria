@@ -37,8 +37,8 @@
  */
 
 import request from 'supertest';
-import app from '../app.js';
-import { generateTestToken } from './helpers/authHelper.js';
+import app from '../app.mjs';
+import { generateTestToken } from './helpers/authHelper.mjs';
 
 // Custom Jest matcher for toBeOneOf
 expect.extend({

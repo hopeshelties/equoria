@@ -1,4 +1,4 @@
-import AppError from './AppError.js';
+import AppError from './AppError.mjs';
 
 /**
  * Database Error Class

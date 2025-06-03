@@ -5,8 +5,8 @@
  * Run with: node scripts/testUserProgressAPI.js
  */
 
-import { createUser, getUserById, addXpToUser } from '../models/userModel.js';
-import logger from '../utils/logger.js';
+import { createUser, getUserById, addXpToUser } from '../models/userModel.mjs';
+import logger from '../utils/logger.mjs';
 
 async function testUserProgressAPI() {
   try {

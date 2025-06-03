@@ -29,10 +29,10 @@
  * - Age 21 (7665 days): Retirement from competition
  */
 
-import prisma from '../db/index.js';
-import logger from './logger.js';
-import { evaluateEpigeneticTagsFromFoalTasks } from './traitEvaluation.js';
-import { evaluateTraitMilestones, checkMilestoneEligibility } from './milestoneTraitEvaluator.js';
+import prisma from '../db/index.mjs';
+import logger from './logger.mjs';
+import { evaluateEpigeneticTagsFromFoalTasks } from './traitEvaluation.mjs';
+import { evaluateTraitMilestones, checkMilestoneEligibility } from './milestoneTraitEvaluator.mjs';
 
 /**
  * Calculate age in days from date of birth

@@ -1,4 +1,4 @@
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 
 /**
  * Check if a horse can train (cooldown is null or in the past)

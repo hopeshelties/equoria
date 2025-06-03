@@ -3,7 +3,7 @@
  * Utility function to check lineage for discipline affinity
  */
 
-import logger from './logger.js';
+import logger from './logger.mjs';
 
 /**
  * Check lineage for discipline affinity

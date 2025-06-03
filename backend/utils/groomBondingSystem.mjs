@@ -35,9 +35,9 @@
  * - Real: Business logic, calculations, validation rules, age-based eligibility
  */
 
-import { GROOM_CONFIG } from '../config/groomConfig.js';
-import prisma from '../db/index.js';
-import logger from './logger.js';
+import { GROOM_CONFIG } from '../config/groomConfig.mjs';
+import prisma from '../db/index.mjs';
+import logger from './logger.mjs';
 
 /**
  * Get eligible tasks for a horse based on age

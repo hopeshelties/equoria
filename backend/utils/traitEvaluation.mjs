@@ -29,9 +29,9 @@
  * @lastModified 2025-01-02 - Enhanced with groom interaction trait influence system
  */
 
-import logger from './logger.js';
-import { TASK_TRAIT_INFLUENCE_MAP } from '../config/taskInfluenceConfig.js';
-import { TRAIT_INFLUENCE_CONFIG, getTaskTraitInfluence } from './taskTraitInfluenceMap.js';
+import logger from './logger.mjs';
+import { TASK_TRAIT_INFLUENCE_MAP } from '../config/taskInfluenceConfig.mjs';
+import { TRAIT_INFLUENCE_CONFIG, getTaskTraitInfluence } from './taskTraitInfluenceMap.mjs';
 
 /**
  * Trait definitions with their revelation conditions

@@ -1,5 +1,5 @@
 import { query } from 'express-validator';
-import { handleValidationErrors } from './validationErrorHandler.js';
+import { handleValidationErrors } from './validationErrorHandler.mjs';
 
 /**
  * Ping Validation Middleware

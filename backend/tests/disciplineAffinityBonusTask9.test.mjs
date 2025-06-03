@@ -34,7 +34,7 @@
  */
 
 import { jest, describe, it, expect } from '@jest/globals';
-import { simulateCompetition } from '../logic/simulateCompetition.js';
+import { simulateCompetition } from '../logic/simulateCompetition.mjs';
 
 describe('🏆 UNIT: Discipline Affinity Trait Bonus - Competition Score Enhancement', () => {
   // Helper function to create a test horse with specific traits

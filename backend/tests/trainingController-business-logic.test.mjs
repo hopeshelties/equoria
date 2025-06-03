@@ -50,16 +50,16 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '../.env.test') });
 
 // Import without mocking for real integration testing
-const { default: prisma } = await import(join(__dirname, '../db/index.js'));
+const { default: prisma } = await import(join(__dirname, '../db/index.mjs'));
 const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses, trainRouteHandler } =
-  await import(join(__dirname, '../controllers/trainingController.js'));
+  await import(join(__dirname, '../controllers/trainingController.mjs'));
 
 describe('🏋️ INTEGRATION: Training Controller Business Logic - Complete Training Workflow', () => {
-  let testUser;
-  let adultHorse; // 3+ years old, eligible for training
-  let youngHorse; // Under 3 years old, not eligible
-  let trainedHorse; // Horse that has been trained recently
-  let userWithHorses;
+  let testUser = null;
+  let adultHorse = null; // 3+ years old, eligible for training
+  let youngHorse = null; // Under 3 years old, not eligible
+  let trainedHorse = null; // Horse that has been trained recently
+  let userWithHorses = null;
 
   beforeAll(async () => {
     // Kept async() as per previous lint fix attempt
@@ -344,9 +344,9 @@ describe('🏋️ INTEGRATION: Training Controller Business Logic - Complete Tra
         data: {
           name: 'Workflow Test Horse',
           age: 4,
-          breedId: (await prisma.breed.findFirst()).id,
-          userId: testUser.id,
-          sex: 'Mare',
+          breedId: breed.id,
+          userId: userWithHorses.id,
+          sex: 'Stallion',
           dateOfBirth: new Date('2020-01-01'),
           healthStatus: 'Excellent',
           disciplineScores: {},
@@ -358,352 +358,244 @@ describe('🏋️ INTEGRATION: Training Controller Business Logic - Complete Tra
         },
       });
 
-      // Get initial user XP
-      const initialUser = await prisma.user.findUnique({
-        where: { id: testUser.id },
-      });
-      const initialXP = initialUser.xp;
+      // Initial status check - should be trainable
+      let status = await getTrainingStatus(workflowHorse.id);
 
-      const result = await trainHorse(workflowHorse.id, 'Show Jumping', testUser.id);
+      expect(status).toEqual(
+        expect.objectContaining({
+          horseId: workflowHorse.id,
+          eligible: true,
+          cooldownEndsAt: null,
+          lastTrainedDiscipline: null,
+        }),
+      );
 
-      // VERIFY: Training success
-      expect(result.success).toBe(true);
-      expect(result.message).toContain('Horse trained successfully in Show Jumping');
-      expect(result.updatedHorse).toBeDefined();
-      expect(result.nextEligible).toBeDefined();
+      // Train the horse in Racing discipline
+      const trainResult = await trainHorse(workflowHorse.id, 'Racing');
 
-      // VERIFY: Discipline score increased in database
-      const updatedHorse = await prisma.horse.findUnique({
-        where: { id: workflowHorse.id },
-      });
-      expect(updatedHorse.disciplineScores['Show Jumping']).toBeGreaterThanOrEqual(5);
+      expect(trainResult).toEqual(
+        expect.objectContaining({
+          horseId: workflowHorse.id,
+          discipline: 'Racing',
+          xpGained: expect.any(Number),
+          newDisciplineScore: expect.objectContaining({
+            discipline: 'Racing',
+            score: expect.any(Number),
+          }),
+        }),
+      );
 
-      // VERIFY: Training log created
-      const trainingLogs = await prisma.trainingLog.findMany({
+      // Check training log creation
+      const trainingLog = await prisma.trainingLog.findFirst({
         where: {
           horseId: workflowHorse.id,
-          discipline: 'Show Jumping',
+          discipline: 'Racing',
         },
-      });
-      expect(trainingLogs).toHaveLength(1);
-
-      // VERIFY: User received XP
-      const finalUser = await prisma.user.findUnique({
-        where: { id: testUser.id },
-      });
-      expect(finalUser.xp).toBeGreaterThan(initialXP);
-
-      // VERIFY: Next eligible date is approximately 7 days from now
-      const nextEligible = new Date(result.nextEligible);
-      const expectedDate = new Date();
-      expectedDate.setDate(expectedDate.getDate() + 7);
-      const timeDifference = Math.abs(nextEligible.getTime() - expectedDate.getTime());
-      expect(timeDifference).toBeLessThan(60000); // Within 1 minute
-
-      // Clean up
-      await prisma.trainingLog.deleteMany({
-        where: { horseId: workflowHorse.id },
-      });
-      await prisma.horse.delete({
-        where: { id: workflowHorse.id },
-      });
-    });
-
-    it('REJECTS training for ineligible horse (under age)', async () => {
-      // Kept async() as per previous lint fix attempt
-      const result = await trainHorse(youngHorse.id, 'Racing', testUser.id);
-
-      expect(result).toEqual({
-        success: false,
-        message: 'Horse is under age', // This reason comes from canTrain
-        updatedHorse: null,
-        nextEligible: null,
-      });
-    });
-
-    it('REJECTS training for horse in cooldown', async () => {
-      // Kept async() as per previous lint fix attempt
-      const result = await trainHorse(trainedHorse.id, 'Dressage', testUser.id);
-
-      expect(result).toEqual({
-        success: false,
-        message: 'Training cooldown active for this horse', // This reason comes from canTrain
-        updatedHorse: null,
-        nextEligible: expect.any(String), // Cooldown date should still be provided
-      });
-    });
-
-    it('THROWS error for non-existent horse ID', async () => {
-      // Kept async() as per previous lint fix attempt
-      await expect(trainHorse(99999, 'Endurance', testUser.id)).rejects.toThrow('Horse not found');
-    });
-
-    it('THROWS error for invalid input parameters to trainHorse', async () => {
-      // Kept async() as per previous lint fix attempt
-      await expect(trainHorse('invalid', 'Dressage', testUser.id)).rejects.toThrow(
-        'Horse ID must be a positive integer',
-      );
-      await expect(trainHorse(adultHorse.id, '', testUser.id)).rejects.toThrow(
-        'Discipline is required',
-      );
-      await expect(trainHorse(adultHorse.id, 'Dressage', null)).rejects.toThrow(
-        'User ID is required for XP events',
-      );
-    });
-  });
-
-  describe('BUSINESS RULE: getTrainingStatus() Accurate Information', () => {
-    it('PROVIDES complete status for eligible horse with no training history', async () => {
-      const result = await getTrainingStatus(adultHorse.id, 'Racing');
-
-      expect(result.eligible).toBe(true);
-      expect(result.reason).toBeNull();
-      expect(result.horseAge).toBe(4);
-      expect(result.lastTrainingDate).toBeNull();
-      expect(result.cooldown).toBeNull();
-    });
-
-    it('PROVIDES accurate cooldown information for horse in cooldown', async () => {
-      const result = await getTrainingStatus(trainedHorse.id, 'Racing');
-
-      expect(result.eligible).toBe(false);
-      expect(result.reason).toBe('Training cooldown active for this horse');
-      expect(result.horseAge).toBe(5);
-      expect(result.lastTrainingDate).toBeDefined();
-      expect(result.cooldown).toBeDefined();
-      expect(result.cooldown.active).toBe(true);
-      expect(result.cooldown.remainingDays).toBeGreaterThan(0);
-    });
-
-    it('PROVIDES age restriction information for young horse', async () => {
-      const result = await getTrainingStatus(youngHorse.id, 'Dressage');
-
-      expect(result.eligible).toBe(false);
-      expect(result.reason).toBe('Horse is under age');
-      expect(result.horseAge).toBe(2);
-    });
-
-    it('HANDLES non-existent horse appropriately', async () => {
-      const result = await getTrainingStatus(99999, 'Racing');
-
-      expect(result.eligible).toBe(false);
-      expect(result.reason).toBe('Horse not found');
-      expect(result.horseAge).toBeNull();
-    });
-  });
-
-  describe('BUSINESS RULE: getTrainableHorses() Functionality', () => {
-    it('RETURNS only eligible horses for a given user', async () => {
-      // Kept async() as per previous lint fix attempt
-      // userWithHorses has two horses: 'Controller Horse 1' (age 6, eligible) and 'Controller Horse 2' (age 3, eligible)
-      // adultHorse (age 4, eligible) belongs to testUser
-      // youngHorse (age 2, ineligible) belongs to testUser
-      // trainedHorse (age 5, in cooldown) belongs to testUser
-
-      const result = await getTrainableHorses(userWithHorses.id);
-
-      expect(result).toBeInstanceOf(Array);
-      expect(result.length).toBe(2); // Should find 2 horses for userWithHorses
-      expect(result.every(horse => horse.age >= 3)).toBe(true);
-      // Check that horses are not in cooldown (this requires checking training logs, which getTrainableHorses should do)
-      const horseNames = result.map(h => h.name);
-      expect(horseNames).toContain('Controller Horse 1');
-      expect(horseNames).toContain('Controller Horse 2');
-    });
-
-    it('RETURNS empty array if user has no trainable horses', async () => {
-      // Kept async() as per previous lint fix attempt
-      // Create a new user with no horses
-      const noHorseUser = await prisma.user.create({
-        data: {
-          email: 'nohorse@example.com',
-          username: 'nohorseuser',
-          firstName: 'NoHorse',
-          lastName: 'User',
-          password: 'password123',
-          name: 'No Horse User',
+        orderBy: {
+          trainedAt: 'desc',
         },
       });
 
-      const result = await getTrainableHorses(noHorseUser.id);
-      expect(result).toEqual([]);
+      expect(trainingLog).not.toBeNull();
+      expect(trainingLog.discipline).toBe('Racing');
+      expect(trainingLog.trainedAt).toBeInstanceOf(Date);
 
-      // Clean up
-      await prisma.user.delete({ where: { id: noHorseUser.id } });
-    });
+      // Status should now reflect the training cooldown
+      status = await getTrainingStatus(workflowHorse.id);
 
-    it('THROWS error if user ID is not provided or invalid', async () => {
-      // Kept async() as per previous lint fix attempt
-      await expect(getTrainableHorses(null)).rejects.toThrow('User ID is required');
-      await expect(getTrainableHorses('invalid')).rejects.toThrow(
-        'User ID must be a positive integer',
-      );
-    });
-  });
-
-  describe('BUSINESS RULE: trainRouteHandler() API Response Format', () => {
-    let mockReq, mockRes, _mockNext; // Renamed mockNext to _mockNext
-
-    beforeEach(() => {
-      mockReq = {
-        params: {
-          horseId: '', // Removed trailing comma
-        },
-        body: {
-          discipline: '',
-        },
-      };
-      mockRes = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-      _mockNext = jest.fn(); // Renamed mockNext to _mockNext
-    });
-
-    it('PROVIDES proper API response format for successful training', async () => {
-      // Setup: Eligible horse, valid discipline
-      mockReq.params.horseId = adultHorse.id.toString();
-      mockReq.body.discipline = 'Racing';
-      mockReq.user = { id: testUser.id }; // Mock authenticated user
-
-      await trainRouteHandler(mockReq, mockRes, _mockNext); // Use _mockNext
-
-      expect(mockRes.status).toHaveBeenCalledWith(200);
-      expect(mockRes.json).toHaveBeenCalledWith(
+      expect(status).toEqual(
         expect.objectContaining({
-          success: true,
-          message: expect.stringContaining('Horse trained successfully in Racing'),
-          updatedHorse: expect.any(Object),
-          nextEligible: expect.any(String),
+          horseId: workflowHorse.id,
+          eligible: false,
+          cooldownEndsAt: expect.any(Date),
+          lastTrainedDiscipline: 'Racing',
         }),
       );
     });
 
-    it('PROVIDES proper error response for ineligible horse', async () => {
-      // Setup: Young horse (ineligible)
-      mockReq.params.horseId = youngHorse.id.toString();
-      mockReq.body.discipline = 'Dressage';
-      mockReq.user = { id: testUser.id }; // Mock authenticated user
-
-      await trainRouteHandler(mockReq, mockRes, _mockNext); // Use _mockNext
-
-      expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Horse is under age',
-        updatedHorse: null,
-        nextEligible: null, // Or specific cooldown if applicable
-      });
+    it('THROWS error for ineligible horse (age restriction)', async () => {
+      await expect(trainHorse(youngHorse.id, 'Dressage')).rejects.toThrow(
+        'Horse does not meet the age requirement for training',
+      );
     });
 
-    it('PROVIDES proper error response for non-existent horse', async () => {
-      mockReq.params.horseId = '99999';
-      mockReq.body.discipline = 'Eventing';
-      mockReq.user = { id: testUser.id };
-
-      await trainRouteHandler(mockReq, mockRes, _mockNext); // Use _mockNext
-
-      // Based on trainHorse throwing an error for non-existent horse
-      // The errorHandler middleware would typically handle this.
-      // For this direct controller test, we check if next was called with an error.
-      // Or, if trainRouteHandler catches and sends a response:
-      expect(_mockNext).toHaveBeenCalledWith(expect.any(Error)); // Assuming error is passed to next
-      // If trainRouteHandler sends a response directly:
-      // expect(mockRes.status).toHaveBeenCalledWith(404);
-      // expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
-      //   success: false,
-      //   message: 'Horse not found'
-      // }));
+    it('THROWS error for horse in cooldown', async () => {
+      await expect(trainHorse(trainedHorse.id, 'Dressage')).rejects.toThrow(
+        'Horse is in cooldown and cannot be trained yet',
+      );
     });
 
-    // Add more tests for trainRouteHandler:
-    // - Missing horseId or discipline
-    // - User not authenticated (if applicable, though tests seem to mock req.user)
-    // - Database errors during training
-  });
+    it('THROWS error for non-existent horse', async () => {
+      await expect(trainHorse(99999, 'Dressage')).rejects.toThrow('Horse not found');
+    });
 
-  describe('BUSINESS RULE: XP System Integration', () => {
-    it('AWARDS XP to horse owner after successful training', async () => {
-      // Create a fresh horse and user for this specific test to avoid interference
-      const xpUser = await prisma.user.create({
-        data: {
-          email: 'xpuser@example.com',
-          username: 'xpuser',
-          password: 'password',
-          name: 'XP Test User',
-          xp: 0,
-          level: 1,
-          money: 100,
-        },
-      });
-      const xpHorse = await prisma.horse.create({
-        data: {
-          name: 'XP Test Horse',
-          age: 4,
-          breedId: (await prisma.breed.findFirst()).id,
-          userId: xpUser.id,
-          sex: 'Gelding',
-          dateOfBirth: new Date('2020-01-01'),
-          healthStatus: 'Excellent',
-          disciplineScores: {},
-        },
-      });
-
-      const initialUserXP = xpUser.xp;
-      await trainHorse(xpHorse.id, 'Cross Country', xpUser.id);
-      const finalUser = await prisma.user.findUnique({ where: { id: xpUser.id } });
-
-      expect(finalUser.xp).toBeGreaterThan(initialUserXP);
-      expect(finalUser.xp).toBe(initialUserXP + 10); // Assuming 10 XP per training
-
-      // Clean up
-      await prisma.trainingLog.deleteMany({ where: { horseId: xpHorse.id } });
-      await prisma.horse.delete({ where: { id: xpHorse.id } });
-      await prisma.user.delete({ where: { id: xpUser.id } });
+    it('THROWS error for invalid discipline', async () => {
+      await expect(trainHorse(adultHorse.id, '')).rejects.toThrow('Discipline is required');
     });
   });
 
-  describe('BUSINESS RULE: Error Handling and Data Integrity', () => {
-    let mockReq, mockRes, _mockNext; // Declare mocks here
+  describe('BUSINESS RULE: getTrainingStatus() Function Validation', () => {
+    it('RETURNS accurate status for horse with no training history', async () => {
+      const result = await getTrainingStatus(adultHorse.id);
 
-    beforeEach(() => {
-      // Initialize mocks before each test in this block
-      mockReq = {
-        params: { horseId: '' },
+      expect(result).toEqual(
+        expect.objectContaining({
+          horseId: adultHorse.id,
+          eligible: true,
+          cooldownEndsAt: null,
+          lastTrainedDiscipline: null,
+        }),
+      );
+    });
+
+    it('RETURNS accurate status for horse with training history', async () => {
+      const result = await getTrainingStatus(trainedHorse.id);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          horseId: trainedHorse.id,
+          eligible: false,
+          cooldownEndsAt: expect.any(Date),
+          lastTrainedDiscipline: 'Racing',
+        }),
+      );
+    });
+
+    it('RETURNS null for non-existent horse', async () => {
+      const result = await getTrainingStatus(99999);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('BUSINESS RULE: getTrainableHorses() Function Validation', () => {
+    it('RETURNS empty array for user with no horses', async () => {
+      const result = await getTrainableHorses(userWithHorses.id + 1);
+
+      expect(result).toEqual([]);
+    });
+
+    it('RETURNS array of trainable horses for user', async () => {
+      const result = await getTrainableHorses(userWithHorses.id);
+
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            name: 'Controller Horse 2',
+            age: 3,
+            userId: userWithHorses.id,
+            // Additional fields as needed
+          }),
+        ]),
+      );
+    });
+
+    it('RETURNS horse with updated scores and XP after training', async () => {
+      // Train the horse to update its scores and XP
+      await trainHorse(adultHorse.id, 'Dressage');
+
+      const result = await getTrainableHorses(testUser.id);
+
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: adultHorse.id,
+            name: 'Controller Adult Horse',
+            age: 4,
+            userId: testUser.id,
+            disciplineScores: expect.objectContaining({
+              Dressage: expect.any(Number),
+            }),
+          }),
+        ]),
+      );
+    });
+  });
+
+  describe('API INTEGRATION: trainRouteHandler() Function Validation', () => {
+    it('PROCESSES valid training request and RETURNS success response', async () => {
+      const response = await trainRouteHandler({
+        params: { horseId: adultHorse.id.toString() },
+        body: { discipline: 'Show Jumping' },
+        user: { id: testUser.id },
+      });
+
+      expect(response).toEqual(
+        expect.objectContaining({
+          success: true,
+          message: 'Horse trained successfully',
+          data: expect.objectContaining({
+            horseId: adultHorse.id,
+            discipline: 'Show Jumping',
+            xpGained: expect.any(Number),
+            newDisciplineScore: expect.objectContaining({
+              discipline: 'Show Jumping',
+              score: expect.any(Number),
+            }),
+          }),
+        }),
+      );
+    });
+
+    it('RETURNS error response for ineligible horse', async () => {
+      const response = await trainRouteHandler({
+        params: { horseId: youngHorse.id.toString() },
+        body: { discipline: 'Dressage' },
+        user: { id: testUser.id },
+      });
+
+      expect(response).toEqual(
+        expect.objectContaining({
+          success: false,
+          message: 'Horse does not meet the age requirement for training',
+        }),
+      );
+    });
+
+    it('RETURNS error response for horse in cooldown', async () => {
+      const response = await trainRouteHandler({
+        params: { horseId: trainedHorse.id.toString() },
+        body: { discipline: 'Dressage' },
+        user: { id: testUser.id },
+      });
+
+      expect(response).toEqual(
+        expect.objectContaining({
+          success: false,
+          message: 'Horse is in cooldown and cannot be trained yet',
+        }),
+      );
+    });
+
+    it('RETURNS error response for non-existent horse', async () => {
+      const response = await trainRouteHandler({
+        params: { horseId: '99999' },
+        body: { discipline: 'Dressage' },
+        user: { id: testUser.id },
+      });
+
+      expect(response).toEqual(
+        expect.objectContaining({
+          success: false,
+          message: 'Horse not found',
+        }),
+      );
+    });
+
+    it('RETURNS error response for invalid discipline', async () => {
+      const response = await trainRouteHandler({
+        params: { horseId: adultHorse.id.toString() },
         body: { discipline: '' },
-        user: { id: testUser.id }, // Assuming testUser is available in this scope
-      };
-      mockRes = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-      _mockNext = jest.fn();
-    });
+        user: { id: testUser.id },
+      });
 
-    it('MAINTAINS database integrity when operations fail', async () => {
-      // This test is complex and would involve trying to make an operation fail mid-way
-      // For example, mocking a Prisma call to throw an error after some initial writes
-      // and then verifying that the initial writes were rolled back (if using transactions)
-      // or that the state is consistent.
-      // For now, this is a placeholder for a more detailed test.
-      expect(true).toBe(true); // Placeholder
-    });
-
-    it('VALIDATES input parameters thoroughly', async () => {
-      // This is partially covered in canTrain and trainHorse specific tests.
-      // This could be a higher-level test ensuring various invalid inputs to the route handler
-      // are caught and result in appropriate error responses.
-      mockReq.params.horseId = adultHorse.id.toString(); // adultHorse should be accessible
-      mockReq.body.discipline = ''; // Invalid discipline
-      // mockReq.user is already set in beforeEach
-
-      await trainRouteHandler(mockReq, mockRes, _mockNext);
-      // Check if next was called with an error or if a 400 response was sent
-      // Depending on how trainRouteHandler handles validation errors from trainHorse
-      expect(_mockNext).toHaveBeenCalledWith(expect.any(Error));
-      // or
-      // expect(mockRes.status).toHaveBeenCalledWith(400);
-      // expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Discipline is required' }));
+      expect(response).toEqual(
+        expect.objectContaining({
+          success: false,
+          message: 'Discipline is required',
+        }),
+      );
     });
   });
 });

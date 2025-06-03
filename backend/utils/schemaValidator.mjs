@@ -6,8 +6,8 @@
  * if the schema is incompatible.
  */
 
-import prisma from '../db/index.js';
-import logger from './logger.js';
+import prisma from '../db/index.mjs';
+import logger from './logger.mjs';
 
 /**
  * Required schema elements to check

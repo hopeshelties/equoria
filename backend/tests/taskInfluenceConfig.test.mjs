@@ -38,8 +38,8 @@ import {
   getAllInfluencedTraits,
   calculateTraitPoints,
   validateTaskInfluenceMap,
-} from '../config/taskInfluenceConfig.js';
-import { ELIGIBLE_FOAL_ENRICHMENT_TASKS, FOAL_GROOMING_TASKS } from '../config/groomConfig.js';
+} from '../config/taskInfluenceConfig.mjs';
+import { ELIGIBLE_FOAL_ENRICHMENT_TASKS, FOAL_GROOMING_TASKS } from '../config/groomConfig.mjs';
 
 describe('Task Influence Configuration', () => {
   describe('Task Influence Map Structure', () => {

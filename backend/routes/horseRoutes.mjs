@@ -1,9 +1,9 @@
 import express from 'express';
 import { param, body, validationResult } from 'express-validator';
-import { getTrainableHorses } from '../controllers/trainingController.js';
-import { getHorseOverview } from '../controllers/horseController.js';
-import { authenticateToken } from '../middleware/auth.js';
-import * as horseXpController from '../controllers/horseXpController.js';
+import { getTrainableHorses } from '../controllers/trainingController.mjs';
+import { getHorseOverview } from '../controllers/horseController.mjs';
+import { authenticateToken } from '../middleware/auth.mjs';
+import * as horseXpController from '../controllers/horseXpController.mjs';
 
 const router = express.Router();
 

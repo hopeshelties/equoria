@@ -3,9 +3,9 @@
  * Demonstrates how traits affect training, competition, bonding, and temperament
  */
 
-import { getCombinedTraitEffects } from '../utils/traitEffects.js';
-import { calculateBondingChange } from '../utils/bondingModifiers.js';
-import { calculateTemperamentDrift } from '../utils/temperamentDrift.js';
+import { getCombinedTraitEffects } from '../utils/traitEffects.mjs';
+import { calculateBondingChange } from '../utils/bondingModifiers.mjs';
+import { calculateTemperamentDrift } from '../utils/temperamentDrift.mjs';
 
 console.log('=== Trait Integration During Gameplay Examples ===\n');
 

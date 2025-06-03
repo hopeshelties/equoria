@@ -40,7 +40,7 @@ import {
   getTraitCompetitionEffect,
   getAllTraitCompetitionEffects,
   hasSpecializedEffect,
-} from '../utils/traitCompetitionImpact.js';
+} from '../utils/traitCompetitionImpact.mjs';
 
 describe('🏆 UNIT: Trait Competition Impact System - Scoring Modifier Calculations', () => {
   describe('calculateTraitCompetitionImpact', () => {

@@ -1,9 +1,9 @@
-import { getStatScore } from '../utils/getStatScore.js';
-import { getHealthModifier } from '../utils/healthBonus.js';
-import { applyRiderModifiers } from '../utils/riderBonus.js';
-import { calculateTraitCompetitionImpact } from '../utils/traitCompetitionImpact.js';
-import { getCombinedTraitEffects } from '../utils/traitEffects.js';
-import logger from '../utils/logger.js';
+import { getStatScore } from '../utils/getStatScore.mjs';
+import { getHealthModifier } from '../utils/healthBonus.mjs';
+import { applyRiderModifiers } from '../utils/riderBonus.mjs';
+import { calculateTraitCompetitionImpact } from '../utils/traitCompetitionImpact.mjs';
+import { getCombinedTraitEffects } from '../utils/traitEffects.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * Simulate a competition with multiple horses and return ranked results

@@ -20,10 +20,10 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import request from 'supertest';
-import app from '../app.js';
-import prisma from '../db/index.js';
+import app from '../app.mjs';
+import prisma from '../db/index.mjs';
 // TODO: Will use GROOM_CONFIG in future integration tests
-// import { GROOM_CONFIG } from '../config/groomConfig.js';
+// import { GROOM_CONFIG } from '../config/groomConfig.mjs';
 
 describe('Groom Bonding System Integration', () => {
   let testUser, testGroom, testHorse, testAssignment;

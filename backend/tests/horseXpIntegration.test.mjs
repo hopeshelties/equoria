@@ -19,7 +19,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 
 describe('🐎 INTEGRATION: Horse XP System - Core Functionality Integration', () => {
   let testHorseId;

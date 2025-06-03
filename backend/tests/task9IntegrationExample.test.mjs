@@ -36,7 +36,7 @@
  *    simulation with minimal mocking and validates actual trait bonus effects.
  */
 
-import { simulateCompetition } from '../logic/simulateCompetition.js';
+import { simulateCompetition } from '../logic/simulateCompetition.mjs';
 
 describe('🏆 INTEGRATION: Task 9 Integration Example - Discipline Affinity Trait Bonus', () => {
   // Create a minimal test horse for demonstration

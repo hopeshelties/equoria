@@ -1,5 +1,5 @@
 import { validationResult } from 'express-validator';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger.mjs';
 
 /**
  * Validation Error Handler Middleware

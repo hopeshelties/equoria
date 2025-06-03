@@ -32,8 +32,8 @@
  */
 
 import { describe, expect, beforeEach } from '@jest/globals';
-import { addXpToUser, getUserProgress } from '../controllers/progressionController.js';
-import * as db from '../models/userModel.js';
+import { addXpToUser, getUserProgress } from '../controllers/progressionController.mjs';
+import * as db from '../models/userModel.mjs';
 
 jest.mock('../models/userModel.js');
 

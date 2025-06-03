@@ -1,5 +1,5 @@
-import logger from '../utils/logger.js';
-import { AppError } from '../errors/index.js';
+import logger from '../utils/logger.mjs';
+import { AppError } from '../errors/index.mjs';
 
 /**
  * Global Error Handler Middleware

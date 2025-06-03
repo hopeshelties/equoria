@@ -4,8 +4,8 @@
  * Integrates with grooming, training, and interaction systems
  */
 
-import { getCombinedTraitEffects } from './traitEffects.js';
-import logger from './logger.js';
+import { getCombinedTraitEffects } from './traitEffects.mjs';
+import logger from './logger.mjs';
 
 /**
  * Base bonding change rates for different activities

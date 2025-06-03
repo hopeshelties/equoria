@@ -2,7 +2,7 @@
  * Schema Field Test - Test specific field existence
  */
 
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 
 describe('Schema Field Test', () => {
   afterAll(async () => {

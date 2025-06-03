@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { AppError } from '../errors/index.js';
-import logger from '../utils/logger.js';
+import { AppError } from '../errors/index.mjs';
+import logger from '../utils/logger.mjs';
 
 /**
  * JWT Authentication Middleware

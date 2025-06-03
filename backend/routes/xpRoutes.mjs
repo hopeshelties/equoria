@@ -4,8 +4,8 @@
  */
 
 import express from 'express';
-import { getPlayerXpEvents, getPlayerXpSummary, getRecentXpEvents } from '../models/xpLogModel.js';
-import logger from '../utils/logger.js';
+import { getPlayerXpEvents, getPlayerXpSummary, getRecentXpEvents } from '../models/xpLogModel.mjs';
+import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 

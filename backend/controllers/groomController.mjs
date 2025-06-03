@@ -17,15 +17,16 @@ import {
   SKILL_LEVELS,
   PERSONALITY_TRAITS,
   DEFAULT_GROOMS,
-} from '../utils/groomSystem.js';
+} from '../utils/groomSystem.mjs';
 import {
   validateGroomingEligibility,
   updateTaskLog,
   updateStreakTracking,
   checkTaskMutualExclusivity as _checkTaskMutualExclusivity,
-} from '../utils/groomBondingSystem.js';
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
+} from '../utils/groomBondingSystem.mjs';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
+import { ensureDefaultGroomAssignment } from '../services/groomService';
 
 /**
  * POST /api/grooms/assign
@@ -78,6 +79,7 @@ export async function assignGroom(req, res) {
       message: result.message,
       data: result.assignment,
     });
+    return null;
   } catch (error) {
     logger.error(`[groomController.assignGroom] Error: ${error.message}`);
     res.status(500).json({
@@ -85,16 +87,18 @@ export async function assignGroom(req, res) {
       message: error.message || 'Failed to assign groom',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
+    return null;
   }
 }
 
 /**
  * POST /api/grooms/ensure-default/:foalId
  * Ensure a foal has a default groom assignment
- */
 export async function ensureDefaultAssignment(req, res) {
+
   try {
     const { foalId } = req.params;
+    const userId = req.user?.id || 'default-user'; // TODO: Get from auth
     const userId = req.user?.id || 'default-user'; // TODO: Get from auth
 
     const parsedFoalId = parseInt(foalId, 10);
@@ -180,6 +184,7 @@ export async function getFoalAssignments(req, res) {
         totalAssignments: assignments.length,
       },
     });
+    return null;
   } catch (error) {
     logger.error(`[groomController.getFoalAssignments] Error: ${error.message}`);
     res.status(500).json({
@@ -187,6 +192,7 @@ export async function getFoalAssignments(req, res) {
       message: 'Failed to retrieve foal assignments',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
+    return null;
   }
 }
 
@@ -276,8 +282,8 @@ export async function recordInteraction(req, res) {
 
     // Check if foal has already completed a task today
     let existingTaskToday = null;
-    if (foal.taskLog && foal.taskLog[today] && foal.taskLog[today].length > 0) {
-      existingTaskToday = foal.taskLog[today][0]; // Get the first task completed today
+    if (foal.taskLog?.[today]?.length > 0) {
+      existingTaskToday = foal.taskLog?.[today]?.[0]; // Get the first task completed today
     }
 
     // Check for task mutual exclusivity
@@ -383,6 +389,7 @@ export async function recordInteraction(req, res) {
         },
       },
     });
+    return null;
   } catch (error) {
     logger.error(`[groomController.recordInteraction] Error: ${error.message}`);
     res.status(500).json({
@@ -390,6 +397,7 @@ export async function recordInteraction(req, res) {
       message: 'Failed to record interaction',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
+    return null;
   }
 }
 
@@ -545,9 +553,9 @@ export async function hireGroom(req, res) {
     }
 
     // Create the groom and deduct funds in a transaction
-    const result = await prisma.$transaction(async prisma => {
+    const result = await prisma.$transaction(async prismaTx => {
       // Create the groom
-      const groom = await prisma.groom.create({
+      const groom = await prismaTx.groom.create({
         data: {
           name,
           speciality,
@@ -563,7 +571,7 @@ export async function hireGroom(req, res) {
       });
 
       // Deduct funds from user
-      await prisma.user.update({
+      await prismaTx.user.update({
         where: { id: userId },
         data: {
           money: {
@@ -596,6 +604,7 @@ export async function hireGroom(req, res) {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
+  return null;
 }
 
 /**

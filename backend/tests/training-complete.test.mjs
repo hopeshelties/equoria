@@ -39,9 +39,9 @@
 import request from 'supertest';
 import express from 'express';
 import { body } from 'express-validator';
-import { register, login } from '../controllers/authController.js';
-import { authenticateToken } from '../middleware/auth.js';
-import prisma from '../db/index.js';
+import { register, login } from '../controllers/authController.mjs';
+import { authenticateToken } from '../middleware/auth.mjs';
+import prisma from '../db/index.mjs';
 
 // Create a minimal test app for training tests
 const createTestApp = () => {

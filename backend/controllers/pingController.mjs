@@ -2,8 +2,8 @@
  * Ping Controller
  * Handles ping requests for health checks
  */
-import logger from '../utils/logger.js';
-import prisma from '../db/index.js';
+import logger from '../utils/logger.mjs';
+import prisma from '../db/index.mjs';
 
 export const handlePing = (req, res) => {
   const { name } = req.query;

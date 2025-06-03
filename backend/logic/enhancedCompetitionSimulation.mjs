@@ -9,8 +9,8 @@
  * - Hidden scores from users
  */
 
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
 import {
   calculateCompetitionScore,
   calculatePrizeAmount,
@@ -22,7 +22,7 @@ import {
   calculateStatGain,
   getAllDisciplines,
   getDisciplineConfig,
-} from '../utils/competitionLogic.js';
+} from '../utils/competitionLogic.mjs';
 
 /**
  * Validate horse eligibility for competition entry

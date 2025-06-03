@@ -33,7 +33,7 @@
  */
 
 import { describe, it, expect, afterAll } from '@jest/globals';
-import prisma from '../db/index.js';
+import prisma from '../db/index.mjs';
 
 describe('🔌 INTEGRATION: Database Connection - Core Infrastructure Validation', () => {
   afterAll(async () => {
