@@ -8,9 +8,9 @@ import {
   getAllTraitCompetitionEffects,
   // TODO: Re-enable when specialized effects are implemented
   // hasSpecializedEffect as _hasSpecializedEffect,
-} from '../utils/traitCompetitionImpact.js';
-import prisma from '../db/index.js';
-import logger from '../utils/logger.js';
+} from '../utils/traitCompetitionImpact.mjs';
+import prisma from '../db/index.mjs';
+import logger from '../utils/logger.mjs';
 
 // TODO: Implement hasSpecializedEffect usage for enhanced trait analysis
 // This function will be used to provide more detailed trait specialization information
