@@ -201,7 +201,7 @@ describe('🏆 UNIT: Competition Score Calculation - Scoring Algorithm Validatio
       expect(() => calculateCompetitionScore(horse, null)).toThrow(
         'Event type is required and must be a string',
       );
-      expect(() => calculateCompetitionScore(horse, undefined)).toThrow(
+      expect(() => calculateCompetitionScore(horse)).toThrow(
         'Event type is required and must be a string',
       );
       expect(() => calculateCompetitionScore(horse, 123)).toThrow(

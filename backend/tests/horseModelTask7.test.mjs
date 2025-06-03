@@ -83,7 +83,7 @@ describe('🐴 UNIT: Horse Model Task 7 - Instance-Style Helper Methods Validati
     it('should reject invalid trait names in hasTrait', async () => {
       await expect(hasTrait(1, '')).rejects.toThrow('Trait name must be a non-empty string');
       await expect(hasTrait(1, null)).rejects.toThrow('Trait name must be a non-empty string');
-      await expect(hasTrait(1, undefined)).rejects.toThrow('Trait name must be a non-empty string');
+      await expect(hasTrait(1)).rejects.toThrow('Trait name must be a non-empty string');
       await expect(hasTrait(1, 123)).rejects.toThrow('Trait name must be a non-empty string');
     });
 
