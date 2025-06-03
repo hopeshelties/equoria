@@ -1,14 +1,5 @@
 # dependencies
 /node_modules/
-/copilot
-/.cursor
-/Project Cheatsheets
-/codehelpers
-/UI
-/coderrules
-/.vscode
-/augment
-
 
 # next.js
 /.next/
@@ -62,3 +53,27 @@ jest.setup.mjs
 
 # augment
 .augmentignoreS
+
+# project cheatsheets
+/Project Cheatsheets
+
+# code helpers
+/
+
+# UI
+/UI
+
+# coderrules
+/coderrules
+
+# copilot
+/copilot
+
+# cursor
+/.cursor
+
+# augment
+/augment
+
+# .vscode
+/.vscode

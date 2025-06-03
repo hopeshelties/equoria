@@ -1,5 +1,5 @@
 # dependencies
-/node_modules
+/node_modules/
 
 # next.js
 /.next/
@@ -14,16 +14,36 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Prevent automated tools from modifying these
-.eslintrc.json
-.prettierrc
-
-# env files
-.env*
-
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# .json files
+*.json
+
+# misc
+.DS_Store
+
+#markdown
+*.md
+
+#env
+.env
+
+#jest
+jest.config.mjs
+jest.setup.mjs
+
+# prettier
+.prettierrc
+.prettierignore 
+
+# eslint
+.eslintrc.json
+.eslintignore
+
+# editor config
+.editorconfig
+
+# augment
+.augmentignoreS

@@ -1,3 +1,5 @@
+// DO NOT MODIFY: Configuration locked for consistency
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -56,8 +58,8 @@ const config = {
   jwtRefreshSecret: JWT_REFRESH_SECRET,
   allowedOrigins: ALLOWED_ORIGINS
     ? ALLOWED_ORIGINS.split(',')
-      .map(origin => origin.trim())
-      .filter(origin => origin)
+        .map(origin => origin.trim())
+        .filter(origin => origin)
     : [],
 };
 

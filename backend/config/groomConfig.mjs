@@ -1,3 +1,4 @@
+// DO NOT MODIFY: Configuration locked for consistency
 /**
  * Groom System Configuration
  * Centralized configuration for groom bonding and burnout prevention mechanics

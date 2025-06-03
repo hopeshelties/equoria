@@ -1,3 +1,4 @@
+// DO NOT MODIFY: Configuration locked for consistency
 /**
  * Task Influence Configuration for Epigenetic Traits
  * Maps foal tasks to epigenetic traits and defines trait point accumulation

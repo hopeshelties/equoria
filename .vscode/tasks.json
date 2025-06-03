@@ -42,6 +42,22 @@
       }
     },
     {
+  "label": "🛠 Update import paths from .js to .mjs",
+  "type": "shell",
+  "command": "powershell",
+  "args": [
+    "-NoProfile",
+    "-ExecutionPolicy", "Bypass",
+    "-Command",
+    "Get-ChildItem -Path 'C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend' -Recurse -Include *.mjs | ForEach-Object { (Get-Content $_.FullName) -replace '\\.js\"', '.mjs\"' | Set-Content $_.FullName }"
+  ],
+  "problemMatcher": [],
+  "presentation": {
+    "reveal": "always",
+    "panel": "dedicated"
+  }
+},
+    {
       "label": "ESLint: Fix All Auto-Fixable",
       "type": "shell",
       "command": "npm",
@@ -90,15 +106,15 @@
       }
     },
     {
-  "label": "🔁 Convert .js to .mjs (backend only)",
-  "type": "shell",
-  "command": "powershell",
-  "args": [
-    "-NoProfile",
-    "-ExecutionPolicy", "Bypass",
-    "-Command",
-    "Get-ChildItem -Path '${workspaceFolder}/backend' -Recurse -Filter *.js | Rename-Item -NewName { $_.Name -replace '\\.js$', '.mjs' }"
-  ],
+      "label": "🔁 Convert .js to .mjs (backend only)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-Command",
+        "Get-ChildItem -Path '${workspaceFolder}/backend' -Recurse -Filter *.js | ForEach-Object { Rename-Item $_.FullName ($_.FullName -replace '\\.js$', '.mjs') }"
+      ],
   "presentation": {
     "reveal": "always",
     "panel": "shared"
