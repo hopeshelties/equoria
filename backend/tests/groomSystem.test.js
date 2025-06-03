@@ -1,3 +1,5 @@
+import { expect, jest, test, describe, beforeEach, afterEach, it } from '@jest/globals';
+
 /**
  * 🧪 UNIT TEST: Groom System - Foal Care Assignment & Management
  *
@@ -34,8 +36,6 @@
  * 💡 TEST STRATEGY: Unit testing with mocked database to focus on groom management
  *    business logic while ensuring predictable test outcomes for complex calculations
  */
-
-import { jest, describe, beforeEach, expect, it } from '@jest/globals';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 

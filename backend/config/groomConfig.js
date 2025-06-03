@@ -49,11 +49,18 @@ export const GROOM_CONFIG = {
   GENERAL_GROOMING_MIN_AGE: 3, // 3+ years for general grooming tasks
 
   // Tasks used for foal bonding, epigenetics, and enrichment (ages 0-2)
-  ELIGIBLE_FOAL_ENRICHMENT_TASKS: ['desensitization', 'trust_building', 'showground_exposure'],
+  ELIGIBLE_FOAL_ENRICHMENT_TASKS: [
+    'desensitization',
+    'trust_building',
+    'showground_exposure',
+    'early_touch',
+    'gentle_touch',
+    'feeding_assistance',
+    'environment_exploration',
+  ],
 
   // Tasks used for grooming behavior and presentation prep (ages 1-3)
   ELIGIBLE_FOAL_GROOMING_TASKS: [
-    'early_touch',
     'hoof_handling',
     'tying_practice',
     'sponge_bath',

@@ -19,6 +19,7 @@ import { createSecurityMiddleware } from './middleware/security.js';
 import { requestLogger, errorRequestLogger } from './middleware/requestLogger.js';
 import { specs, swaggerUi } from './docs/swagger.js';
 import cronJobService from './services/cronJobs.js';
+import { validateDatabaseSchemaOrExit } from './utils/schemaValidator.js';
 
 const app = express();
 
@@ -62,6 +63,18 @@ app.get('/api-docs.json', (_req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(specs);
 });
+
+// Validate database schema compatibility
+if (config.env !== 'test') {
+  logger.info('[app] Validating database schema compatibility...');
+  // This is an async operation, but we want it to block startup if it fails
+  // The function will exit the process if validation fails
+  validateDatabaseSchemaOrExit().catch(error => {
+    logger.error('[app] Fatal error during schema validation:', error);
+    process.exit(1);
+  });
+  logger.info('[app] Database schema validation completed');
+}
 
 // Routes
 app.use('/ping', pingRoute);

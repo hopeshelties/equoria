@@ -4,10 +4,15 @@
 /.cursor
 /Project Cheatsheets
 /codehelpers
+/UI
+/coderrules
+/.vscode
+/augment
+
+
 # next.js
 /.next/
 /out/
-/UI
 
 # production
 /build
@@ -27,3 +32,33 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# .json files
+*.json
+
+# misc
+.DS_Store
+
+#markdown
+*.md
+
+#env
+.env
+
+#jest
+jest.config.mjs
+jest.setup.mjs
+
+# prettier
+.prettierrc
+.prettierignore 
+
+# eslint
+.eslintrc.json
+.eslintignore
+
+# editor config
+.editorconfig
+
+# augment
+.augmentignoreS

@@ -3,9 +3,14 @@
  * Handles groom assignments, interactions, and management operations
  */
 
+// Maximum number of grooms a user can hire
+const MAX_GROOMS_PER_USER = 10;
+
+// Base hiring cost for grooms (modified by skill level)
+const BASE_HIRING_COST = 500;
+
 import {
   assignGroomToFoal,
-  ensureDefaultGroomAssignment,
   calculateGroomInteractionEffects,
   validateFoalInteractionLimits,
   GROOM_SPECIALTIES,
@@ -91,7 +96,6 @@ export async function ensureDefaultAssignment(req, res) {
   try {
     const { foalId } = req.params;
     const userId = req.user?.id || 'default-user'; // TODO: Get from auth
-    const userId = req.user?.id || 'default-user'; // TODO: Get from auth
 
     const parsedFoalId = parseInt(foalId, 10);
     if (isNaN(parsedFoalId) || parsedFoalId <= 0) {
@@ -104,11 +108,16 @@ export async function ensureDefaultAssignment(req, res) {
 
     logger.info(
       `[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`,
-      `[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`,
     );
 
     const result = await ensureDefaultGroomAssignment(parsedFoalId, userId);
-    const result = await ensureDefaultGroomAssignment(parsedFoalId, userId);
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+        data: null,
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -147,7 +156,6 @@ export async function getFoalAssignments(req, res) {
     }
 
     logger.info(
-      `[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`,
       `[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`,
     );
 
@@ -192,7 +200,6 @@ export async function recordInteraction(req, res) {
 
     logger.info(
       `[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`,
-      `[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`,
     );
 
     // Validate required fields
@@ -234,7 +241,6 @@ export async function recordInteraction(req, res) {
         },
       }),
     ]);
-
     if (!groom) {
       return res.status(404).json({
         success: false,
@@ -242,12 +248,10 @@ export async function recordInteraction(req, res) {
         data: null,
       });
     }
-
     if (!foal) {
       return res.status(404).json({
         success: false,
-        message: 'Foal not found',
-        error: 'Horse not found',
+        message: 'Horse not found',
         data: null,
       });
     }
@@ -267,15 +271,30 @@ export async function recordInteraction(req, res) {
     }
 
     // Check for task mutual exclusivity (enrichment vs grooming same day)
-    // TODO: Implement daily task checking - for now, allow all tasks
-    // const mutualExclusivityResult = checkTaskMutualExclusivity(existingTaskToday, interactionType);
-    // if (!mutualExclusivityResult.allowed) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: mutualExclusivityResult.reason,
-    //     data: { conflict: true },
-    //   });
-    // }
+    // Get today's date in YYYY-MM-DD format for task log checking
+    const today = new Date().toISOString().split('T')[0];
+
+    // Check if foal has already completed a task today
+    let existingTaskToday = null;
+    if (foal.taskLog && foal.taskLog[today] && foal.taskLog[today].length > 0) {
+      existingTaskToday = foal.taskLog[today][0]; // Get the first task completed today
+    }
+
+    // Check for task mutual exclusivity
+    const checkTaskMutualExclusivity = _checkTaskMutualExclusivity; // Rename imported function
+    const mutualExclusivityResult = checkTaskMutualExclusivity(existingTaskToday, interactionType);
+    if (!mutualExclusivityResult.allowed) {
+      return res.status(400).json({
+        success: false,
+        message: mutualExclusivityResult.reason,
+        data: {
+          conflict: true,
+          existingTask: existingTaskToday,
+          existingCategory: mutualExclusivityResult.existingCategory,
+          newCategory: mutualExclusivityResult.newCategory,
+        },
+      });
+    }
 
     // Calculate interaction effects
     const effects = calculateGroomInteractionEffects(groom, foal, interactionType, duration);
@@ -307,16 +326,10 @@ export async function recordInteraction(req, res) {
       },
     });
 
-    // Update foal's bond score and stress level
-    const newBondScore = Math.max(
-      0,
-      Math.min(100, (foal.bond_score || 50) + effects.bondingChange),
-    );
     // Update foal's bond score, stress level, task log, and streak tracking
     const newBondScore = Math.max(0, Math.min(100, (foal.bondScore || 50) + effects.bondingChange));
     const newStressLevel = Math.max(
       0,
-      Math.min(100, (foal.stress_level || 0) + effects.stressChange),
       Math.min(100, (foal.stressLevel || 0) + effects.stressChange),
     );
 
@@ -383,20 +396,14 @@ export async function recordInteraction(req, res) {
 /**
  * GET /api/grooms/user/:userId
  * Get all grooms for a user
- * GET /api/grooms/user/:userId
- * Get all grooms for a user
  */
-export async function getUserGrooms(req, res) {
 export async function getUserGrooms(req, res) {
   try {
     const { userId } = req.params;
-    const { userId } = req.params;
 
-    logger.info(`[groomController.getUserGrooms] Getting grooms for user ${userId}`);
     logger.info(`[groomController.getUserGrooms] Getting grooms for user ${userId}`);
 
     const grooms = await prisma.groom.findMany({
-      where: { userId },
       where: { userId },
       include: {
         groomAssignments: {
@@ -420,21 +427,15 @@ export async function getUserGrooms(req, res) {
     res.status(200).json({
       success: true,
       message: `Retrieved ${grooms.length} grooms for user`,
-      message: `Retrieved ${grooms.length} grooms for user`,
-      data: {
-        userId,
-        userId,
-        grooms,
-        activeGrooms: grooms.filter(g => g.isActive),
-        totalGrooms: grooms.length,
-      },
+      userId,
+      grooms,
+      activeGrooms: grooms.filter(g => g.isActive),
+      totalGrooms: grooms.length,
     });
   } catch (error) {
     logger.error(`[groomController.getUserGrooms] Error: ${error.message}`);
-    logger.error(`[groomController.getUserGrooms] Error: ${error.message}`);
     res.status(500).json({
       success: false,
-      message: 'Failed to retrieve user grooms',
       message: 'Failed to retrieve user grooms',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
@@ -443,7 +444,6 @@ export async function getUserGrooms(req, res) {
 
 /**
  * POST /api/grooms/hire
- * Hire a new groom for a user
  * Hire a new groom for a user
  */
 export async function hireGroom(req, res) {
@@ -455,13 +455,11 @@ export async function hireGroom(req, res) {
       skill_level,
       personality,
       session_rate,
-      session_rate,
       bio,
       availability,
     } = req.body;
     const userId = req.user?.id || '83970fb4-f086-46b3-9e76-ae71720d2918'; // TODO: Get from auth
 
-    logger.info(`[groomController.hireGroom] Hiring new groom ${name} for user ${userId}`);
     logger.info(`[groomController.hireGroom] Hiring new groom ${name} for user ${userId}`);
 
     // Validate required fields
@@ -500,32 +498,95 @@ export async function hireGroom(req, res) {
       });
     }
 
-    const groom = await prisma.groom.create({
-      data: {
-        name,
-        speciality,
-        experience: experience || 1,
-        skillLevel: skill_level,
-        skillLevel: skill_level,
-        personality,
-        sessionRate: session_rate || SKILL_LEVELS[skill_level].costModifier * 15.0,
-        sessionRate: session_rate || SKILL_LEVELS[skill_level].costModifier * 15.0,
-        bio,
-        availability: availability || {},
-        userId,
-        userId,
-      },
+    // Check if user has reached the maximum number of grooms
+    const userGroomCount = await prisma.groom.count({
+      where: { userId },
+    });
+
+    if (userGroomCount >= MAX_GROOMS_PER_USER) {
+      return res.status(400).json({
+        success: false,
+        message: `You have reached the maximum limit of ${MAX_GROOMS_PER_USER} grooms. Please release a groom before hiring a new one.`,
+        data: {
+          currentCount: userGroomCount,
+          maxAllowed: MAX_GROOMS_PER_USER,
+        },
+      });
+    }
+
+    // Calculate hiring cost based on skill level
+    const skillLevelCostModifier = SKILL_LEVELS[skill_level].costModifier;
+    const hiringCost = Math.round(BASE_HIRING_COST * skillLevelCostModifier);
+
+    // Check if user has enough funds
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { money: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+        data: null,
+      });
+    }
+
+    if (user.money < hiringCost) {
+      return res.status(400).json({
+        success: false,
+        message: `Insufficient funds to hire this groom. You need ${hiringCost} coins, but only have ${user.money}.`,
+        data: {
+          requiredFunds: hiringCost,
+          availableFunds: user.money,
+          deficit: hiringCost - user.money,
+        },
+      });
+    }
+
+    // Create the groom and deduct funds in a transaction
+    const result = await prisma.$transaction(async prisma => {
+      // Create the groom
+      const groom = await prisma.groom.create({
+        data: {
+          name,
+          speciality,
+          experience: experience || 1,
+          skillLevel: skill_level,
+          personality,
+          sessionRate: session_rate || SKILL_LEVELS[skill_level].costModifier * 15.0,
+          bio,
+          availability: availability || {},
+          userId,
+          hiringCost, // Store the hiring cost for record keeping
+        },
+      });
+
+      // Deduct funds from user
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          money: {
+            decrement: hiringCost,
+          },
+        },
+      });
+
+      return { groom, hiringCost };
     });
 
     logger.info(
-      `[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`,
-      `[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`,
+      `[groomController.hireGroom] Successfully hired groom ${result.groom.name} (ID: ${result.groom.id}) for ${result.hiringCost} coins`,
     );
 
     res.status(201).json({
       success: true,
-      message: `Successfully hired ${groom.name}`,
-      data: groom,
+      message: `Successfully hired ${result.groom.name} for ${result.hiringCost} coins`,
+      data: {
+        groom: result.groom,
+        hiringCost: result.hiringCost,
+        remainingFunds: user.money - result.hiringCost,
+      },
     });
   } catch (error) {
     logger.error(`[groomController.hireGroom] Error: ${error.message}`);

@@ -14,7 +14,6 @@ import {
   getFoalAssignments,
   recordInteraction,
   getUserGrooms,
-  getUserGrooms,
   hireGroom,
   getGroomDefinitions,
 } from '../controllers/groomController.js';
@@ -293,9 +292,6 @@ router.post(
  *         description: Internal server error
  */
 router.get(
-  '/user/:userId',
-  [param('userId').notEmpty().withMessage('userId is required'), handleValidationErrors],
-  getUserGrooms,
   '/user/:userId',
   [param('userId').notEmpty().withMessage('userId is required'), handleValidationErrors],
   getUserGrooms,

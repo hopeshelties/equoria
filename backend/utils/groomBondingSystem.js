@@ -9,7 +9,7 @@
  * - General grooming tasks (3+ years) for burnout prevention
  * - Task logging system for frequency tracking and trait evaluation
  * - Streak tracking with grace period logic for consecutive care bonuses
- * - Task mutual exclusivity enforcement (one enrichment OR grooming per day)
+ * - Task mutual exclusivity enforcement (one enrichment OR one grooming per day)
  * - Bonding effect calculations for grooming sessions
  * - Consecutive day tracking for burnout immunity
  * - Burnout immunity status management
@@ -53,7 +53,7 @@ export function getEligibleTasksForAge(ageInDays) {
     eligibleTasks.push(...GROOM_CONFIG.ELIGIBLE_FOAL_ENRICHMENT_TASKS);
   }
 
-  // Ages 1-3: Foal grooming tasks
+  // Ages 1-3: Foal grooming tasks (overlap with enrichment)
   if (
     ageInYears >= GROOM_CONFIG.FOAL_GROOMING_MIN_AGE &&
     ageInYears <= GROOM_CONFIG.FOAL_GROOMING_MAX_AGE
@@ -61,12 +61,12 @@ export function getEligibleTasksForAge(ageInDays) {
     eligibleTasks.push(...GROOM_CONFIG.ELIGIBLE_FOAL_GROOMING_TASKS);
   }
 
-  // Ages 3+: General grooming tasks + continue allowing enrichment and foal grooming
+  // Ages 3+: Allow all task types (enrichment, foal grooming, and general grooming)
   if (ageInYears >= GROOM_CONFIG.GENERAL_GROOMING_MIN_AGE) {
-    eligibleTasks.push(...GROOM_CONFIG.ELIGIBLE_GENERAL_GROOMING_TASKS);
-    // Adult horses can still do enrichment and foal grooming tasks
+    // For adult horses, allow all types of tasks
     eligibleTasks.push(...GROOM_CONFIG.ELIGIBLE_FOAL_ENRICHMENT_TASKS);
     eligibleTasks.push(...GROOM_CONFIG.ELIGIBLE_FOAL_GROOMING_TASKS);
+    eligibleTasks.push(...GROOM_CONFIG.ELIGIBLE_GENERAL_GROOMING_TASKS);
   }
 
   return [...new Set(eligibleTasks)]; // Remove duplicates

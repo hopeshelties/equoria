@@ -5,7 +5,6 @@ import { AppError } from '../errors/index.js';
  * Global Error Handler Middleware
  * Handles all errors in a consistent manner with proper logging
  */
-<<<<<<< HEAD
 const errorHandler = (err, req, res, next) => {
   // Defensive checks for response object
   if (!res || typeof res.status !== 'function') {
@@ -27,10 +26,6 @@ const errorHandler = (err, req, res, next) => {
     });
     return next(err); // Pass to Express default handler
   }
-
-=======
-const errorHandler = (err, req, res) => {
->>>>>>> 2b90c9a95e25c8a96fbf72c96ae67accf803c409
   let error = { ...err };
   error.message = err.message;
 

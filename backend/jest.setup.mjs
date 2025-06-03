@@ -1,3 +1,8 @@
+// DO NOT MODIFY: Configuration locked for consistency
+// Jest configuration for a Node.js project using ES modules
+// This configuration is tailored for a Node.js environment with ES module support,
+// ensuring compatibility with both .js and .mjs files, and includes necessary setup for Jest globals.
+// It also includes custom module name mappings for utility files and error handling.
 /* eslint-disable no-console */
 import dotenv from 'dotenv';
 import path from 'path';

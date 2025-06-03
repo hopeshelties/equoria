@@ -14,6 +14,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# Prevent automated tools from modifying these
+.eslintrc.json
+.prettierrc
+
 # env files
 .env*
 

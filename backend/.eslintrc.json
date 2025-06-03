@@ -1,21 +1,48 @@
+// DO NOT MODIFY: Configuration locked for consistency
 {
   "env": {
     "node": true,
-    "es2022": true
+    "es2022": true,
+    "jest": true
   },
-  "extends": [
-    "eslint:recommended"
+"parserOptions": {
+  "ecmaVersion": "latest",
+  "sourceType": "module"
+},
+"plugins": ["only-warn",
+"import"],
+"extends": [
+    "eslint:recommended",
+    "prettier"
   ],
-  "parserOptions": {
-    "ecmaVersion": "latest",
-    "sourceType": "module"
-  },
-  "rules": {
+"rules": {
     "no-var": "error",
     "no-extra-semi": "error",
+    "prefer-const": "error",
+    "no-console": ["warn"],
     "semi": ["error", "always"],
     "quotes": ["error", "single"],
+    "import/no-commonjs": "error",
     "indent": ["error", 2],
+    "rules": {
+  "camelcase": ["error", { "properties": "always" }],
+  "id-match": ["error", "^[a-zA-Z][a-zA-Z0-9]*$", {
+    "properties": true,
+    "onlyDeclarations": true,
+    "ignoreDestructuring": false
+  }]
+},
+"no-restricted-syntax": [
+    "error",
+    {
+      "selector": "CallExpression[callee.name='require']",
+      "message": "Use import instead of require"
+    },
+    {
+      "selector": "MemberExpression[object.name='module'][property.name='exports']",
+      "message": "Use export instead of module.exports"
+    }
+  ],
     "comma-dangle": ["error", "always-multiline"],
     "object-curly-spacing": ["error", "always"],
     "arrow-parens": ["error", "as-needed"],
