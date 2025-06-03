@@ -71,12 +71,14 @@ describe('🔍 UNIT: Trait Discovery System - Environmental Trait Detection', ()
     // Count social activities
     const socialCount = activities.filter(
       a => a.activityType === 'social_interaction' || a.activityType === 'group_play',
+      a => a.activityType === 'social_interaction' || a.activityType === 'group_play',
     ).length;
 
     expect(socialCount).toBe(3);
 
     // Count mental stimulation activities
     const mentalCount = activities.filter(
+      a => a.activityType === 'puzzle_feeding' || a.activityType === 'obstacle_course',
       a => a.activityType === 'puzzle_feeding' || a.activityType === 'obstacle_course',
     ).length;
 

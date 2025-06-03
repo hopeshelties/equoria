@@ -24,35 +24,36 @@ export function calculateCompetitionScore(horse, eventType) {
     let baseScore = 0;
 
     switch (normalizedEventType) {
-    case 'Racing':
-      baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
-      break;
+      case 'Racing':
+        baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
+        break;
 
-    case 'Show Jumping':
-    case 'Jumping':
-      baseScore =
+      case 'Show Jumping':
+      case 'Jumping':
+        baseScore =
           (horse.precision || horse.agility || 0) + (horse.focus || 0) + (horse.stamina || 0);
-      break;
+        break;
 
-    case 'Dressage':
-      baseScore =
+      case 'Dressage':
+        baseScore =
           (horse.precision || horse.agility || 0) +
           (horse.focus || 0) +
           (horse.coordination || horse.balance || 0);
-      break;
+        break;
 
-    case 'Cross Country':
-      baseScore = (horse.stamina || 0) + (horse.agility || 0) + (horse.boldness || 0);
-      break;
+      case 'Cross Country':
+        baseScore = (horse.stamina || 0) + (horse.agility || 0) + (horse.boldness || 0);
+        break;
 
-    default:
-      logger.warn(
-        `[calculateCompetitionScore] Unknown event type: ${normalizedEventType}, using default calculation`,
-      );
-      baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
+      default:
+        logger.warn(
+          `[calculateCompetitionScore] Unknown event type: ${normalizedEventType}, using default calculation`,
+        );
+        baseScore = (horse.speed || 0) + (horse.stamina || 0) + (horse.focus || 0);
     }
 
     logger.info(
+      `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Base score for ${normalizedEventType}: ${baseScore}`,
       `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Base score for ${normalizedEventType}: ${baseScore}`,
     );
 
@@ -67,6 +68,7 @@ export function calculateCompetitionScore(horse, eventType) {
       if (epigeneticModifiers.positive.includes(traitName)) {
         traitBonus = 5;
         logger.info(
+          `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Discipline affinity bonus applied for ${traitName} (+${traitBonus} points)`,
           `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Discipline affinity bonus applied for ${traitName} (+${traitBonus} points)`,
         );
       }
@@ -86,6 +88,7 @@ export function calculateCompetitionScore(horse, eventType) {
 
     logger.info(
       `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Luck modifier: ${(clampedLuckModifier * 100).toFixed(1)}%, adjustment: ${luckAdjustment.toFixed(1)}`,
+      `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Luck modifier: ${(clampedLuckModifier * 100).toFixed(1)}%, adjustment: ${luckAdjustment.toFixed(1)}`,
     );
 
     // Calculate final score
@@ -94,11 +97,13 @@ export function calculateCompetitionScore(horse, eventType) {
 
     logger.info(
       `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Final score: ${roundedScore} (base: ${baseScore}, trait: +${traitBonus}, luck: ${luckAdjustment.toFixed(1)})`,
+      `[calculateCompetitionScore] Horse ${horse.name || horse.id}: Final score: ${roundedScore} (base: ${baseScore}, trait: +${traitBonus}, luck: ${luckAdjustment.toFixed(1)})`,
     );
 
     return roundedScore;
   } catch (error) {
     logger.error(
+      `[calculateCompetitionScore] Error calculating score for horse ${horse?.name || horse?.id}: ${error.message}`,
       `[calculateCompetitionScore] Error calculating score for horse ${horse?.name || horse?.id}: ${error.message}`,
     );
     throw error;

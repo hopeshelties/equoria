@@ -3,21 +3,9 @@
   "eslint.format.enable": true,
   "eslint.lintTask.enable": true,
   "eslint.validate": ["javascript", "javascriptreact"],
-  "eslint.workingDirectories": [
-    {
-      "directory": "./backend",
-      "changeProcessCWD": true
-    }
-  ],
-  "eslint.codeActionsOnSave.mode": "all",
-  "eslint.run": "onType",
-  "eslint.debug": true,
-  "eslint.trace.server": "verbose",
-  "eslint.alwaysShowStatus": true,
-
-  "eslint.runtime": "node",
-  "eslint.nodePath": "./backend/node_modules",
-  "problems.decorations.enabled": true,
+  "eslint.options": {
+    "configFile": "./backend/.eslintrc.json"
+  },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },

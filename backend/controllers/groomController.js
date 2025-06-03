@@ -91,6 +91,7 @@ export async function ensureDefaultAssignment(req, res) {
   try {
     const { foalId } = req.params;
     const userId = req.user?.id || 'default-user'; // TODO: Get from auth
+    const userId = req.user?.id || 'default-user'; // TODO: Get from auth
 
     const parsedFoalId = parseInt(foalId, 10);
     if (isNaN(parsedFoalId) || parsedFoalId <= 0) {
@@ -103,8 +104,10 @@ export async function ensureDefaultAssignment(req, res) {
 
     logger.info(
       `[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`,
+      `[groomController.ensureDefaultAssignment] Ensuring default assignment for foal ${parsedFoalId}`,
     );
 
+    const result = await ensureDefaultGroomAssignment(parsedFoalId, userId);
     const result = await ensureDefaultGroomAssignment(parsedFoalId, userId);
 
     res.status(200).json({
@@ -144,6 +147,7 @@ export async function getFoalAssignments(req, res) {
     }
 
     logger.info(
+      `[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`,
       `[groomController.getFoalAssignments] Getting assignments for foal ${parsedFoalId}`,
     );
 
@@ -187,6 +191,7 @@ export async function recordInteraction(req, res) {
     const { foalId, groomId, interactionType, duration, notes, assignmentId } = req.body;
 
     logger.info(
+      `[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`,
       `[groomController.recordInteraction] Recording ${interactionType} interaction for foal ${foalId}`,
     );
 
@@ -242,6 +247,7 @@ export async function recordInteraction(req, res) {
       return res.status(404).json({
         success: false,
         message: 'Foal not found',
+        error: 'Horse not found',
         data: null,
       });
     }
@@ -301,10 +307,16 @@ export async function recordInteraction(req, res) {
       },
     });
 
+    // Update foal's bond score and stress level
+    const newBondScore = Math.max(
+      0,
+      Math.min(100, (foal.bond_score || 50) + effects.bondingChange),
+    );
     // Update foal's bond score, stress level, task log, and streak tracking
     const newBondScore = Math.max(0, Math.min(100, (foal.bondScore || 50) + effects.bondingChange));
     const newStressLevel = Math.max(
       0,
+      Math.min(100, (foal.stress_level || 0) + effects.stressChange),
       Math.min(100, (foal.stressLevel || 0) + effects.stressChange),
     );
 
@@ -319,6 +331,7 @@ export async function recordInteraction(req, res) {
     });
 
     logger.info(
+      `[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress`,
       `[groomController.recordInteraction] Interaction recorded: ${effects.bondingChange} bonding, ${effects.stressChange} stress, task: ${interactionType} (count: ${taskLogUpdate.taskCount})`,
     );
 
@@ -370,14 +383,20 @@ export async function recordInteraction(req, res) {
 /**
  * GET /api/grooms/user/:userId
  * Get all grooms for a user
+ * GET /api/grooms/user/:userId
+ * Get all grooms for a user
  */
+export async function getUserGrooms(req, res) {
 export async function getUserGrooms(req, res) {
   try {
     const { userId } = req.params;
+    const { userId } = req.params;
 
+    logger.info(`[groomController.getUserGrooms] Getting grooms for user ${userId}`);
     logger.info(`[groomController.getUserGrooms] Getting grooms for user ${userId}`);
 
     const grooms = await prisma.groom.findMany({
+      where: { userId },
       where: { userId },
       include: {
         groomAssignments: {
@@ -401,7 +420,9 @@ export async function getUserGrooms(req, res) {
     res.status(200).json({
       success: true,
       message: `Retrieved ${grooms.length} grooms for user`,
+      message: `Retrieved ${grooms.length} grooms for user`,
       data: {
+        userId,
         userId,
         grooms,
         activeGrooms: grooms.filter(g => g.isActive),
@@ -410,8 +431,10 @@ export async function getUserGrooms(req, res) {
     });
   } catch (error) {
     logger.error(`[groomController.getUserGrooms] Error: ${error.message}`);
+    logger.error(`[groomController.getUserGrooms] Error: ${error.message}`);
     res.status(500).json({
       success: false,
+      message: 'Failed to retrieve user grooms',
       message: 'Failed to retrieve user grooms',
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
@@ -420,6 +443,7 @@ export async function getUserGrooms(req, res) {
 
 /**
  * POST /api/grooms/hire
+ * Hire a new groom for a user
  * Hire a new groom for a user
  */
 export async function hireGroom(req, res) {
@@ -431,11 +455,13 @@ export async function hireGroom(req, res) {
       skill_level,
       personality,
       session_rate,
+      session_rate,
       bio,
       availability,
     } = req.body;
     const userId = req.user?.id || '83970fb4-f086-46b3-9e76-ae71720d2918'; // TODO: Get from auth
 
+    logger.info(`[groomController.hireGroom] Hiring new groom ${name} for user ${userId}`);
     logger.info(`[groomController.hireGroom] Hiring new groom ${name} for user ${userId}`);
 
     // Validate required fields
@@ -480,15 +506,19 @@ export async function hireGroom(req, res) {
         speciality,
         experience: experience || 1,
         skillLevel: skill_level,
+        skillLevel: skill_level,
         personality,
+        sessionRate: session_rate || SKILL_LEVELS[skill_level].costModifier * 15.0,
         sessionRate: session_rate || SKILL_LEVELS[skill_level].costModifier * 15.0,
         bio,
         availability: availability || {},
+        userId,
         userId,
       },
     });
 
     logger.info(
+      `[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`,
       `[groomController.hireGroom] Successfully hired groom ${groom.name} (ID: ${groom.id})`,
     );
 

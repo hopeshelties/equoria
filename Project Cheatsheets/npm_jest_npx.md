@@ -24,9 +24,15 @@ npx prisma db push --schema=packages/database/prisma/schema.prisma, Pushes the P
 ## Testing & Linting - BALANCED MOCKING PHILOSOPHY ✅
 
 ### Jest Testing Commands
+## Testing & Linting - BALANCED MOCKING PHILOSOPHY ✅
+
+### Jest Testing Commands
 npx jest Runs all Jest test suites.
 npx jest --watch Re-runs relevant tests on file change.
 npx jest path/to/testFile.test.js Runs a specific test file.
+npm test -- tests/specificFile.test.js Run specific test file with npm script.
+
+### ESLint Commands
 npm test -- tests/specificFile.test.js Run specific test file with npm script.
 
 ### ESLint Commands

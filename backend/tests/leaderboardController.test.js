@@ -228,9 +228,23 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
       mockPrisma.user.findMany.mockResolvedValue([]);
       mockPrisma.user.count.mockResolvedValue(0);
 
+      mockPrisma.user.findMany.mockResolvedValue([]);
+      mockPrisma.user.count.mockResolvedValue(0);
+
       await getTopPlayersByLevel(req, res);
 
       // Should use defaults for invalid parameters
+      expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
+        take: 10, // Default limit
+        skip: 0, // Default offset (invalid -5 becomes 0)
+        orderBy: [{ level: 'desc' }, { xp: 'desc' }],
+        select: {
+          id: true,
+          name: true,
+          level: true,
+          xp: true,
+          money: true,
+        },
       expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
         take: 10, // Default limit
         skip: 0, // Default offset (invalid -5 becomes 0)
@@ -248,6 +262,7 @@ describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => 
     it('should handle database errors', async () => {
       const req = {};
       const res = { json: jest.fn() };
+      mockPrisma.user.findMany.mockRejectedValue(new Error('DB error'));
       mockPrisma.user.findMany.mockRejectedValue(new Error('DB error'));
       await getTopPlayersByLevel(req, res);
       expect(res.json).toHaveBeenCalledWith({

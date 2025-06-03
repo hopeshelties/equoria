@@ -232,6 +232,7 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
   try {
     logger.info(
       `[traitEvaluation.evaluateTraitRevelation] Evaluating traits for foal ${foal.id} on day ${currentDay}`,
+      `[traitEvaluation.evaluateTraitRevelation] Evaluating traits for foal ${foal.id} on day ${currentDay}`,
     );
 
     const bondScore = foal.bond_score || 50;
@@ -274,6 +275,7 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
             existingTraits.add(traitKey);
             logger.info(
               `[traitEvaluation] Revealed positive trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`,
+              `[traitEvaluation] Revealed positive trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`,
             );
           }
         }
@@ -300,6 +302,7 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
             existingTraits.add(traitKey);
             logger.info(
               `[traitEvaluation] Revealed negative trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`,
+              `[traitEvaluation] Revealed negative trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`,
             );
           }
         }
@@ -325,6 +328,7 @@ function evaluateTraitRevelation(foal, currentTraits, currentDay) {
             }
             existingTraits.add(traitKey);
             logger.info(
+              `[traitEvaluation] Revealed rare trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`,
               `[traitEvaluation] Revealed rare trait: ${traitKey} (${shouldHide ? 'hidden' : 'visible'})`,
             );
           }

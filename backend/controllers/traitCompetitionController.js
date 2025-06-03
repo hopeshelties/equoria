@@ -264,7 +264,11 @@ export async function getTraitCompetitionEffects(req, res) {
     // Filter by trait type if specified
     if (type && ['positive', 'negative'].includes(type)) {
       filteredEffects = Object.fromEntries(
+<<<<<<< HEAD
         Object.entries(allEffects).filter(([, effect]) => effect.type === type),
+=======
+        Object.entries(allEffects).filter(([_, effect]) => effect.type === type),
+>>>>>>> 2b90c9a95e25c8a96fbf72c96ae67accf803c409
       );
     }
 

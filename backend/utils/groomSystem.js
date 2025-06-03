@@ -117,6 +117,7 @@ export const DEFAULT_GROOMS = [
     skillLevel: 'intermediate',
     personality: 'gentle',
     sessionRate: 18.0,
+    sessionRate: 18.0,
     bio: 'Experienced foal care specialist with a gentle touch.',
     availability: {
       monday: true,
@@ -134,6 +135,7 @@ export const DEFAULT_GROOMS = [
     experience: 8,
     skillLevel: 'expert',
     personality: 'patient',
+    sessionRate: 25.0,
     sessionRate: 25.0,
     bio: 'Veteran horse caretaker with extensive experience.',
     availability: {
@@ -153,6 +155,7 @@ export const DEFAULT_GROOMS = [
     skillLevel: 'intermediate',
     personality: 'energetic',
     sessionRate: 20.0,
+    sessionRate: 20.0,
     bio: 'Young trainer focused on exercise and development.',
     availability: {
       monday: true,
@@ -171,9 +174,11 @@ export const DEFAULT_GROOMS = [
  * @param {number} foalId - ID of the foal
  * @param {number} groomId - ID of the groom
  * @param {string} userId - ID of the user
+ * @param {string} userId - ID of the user
  * @param {Object} options - Assignment options
  * @returns {Object} Assignment result
  */
+export async function assignGroomToFoal(foalId, groomId, userId, options = {}) {
 export async function assignGroomToFoal(foalId, groomId, userId, options = {}) {
   try {
     const { priority = 1, notes = null, isDefault = false } = options;
@@ -245,6 +250,7 @@ export async function assignGroomToFoal(foalId, groomId, userId, options = {}) {
         foalId,
         groomId,
         userId,
+        userId,
         priority,
         notes,
         isDefault,
@@ -259,6 +265,7 @@ export async function assignGroomToFoal(foalId, groomId, userId, options = {}) {
     });
 
     logger.info(
+      `[groomSystem.assignGroomToFoal] Successfully assigned ${groom.name} to foal ${foal.name}`,
       `[groomSystem.assignGroomToFoal] Successfully assigned ${groom.name} to foal ${foal.name}`,
     );
 
@@ -299,6 +306,7 @@ export async function ensureDefaultGroomAssignment(foalId) {
     if (existingAssignment) {
       logger.info(
         `[groomSystem.ensureDefaultGroomAssignment] Foal ${foalId} already has active assignment`,
+        `[groomSystem.ensureDefaultGroomAssignment] Foal ${foalId} already has active assignment`,
       );
       return {
         success: true,
@@ -329,6 +337,7 @@ export async function ensureDefaultGroomAssignment(foalId) {
  * @returns {Object} Groom object
  */
 export async function getOrCreateDefaultGroom(userId) {
+export async function getOrCreateDefaultGroom(userId) {
   try {
     logger.warn(
       `[groomSystem.getOrCreateDefaultGroom] DEPRECATED: Auto-creation disabled for user ${userId}. Players must manually hire grooms.`,
@@ -337,6 +346,7 @@ export async function getOrCreateDefaultGroom(userId) {
     // Check if user already has grooms
     const existingGroom = await prisma.groom.findFirst({
       where: {
+        userId,
         userId,
         isActive: true,
         speciality: 'foal_care',
@@ -428,9 +438,11 @@ export async function recordGroomInteraction(
   duration,
   userId,
   notes = null,
+  notes = null,
 ) {
   try {
     logger.info(
+      `[groomSystem.recordGroomInteraction] Recording interaction: Groom ${groomId} with Foal ${foalId}`,
       `[groomSystem.recordGroomInteraction] Recording interaction: Groom ${groomId} with Foal ${foalId}`,
     );
 
@@ -459,6 +471,7 @@ export async function recordGroomInteraction(
     });
 
     logger.info(
+      `[groomSystem.recordGroomInteraction] Successfully recorded interaction ID ${interaction.id}`,
       `[groomSystem.recordGroomInteraction] Successfully recorded interaction ID ${interaction.id}`,
     );
 
@@ -520,6 +533,8 @@ export function calculateGroomInteractionEffects(groom, foal, interactionType, d
     bondingChange = Math.max(0, Math.min(10, bondingChange));
     stressChange = Math.max(-10, Math.min(5, stressChange));
 
+    // Calculate cost per session (not hourly)
+    const cost = groom.sessionRate * skillLevel.costModifier;
     // Calculate cost per session (not hourly)
     const cost = groom.sessionRate * skillLevel.costModifier;
 

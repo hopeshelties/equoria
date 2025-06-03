@@ -47,6 +47,7 @@ const { getTraitEffects, getAllTraitEffects, hasTraitEffect, getCombinedTraitEff
   await import(join(__dirname, '../utils/traitEffects.js'));
 
 describe('🎭 UNIT: Trait Effects System - Trait Impact Calculation & Combination', () => {
+describe('🎭 UNIT: Trait Effects System - Trait Impact Calculation & Combination', () => {
   describe('getTraitEffects', () => {
     test('should return effects for valid trait', () => {
       const effects = getTraitEffects('resilient');
