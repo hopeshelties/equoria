@@ -454,7 +454,7 @@ describe('🧬 UNIT: Lineage Trait Check - Discipline Affinity Analysis', () => 
     });
 
     it('should handle undefined ancestors gracefully', () => {
-      const result = checkLineageForDisciplineAffinity(undefined);
+      const result = checkLineageForDisciplineAffinity();
       expect(result.affinity).toBe(false);
     });
 

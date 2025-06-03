@@ -214,7 +214,7 @@ describe('Foal Task Log Manager', () => {
 
     it('should handle invalid input', () => {
       expect(hasBurnoutImmunity(null)).toBe(false);
-      expect(hasBurnoutImmunity(undefined)).toBe(false);
+      expect(hasBurnoutImmunity()).toBe(false);
       expect(hasBurnoutImmunity('not_a_number')).toBe(false);
     });
 

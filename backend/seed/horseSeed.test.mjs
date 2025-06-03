@@ -145,7 +145,7 @@ describe('horseSeed', () => {
     });
 
     it('should return null for undefined breed name', async () => {
-      const result = await findOrCreateBreed(undefined);
+      const result = await findOrCreateBreed();
 
       expect(result).toBeNull();
       expect(mockLogger.warn).toHaveBeenCalledWith(

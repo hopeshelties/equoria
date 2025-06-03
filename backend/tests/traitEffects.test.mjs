@@ -63,7 +63,7 @@ describe('🎭 UNIT: Trait Effects System - Trait Impact Calculation & Combinati
 
     test('should return null for invalid input', () => {
       expect(getTraitEffects(null)).toBeNull();
-      expect(getTraitEffects(undefined)).toBeNull();
+      expect(getTraitEffects()).toBeNull();
       expect(getTraitEffects('')).toBeNull();
       expect(getTraitEffects(123)).toBeNull();
     });
