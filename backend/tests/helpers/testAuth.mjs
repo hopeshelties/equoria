@@ -70,6 +70,8 @@ export async function createTestHorse(horseData = {}) {
     breed: 'Thoroughbred',
     age: 5,
     gender: 'Mare',
+    sex: 'Female',
+    dateOfBirth: new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000), // 5 years ago
     speed: 50,
     stamina: 50,
     focus: 50,
