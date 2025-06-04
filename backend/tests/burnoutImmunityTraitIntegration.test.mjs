@@ -52,15 +52,15 @@ const {
   updateConsecutiveDays,
   checkBurnoutImmunity,
   updateStreakTracking: _updateStreakTracking,
-} = await import(join(__dirname, '../utils/groomBondingSystem.js'));
+} = await import(join(__dirname, '../utils/groomBondingSystem.mjs'));
 
 const { evaluateEpigeneticTagsFromFoalTasks } = await import(
-  join(__dirname, '../utils/traitEvaluation.js')
+  join(__dirname, '../utils/traitEvaluation.mjs')
 );
 
-const { getTraitMetadata } = await import(join(__dirname, '../utils/epigeneticTraits.js'));
+const { getTraitMetadata } = await import(join(__dirname, '../utils/epigeneticTraits.mjs'));
 
-const { GROOM_CONFIG } = await import(join(__dirname, '../config/groomConfig.js'));
+const { GROOM_CONFIG } = await import(join(__dirname, '../config/groomConfig.mjs'));
 
 describe('Burnout Immunity & Trait Integration', () => {
   beforeEach(() => {

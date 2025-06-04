@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Mock the user model
-jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../models/userModel.mjs'), () => ({
   getUserById: jest.fn(),
   getUserWithHorses: jest.fn(),
   getUserByEmail: jest.fn(),
@@ -14,7 +14,7 @@ jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
 
 // Import the mocked functions
 const { getUserById, getUserWithHorses, getUserByEmail } = await import(
-  '../../models/userModel.js'
+  '../../models/userModel.mjs'
 );
 
 describe('User Integration Tests - Mocked Database', () => {

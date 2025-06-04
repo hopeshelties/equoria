@@ -35,7 +35,7 @@ jest.unstable_mockModule(join(__dirname, '../../db/index.js'), () => ({
 }));
 
 // Mock the trainingModel
-jest.unstable_mockModule(join(__dirname, '../../models/trainingModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../models/trainingModel.mjs'), () => ({
   getAnyRecentTraining: jest.fn(),
   getHorseAge: jest.fn(),
   getLastTrainingDate: jest.fn(),
@@ -43,9 +43,9 @@ jest.unstable_mockModule(join(__dirname, '../../models/trainingModel.js'), () =>
 }));
 
 // Now import the app and the mocked modules
-const app = (await import('../../app.js')).default;
-const mockPrisma = (await import(join(__dirname, '../../db/index.js'))).default;
-const { getAnyRecentTraining } = await import('../../models/trainingModel.js');
+const app = (await import('../../app.mjs')).default;
+const mockPrisma = (await import(join(__dirname, '../../db/index.mjs'))).default;
+const { getAnyRecentTraining } = await import('../../models/trainingModel.mjs');
 
 describe('Horse Overview Integration Tests', () => {
   let testHorse;

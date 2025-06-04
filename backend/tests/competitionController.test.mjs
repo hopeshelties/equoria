@@ -70,9 +70,9 @@ let addXpToUser;
 let enterAndRunShow;
 
 beforeEach(async () => {
-  const { addXpToUser: importedAddXpToUser } = await import('../models/userModel.js');
+  const { addXpToUser: importedAddXpToUser } = await import('../models/userModel.mjs');
   const { enterAndRunShow: importedEnterAndRunShow } = await import(
-    '../controllers/competitionController.js'
+    '../controllers/competitionController.mjs'
   );
   addXpToUser = importedAddXpToUser;
   enterAndRunShow = importedEnterAndRunShow;

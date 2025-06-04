@@ -51,16 +51,16 @@ const mockLogger = {
   error: jest.fn(),
 };
 
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
 // Import the controller directly for testing
-const horseXpController = await import(join(__dirname, '../controllers/horseXpController.js'));
+const horseXpController = await import(join(__dirname, '../controllers/horseXpController.mjs'));
 
 describe('Horse XP Controller - API Endpoints', () => {
   beforeEach(() => {

@@ -64,8 +64,8 @@ const mockLogger = {
   error: jest.fn(),
 };
 
-jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
-  // Changed path to userModel.js
+jest.unstable_mockModule(join(__dirname, '../../models/userModel.mjs'), () => ({
+  // Changed path to userModel.mjs
   getUserById: mockGetUserById,
   getUserByEmail: mockGetUserByEmail,
   getUserWithHorses: mockGetUserWithHorses,
@@ -76,12 +76,12 @@ jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
   levelUpUserIfNeeded: mockLevelUpUserIfNeeded, // Assumed new function name
 }));
 
-jest.unstable_mockModule(join(__dirname, '../../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
 // Import app after mocking
-const app = (await import('../../app.js')).default;
+const app = (await import('../../app.mjs')).default;
 
 describe('🌐 INTEGRATION: User Routes - HTTP API Endpoints', () => {
   // Changed from User Routes'

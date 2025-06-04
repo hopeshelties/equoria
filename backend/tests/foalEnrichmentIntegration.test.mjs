@@ -72,8 +72,8 @@ jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
 }));
 
 // Now import the app and the mocked prisma
-const app = (await import('../app.js')).default;
-const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
+const app = (await import('../app.mjs')).default;
+const mockPrisma = (await import(join(__dirname, '../db/index.mjs'))).default;
 
 describe('🐴 INTEGRATION: Foal Enrichment API Integration - Complete API Workflow Validation', () => {
   let testFoal;

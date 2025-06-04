@@ -52,13 +52,13 @@ const mockPrisma = {
 };
 
 // We need to mock dependencies before importing the controller
-jest.unstable_mockModule('../../db/index.js', () => ({
+jest.unstable_mockModule('../../db/index.mjs', () => ({
   __esModule: true,
   default: mockPrisma,
 }));
 
 // Mock logger
-jest.mock('../../utils/logger.js', () => ({
+jest.mock('../../utils/logger.mjs', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),
