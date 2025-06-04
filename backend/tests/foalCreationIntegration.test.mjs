@@ -45,7 +45,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Mock the database module BEFORE importing the app
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: {
     horse: {
       findUnique: jest.fn(),
@@ -63,8 +63,8 @@ jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
 }));
 
 // Now import the app and the mocked modules
-const app = (await import('../app.js')).default;
-const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
+const app = (await import('../app.mjs')).default;
+const mockPrisma = (await import(join(__dirname, '../db/index.mjs'))).default;
 
 describe('🐴 INTEGRATION: Foal Creation Integration - API Endpoint Validation', () => {
   const mockBreed = {

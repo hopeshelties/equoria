@@ -66,11 +66,11 @@ const mockLogger = {
 };
 
 // Mock modules
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
@@ -81,7 +81,7 @@ const {
   advanceDay,
   completeEnrichmentActivity,
   getAvailableActivities,
-} = await import(join(__dirname, '../models/foalModel.js'));
+} = await import(join(__dirname, '../models/foalModel.mjs'));
 
 describe('🍼 UNIT: Foal Model - Foal Development & Activity Management', () => {
   beforeEach(() => {

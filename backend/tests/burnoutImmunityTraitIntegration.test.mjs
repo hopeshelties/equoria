@@ -90,7 +90,7 @@ describe('Burnout Immunity & Trait Integration', () => {
       expect(immunityCheck.status).toBe(GROOM_CONFIG.BURNOUT_STATUS.IMMUNE);
 
       // Week 2: Miss 2 days (within grace period), then resume
-      let gracePeriodResult = updateConsecutiveDays(streak, false, 2);
+      const gracePeriodResult = updateConsecutiveDays(streak, false, 2);
       expect(gracePeriodResult.newConsecutiveDays).toBe(7); // Preserved
       expect(gracePeriodResult.wasReset).toBe(false);
 

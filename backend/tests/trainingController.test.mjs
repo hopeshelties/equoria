@@ -788,7 +788,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
         xpGained: 5,
       });
 
-      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      const { trainRouteHandler } = await import('../controllers/trainingController.mjs');
       await trainRouteHandler(mockReq, mockRes);
 
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -808,7 +808,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
     it('should return failure response for ineligible horse (under age)', async () => {
       mockGetHorseAge.mockResolvedValue(2);
 
-      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      const { trainRouteHandler } = await import('../controllers/trainingController.mjs');
       await trainRouteHandler(mockReq, mockRes);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
@@ -823,7 +823,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
       const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
       mockGetAnyRecentTraining.mockResolvedValue(twoDaysAgo);
 
-      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      const { trainRouteHandler } = await import('../controllers/trainingController.mjs');
       await trainRouteHandler(mockReq, mockRes);
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
@@ -866,7 +866,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
         xpGained: 5,
       });
 
-      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      const { trainRouteHandler } = await import('../controllers/trainingController.mjs');
       await trainRouteHandler(mockReq, mockRes);
 
       expect(mockRes.json).toHaveBeenCalledWith({
@@ -885,7 +885,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
     it('should handle server errors gracefully', async () => {
       mockGetHorseAge.mockRejectedValue(new Error('Database connection failed'));
 
-      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      const { trainRouteHandler } = await import('../controllers/trainingController.mjs');
       await trainRouteHandler(mockReq, mockRes);
 
       expect(mockRes.status).toHaveBeenCalledWith(500);
@@ -928,7 +928,7 @@ describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', ()
         xpGained: 6, // +6 XP due to trait
       });
 
-      const { trainRouteHandler } = await import('../controllers/trainingController.js');
+      const { trainRouteHandler } = await import('../controllers/trainingController.mjs');
       mockReq.body = { horseId: 1, discipline: 'Dressage' };
 
       await trainRouteHandler(mockReq, mockRes);

@@ -64,11 +64,11 @@ const mockLogger = {
 };
 
 // Mock the imports
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
@@ -84,7 +84,7 @@ const {
   checkLineageForDisciplineAffinity,
   getMostCommonDisciplineFromHistory,
   getHighestScoringDiscipline,
-} = await import(join(__dirname, '../utils/atBirthTraits.js'));
+} = await import(join(__dirname, '../utils/atBirthTraits.mjs'));
 
 describe('🧬 UNIT: At-Birth Traits System - Comprehensive Breeding Analysis Testing', () => {
   beforeEach(() => {

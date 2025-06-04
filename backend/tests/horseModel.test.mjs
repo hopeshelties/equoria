@@ -36,7 +36,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Mock external dependencies BEFORE importing the module under test
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: {
     horse: {
       create: jest.fn(),
@@ -46,7 +46,7 @@ jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   },
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: {
     error: jest.fn(),
     info: jest.fn(),
@@ -55,10 +55,10 @@ jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
 
 // Import the module under test and mocked dependencies
 const { createHorse, updateDisciplineScore, getDisciplineScores } = await import(
-  join(__dirname, '../models/horseModel.js')
+  join(__dirname, '../models/horseModel.mjs')
 );
-const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
-const mockLogger = (await import(join(__dirname, '../utils/logger.js'))).default;
+const mockPrisma = (await import(join(__dirname, '../db/index.mjs'))).default;
+const mockLogger = (await import(join(__dirname, '../utils/logger.mjs'))).default;
 
 describe('🐎 UNIT: Horse Model - Discipline Score Management', () => {
   beforeEach(() => {
