@@ -52,7 +52,7 @@ const mockLogger = {
 };
 
 // Mock the logger import
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
@@ -63,7 +63,7 @@ const {
   getAllTraitDefinitions,
   TRAIT_DEFINITIONS,
   TRAIT_CONFLICTS,
-} = await import(join(__dirname, '../utils/traitEvaluation.js'));
+} = await import(join(__dirname, '../utils/traitEvaluation.mjs'));
 
 describe('🔬 UNIT: Trait Evaluation System - Trait Revelation & Validation', () => {
   beforeEach(() => {

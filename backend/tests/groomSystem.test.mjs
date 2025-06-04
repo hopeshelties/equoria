@@ -74,11 +74,11 @@ const mockLogger = {
 };
 
 // Mock the imports
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
@@ -91,7 +91,7 @@ const {
   GROOM_SPECIALTIES,
   SKILL_LEVELS,
   PERSONALITY_TRAITS,
-} = await import(join(__dirname, '../utils/groomSystem.js'));
+} = await import(join(__dirname, '../utils/groomSystem.mjs'));
 
 describe('👩‍🔧 UNIT: Groom System - Foal Care Assignment & Management', () => {
   beforeEach(() => {
