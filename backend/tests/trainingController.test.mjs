@@ -54,20 +54,20 @@ const mockGetUserWithHorses = jest.fn();
 const mockAddXpToUser = jest.fn();
 const mockLevelUpIfNeeded = jest.fn();
 
-jest.unstable_mockModule(join(__dirname, '../models/trainingModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../models/trainingModel.mjs'), () => ({
   getHorseAge: mockGetHorseAge,
   getLastTrainingDate: mockGetLastTrainingDate,
   logTrainingSession: mockLogTrainingSession,
   getAnyRecentTraining: mockGetAnyRecentTraining,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../models/horseModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../models/horseModel.mjs'), () => ({
   incrementDisciplineScore: mockIncrementDisciplineScore,
   getHorseById: mockGetHorseById,
   updateHorseStat: mockUpdateHorseStat,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../models/userModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../models/userModel.mjs'), () => ({
   getUserWithHorses: mockGetUserWithHorses,
   addXpToUser: mockAddXpToUser,
   levelUpIfNeeded: mockLevelUpIfNeeded,
@@ -75,7 +75,7 @@ jest.unstable_mockModule(join(__dirname, '../models/userModel.js'), () => ({
 
 // Import the module after mocking
 const { canTrain, trainHorse, getTrainingStatus, getTrainableHorses } = await import(
-  join(__dirname, '../controllers/trainingController.js')
+  join(__dirname, '../controllers/trainingController.mjs')
 );
 
 describe('🏋️ UNIT: Training Controller - Horse Training Business Logic', () => {

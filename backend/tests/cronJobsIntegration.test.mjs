@@ -73,7 +73,7 @@ jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
 }));
 
 // Mock the cron job service
-jest.unstable_mockModule(join(__dirname, '../services/cronJobs.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../services/cronJobs.mjs'), () => ({
   default: {
     stop: jest.fn(),
     start: jest.fn(),
@@ -84,9 +84,9 @@ jest.unstable_mockModule(join(__dirname, '../services/cronJobs.js'), () => ({
 }));
 
 // Now import the app and the mocked modules
-const app = (await import('../app.js')).default;
-const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
-const mockCronJobService = (await import(join(__dirname, '../services/cronJobs.js'))).default;
+const app = (await import('../app.mjs')).default;
+const mockPrisma = (await import(join(__dirname, '../db/index.mjs'))).default;
+const mockCronJobService = (await import(join(__dirname, '../services/cronJobs.mjs'))).default;
 
 describe('⏰ INTEGRATION: Cron Jobs System - Automated Trait Evaluation & Admin API', () => {
   let testBreed;

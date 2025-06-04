@@ -70,11 +70,11 @@ const mockLogger = {
 };
 
 // Mock the imports
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
@@ -87,7 +87,7 @@ const {
   getTopPlayersByHorseEarnings,
   getRecentWinners,
   getLeaderboardStats,
-} = await import(join(__dirname, '../controllers/leaderboardController.js'));
+} = await import(join(__dirname, '../controllers/leaderboardController.mjs'));
 
 describe('🏆 UNIT: Leaderboard Controller - Ranking & Statistics APIs', () => {
   afterEach(() => {

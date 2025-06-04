@@ -43,7 +43,7 @@ const mockTrainingLogCreate = jest.fn();
 const mockTrainingLogFindFirst = jest.fn();
 const mockHorseFindUnique = jest.fn();
 
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: {
     trainingLog: {
       create: mockTrainingLogCreate,
@@ -57,7 +57,7 @@ jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
 
 // Import the module after mocking
 const { logTrainingSession, getLastTrainingDate, getHorseAge } = await import(
-  join(__dirname, '../models/trainingModel.js')
+  join(__dirname, '../models/trainingModel.mjs')
 );
 
 describe('🏋️ UNIT: Training Model - Training Session Logging & Horse Data', () => {
