@@ -53,7 +53,7 @@ const mockPrisma = {
 };
 
 // Mock the database import
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
@@ -65,7 +65,7 @@ const {
   getResultById,
   createResult,
   getResultsByUser,
-} = await import(join(__dirname, '../models/resultModel.js'));
+} = await import(join(__dirname, '../models/resultModel.mjs'));
 
 describe('🏆 UNIT: Result Model - Competition Result Management', () => {
   beforeEach(() => {

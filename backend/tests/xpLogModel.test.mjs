@@ -59,17 +59,17 @@ const mockLogger = {
   error: jest.fn(),
 };
 
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
 // Import the module after mocking
 const { logXpEvent, getUserXpEvents, getUserXpSummary, getRecentXpEvents } = await import(
-  join(__dirname, '../models/xpLogModel.js')
+  join(__dirname, '../models/xpLogModel.mjs')
 );
 
 describe('📊 UNIT: XP Log Model - Experience Point Event Tracking', () => {

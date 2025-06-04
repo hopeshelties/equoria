@@ -1,13 +1,9 @@
-// 🎯 Updated import from userModel.js to userModel.js and function names
-import {
-  createUser,
-  getUserById,
-  getUserWithHorses,
-} from '../../backend/models/userModel.js';
-import { createHorse } from '../../backend/models/horseModel.js';
+// 🎯 Updated import from userModel.js to userModel.mjs and function names
+import { createUser, getUserById, getUserWithHorses } from '../../backend/models/userModel.mjs';
+import { createHorse } from '../../backend/models/horseModel.mjs';
 
 // Mock the database and logger
-jest.unstable_mockModule('../../backend/db/index.js', () => ({
+jest.unstable_mockModule('../../backend/db/index.mjs', () => ({
   default: {
     // 🎯 Changed player to user
     user: {
@@ -25,14 +21,14 @@ jest.unstable_mockModule('../../backend/db/index.js', () => ({
   },
 }));
 
-jest.unstable_mockModule('../../backend/utils/logger.js', () => ({
+jest.unstable_mockModule('../../backend/utils/logger.mjs', () => ({
   default: {
     info: jest.fn(),
     error: jest.fn(),
   },
 }));
 
-const { default: prisma } = await import('../../backend/db/index.js');
+const { default: prisma } = await import('../../backend/db/index.mjs');
 
 // 🎯 Renamed describe block
 describe('User Integration Tests', () => {
@@ -97,9 +93,7 @@ describe('User Integration Tests', () => {
       };
 
       // 🎯 Changed prisma.player.create to prisma.user.create
-      prisma.user.create.mockRejectedValue(
-        new Error('Database connection failed')
-      );
+      prisma.user.create.mockRejectedValue(new Error('Database connection failed'));
 
       // 🎯 Changed createPlayer to createUser and error message
       await expect(createUser(userData)).rejects.toThrow(
