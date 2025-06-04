@@ -12,7 +12,7 @@ const mockLogger = {
   error: jest.fn(),
   debug: jest.fn(),
 };
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 

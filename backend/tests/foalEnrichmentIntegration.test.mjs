@@ -48,7 +48,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Mock the database module BEFORE importing the app
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: {
     horse: {
       create: jest.fn(),

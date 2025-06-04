@@ -47,9 +47,9 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '../.env.test') });
 
 // Import modules for testing
-const { default: prisma } = await import(join(__dirname, '../db/index.js'));
-const { saveResult, getResultsByShow } = await import('../models/resultModel.js');
-const { calculateCompetitionScore } = await import('../utils/competitionScore.js');
+const { default: prisma } = await import(join(__dirname, '../db/index.mjs'));
+const { saveResult, getResultsByShow } = await import('../models/resultModel.mjs');
+const { calculateCompetitionScore } = await import('../utils/competitionScore.mjs');
 
 describe('🏆 INTEGRATION: Competition Controller Business Logic - Real Competition Workflow', () => {
   let testUser, testBreed, testStable; // Removed testPlayer

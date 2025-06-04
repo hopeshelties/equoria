@@ -47,7 +47,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Mock Prisma client and logger
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: {
     user: {
       create: jest.fn(),

@@ -48,8 +48,8 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, '../.env.test') });
 
 // Import without mocking for real integration testing
-const app = (await import('../app.js')).default;
-const { default: prisma } = await import(join(__dirname, '../db/index.js'));
+const app = (await import('../app.mjs')).default;
+const { default: prisma } = await import(join(__dirname, '../db/index.mjs'));
 
 describe('🏋️ INTEGRATION: Training System - Complete Business Logic Validation', () => {
   let testUser;

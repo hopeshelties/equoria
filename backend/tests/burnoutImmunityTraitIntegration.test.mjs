@@ -42,7 +42,7 @@ const mockLogger = {
 };
 
 // Mock the logger import
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
   logger: mockLogger,
 }));

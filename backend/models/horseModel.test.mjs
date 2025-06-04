@@ -34,11 +34,11 @@ const mockAtBirthTraits = {
 };
 
 // Mock the imports
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
