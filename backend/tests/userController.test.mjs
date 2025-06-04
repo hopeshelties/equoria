@@ -75,21 +75,21 @@ const mockLogger = {
 //   getPlayerById: mockGetPlayerById // This was mockGetPlayerById
 // }));
 
-jest.unstable_mockModule(join(__dirname, '../controllers/trainingController.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../controllers/trainingController.mjs'), () => ({
   getTrainableHorses: mockGetTrainableHorses,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
 // Import the module after mocking - change controller name
 const { getUserProgress, getDashboardData } = await import(
-  join(__dirname, '../controllers/userController.js')
+  join(__dirname, '../controllers/userController.mjs')
 ); // Changed from playerController.js
 
 describe('👤 UNIT: User Controller - Progress & Dashboard APIs', () => {

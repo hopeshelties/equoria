@@ -1,5 +1,4 @@
-// DO NOT MODIFY: Configuration locked for consistency
-// Jest configuration for a Node.js project using ES modules
+// Jest configuration for a Node.js project using native ES modules
 export default {
   testEnvironment: 'node',
 
@@ -9,13 +8,19 @@ export default {
   // Ensures Jest treats both JS and MJS files correctly
   moduleFileExtensions: ['js', 'mjs'],
 
-  // Configure transform for ES modules
-  transform: {
-    '^.+\\.m?js$': ['babel-jest', { configFile: './babel.config.json' }],
-  },
+  // Use native ES modules - no transform needed
+  preset: null,
+  transform: {},
 
-  // Don't transform node_modules except for specific packages that need it
-  transformIgnorePatterns: ['node_modules/(?!(dotenv|other-es-module-packages)/)'],
+  // Don't transform node_modules
+  transformIgnorePatterns: ['node_modules/'],
+
+  // Add globals for ES modules
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+  },
 
   // Setup file path must match your actual filename
   setupFilesAfterEnv: ['<rootDir>/jest.setup.mjs'],
