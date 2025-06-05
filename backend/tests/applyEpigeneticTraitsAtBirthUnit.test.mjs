@@ -62,7 +62,7 @@ const { applyEpigeneticTraitsAtBirth } = await import(
 );
 
 describe('🧬 UNIT: Apply Epigenetic Traits At Birth Unit - Pure Logic Validation', () => {
-  let mockRandom;
+  const mockRandom;
 
   beforeEach(() => {
     jest.clearAllMocks();
