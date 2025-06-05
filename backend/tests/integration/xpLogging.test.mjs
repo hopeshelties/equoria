@@ -65,30 +65,30 @@ const mockLogger = {
 };
 
 // Mock all the modules
-jest.unstable_mockModule(join(__dirname, '../../models/xpLogModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../models/xpLogModel.mjs'), () => ({
   logXpEvent: mockLogXpEvent,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../../models/userModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../models/userModel.mjs'), () => ({
   addXp: mockAddXp,
   levelUpIfNeeded: mockLevelUpIfNeeded,
   getPlayerWithHorses: jest.fn(),
 }));
 
-jest.unstable_mockModule(join(__dirname, '../../models/horseModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../models/horseModel.mjs'), () => ({
   getHorseById: mockGetHorseById,
   incrementDisciplineScore: mockIncrementDisciplineScore,
   updateHorseStat: mockUpdateHorseStat,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../../models/trainingModel.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../models/trainingModel.mjs'), () => ({
   logTrainingSession: mockLogTrainingSession,
   getHorseAge: mockGetHorseAge,
   getAnyRecentTraining: mockGetAnyRecentTraining,
   getLastTrainingDate: jest.fn(),
 }));
 
-jest.unstable_mockModule(join(__dirname, '../../utils/traitEffects.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../utils/traitEffects.mjs'), () => ({
   getCombinedTraitEffects: mockGetCombinedTraitEffects,
 }));
 
@@ -97,8 +97,8 @@ jest.unstable_mockModule(join(__dirname, '../../utils/logger.mjs'), () => ({
 }));
 
 // Import the controllers after mocking
-const { trainHorse } = await import('../../controllers/trainingController.js');
-// const { enterAndRunShow } = await import('../../controllers/competitionController.js'); // Commented out as it's unused
+const { trainHorse } = await import('../../controllers/trainingController.mjs');
+// const { enterAndRunShow } = await import('../../controllers/competitionController.mjs'); // Commented out as it's unused
 
 describe('📊 INTEGRATION: XP Logging Integration - Experience Point Workflow', () => {
   beforeEach(() => {
