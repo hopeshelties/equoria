@@ -18,22 +18,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# .json files
-*.json
 
 # misc
 .DS_Store
 
 #markdown
 *.md
-
-#env
-.env
-
-#jest
-jest.config.mjs
-jest.setup.mjs
-
 # prettier
 .prettierrc
 .prettierignore 

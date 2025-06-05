@@ -5,7 +5,7 @@
 
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import logger from './logger.js';
+import logger from './logger.mjs';
 
 /**
  * Hash a password using bcrypt
@@ -108,11 +108,11 @@ export function generateRandomString(length = 32) {
   try {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
-    
+
     for (let i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
-    
+
     logger.debug('[authUtils.generateRandomString] Random string generated');
     return result;
   } catch (error) {

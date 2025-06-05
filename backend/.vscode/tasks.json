@@ -1,0 +1,141 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ESLint: Check All Files",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "lint"],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": {
+        "owner": "eslint",
+        "fileLocation": ["relative", "${workspaceFolder}/backend"],
+        "pattern": [
+          {
+            "regexp": "^(.+)$",
+            "file": 1
+          },
+          {
+            "regexp": "^\\s+(\\d+):(\\d+)\\s+(error|warning|info)\\s+(.+?)\\s+(.+)$",
+            "line": 1,
+            "column": 2,
+            "severity": 3,
+            "message": 4,
+            "code": 5,
+            "loop": true
+          }
+        ]
+      }
+    },
+    {
+  "label": "🛠 Update import paths from .js to .mjs",
+  "type": "shell",
+  "command": "powershell",
+  "args": [
+    "-NoProfile",
+    "-ExecutionPolicy", "Bypass",
+    "-Command",
+    "Get-ChildItem -Path 'C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend' -Recurse -Include *.mjs | ForEach-Object { (Get-Content $_.FullName) -replace '\\.js\"', '.mjs\"' | Set-Content $_.FullName }"
+  ],
+  "problemMatcher": [],
+  "presentation": {
+    "reveal": "always",
+    "panel": "dedicated"
+  }
+},
+    {
+      "label": "ESLint: Fix All Auto-Fixable",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "lint:fix"],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test: All (Lint + Jest)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:all"],
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "ESLint: Restart Server",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Restarting ESLint server... Please run 'ESLint: Restart ESLint Server' from Command Palette"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🔁 Convert .js to .mjs (backend only)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-Command",
+        "Get-ChildItem -Path '${workspaceFolder}/backend' -Recurse -Filter *.js | ForEach-Object { Rename-Item $_.FullName ($_.FullName -replace '\\.js$', '.mjs') }"
+      ],
+  "presentation": {
+    "reveal": "always",
+    "panel": "shared"
+  },
+  "problemMatcher": []
+},
+    {
+      "label": "🔎 Scan .js Files (flag ESM errors)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy", "Bypass",
+        "-Command",
+        "Get-ChildItem -Path '${workspaceFolder}/backend' -Recurse -Filter *.js | ForEach-Object { Write-Host 'Found JS file: ' $_.FullName }"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

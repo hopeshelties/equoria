@@ -1,6 +1,6 @@
 import request from 'supertest'; // Changed to ESM
-import app from '../../backend/app.js'; // Path to your Express app, assuming .js extension
-import prisma from '../../backend/db/index.js'; // Path to your Prisma client
+import app from '../../backend/app.mjs'; // Path to your Express app, assuming .js extension
+import prisma from '../../backend/db/index.mjs'; // Path to your Prisma client
 // import logger from '../../backend/utils/logger.js'; // Logger might not be needed directly if Prisma handles errors, ensure .js extension if used
 
 // Helper function to reset the database using Prisma
@@ -37,9 +37,7 @@ describe('Breeds API - /api/breeds', () => {
         name: 'Arabian',
         description: 'Elegant and spirited',
       };
-      const response = await request(app)
-        .post('/api/breeds')
-        .send(newBreedData);
+      const response = await request(app).post('/api/breeds').send(newBreedData);
       expect(response.statusCode).toBe(201);
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe(newBreedData.name);
@@ -62,14 +60,10 @@ describe('Breeds API - /api/breeds', () => {
     });
 
     it('should return 400 if name is not a string or empty', async () => {
-      const responseEmptyName = await request(app)
-        .post('/api/breeds')
-        .send({ name: '' });
+      const responseEmptyName = await request(app).post('/api/breeds').send({ name: '' });
       expect(responseEmptyName.statusCode).toBe(400);
 
-      const responseNonStringName = await request(app)
-        .post('/api/breeds')
-        .send({ name: 123 });
+      const responseNonStringName = await request(app).post('/api/breeds').send({ name: 123 });
       expect(responseNonStringName.statusCode).toBe(400);
     });
 
@@ -80,9 +74,7 @@ describe('Breeds API - /api/breeds', () => {
       });
 
       // Attempt to create it again (same case)
-      const responseSameCase = await request(app)
-        .post('/api/breeds')
-        .send({ name: breedName });
+      const responseSameCase = await request(app).post('/api/breeds').send({ name: breedName });
       expect(responseSameCase.statusCode).toBe(409);
 
       // Attempt to create with different casing

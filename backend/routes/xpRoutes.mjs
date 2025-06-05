@@ -4,29 +4,29 @@
  */
 
 import express from 'express';
-import { getPlayerXpEvents, getPlayerXpSummary, getRecentXpEvents } from '../models/xpLogModel.mjs';
+import { getUserXpEvents, getUserXpSummary, getRecentXpEvents } from '../models/xpLogModel.mjs';
 import logger from '../utils/logger.mjs';
 
 const router = express.Router();
 
 /**
- * GET /api/xp/player/:playerId/events
- * Get XP events for a specific player
+ * GET /api/xp/user/:userId/events
+ * Get XP events for a specific user
  */
-router.get('/player/:playerId/events', async (req, res) => {
+router.get('/user/:userId/events', async (req, res) => {
   try {
-    const { playerId } = req.params;
+    const { userId } = req.params;
     const { limit = 50, offset = 0, startDate, endDate } = req.query;
 
     logger.info(
-      `[xpRoutes] GET /api/xp/player/${playerId}/events - limit: ${limit}, offset: ${offset}`,
+      `[xpRoutes] GET /api/xp/user/${userId}/events - limit: ${limit}, offset: ${offset}`,
     );
 
-    // Validate playerId
-    if (!playerId) {
+    // Validate userId
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: 'Player ID is required',
+        message: 'User ID is required',
       });
     }
 
@@ -57,12 +57,12 @@ router.get('/player/:playerId/events', async (req, res) => {
     }
 
     // Get XP events
-    const xpEvents = await getPlayerXpEvents(playerId, options);
+    const xpEvents = await getUserXpEvents(userId, options);
 
     res.json({
       success: true,
       data: {
-        playerId,
+        userId,
         events: xpEvents,
         pagination: {
           limit: options.limit,
@@ -72,7 +72,7 @@ router.get('/player/:playerId/events', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error(`[xpRoutes] GET /api/xp/player/:playerId/events error: ${error.message}`);
+    logger.error(`[xpRoutes] GET /api/xp/user/:userId/events error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve XP events',
@@ -82,21 +82,21 @@ router.get('/player/:playerId/events', async (req, res) => {
 });
 
 /**
- * GET /api/xp/player/:playerId/summary
- * Get XP summary for a specific player
+ * GET /api/xp/user/:userId/summary
+ * Get XP summary for a specific user
  */
-router.get('/player/:playerId/summary', async (req, res) => {
+router.get('/user/:userId/summary', async (req, res) => {
   try {
-    const { playerId } = req.params;
+    const { userId } = req.params;
     const { startDate, endDate } = req.query;
 
-    logger.info(`[xpRoutes] GET /api/xp/player/${playerId}/summary`);
+    logger.info(`[xpRoutes] GET /api/xp/user/${userId}/summary`);
 
-    // Validate playerId
-    if (!playerId) {
+    // Validate userId
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: 'Player ID is required',
+        message: 'User ID is required',
       });
     }
 
@@ -125,12 +125,12 @@ router.get('/player/:playerId/summary', async (req, res) => {
     }
 
     // Get XP summary
-    const xpSummary = await getPlayerXpSummary(playerId, parsedStartDate, parsedEndDate);
+    const xpSummary = await getUserXpSummary(userId, parsedStartDate, parsedEndDate);
 
     res.json({
       success: true,
       data: {
-        playerId,
+        userId,
         summary: xpSummary,
         dateRange: {
           startDate: parsedStartDate,
@@ -139,7 +139,7 @@ router.get('/player/:playerId/summary', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error(`[xpRoutes] GET /api/xp/player/:playerId/summary error: ${error.message}`);
+    logger.error(`[xpRoutes] GET /api/xp/user/:userId/summary error: ${error.message}`);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve XP summary',
@@ -150,7 +150,7 @@ router.get('/player/:playerId/summary', async (req, res) => {
 
 /**
  * GET /api/xp/recent
- * Get recent XP events across all players (for admin/analytics)
+ * Get recent XP events across all users (for admin/analytics)
  */
 router.get('/recent', async (req, res) => {
   try {
@@ -201,6 +201,7 @@ router.get('/recent', async (req, res) => {
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error',
     });
   }
+  return null;
 });
 
 /**
@@ -220,7 +221,7 @@ router.get('/stats', async (req, res) => {
       totalXpAwarded: recentEvents.reduce((sum, event) => sum + Math.max(0, event.amount), 0),
       totalXpDeducted: recentEvents.reduce((sum, event) => sum + Math.max(0, -event.amount), 0),
       netXp: recentEvents.reduce((sum, event) => sum + event.amount, 0),
-      uniquePlayers: new Set(recentEvents.map(event => event.playerId)).size,
+      uniqueUsers: new Set(recentEvents.map(event => event.userId)).size,
       averageXpPerEvent:
         recentEvents.length > 0
           ? recentEvents.reduce((sum, event) => sum + event.amount, 0) / recentEvents.length

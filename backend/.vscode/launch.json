@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Backend Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/server.js",
+      "args": ["install"],
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "restart": true,
+      "runtimeExecutable": "node",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/node_modules/.bin/jest",
+      "args": ["--runInBand", "--no-cache", "--no-coverage"],
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}

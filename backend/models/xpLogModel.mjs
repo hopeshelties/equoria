@@ -10,13 +10,13 @@ import logger from '../utils/logger.mjs';
  * Log an XP event to the database
  *
  * @param {Object} params - XP event parameters
- * @param {string} params.userId - User ID who received/lost XP (Changed from playerId)
+ * @param {string} params.userId - User ID who received/lost XP (Changed from userId)
  * @param {number} params.amount - Amount of XP gained/lost (positive or negative)
  * @param {string} params.reason - Reason for XP change (e.g., "Trained horse in Dressage")
  * @returns {Promise<Object>} The created XP event record
  */
 export const logXpEvent = async ({ userId, amount, reason }) => {
-  // Changed playerId to userId
+  // Changed userId to userId
   try {
     logger.info(
       `[xpLogModel.logXpEvent] Logging XP event: User ${userId}, Amount: ${amount}, Reason: ${reason}`,
@@ -24,7 +24,7 @@ export const logXpEvent = async ({ userId, amount, reason }) => {
 
     // Validate input parameters
     if (!userId) {
-      // Changed playerId to userId
+      // Changed userId to userId
       throw new Error('User ID is required'); // Changed User ID to User ID
     }
 
@@ -39,7 +39,7 @@ export const logXpEvent = async ({ userId, amount, reason }) => {
     // Insert XP event into database using Prisma
     const xpEvent = await prisma.xpEvent.create({
       data: {
-        userId, // Changed playerId to userId
+        userId, // Changed userId to userId
         amount,
         reason,
       },
@@ -47,11 +47,11 @@ export const logXpEvent = async ({ userId, amount, reason }) => {
 
     logger.info(
       `[xpLogModel.logXpEvent] Successfully logged XP event: ID ${xpEvent.id}, User ${xpEvent.userId}, Amount: ${xpEvent.amount}`,
-    ); // Changed User to User, playerId to userId
+    ); // Changed User to User, userId to userId
 
     return {
       id: xpEvent.id,
-      userId: xpEvent.userId, // Changed playerId to userId
+      userId: xpEvent.userId, // Changed userId to userId
       amount: xpEvent.amount,
       reason: xpEvent.reason,
       timestamp: xpEvent.timestamp,
@@ -65,7 +65,7 @@ export const logXpEvent = async ({ userId, amount, reason }) => {
 /**
  * Get XP events for a specific user
  *
- * @param {string} userId - User ID to get XP events for (Changed from playerId)
+ * @param {string} userId - User ID to get XP events for (Changed from userId)
  * @param {Object} options - Query options
  * @param {number} options.limit - Maximum number of events to return (default: 50)
  * @param {number} options.offset - Number of events to skip (default: 0)
@@ -74,17 +74,17 @@ export const logXpEvent = async ({ userId, amount, reason }) => {
  * @returns {Promise<Array>} Array of XP events
  */
 export const getUserXpEvents = async (userId, options = {}) => {
-  // Renamed function, changed playerId to userId
+  // Renamed function, changed userId to userId
   try {
     const { limit = 50, offset = 0, startDate, endDate } = options;
 
     logger.info(
       `[xpLogModel.getUserXpEvents] Getting XP events for user ${userId}, limit: ${limit}, offset: ${offset}`,
-    ); // Changed player to user, function name
+    ); // Changed user to user, function name
 
     // Build where clause for date filters
     const where = {
-      userId, // Changed playerId to userId
+      userId, // Changed userId to userId
     };
 
     if (startDate || endDate) {
@@ -109,7 +109,7 @@ export const getUserXpEvents = async (userId, options = {}) => {
 
     logger.info(
       `[xpLogModel.getUserXpEvents] Retrieved ${xpEvents.length} XP events for user ${userId}`,
-    ); // Changed player to user, function name
+    ); // Changed user to user, function name
 
     return xpEvents;
   } catch (error) {
@@ -121,19 +121,19 @@ export const getUserXpEvents = async (userId, options = {}) => {
 /**
  * Get total XP gained by a user within a date range
  *
- * @param {string} userId - User ID (Changed from playerId)
+ * @param {string} userId - User ID (Changed from userId)
  * @param {Date} startDate - Start date (optional)
  * @param {Date} endDate - End date (optional)
  * @returns {Promise<Object>} Object with total XP gained and lost
  */
 export const getUserXpSummary = async (userId, startDate = null, endDate = null) => {
-  // Renamed function, changed playerId to userId
+  // Renamed function, changed userId to userId
   try {
-    logger.info(`[xpLogModel.getUserXpSummary] Getting XP summary for user ${userId}`); // Changed player to user, function name
+    logger.info(`[xpLogModel.getUserXpSummary] Getting XP summary for user ${userId}`); // Changed user to user, function name
 
     // Build where clause for date filters
     const where = {
-      userId, // Changed playerId to userId
+      userId, // Changed userId to userId
     };
 
     if (startDate || endDate) {
@@ -177,7 +177,7 @@ export const getUserXpSummary = async (userId, startDate = null, endDate = null)
 
     logger.info(
       `[xpLogModel.getUserXpSummary] XP summary for user ${userId}: Gained ${xpSummary.totalGained}, Lost ${xpSummary.totalLost}, Net ${xpSummary.netTotal}`,
-    ); // Changed player to user, function name
+    ); // Changed user to user, function name
 
     return xpSummary;
   } catch (error) {
@@ -228,7 +228,3 @@ export const getRecentXpEvents = async (options = {}) => {
     throw error;
   }
 };
-
-// Backward compatibility aliases
-export const getPlayerXpEvents = getUserXpEvents;
-export const getPlayerXpSummary = getUserXpSummary;
