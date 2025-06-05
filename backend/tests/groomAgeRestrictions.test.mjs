@@ -10,8 +10,8 @@
  * - Configuration-driven age restrictions
  *
  * 🔧 DEPENDENCIES:
- * - groomBondingSystem.js (validateGroomingEligibility function)
- * - groomConfig.js (age thresholds and task definitions)
+ * - groomBondingSystem.mjs (validateGroomingEligibility function)
+ * - groomConfig.mjs (age thresholds and task definitions)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Foals (0-3 years): Can receive enrichment tasks for epigenetic development

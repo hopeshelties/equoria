@@ -67,7 +67,7 @@ jest.unstable_mockModule(join(__dirname, '../db/index.js'), () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 

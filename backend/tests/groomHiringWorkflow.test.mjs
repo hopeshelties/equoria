@@ -41,7 +41,7 @@ const mockLogger = {
 };
 
 // Mock only the logger (external dependency)
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 

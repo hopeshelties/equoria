@@ -10,10 +10,10 @@
  * - Age 1 milestone trait evaluation from foal task history
  *
  * 🔧 DEPENDENCIES:
- * - cronJobs.js (cron job service)
- * - horseAgingSystem.js (aging logic)
- * - traitEvaluation.js (milestone evaluation)
- * - foalTaskLogManager.js (task log utilities)
+ * - cronJobs.mjs (cron job service)
+ * - horseAgingSystem.mjs (aging logic)
+ * - traitEvaluation.mjs (milestone evaluation)
+ * - foalTaskLogManager.mjs (task log utilities)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Daily aging process triggers birthday detection
@@ -43,7 +43,7 @@ const mockLogger = {
 };
 
 // Mock the logger import
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
   logger: mockLogger,
 }));

@@ -11,8 +11,8 @@
  * - Integration with foal development system
  *
  * 🔧 DEPENDENCIES:
- * - epigeneticTraits.js (trait definitions)
- * - taskInfluenceConfig.js (task-trait mapping)
+ * - epigeneticTraits.mjs (trait definitions)
+ * - taskInfluenceConfig.mjs (task-trait mapping)
  *
  * 📋 BUSINESS RULES TESTED:
  * - All traits have proper descriptions for UI display

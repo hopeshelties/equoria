@@ -10,7 +10,7 @@
  * - Configuration constants and environment overrides
  *
  * 🔧 DEPENDENCIES:
- * - groomConfig.js (configuration constants)
+ * - groomConfig.mjs (configuration constants)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Enrichment tasks: desensitization, trust_building, showground_exposure

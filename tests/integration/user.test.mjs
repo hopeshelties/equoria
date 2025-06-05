@@ -1,4 +1,4 @@
-// 🎯 Updated import from userModel.js to userModel.mjs and function names
+// 🎯 Updated import from userModel.mjs to userModel.mjs and function names
 import { createUser, getUserById, getUserWithHorses } from '../../backend/models/userModel.mjs';
 import { createHorse } from '../../backend/models/horseModel.mjs';
 

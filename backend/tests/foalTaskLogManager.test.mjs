@@ -10,7 +10,7 @@
  * - Data validation and error handling
  *
  * 🔧 DEPENDENCIES:
- * - foalTaskLogManager.js utility functions
+ * - foalTaskLogManager.mjs utility functions
  * - Logger for error handling
  *
  * 📋 BUSINESS RULES TESTED:
@@ -40,7 +40,7 @@ const mockLogger = {
 };
 
 // Mock the logger import
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   logger: mockLogger,
 }));
 

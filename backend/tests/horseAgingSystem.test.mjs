@@ -11,10 +11,10 @@
  * - Retirement at age 21
  *
  * 🔧 DEPENDENCIES:
- * - horseAgingSystem.js (aging logic)
- * - traitEvaluation.js (milestone evaluation)
- * - foalTaskLogManager.js (task log utilities)
- * - cronJobs.js (daily processing)
+ * - horseAgingSystem.mjs (aging logic)
+ * - traitEvaluation.mjs (milestone evaluation)
+ * - foalTaskLogManager.mjs (task log utilities)
+ * - cronJobs.mjs (daily processing)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Age calculated from dateOfBirth vs current date
@@ -45,7 +45,7 @@ const mockLogger = {
 };
 
 // Mock the logger import
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjss'), () => ({
   default: mockLogger,
   logger: mockLogger,
 }));

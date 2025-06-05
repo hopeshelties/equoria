@@ -552,7 +552,7 @@ import { body, param, validationResult } from 'express-validator';
 import { getFoalDevelopment, completeActivity, advanceDay, completeEnrichmentActivity } from '../models/foalModel.js';
 import { enrichmentDiscoveryMiddleware } from '../middleware/traitDiscoveryMiddleware.js';
 import { ensureDefaultGroomAssignment } from '../utils/groomSystem.js';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger.mjs';
 &nbsp;
 const router = <span class="cstat-no" title="statement not covered" >express.Router();</span>
 &nbsp;

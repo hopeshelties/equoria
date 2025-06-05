@@ -10,8 +10,8 @@
  * - Age-based task eligibility validation with database
  *
  * 🔧 DEPENDENCIES:
- * - groomController.js (recordInteraction endpoint)
- * - groomBondingSystem.js (task logging functions)
+ * - groomController.mjs (recordInteraction endpoint)
+ * - groomBondingSystem.mjs  (task logging functions)
  * - Prisma database (Horse table with taskLog and lastGroomed fields)
  *
  * 📋 BUSINESS RULES TESTED:

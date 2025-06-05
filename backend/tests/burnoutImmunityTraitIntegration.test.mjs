@@ -10,10 +10,10 @@
  * - Integration between groom bonding and trait systems
  *
  * 🔧 DEPENDENCIES:
- * - groomBondingSystem.js (burnout immunity logic)
- * - traitEvaluation.js (trait milestone evaluation)
- * - epigeneticTraits.js (trait definitions)
- * - taskInfluenceConfig.js (task-trait mapping)
+ * - groomBondingSystem.mjs  (burnout immunity logic)
+ * - traitEvaluation.mjs  (trait milestone evaluation)
+ * - epigeneticTraits.mjs  (trait definitions)
+ * - taskInfluenceConfig.mjs  (task-trait mapping)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Grace period: Up to 2 days missed before streak reset

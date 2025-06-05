@@ -12401,8 +12401,8 @@
     },
     "inputSourceMap": null
   },
-  "C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\middleware\\requestLogger.js": {
-    "path": "C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\middleware\\requestLogger.js",
+  "C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\middleware\\requestLogger.mjs": {
+    "path": "C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\middleware\\requestLogger.mjs",
     "statementMap": {
       "0": { "start": { "line": 7, "column": 29 }, "end": { "line": 39, "column": 1 } },
       "1": { "start": { "line": 8, "column": 16 }, "end": { "line": 8, "column": 26 } },
@@ -30575,8 +30575,8 @@
     },
     "inputSourceMap": null
   },
-  "C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\utils\\logger.js": {
-    "path": "C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\utils\\logger.js",
+  "C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\utils\\logger.mjs": {
+    "path": "C:\\Users\\heirr\\OneDrive\\Desktop\\Equoria\\backend\\utils\\logger.mjs",
     "statementMap": {
       "0": { "start": { "line": 4, "column": 29 }, "end": { "line": 9, "column": 2 } },
       "1": { "start": { "line": 5, "column": 2 }, "end": { "line": 7, "column": 3 } },

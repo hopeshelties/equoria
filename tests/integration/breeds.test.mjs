@@ -1,7 +1,7 @@
 import request from 'supertest'; // Changed to ESM
-import app from '../../backend/app.mjs'; // Path to your Express app, assuming .js extension
+import app from '../../backend/app.mjs'; // Path to your Express app, assuming .mjs extension
 import prisma from '../../backend/db/index.mjs'; // Path to your Prisma client
-// import logger from '../../backend/utils/logger.js'; // Logger might not be needed directly if Prisma handles errors, ensure .js extension if used
+// import logger from '../../backend/utils/logger.mjs'; // Logger might not be needed directly if Prisma handles errors, ensure .mjs extension if used
 
 // Helper function to reset the database using Prisma
 const resetDatabase = async () => {

@@ -11,8 +11,8 @@
  * - Batch processing for daily updates
  *
  * 🔧 DEPENDENCIES:
- * - traitEvaluation.js (milestone evaluation)
- * - foalTaskLogManager.js (task log utilities)
+ * - traitEvaluation.mjs (milestone evaluation)
+ * - foalTaskLogManager.mjs (task log utilities)
  * - prisma (database operations)
  * - logger (logging)
  *

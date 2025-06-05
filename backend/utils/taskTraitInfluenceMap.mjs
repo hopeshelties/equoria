@@ -17,7 +17,7 @@
  * - None (pure configuration data)
  *
  * @usage
- * Used by traitEvaluation.js to determine trait changes during groom interactions.
+ * Used by traitEvaluation.mjs to determine trait changes during groom interactions.
  * Imported by groom system for trait influence calculations and permanent trait assignment.
  *
  * @author Equoria Development Team

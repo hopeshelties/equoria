@@ -11,8 +11,8 @@
  * - Progressive age-based task availability
  *
  * 🔧 DEPENDENCIES:
- * - groomBondingSystem.js (task validation and processing)
- * - groomConfig.js (task definitions and age thresholds)
+ * - groomBondingSystem.mjs (task validation and processing)
+ * - groomConfig.mjs (task definitions and age thresholds)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Ages 0-2: Enrichment tasks only (epigenetic trait development)

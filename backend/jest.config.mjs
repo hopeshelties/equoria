@@ -1,4 +1,4 @@
-// Jest configuration for a Node.js project using native ES modules
+// Jest configuration for a Node.mjs project using native ES modules
 export default {
   testEnvironment: 'node',
 

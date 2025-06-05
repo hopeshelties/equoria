@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../../backend/app.mjs'; // Adjusted path to backend/app.js and .js extension
+import app from '../../backend/app.mjs'; // Adjusted path to backend/app.mjs and .mjs extension
 
 describe('GET /ping', () => {
   it('should return { message: "pong" }', async () => {

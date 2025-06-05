@@ -11,9 +11,9 @@
  * - Task coverage for all foal-specific activities
  *
  * 🔧 DEPENDENCIES:
- * - taskInfluenceConfig.js (task influence mapping)
- * - groomConfig.js (task category definitions)
- * - traitEvaluation.js (trait definitions for validation)
+ * - taskInfluenceConfig.mjs (task influence mapping)
+ * - groomConfig.mjs (task category definitions)
+ * - traitEvaluation.mjs (trait definitions for validation)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Each foal task maps to specific epigenetic traits

@@ -10,9 +10,9 @@
  * - Task influence mapping integration with trait evaluation
  *
  * 🔧 DEPENDENCIES:
- * - traitEvaluation.js (milestone evaluation function)
- * - foalTaskLogManager.js (task log utilities)
- * - taskInfluenceConfig.js (task influence mapping)
+ * - traitEvaluation.mjs (milestone evaluation function)
+ * - foalTaskLogManager.mjs (task log utilities)
+ * - taskInfluenceConfig.mjs (task influence mapping)
  * - Horse model with task log storage
  *
  * 📋 BUSINESS RULES TESTED:
@@ -43,7 +43,7 @@ const mockLogger = {
 };
 
 // Mock the logger import
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
   logger: mockLogger,
 }));

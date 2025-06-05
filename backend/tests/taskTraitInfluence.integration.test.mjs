@@ -10,10 +10,10 @@
  * - Task completion tracking and trait probability influence
  *
  * 🔧 DEPENDENCIES:
- * - taskInfluenceConfig.js (task influence mapping)
- * - traitEvaluation.js (trait evaluation system)
- * - groomConfig.js (task category definitions)
- * - epigeneticTraits.js (trait definitions)
+ * - taskInfluenceConfig.mjs (task influence mapping)
+ * - traitEvaluation.mjs (trait evaluation system)
+ * - groomConfig.mjs (task category definitions)
+ * - epigeneticTraits.mjs (trait definitions)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Task completions accumulate trait points over time

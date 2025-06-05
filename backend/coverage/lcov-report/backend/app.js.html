@@ -251,7 +251,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import express from 'express';
 import morgan from 'morgan';
 import config from './config/config.js';
-import logger from './utils/logger.js';
+import logger from './utils/logger.mjs';
 import pingRoute from './routes/ping.js';
 import breedRoutes from './routes/breedRoutes.js';
 import competitionRoutes from './routes/competitionRoutes.js';
@@ -266,7 +266,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import leaderboardRoutes from './routes/leaderboardRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import { createSecurityMiddleware } from './middleware/security.js';
-import { requestLogger, errorRequestLogger } from './middleware/requestLogger.js';
+import { requestLogger, errorRequestLogger } from './middleware/requestLogger.mjs';
 import { specs, swaggerUi } from './docs/swagger.js';
 import cronJobService from './services/cronJobs.js';
 &nbsp;

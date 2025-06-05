@@ -16,9 +16,9 @@
  * - Complete grooming session processing workflow
  *
  * 🔧 DEPENDENCIES:
- * - groomConfig.js (configuration constants)
- * - db/index.js (Prisma database client)
- * - utils/logger.js (logging functionality)
+ * - groomConfig.mjs (configuration constants)
+ * - db/index.mjs (Prisma database client)
+ * - utils/logger.mjs (logging functionality)
  *
  * 📋 BUSINESS RULES:
  * - Ages 0-2: Enrichment tasks only (epigenetic trait development)

@@ -11,9 +11,9 @@
  * - Edge cases and validation
  *
  * 🔧 DEPENDENCIES:
- * - traitEvaluation.js (milestone evaluation function)
- * - taskInfluenceConfig.js (task influence mapping)
- * - foalTaskLogManager.js (task log utilities)
+ * - traitEvaluation.mjs (milestone evaluation function)
+ * - taskInfluenceConfig.mjs (task influence mapping)
+ * - foalTaskLogManager.mjs (task log utilities)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Trait points calculated from task completion counts × daily values
@@ -43,7 +43,7 @@ const mockLogger = {
 };
 
 // Mock the logger import
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjs'), () => ({
   default: mockLogger,
   logger: mockLogger,
 }));

@@ -11,9 +11,9 @@
  * - Integration with existing groom bonding system
  *
  * 🔧 DEPENDENCIES:
- * - groomBondingSystem.js (streak tracking functions)
- * - groomConfig.js (configuration constants)
- * - foalTaskLogManager.js (task log utilities)
+ * - groomBondingSystem.mjs (streak tracking functions)
+ * - groomConfig.mjs (configuration constants)
+ * - foalTaskLogManager.mjs (task log utilities)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Grace period: Up to 2 days missed before streak reset

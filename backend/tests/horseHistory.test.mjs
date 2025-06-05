@@ -54,7 +54,7 @@ jest.unstable_mockModule(join(__dirname, '../models/resultModel.js'), () => ({
   getResultsByHorse: mockGetResultsByHorse,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjss'), () => ({
   default: mockLogger,
 }));
 

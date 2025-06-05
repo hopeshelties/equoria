@@ -37,16 +37,16 @@ const mockLogger = {
 };
 
 // Mock the imports with minimal mocking approach
-jest.unstable_mockModule('../db/index.js', () => ({
+jest.unstable_mockModule('../db/index.mjs', () => ({
   default: mockPrisma,
 }));
 
-jest.unstable_mockModule('../utils/logger.js', () => ({
+jest.unstable_mockModule('../utils/logger.mjs', () => ({
   default: mockLogger,
 }));
 
 // Import the function under test
-const { validateFoalInteractionLimits } = await import('../utils/groomSystem.js');
+const { validateFoalInteractionLimits } = await import('../utils/groomSystem.mjs');
 
 describe('🐴 TDD: Groom Interaction Daily Limits - ALL Horses', () => {
   beforeEach(() => {

@@ -15,7 +15,7 @@
  * - Field validation: ID and email field presence and format
  *
  * 🎯 FUNCTIONALITY TESTED:
- * 1. Database connection via packages/database/prismaClient.js import
+ * 1. Database connection via packages/database/prismaClient.mjs import
  * 2. User table query access (findMany operations)
  * 3. Data structure validation (id and email field presence)
  * 4. Connection cleanup and disconnection
@@ -31,7 +31,7 @@
  * 💡 TEST STRATEGY: Infrastructure validation with alternative import path to ensure
  *    multiple ways of accessing the database work correctly
  *
- * ⚠️  NOTE: This test is similar to database.test.js but uses different import path.
+ * ⚠️  NOTE: This test is similar to database.test.mjs but uses different import path.
  *    Consider consolidating if both tests serve the same purpose.
  */
 

@@ -58,7 +58,7 @@ jest.unstable_mockModule(join(__dirname, '../db/index.mjs'), () => ({
   },
 }));
 
-jest.unstable_mockModule(join(__dirname, '../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../utils/logger.mjsss'), () => ({
   default: {
     info: jest.fn(),
     error: jest.fn(),
@@ -80,7 +80,7 @@ const {
 } = await import(join(__dirname, './userModel.js'));
 
 const mockPrisma = (await import(join(__dirname, '../db/index.js'))).default;
-const mockLogger = (await import(join(__dirname, '../utils/logger.js'))).default;
+const mockLogger = (await import(join(__dirname, '../utils/logger.mjss'))).default;
 const { DatabaseError } = await import(join(__dirname, '../errors/index.js'));
 
 describe('👤 UNIT: User Model - Database Operations & Business Logic', () => {

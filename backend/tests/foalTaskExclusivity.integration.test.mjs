@@ -9,8 +9,8 @@
  * - Edge cases and business rule enforcement
  *
  * 🔧 DEPENDENCIES:
- * - groomConfig.js (task category definitions)
- * - groomSystem.js (daily exclusivity function)
+ * - groomConfig.mjs  (task category definitions)
+ * - groomSystem.mjs (daily exclusivity function)
  *
  * 📋 BUSINESS RULES TESTED:
  * - Foals can only complete ONE task per day from either category

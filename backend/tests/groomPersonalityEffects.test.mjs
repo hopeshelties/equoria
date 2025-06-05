@@ -41,7 +41,7 @@ import {
 } from '../utils/groomPersonalityEffects.mjs';
 
 // Strategic mocking: Only mock external dependencies, not business logic
-jest.mock('../utils/logger.js', () => ({
+jest.mock('../utils/logger.mjs', () => ({
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),

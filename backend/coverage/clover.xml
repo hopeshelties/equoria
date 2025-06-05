@@ -2493,7 +2493,7 @@
         <line num="319" count="0" type="stmt"/>
         <line num="320" count="0" type="stmt"/>
       </file>
-      <file name="requestLogger.js" path="C:\Users\heirr\OneDrive\Desktop\Equoria\backend\middleware\requestLogger.js">
+      <file name="requestLogger.mjs" path="C:\Users\heirr\OneDrive\Desktop\Equoria\backend\middleware\requestLogger.mjs">
         <metrics statements="12" coveredstatements="0" conditionals="6" coveredconditionals="0" methods="3" coveredmethods="0"/>
         <line num="7" count="0" type="stmt"/>
         <line num="8" count="0" type="stmt"/>
@@ -5623,7 +5623,7 @@
         <line num="258" count="0" type="stmt"/>
         <line num="259" count="0" type="stmt"/>
       </file>
-      <file name="logger.js" path="C:\Users\heirr\OneDrive\Desktop\Equoria\backend\utils\logger.js">
+      <file name="logger.mjs" path="C:\Users\heirr\OneDrive\Desktop\Equoria\backend\utils\logger.mjs">
         <metrics statements="6" coveredstatements="0" conditionals="6" coveredconditionals="0" methods="2" coveredmethods="0"/>
         <line num="4" count="0" type="stmt"/>
         <line num="5" count="0" type="cond" truecount="0" falsecount="2"/>

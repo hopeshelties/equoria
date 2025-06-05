@@ -4303,7 +4303,7 @@ BRF:104
 BRH:0
 end_of_record
 TN:
-SF:middleware\requestLogger.js
+SF:middleware\requestLogger.mjs
 FN:7,(anonymous_0)
 FN:23,(anonymous_1)
 FN:45,(anonymous_2)
@@ -10239,7 +10239,7 @@ BRF:70
 BRH:0
 end_of_record
 TN:
-SF:utils\logger.js
+SF:utils\logger.mjs
 FN:4,(anonymous_0)
 FN:18,(anonymous_1)
 FNF:2

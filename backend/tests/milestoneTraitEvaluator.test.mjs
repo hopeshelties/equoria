@@ -46,7 +46,7 @@ import {
 import { TASK_TRAIT_INFLUENCE_MAP } from '../utils/taskTraitInfluenceMap.mjs';
 
 // Strategic mocking: Only mock external dependencies, not business logic
-jest.mock('../utils/logger.js', () => ({
+jest.mock('../utils/logger.mjs', () => ({
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),

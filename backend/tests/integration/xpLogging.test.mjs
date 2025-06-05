@@ -92,7 +92,7 @@ jest.unstable_mockModule(join(__dirname, '../../utils/traitEffects.js'), () => (
   getCombinedTraitEffects: mockGetCombinedTraitEffects,
 }));
 
-jest.unstable_mockModule(join(__dirname, '../../utils/logger.js'), () => ({
+jest.unstable_mockModule(join(__dirname, '../../utils/logger.mjs'), () => ({
   default: mockLogger,
 }));
 
